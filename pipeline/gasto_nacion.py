@@ -33,13 +33,12 @@ import sys
 import unicodedata
 import zipfile
 from datetime import date
-from pathlib import Path
 
 import pandas as pd
 
-from salarios import _get
+import red
 
-CACHE = Path(__file__).resolve().parent.parent / "datos" / "cache"
+CACHE = red.CACHE
 URL_BASE = "https://dgsiaf-repo.mecon.gob.ar/repository/pa/datasets"
 URL_ANUAL = URL_BASE + "/{a}/credito-anual-{a}.zip"
 URL_FINFUN = URL_BASE + "/serie_finfun_anual.csv"
@@ -187,10 +186,6 @@ def _meta():
     return json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
 
 
-def _guardar_meta(meta):
-    (CACHE / "gasto_nacion_meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
-
-
 def anio_en_curso():
     return date.today().year
 
@@ -220,7 +215,7 @@ def cargar_anio(anio, con_red, meta):
             return largo
     if con_red:
         try:
-            raw = _get(URL_ANUAL.format(a=anio), timeout=300)
+            raw = red.bajar(URL_ANUAL.format(a=anio), timeout=300)
             largo, actualizado = _agregar_completo(raw)
             largo.to_csv(f, index=False)
             meta[str(anio)] = {"actualizado": actualizado, "bajado": hoy}
@@ -239,7 +234,7 @@ def cargar_finfun(con_red):
     f = CACHE / "gasto_nacion_finfun.csv"
     if con_red:
         try:
-            raw = _get(URL_FINFUN, timeout=120)
+            raw = red.bajar(URL_FINFUN, timeout=120)
             pd.read_csv(io.BytesIO(raw), encoding="utf-8-sig", nrows=1)  # que al menos sea un CSV
             f.write_bytes(raw)
         except Exception as e:  # noqa: BLE001
@@ -255,7 +250,7 @@ def bajar():
     meta = _meta()
     for a in range(PRIMER_ANIO, anio_en_curso() + 1):
         cargar_anio(a, True, meta)
-    _guardar_meta(meta)
+    red.guardar_meta("gasto_nacion", meta)
     cargar_finfun(True)
 
 
@@ -425,7 +420,7 @@ def construir(con_red=True):
         if largo is not None and len(largo):
             datos[a] = largo
     if con_red:
-        _guardar_meta(meta)
+        red.guardar_meta("gasto_nacion", meta)
     if not datos:
         raise RuntimeError("no hay datos de gasto de ningún año (ni red ni respaldo)")
     fin = cargar_finfun(con_red)

@@ -36,15 +36,14 @@ import re
 import sys
 import urllib.parse
 from datetime import date
-from pathlib import Path
 
 import pandas as pd
 
 from gasto_nacion import (OTROS_PROGRAMA, PRIMER_ANIO, PROGRAMA_UNIVERSIDADES, _clave, _con_tildes, _r,
                           anio_en_curso)
-from salarios import _get
+import red
 
-CACHE = Path(__file__).resolve().parent.parent / "datos" / "cache"
+CACHE = red.CACHE
 URL_CKAN = "https://piu.agn.gov.ar/api/3/action/package_search"
 URL_XLSX_61 = ("https://piu.agn.gov.ar/dataset/3da0b47f-2e5b-4799-ae7d-718767513a4e/resource/"
                "63b37ee8-004b-4973-b74e-7e998aa30eef/download/estudiantes-2023-2024-61-uunn.xlsx")
@@ -96,12 +95,8 @@ def _meta():
     return json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
 
 
-def _guardar_meta(meta):
-    (CACHE / "universidades_meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
-
-
 def _ckan(params):
-    return json.loads(_get(URL_CKAN + "?" + urllib.parse.urlencode(params), timeout=60))["result"]
+    return json.loads(red.bajar(URL_CKAN + "?" + urllib.parse.urlencode(params), timeout=60))["result"]
 
 
 def _datasets_matricula():
@@ -186,7 +181,7 @@ def bajar_piu():
     nuevas, fallaron = [], []
     for u in csvs:
         try:
-            nuevas += _filas_csv(_get(u, timeout=60), u)
+            nuevas += _filas_csv(red.bajar(u, timeout=60), u)
         except Exception as e:  # noqa: BLE001
             fallaron.append(u)
             print(f"  universidades: no se pudo bajar {u.rsplit('/', 1)[-1]} ({e})")
@@ -200,7 +195,7 @@ def bajar_piu():
     print(f"  universidades: PIU bajado ({len(csvs) - len(fallaron)} de {len(csvs)} CSV, {len(largo)} filas)")
     f61 = CACHE / "universidades_estudiantes_61.json"
     try:
-        tot = _total_61(_get(url61, timeout=60))
+        tot = _total_61(red.bajar(url61, timeout=60))
         f61.write_text(json.dumps({"totales": {str(a): n for a, n in tot.items()}, "url": url61}, ensure_ascii=False, indent=1), encoding="utf-8")
     except Exception as e:  # noqa: BLE001
         if not f61.exists():
@@ -216,7 +211,7 @@ def _actualizar_respaldos(con_red):
         try:
             bajar_piu()
             meta["bajado"] = hoy
-            _guardar_meta(meta)
+            red.guardar_meta("universidades", meta)
         except Exception as e:  # noqa: BLE001
             if not hay:
                 raise RuntimeError(f"no se pudo bajar el PIU y no hay respaldo ({e})") from e
@@ -400,7 +395,7 @@ def construir_json(con_red=True):
 if __name__ == "__main__":
     if "--bajar" in sys.argv:
         bajar_piu()
-        _guardar_meta({**_meta(), "bajado": date.today().isoformat()})
+        red.guardar_meta("universidades", {**_meta(), "bajado": date.today().isoformat()})
         sys.exit(0)
     res = construir(con_red="--sin-red" not in sys.argv)
     for nombre, obj in sorted(res.items()):

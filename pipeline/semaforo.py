@@ -16,14 +16,14 @@ import io
 import json
 import sys
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from salarios import _cacheado, _get, _serie_api
+import red
+from salarios import _serie_api
 
-CACHE = Path(__file__).resolve().parent.parent / "datos" / "cache"
+CACHE = red.CACHE
 MAX_ATRASO_MESES = 4
 MAX_SALTO_PCT = 60  # variación de un mes que ya parece un error de carga
 MIN_MESES_PROPIA = 36
@@ -123,7 +123,7 @@ def _bajar_dgo(sid):
 
 
 def _bajar_csv(url, cols):
-    df = pd.read_csv(io.BytesIO(_get(url)), parse_dates=["indice_tiempo"]).set_index("indice_tiempo")
+    df = pd.read_csv(io.BytesIO(red.bajar(url)), parse_dates=["indice_tiempo"]).set_index("indice_tiempo")
     if isinstance(cols, str) and cols.startswith("prefijo:"):
         pre = cols[len("prefijo:"):]
         cols = [c for c in df.columns if str(c).startswith(pre)]
@@ -147,7 +147,7 @@ MESES = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5, "junio": 6
 
 def _bajar_minero():
     """IPI minero (INDEC, Cuadro 1): devuelve (original, desestacionalizada). Columnas: 1 año, 2 mes, 3 original, 7 desest."""
-    d = pd.read_excel(io.BytesIO(_get(URL_MINERIA)), sheet_name="Cuadro 1", header=None)
+    d = pd.read_excel(io.BytesIO(red.bajar(URL_MINERIA)), sheet_name="Cuadro 1", header=None)
     cab = lambda f, c: str(d.iloc[f, c]).lower()  # noqa: E731
     if (d.shape[1] < 8 or "serie original" not in cab(3, 3) or "nivel general" not in cab(4, 3)
             or "desestacionalizada" not in cab(3, 7) or "nivel general" not in cab(4, 7)):
@@ -183,7 +183,7 @@ def _leer_cache(nombre):
 
 
 def _validada(nombre, fn):
-    """Envuelve la bajada: vacía, o con menos del 80 % de las filas del respaldo, es una falla (así _cacheado no pisa el respaldo)."""
+    """Envuelve la bajada: vacía, o con menos del 80 % de las filas del respaldo, es una falla (así red.cacheado no pisa el respaldo)."""
     def f():
         s = fn()
         if s is None or len(s) == 0:
@@ -196,7 +196,7 @@ def _validada(nombre, fn):
 
 
 def _obtener(clave, fuente, con_red):
-    """(original, oficial sin estacionalidad o None). Con red usa _cacheado; sin red, solo las copias de datos/cache/."""
+    """(original, oficial sin estacionalidad o None). Con red usa red.cacheado; sin red, solo las copias de datos/cache/."""
     tipo = fuente[0]
     pares = []  # (nombre de cache, función de bajada)
     if tipo == "dgo":
@@ -218,7 +218,7 @@ def _obtener(clave, fuente, con_red):
     out = []
     for nombre, fn in pares:
         if con_red:
-            out.append(_a_mes(_cacheado(nombre, _validada(nombre, fn))))
+            out.append(_a_mes(red.cacheado(nombre, _validada(nombre, fn))))
         else:
             s = _leer_cache(nombre)
             if s is None:

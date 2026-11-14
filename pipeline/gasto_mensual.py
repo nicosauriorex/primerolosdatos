@@ -28,16 +28,15 @@ import json
 import sys
 import zipfile
 from datetime import date, timedelta
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from gasto_nacion import (INCISOS, URL_BASE, _fecha_actualizacion, _r, _titulos, _unificar, anio_cerrado,
                           limpiar)
-from salarios import _get
+import red
 
-CACHE = Path(__file__).resolve().parent.parent / "datos" / "cache"
+CACHE = red.CACHE
 URL_MENSUAL = URL_BASE + "/{a}/credito-mensual-{a}.zip"
 FUENTE_TXT = ("Presupuesto Abierto, Dirección General de Sistemas de Información Financiera (DGSIAF), Ministerio de Economía: "
               "créditos mensuales de la Administración Nacional (sin empresas públicas ni fondos fiduciarios).")
@@ -107,10 +106,6 @@ def _meta():
     return json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
 
 
-def _guardar_meta(meta):
-    (CACHE / "gasto_mensual_meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
-
-
 def _leer_respaldo(f):
     return pd.read_csv(f, keep_default_na=False, dtype=TIPOS_LARGO)
 
@@ -125,7 +120,7 @@ def cargar_anio(anio, con_red, meta):
         return _leer_respaldo(f)
     if con_red:
         try:
-            raw = _get(URL_MENSUAL.format(a=anio), timeout=600)
+            raw = red.bajar(URL_MENSUAL.format(a=anio), timeout=600)
             largo, actualizado = _agregar_zip(raw, anio)
             largo.to_csv(f, index=False)
             meta[str(anio)] = {"actualizado": actualizado, "bajado": hoy}
@@ -160,7 +155,7 @@ def bajar():
     CACHE.mkdir(parents=True, exist_ok=True)
     meta = _meta()
     elegir_anios(True, meta)
-    _guardar_meta(meta)
+    red.guardar_meta("gasto_mensual", meta)
 
 
 def elegir_anios(con_red, meta):
@@ -290,7 +285,7 @@ def construir(con_red=True):
     meta = _meta()
     anio, df_act, anio_ant, df_ant = elegir_anios(con_red, meta)
     if con_red:
-        _guardar_meta(meta)
+        red.guardar_meta("gasto_mensual", meta)
     actualizado = meta.get(str(anio), {}).get("actualizado")
     completos, parcial = meses_de_datos(anio, actualizado)
     if parcial is not None and not df_act[(df_act["mes"] == parcial) & (df_act["dev"] != 0)].shape[0]:

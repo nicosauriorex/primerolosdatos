@@ -31,15 +31,14 @@ import io
 import json
 import sys
 from datetime import date
-from pathlib import Path
 
 import pandas as pd
 
 import gasto_nacion
 from gasto_nacion import INCISOS, PRIMER_ANIO, _arbol, _cerrar, _r, _titulos, _unificar, anio_en_curso
-from salarios import _get
+import red
 
-CACHE = Path(__file__).resolve().parent.parent / "datos" / "cache"
+CACHE = red.CACHE
 URL_POBLACION = "https://www.indec.gob.ar/ftp/cuadros/poblacion/c2_proyecciones_prov_2010_2040.xls"
 URL_SERIES = "https://apis.datos.gob.ar/series/api/series/"
 FUENTE_TXT = ("Gasto de la Nación: Presupuesto Abierto (DGSIAF, Ministerio de Economía), créditos anuales de la Administración Nacional "
@@ -82,10 +81,6 @@ def _fallo(msg):
 def _meta():
     f = CACHE / "provincias_meta.json"
     return json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
-
-
-def _guardar_meta(meta):
-    (CACHE / "provincias_meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
 
 
 def _poblacion_de_xls(raw):
@@ -136,7 +131,7 @@ def bajar():
     CACHE.mkdir(parents=True, exist_ok=True)
     fp, fa = CACHE / "provincias_poblacion.csv", CACHE / "provincias_agregado.csv"
     try:
-        _poblacion_de_xls(_get(URL_POBLACION, timeout=120)).to_csv(fp, index=False)
+        _poblacion_de_xls(red.bajar(URL_POBLACION, timeout=120)).to_csv(fp, index=False)
         print("  provincias: población bajada")
         bajados += 1
     except Exception as e:  # noqa: BLE001
@@ -145,7 +140,7 @@ def bajar():
         print(f"  provincias: error al bajar la población ({e}); uso el respaldo")
     try:
         ids = ",".join(i for i, _ in SERIES_AGREGADO)
-        _agregado_de_api(_get(f"{URL_SERIES}?ids={ids}&limit=1000&format=json", timeout=60)).to_csv(fa, index=False)
+        _agregado_de_api(red.bajar(f"{URL_SERIES}?ids={ids}&limit=1000&format=json", timeout=60)).to_csv(fa, index=False)
         print("  provincias: agregado bajado")
         bajados += 1
     except Exception as e:  # noqa: BLE001
@@ -163,7 +158,7 @@ def _actualizar_respaldos(con_red):
         try:
             if bajar():   # la fecha se guarda solo si bajó todo: si se usó un respaldo, se reintenta en la próxima corrida
                 meta["bajado"] = hoy
-                _guardar_meta(meta)
+                red.guardar_meta("provincias", meta)
         except Exception as e:  # noqa: BLE001
             if not hay:
                 raise RuntimeError(f"no se pudo bajar la población ni el agregado y no hay respaldo ({e})") from e
@@ -346,7 +341,7 @@ def construir_json(con_red=True):
 if __name__ == "__main__":
     if "--bajar" in sys.argv:
         if bajar():
-            _guardar_meta({**_meta(), "bajado": date.today().isoformat()})
+            red.guardar_meta("provincias", {**_meta(), "bajado": date.today().isoformat()})
         sys.exit(0)
     res = construir(con_red="--sin-red" not in sys.argv)
     for nombre, obj in sorted(res.items()):

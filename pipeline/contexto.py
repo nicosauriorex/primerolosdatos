@@ -18,13 +18,14 @@ Todo se cachea en datos/cache/ (si la fuente falla se usa la última copia). El 
 import io
 import json
 import re
-import urllib.request
 from datetime import date
 
 import pandas as pd
 
 import catalogo
-from salarios import CACHE, _cacheado
+import red
+
+CACHE = red.CACHE
 
 DATAMAPPER = "https://www.imf.org/external/datamapper/api/v1/"
 HISTORICO = "https://www.imf.org/external/pubs/ft/weo/data/weohistorical.xlsx"
@@ -56,48 +57,27 @@ HOJAS_HIST = {"ngdp_rpch": "NGDP_RPCH", "pcpi_pch": "PCPIPCH"}
 COD_WEO = {1: "WEOWORLD", 110: "ADVEC", 163: "EURO", 200: "OEMDC"}
 
 
-def _bajar(url, timeout=180):
-    """Descarga con el User-Agent por defecto de urllib (el FMI rechaza el de un navegador y el nuestro)."""
-    with urllib.request.urlopen(url, timeout=timeout) as r:
-        return r.read()
-
-
-def _cache_json(nombre, bajar):
-    """Como _cacheado, para un dict que se guarda como JSON."""
-    f = CACHE / f"{nombre}.json"
-    try:
-        d = bajar()
-        f.write_text(json.dumps(d, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-        return d
-    except Exception as e:  # noqa: BLE001
-        if f.exists():
-            print(f"  {nombre}: error al bajar ({e}); uso cache {f.name}")
-            return json.loads(f.read_text(encoding="utf-8"))
-        print(f"  {nombre}: no disponible ({e})")
-        return None
-
-
 def _datamapper(codigo):
     """{entidad: {año: valor}} del indicador, solo con las entidades de la lista, y la edición del WEO (texto)."""
     def bajar():
-        v = json.loads(_bajar(DATAMAPPER + codigo))["values"][codigo]
+        v = json.loads(red.bajar(DATAMAPPER + codigo, ua=None, timeout=180))["values"][codigo]
         return {e: v[e] for e in ENTIDADES if e in v}
-    return _cache_json(f"ctx_imf_{codigo}", bajar)
+    return red.cache_json(f"ctx_imf_{codigo}", bajar)
 
 
 def _edicion():
     """Año y nombre de la edición del WEO que usa DataMapper (ej. 'October 2026')."""
     def bajar():
-        ind = json.loads(_bajar(DATAMAPPER + "indicators"))["indicators"]["NGDP_RPCH"]
+        ind = json.loads(red.bajar(DATAMAPPER + "indicators", ua=None, timeout=180))["indicators"]["NGDP_RPCH"]
         m = re.search(r"\((\w+) (\d{4})\)", ind.get("source", ""))
         return {"mes": m.group(1), "anio": int(m.group(2))}
-    return _cache_json("ctx_imf_edicion", bajar) or {"mes": "", "anio": date.today().year}
+    return red.cache_json("ctx_imf_edicion", bajar) or {"mes": "", "anio": date.today().year}
 
 
 def _proyecciones_abril():
     """{indicador: {entidad: {año: proyección de abril de ese año}}} desde Historical WEO Forecasts."""
     def bajar():
-        hojas = pd.read_excel(io.BytesIO(_bajar(HISTORICO, timeout=300)), sheet_name=list(HOJAS_HIST))
+        hojas = pd.read_excel(io.BytesIO(red.bajar(HISTORICO, ua=None, timeout=300)), sheet_name=list(HOJAS_HIST))
         out = {}
         for hoja, codigo in HOJAS_HIST.items():
             df = hojas[hoja]
@@ -116,7 +96,7 @@ def _proyecciones_abril():
                 res[ent] = vals
             out[codigo] = res
         return out
-    return _cache_json("ctx_imf_proy_abril", bajar)
+    return red.cache_json("ctx_imf_proy_abril", bajar)
 
 
 def construir_json():
@@ -168,11 +148,11 @@ def cargar_cache():
 # ---------------------------------------------------------------- series mensuales del catálogo
 def _fred(codigo):
     def bajar():
-        df = pd.read_csv(io.BytesIO(_bajar(FRED + codigo, timeout=240)), parse_dates=["observation_date"])
+        df = pd.read_csv(io.BytesIO(red.bajar(FRED + codigo, ua=None, timeout=240)), parse_dates=["observation_date"])
         s = pd.to_numeric(df[codigo], errors="coerce")
         s.index = df["observation_date"]
         return s.dropna()
-    return _cacheado(f"ctx_fred_{codigo}", bajar)
+    return red.cacheado(f"ctx_fred_{codigo}", bajar)
 
 
 def series_mensuales(idx):
@@ -202,7 +182,7 @@ def series_mensuales(idx):
         print(f"  FRED FEDFUNDS: no disponible ({e})")
     try:
         sid = "82.2_ITI_2004_T_27"
-        t = _cacheado("ctx_terminos", lambda: catalogo._series_api([sid])[sid])
+        t = red.cacheado("ctx_terminos", lambda: catalogo._series_api([sid])[sid])
         out.append(catalogo.S("ctx_terminos", "Términos de intercambio (INDEC)", CAT, "none", "índice 2004=100",
                               catalogo._trim_a_mes(t, idx), 1, f"INDEC vía datos.gob.ar, serie {sid}",
                               "Precio de lo que la Argentina exporta dividido el precio de lo que importa. Más alto = el mundo nos paga mejor. Trimestral, repetido en los 3 meses."))

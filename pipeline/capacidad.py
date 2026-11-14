@@ -17,11 +17,12 @@ import csv
 import io
 import json
 import re
-import urllib.request
 import zipfile
 from collections import Counter
 import datetime as dt
 from pathlib import Path
+
+import red
 
 RAIZ = Path(__file__).resolve().parent.parent
 MANUAL = RAIZ / "datos" / "manual"
@@ -57,12 +58,6 @@ def _pres_de(fecha):
     return quien
 
 
-def _bajar(url, timeout=300):
-    req = urllib.request.Request(url, headers={"User-Agent": "primero-los-datos-script"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read()
-
-
 def _csv_filas(datos):
     csv.field_size_limit(10**9)
     return csv.DictReader(io.StringIO(datos.decode("utf-8-sig"), newline=""))
@@ -70,7 +65,7 @@ def _csv_filas(datos):
 
 def _dnu_infoleg():
     """DNU por presidente y año (base Infoleg: tipo Decreto y clase DNU, por fecha de sanción)."""
-    zf = zipfile.ZipFile(io.BytesIO(_bajar(INFOLEG)))
+    zf = zipfile.ZipFile(io.BytesIO(red.bajar(INFOLEG, timeout=300)))
     nombre = next(n for n in zf.namelist() if n.lower().endswith(".csv"))
     csv.field_size_limit(10**9)
     vistos, cuenta = set(), Counter()
@@ -91,10 +86,10 @@ def _dnu_infoleg():
 
 def _leyes_hcdn():
     """Proyectos de ley del Ejecutivo (expediente -PE-, mensaje y proyecto de ley) enviados y sancionados antes de que termine el mandato."""
-    sanc = {f["PROYECTO_ID"]: f["SANCION_DEFINITIVA"][:10] for f in _csv_filas(_bajar(HCDN_LEYES)) if f.get("SANCION_DEFINITIVA")}
+    sanc = {f["PROYECTO_ID"]: f["SANCION_DEFINITIVA"][:10] for f in _csv_filas(red.bajar(HCDN_LEYES, timeout=300)) if f.get("SANCION_DEFINITIVA")}
     fines = {pid: (MANDATOS[k + 1][1] if k + 1 < len(MANDATOS) else FIN_ULTIMO) for k, (pid, _) in enumerate(MANDATOS)}
     env, apr = Counter(), Counter()
-    for f in _csv_filas(_bajar(HCDN_PROY)):
+    for f in _csv_filas(red.bajar(HCDN_PROY, timeout=300)):
         if f.get("TIPO") != "MENSAJE Y PROYECTO DE LEY" or not re.search(r"-PE-", f"{f.get('EXP_DIPUTADOS', '')} {f.get('EXP_SENADO', '')}"):
             continue
         fecha = (f.get("PUBLICACION_FECHA") or "")[:10]

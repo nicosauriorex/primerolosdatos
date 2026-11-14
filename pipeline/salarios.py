@@ -11,20 +11,18 @@ Salarios (pesos corrientes, mensuales):
 Deflactores:
 - IPC Argentina empalmado: INDEC (IPC-GBA) hasta dic-2006, IPC San Luis ene-2007 a jul-2012,
   IPC CABA ago-2012 a dic-2016, IPC Nacional INDEC desde ene-2017 (API INDEC si hay token).
-- Tipo de cambio oficial: A3500 BCRA (promedio mensual); 1 peso = 1 dólar antes de 2002.
-- Dólar blue: bluelytics.com.ar (promedio mensual de venta) desde 2011; antes se usa el oficial.
+- Los dólares (oficial y blue) los arma macro.py; las columnas fx_oficial/fx_blue las pone obtener_datos.main().
 - IPC de EEUU: CPI-U (CUUR0000SA0), Bureau of Labor Statistics.
 Cada fuente se cachea en datos/cache/ para no depender de que todas respondan siempre.
 """
 import io
 import json
-import urllib.request
-from pathlib import Path
 
 import pandas as pd
 
-CACHE = Path(__file__).resolve().parent.parent / "datos" / "cache"
-CACHE.mkdir(parents=True, exist_ok=True)
+import red
+from red import CACHE
+
 SERIES_API = "https://apis.datos.gob.ar/series/api/series/"
 RIPTE_CSV = ("https://infra.datos.gob.ar/catalog/sspm/dataset/158/distribution/158.1/download/"
              "remuneracion-imponible-promedio-trabajadores-estables-ripte-total-pais-pesos-serie-mensual.csv")
@@ -38,47 +36,18 @@ IDS = {
     "ipc_caba": "193.1_NIVEL_GENERAL_JULI_0_13",
     "ipc_nac": "148.3_INIVELNAL_DICI_M_26",
 }
-FX_A3500 = "168.1_T_CAMBI500_D_0_0_17"
-
-
-def _get(url, data=None, headers=None, timeout=90):
-    req = urllib.request.Request(url, data=data, headers={"User-Agent": "primero-los-datos-script", **(headers or {})})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read()
-
-
-def _cacheado(nombre, bajar):
-    """Intenta bajar; si falla usa la última copia guardada."""
-    f = CACHE / f"{nombre}.csv"
-    try:
-        s = bajar()
-        s.to_csv(f)
-        return s
-    except Exception as e:  # noqa: BLE001
-        if f.exists():
-            print(f"  {nombre}: error al bajar ({e}); uso cache {f.name}")
-            return pd.read_csv(f, index_col=0, parse_dates=True).iloc[:, 0]
-        raise
 
 
 def _serie_api(sid, extra=""):
     url = f"{SERIES_API}?ids={sid}&limit=1000&format=json&start_date=1990-01-01{extra}"
-    d = json.loads(_get(url))
+    d = json.loads(red.bajar(url))
     s = pd.Series({pd.Timestamp(f): v for f, v in d["data"]}, dtype="float64")
     return s.dropna()
 
 
 def _ripte():
-    df = pd.read_csv(io.BytesIO(_get(RIPTE_CSV)), parse_dates=["indice_tiempo"])
+    df = pd.read_csv(io.BytesIO(red.bajar(RIPTE_CSV)), parse_dates=["indice_tiempo"])
     return df.set_index("indice_tiempo")["ripte"].dropna()
-
-
-def _blue():
-    d = json.loads(_get("https://api.bluelytics.com.ar/v2/evolution.json"))
-    df = pd.DataFrame(d)
-    df = df[df["source"] == "Blue"]
-    df["mes"] = pd.to_datetime(df["date"]).dt.to_period("M").dt.to_timestamp()
-    return df.groupby("mes")["value_sell"].mean()
 
 
 def _cpi_usa():
@@ -93,7 +62,7 @@ def _cpi_usa():
     for ini in inicios:  # hasta 10 años por consulta
         body = json.dumps({"seriesid": ["CUUR0000SA0"], "startyear": str(ini),
                            "endyear": str(min(ini + 9, hoy))}).encode()
-        d = json.loads(_get("https://api.bls.gov/publicAPI/v1/timeseries/data/", body,
+        d = json.loads(red.bajar("https://api.bls.gov/publicAPI/v1/timeseries/data/", body,
                             {"Content-Type": "application/json"}))
         for x in d["Results"]["series"][0]["data"]:
             if x["period"].startswith("M") and x["period"] != "M13" and x["value"] not in ("-", ""):
@@ -106,10 +75,10 @@ def _cpi_usa():
 
 def ipc_empalmado(ipc_nac_override=None):
     """Índice de precios Argentina 1993-hoy, encadenando variaciones mensuales."""
-    var_indec = _cacheado("ipc_indec_var", lambda: _serie_api(IDS["ipc_indec_var"])) / 100
-    sl = _cacheado("ipc_sanluis", lambda: _serie_api(IDS["ipc_sanluis"]))
-    caba = _cacheado("ipc_caba", lambda: _serie_api(IDS["ipc_caba"]))
-    nac = _cacheado("ipc_nac", lambda: _serie_api(IDS["ipc_nac"]))
+    var_indec = red.cacheado("ipc_indec_var", lambda: _serie_api(IDS["ipc_indec_var"])) / 100
+    sl = red.cacheado("ipc_sanluis", lambda: _serie_api(IDS["ipc_sanluis"]))
+    caba = red.cacheado("ipc_caba", lambda: _serie_api(IDS["ipc_caba"]))
+    nac = red.cacheado("ipc_nac", lambda: _serie_api(IDS["ipc_nac"]))
     if ipc_nac_override is not None:
         nac = ipc_nac_override.combine_first(nac)
     tramos = [
@@ -127,11 +96,9 @@ def ipc_empalmado(ipc_nac_override=None):
 
 def construir(prorratear_sac, ipc_nac_override=None):
     print("Salarios: bajando series...")
-    s = {k: _cacheado(k, lambda k=k: _serie_api(IDS[k])) for k in ("sipa_prom", "sipa_med", "smvm", "jub_min")}
-    s["ripte"] = _cacheado("ripte", _ripte)
-    fx = _cacheado("fx_a3500", lambda: _serie_api(FX_A3500, "&collapse=month&collapse_aggregation=avg"))
-    blue = _cacheado("fx_blue", _blue)
-    cpi_us = _cacheado("cpi_usa", _cpi_usa)
+    s = {k: red.cacheado(k, lambda k=k: _serie_api(IDS[k])) for k in ("sipa_prom", "sipa_med", "smvm", "jub_min")}
+    s["ripte"] = red.cacheado("ripte", _ripte)
+    cpi_us = red.cacheado("cpi_usa", _cpi_usa)
     ipc_ar = ipc_empalmado(ipc_nac_override)
 
     df = pd.DataFrame(index=pd.date_range("1994-07-01", pd.Timestamp.today().normalize(), freq="MS"))
@@ -142,15 +109,10 @@ def construir(prorratear_sac, ipc_nac_override=None):
         df[f"{k}_sin"] = s[k]
         df[f"{k}_con"] = s[k] * 13 / 12
     df["ipc_ar"] = ipc_ar
-    fx = fx.reindex(df.index)
-    fx[fx.index < "2002-01-01"] = 1.0  # convertibilidad; ene-feb 2002 se interpolan (A3500 arranca en mar-2002)
-    fx = fx.where(fx.index > fx.last_valid_index(), fx.interpolate(limit_area="inside"))
-    df["fx_oficial"] = fx
-    df["fx_blue"] = blue.reindex(df.index).combine_first(fx.where(df.index < "2011-01-01"))
     df["cpi_us"] = cpi_us
     sal_cols = [c for c in df.columns if c.endswith(("_con", "_sin"))]
     df = df.loc[df[sal_cols].notna().any(axis=1)]
     df = df.loc[: df[sal_cols].last_valid_index()]
-    for c, ser in [("ipc_ar", ipc_ar), ("fx_oficial", fx), ("fx_blue", blue), ("cpi_us", cpi_us)]:
+    for c, ser in [("ipc_ar", ipc_ar), ("cpi_us", cpi_us)]:
         print(f"  {c}: hasta {ser.dropna().index.max():%Y-%m}")
     return df

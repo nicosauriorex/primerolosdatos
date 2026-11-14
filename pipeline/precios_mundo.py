@@ -20,12 +20,13 @@ datos/cache/precios_mundo.json para que --solo-json funcione sin red.
 import io
 import json
 import re
-import urllib.request
 from datetime import date
 
 import pandas as pd
 
-from salarios import CACHE
+import red
+
+CACHE = red.CACHE
 
 WB = "https://api.worldbank.org/v2/"
 OCDE = "https://sdmx.oecd.org/public/rest/data/"
@@ -82,26 +83,6 @@ RUBROS = {
     "frutas": _r("Frutas", "1101160", "ipc_gba_01_1_6_coicop", None, "CP0116", "7254", "p"),
     "verduras": _r("Verduras", "1101170", "ipc_gba_01_1_7_coicop", None, "CP0117", "7241", "p", "En Brasil, hortalizas y verduras."),
 }
-UA = {"User-Agent": "Mozilla/5.0"}
-
-
-def _bajar(url, timeout=180):
-    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=timeout) as r:
-        return r.read()
-
-
-def _cache_json(nombre, bajar):
-    f = CACHE / f"{nombre}.json"
-    try:
-        d = bajar()
-        f.write_text(json.dumps(d, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-        return d
-    except Exception as e:  # noqa: BLE001
-        if f.exists():
-            print(f"  {nombre}: error al bajar ({e}); uso cache {f.name}")
-            return json.loads(f.read_text(encoding="utf-8"))
-        print(f"  {nombre}: no disponible ({e})")
-        return None
 
 
 def _meses():
@@ -112,7 +93,7 @@ def _meses():
 # ------------------------------------------------------------------ 1) ICP
 def _fuentes_icp():
     """Ids de las fuentes 'ICP 2021' y posteriores (la 90 y las que salgan después), de la más vieja a la más nueva."""
-    fuentes = json.loads(_bajar(WB + "sources?format=json&per_page=200"))[1]
+    fuentes = json.loads(red.bajar(WB + "sources?format=json&per_page=200", ua="Mozilla/5.0", timeout=180))[1]
     out = []
     for s in fuentes:
         m = re.fullmatch(r"ICP (\d{4})", s["name"].strip())
@@ -126,7 +107,7 @@ def _icp_serie(fuente, codigo):
     paises = ";".join(ISO_ICP)
     url = f"{WB}sources/{fuente}/series/{codigo}/country/{paises}/time/all?format=json&per_page=5000"
     out = {}
-    for fila in json.loads(_bajar(url))["source"]["data"]:
+    for fila in json.loads(red.bajar(url, ua="Mozilla/5.0", timeout=180))["source"]["data"]:
         v = {x["concept"]: x["id"] for x in fila["variable"]}
         if v.get("Classification") == "PX.WL" and fila["value"] is not None:
             out[(v["Country"], int(v["Time"][2:]))] = float(fila["value"])
@@ -141,7 +122,7 @@ def _medido():
                 for (pais, anio), val in _icp_serie(fuente, r["icp"]).items():
                     res.setdefault(str(anio), {}).setdefault(rid, {})[pais] = round(val, 3)
         return res
-    crudo = _cache_json("pm_icp", bajar)
+    crudo = red.cache_json("pm_icp", bajar)
     if not crudo:
         return None
     # zona euro = promedio simple de Alemania, Francia, Italia y España
@@ -160,7 +141,7 @@ def _ocde_ipc():
     """{(país, código OCDE): Series mensual} empalmando COICOP 1999 con COICOP 2018 en el último mes en común."""
     def leer(flujo, paises):
         url = f"{OCDE}{flujo}/{paises}.M.N.CPI.IX..N._Z?startPeriod=2016-01&format=csvfilewithlabels"
-        df = pd.read_csv(io.BytesIO(_bajar(url, 300)))
+        df = pd.read_csv(io.BytesIO(red.bajar(url, ua="Mozilla/5.0", timeout=300)))
         df = df[df["TIME_PERIOD"].str.fullmatch(r"\d{4}-\d{2}")]
         return {k: g.set_index("TIME_PERIOD")["OBS_VALUE"].sort_index() for k, g in df.groupby(["REF_AREA", "EXPENDITURE"])}
 
@@ -185,14 +166,14 @@ def _ocde_ipc():
                     s = pd.concat([s[s.index <= m], n[n.index > m] * (s[m] / n[m])])
             out[f"{k[0]}|{k[1]}"] = {t: round(float(x), 4) for t, x in s.items()}
         return out
-    return _cache_json("pm_ocde_ipc", bajar) or {}
+    return red.cache_json("pm_ocde_ipc", bajar) or {}
 
 
 def _eurostat_ipc():
     def bajar():
         cods = sorted({r["eu"] for r in RUBROS.values() if r["eu"]})
         url = f"{EUROSTAT}?geo=EA&unit=I15&sinceTimePeriod=2016-12&format=JSON&" + "&".join(f"coicop={c}" for c in cods)
-        d = json.loads(_bajar(url))
+        d = json.loads(red.bajar(url, ua="Mozilla/5.0", timeout=180))
         tiempos = {i: t for t, i in d["dimension"]["time"]["category"]["index"].items()}
         coi = {i: c for c, i in d["dimension"]["coicop"]["category"]["index"].items()}
         nt = len(tiempos)
@@ -201,7 +182,7 @@ def _eurostat_ipc():
             pos = int(pos)
             out.setdefault(coi[pos // nt], {})[tiempos[pos % nt]] = float(val)
         return out
-    return _cache_json("pm_eurostat_ipc", bajar) or {}
+    return red.cache_json("pm_eurostat_ipc", bajar) or {}
 
 
 def _ibge_ipc():
@@ -209,7 +190,7 @@ def _ibge_ipc():
     def bajar():
         cods = sorted({r["br"] for r in RUBROS.values() if r["br"]})
         hoy = date.today()
-        filas = json.loads(_bajar(f"https://apisidra.ibge.gov.br/values/t/7060/n1/1/v/63/p/201701-{hoy.year}{hoy.month:02d}/c315/{','.join(cods)}"))[1:]
+        filas = json.loads(red.bajar(f"https://apisidra.ibge.gov.br/values/t/7060/n1/1/v/63/p/201701-{hoy.year}{hoy.month:02d}/c315/{','.join(cods)}", ua="Mozilla/5.0", timeout=180))[1:]
         por = {}
         for f in filas:
             if f["V"] in ("...", "-", ""):
@@ -224,7 +205,7 @@ def _ibge_ipc():
                 idx[t] = round(nivel, 4)
             out[c] = idx
         return out
-    return _cache_json("pm_ibge_ipc", bajar) or {}
+    return red.cache_json("pm_ibge_ipc", bajar) or {}
 
 
 # ------------------------------------------------------------------ 3) tipo de cambio
@@ -232,11 +213,11 @@ def _tc_ocde():
     def bajar():
         areas = "+".join(TC_OCDE.values())
         url = f"{OCDE}OECD.SDD.STES,DSD_STES@DF_FINMARK,4.0/{areas}..CC.XDC_USD.....?startPeriod=2016-12&format=csv"
-        df = pd.read_csv(io.BytesIO(_bajar(url)))
+        df = pd.read_csv(io.BytesIO(red.bajar(url, ua="Mozilla/5.0", timeout=180)))
         df = df[df["TIME_PERIOD"].str.fullmatch(r"\d{4}-\d{2}")]
         inv = {v: k for k, v in TC_OCDE.items()}
         return {inv[a]: {t: round(float(x), 6) for t, x in g.set_index("TIME_PERIOD")["OBS_VALUE"].items()} for a, g in df.groupby("REF_AREA")}
-    return _cache_json("pm_tc", bajar) or {}
+    return red.cache_json("pm_tc", bajar) or {}
 
 
 # ------------------------------------------------------------------ armado

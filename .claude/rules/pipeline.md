@@ -5,7 +5,7 @@ paths:
 
 # Pipeline de datos
 
-- Toda descarga pasa por `_cacheado` / `_cache_df` (salarios.py / catalogo.py): si la fuente falla se usa `datos/cache/`. No agregar descargas sin caché.
+- Toda descarga pasa por `red.cacheado` / `red.cache_df` / `red.cache_json` (`pipeline/red.py`; el pedido HTTP es `red.bajar`): si la fuente falla se usa `datos/cache/`. No agregar descargas sin caché ni `urlopen` fuera de `red.py`. Lo bajado se recuerda por nombre dentro de la corrida (no se baja dos veces). `PIPELINE_SIN_RED=1` corta toda descarga (prueba con los respaldos).
 - Las series se arman con `catalogo.S(...)` y terminan en `catalogo.construir()`. Todo es mensual (índice desde 1990-01, freq MS); diarias se resumen en promedio/mín/máx; trimestrales con `_trim_a_mes`.
 - `fuente` y `desc` de cada serie se muestran en la página: escribirlos para un lector común, citando organismo y número de serie.
 - Salarios SIPA incluyen aguinaldo (SAC) en jun/dic: respetar la separación base/prorrateado de salarios.py.

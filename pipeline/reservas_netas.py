@@ -32,9 +32,9 @@ def _bajar(con_red):
     """Encajes en dólares (variable 1243): con red se baja (respaldo en datos/cache/); las reservas brutas ya las baja catalogo.py."""
     if con_red:
         from catalogo import _bcra
-        from salarios import _cacheado
+        import red
         try:
-            _cacheado("bcra_1243", lambda: _bcra(1243))
+            red.cacheado("bcra_1243", lambda: _bcra(1243))
         except Exception as e:  # noqa: BLE001
             print(f"  Reservas netas: no se pudo bajar la variable 1243 ({e})")
     return _leer("bcra_1"), _leer("bcra_1243")

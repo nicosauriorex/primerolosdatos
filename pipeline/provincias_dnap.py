@@ -68,14 +68,13 @@ import re
 import sys
 import unicodedata
 from datetime import date
-from pathlib import Path
 
 import pandas as pd
 
 from provincias import PROVINCIAS, _poblacion
-from salarios import _get
+import red
 
-CACHE = Path(__file__).resolve().parent.parent / "datos" / "cache"
+CACHE = red.CACHE
 BASE = "https://www.argentina.gob.ar/economia/sechacienda/"
 BASE_SITIO = "https://www.argentina.gob.ar"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
@@ -520,7 +519,7 @@ def _actualizar_alicuotas(con_red):
     try:
         _bajar_alicuotas(meta)
         meta["bajado_ib"] = hoy
-        _guardar_meta(meta)
+        red.guardar_meta("provincias_dnap", meta)
         print("  provincias_dnap: alícuotas de Ingresos Brutos bajadas")
     except Exception as e:  # noqa: BLE001
         if not hay:
@@ -817,7 +816,7 @@ def _actualizar_parcial(con_red):
     try:
         _bajar_parcial(meta)
         meta["bajado_parcial"] = hoy
-        _guardar_meta(meta)
+        red.guardar_meta("provincias_dnap", meta)
         print(f"  provincias_dnap: año en curso bajado ({meta['parcial']['anio']}, trimestre {meta['parcial']['trim']})")
     except Exception as e:  # noqa: BLE001
         if not hay:
@@ -922,10 +921,6 @@ def _meta():
     return json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
 
 
-def _guardar_meta(meta):
-    (CACHE / "provincias_dnap_meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
-
-
 def _links(html):
     """Todos los links a planillas de la página, con la dirección completa (se normalizan '/sites/…' y el prefijo 'blank:#')."""
     out = []
@@ -957,7 +952,7 @@ def _elegir_link(links, patron):
 
 
 def _bytes(url, timeout=120):
-    return _get(url, headers={"User-Agent": USER_AGENT}, timeout=timeout)
+    return red.bajar(url, headers={"User-Agent": USER_AGENT}, timeout=timeout)
 
 
 def _bajar_tema(tema, meta):
@@ -999,7 +994,7 @@ def bajar():
     for tema in TEMAS:
         try:
             _bajar_tema(tema, meta)
-            _guardar_meta(meta)
+            red.guardar_meta("provincias_dnap", meta)
             print(f"  provincias_dnap: {tema} bajado")
             bajados += 1
         except Exception as e:  # noqa: BLE001
@@ -1022,7 +1017,7 @@ def _actualizar_respaldos(con_red):
             if bajar():   # la fecha se guarda solo si bajó todo: si se usó un respaldo, se reintenta en la próxima corrida
                 meta = _meta()
                 meta["bajado"] = hoy
-                _guardar_meta(meta)
+                red.guardar_meta("provincias_dnap", meta)
         except Exception as e:  # noqa: BLE001
             if not hay:
                 raise RuntimeError(f"no se pudieron bajar las planillas de la DNAP y no hay respaldo ({e})") from e
@@ -1282,14 +1277,14 @@ def construir_json(con_red=True):
 if __name__ == "__main__":
     if "--bajar" in sys.argv:
         if bajar():
-            _guardar_meta({**_meta(), "bajado": date.today().isoformat()})
+            red.guardar_meta("provincias_dnap", {**_meta(), "bajado": date.today().isoformat()})
         _bajar_alicuotas(m := _meta())
         m["bajado_ib"] = date.today().isoformat()
-        _guardar_meta(m)
+        red.guardar_meta("provincias_dnap", m)
         print("  provincias_dnap: alícuotas de Ingresos Brutos bajadas")
         _bajar_parcial(m := _meta())
         m["bajado_parcial"] = date.today().isoformat()
-        _guardar_meta(m)
+        red.guardar_meta("provincias_dnap", m)
         print(f"  provincias_dnap: año en curso bajado ({m['parcial']['anio']}, trimestre {m['parcial']['trim']})")
         sys.exit(0)
     res = construir_json(con_red="--sin-red" not in sys.argv)

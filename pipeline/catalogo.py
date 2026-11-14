@@ -31,7 +31,8 @@ import urllib.parse
 
 import pandas as pd
 
-from salarios import _cacheado, _get, SERIES_API
+import red
+from salarios import SERIES_API
 
 INDEC_API = "https://api.indec.gob.ar/v1/"
 BCRA_API = "https://api.bcra.gob.ar/estadisticas/v4.0/monetarias/"
@@ -71,34 +72,18 @@ def _indec(tabla, token, order, **filtros):
     while True:
         params = {**filtros, "order": order, "limit": 1000, "offset": offset}
         url = INDEC_API + tabla + "?" + urllib.parse.urlencode(params, safe="*.,()")
-        chunk = json.loads(_get(url, headers={"Authorization": f"Bearer {token}", "Accept": "application/json"}, timeout=180))
+        chunk = json.loads(red.bajar(url, headers={"Authorization": f"Bearer {token}", "Accept": "application/json"}, timeout=180))
         rows += chunk
         if len(chunk) < 1000:
             return pd.DataFrame(rows)
         offset += 1000
 
 
-def _cache_df(nombre, bajar):
-    """Como _cacheado pero para DataFrames."""
-    from salarios import CACHE
-    f = CACHE / f"{nombre}.pkl"
-    try:
-        df = bajar()
-        df.to_pickle(f)
-        return df
-    except Exception as e:  # noqa: BLE001
-        if f.exists():
-            print(f"  {nombre}: error al bajar ({e}); uso cache")
-            return pd.read_pickle(f)
-        print(f"  {nombre}: no disponible ({e})")
-        return pd.DataFrame()
-
-
 def _bcra(var_id):
     vals, offset = {}, 0
     while True:
-        d = json.loads(_get(f"{BCRA_API}{var_id}?desde=1990-01-01&hasta=2100-01-01&limit=3000&offset={offset}",
-                            headers={"User-Agent": "Mozilla/5.0"}, timeout=120))
+        d = json.loads(red.bajar(f"{BCRA_API}{var_id}?desde=1990-01-01&hasta=2100-01-01&limit=3000&offset={offset}",
+                                 timeout=120, ua="Mozilla/5.0"))
         det = d["results"][0]["detalle"] if d.get("results") else []
         vals.update({x["fecha"]: x["valor"] for x in det})
         if len(det) < 3000:
@@ -114,7 +99,7 @@ def _series_api(ids):
     out = {}
     for g in ids:
         try:
-            d = json.loads(_get(f"{SERIES_API}?ids={g}&limit=1000&format=json&start_date=1980-01-01", timeout=120))
+            d = json.loads(red.bajar(f"{SERIES_API}?ids={g}&limit=1000&format=json&start_date=1980-01-01", timeout=120))
         except Exception as e:  # noqa: BLE001
             print(f"  datos.gob.ar {g}: error ({e})")
             continue
@@ -130,16 +115,24 @@ def _mes(s, idx, agg="mean"):
     return getattr(g, agg)().reindex(idx)
 
 
+IPC_ORDEN = "clasificador,nivel,codigo,descripcion,periodo,anio,mes,indicador,tipo_de_indicador,tipo_de_indicador_descripcion,region,unidad_de_medida"
+
+
+def tabla_ipc_indec(token):
+    """Tabla `ipc_nacional` de la API de INDEC completa (índices y precios promedio). Se baja una sola vez por corrida
+    (red.cache_df la recuerda). Sin token, o si la API falla, sale de la última copia guardada; vacía si no hay copia.
+    Para saber si salió de la copia: "ipc_indec_completo" in red.RESPALDOS."""
+    def bajar():
+        if not token:
+            raise RuntimeError("sin token")
+        return _indec("ipc_nacional", token, IPC_ORDEN, tipo_de_indicador="in.(Indice,Precio promedio)")
+    return red.cache_df("ipc_indec_completo", bajar)
+
+
 # ---------------------------------------------------------------- bloques
 def ipc_indec(token, idx):
     """Índices del IPC (nacional y regional) y precios promedio por producto, desde la API de INDEC."""
-    if not token:
-        df = _cache_df("ipc_indec_completo", lambda: (_ for _ in ()).throw(RuntimeError("sin token")))
-    else:
-        df = _cache_df("ipc_indec_completo", lambda: _indec(
-            "ipc_nacional", token,
-            "clasificador,nivel,codigo,descripcion,periodo,anio,mes,indicador,tipo_de_indicador,tipo_de_indicador_descripcion,region,unidad_de_medida",
-            tipo_de_indicador="in.(Indice,Precio promedio)"))
+    df = tabla_ipc_indec(token)
     if df.empty:
         return []
     df["fecha"] = pd.to_datetime(df["periodo"].astype(str).str[:6], format="%Y%m")
@@ -224,7 +217,7 @@ def bcra(idx):
     out = []
     for vid, n, ruta, tipo, u, dr, op, desc in VARS:
         try:
-            s = _cacheado(f"bcra_{vid}", lambda vid=vid: _bcra(vid))
+            s = red.cacheado(f"bcra_{vid}", lambda vid=vid: _bcra(vid))
         except Exception as e:  # noqa: BLE001
             print(f"  BCRA {vid}: no disponible ({e})")
             continue
@@ -238,7 +231,7 @@ def bcra(idx):
                          desc + " Promedio mensual de datos diarios.", _mes(s, idx, "min"), _mes(s, idx, "max"), agg=op.get("agg", False)))
     # Déficit cuasifiscal y pasivos remunerados
     try:
-        inter = _cacheado("bcra_55", lambda: _bcra(55))
+        inter = red.cacheado("bcra_55", lambda: _bcra(55))
         cuasi = _mes(inter, idx, "sum")
         out.append(S("bcra_cuasifiscal", "Déficit cuasifiscal del BCRA (intereses de pases, LELIQ y LEFI)", ["Fiscal"], "ars", "millones de $",
                      cuasi, -1, "BCRA, API (variable 55: efecto monetario de intereses de pases y LELIQ)",
@@ -247,7 +240,7 @@ def bcra(idx):
     except Exception as e:  # noqa: BLE001
         print(f"  BCRA cuasifiscal: {e}")
     try:
-        partes = [_cacheado(f"bcra_{v}", lambda v=v: _bcra(v)) for v in (155, 152, 196, 1258)]
+        partes = [red.cacheado(f"bcra_{v}", lambda v=v: _bcra(v)) for v in (155, 152, 196, 1258)]
         tot = sum(_mes(p, idx).fillna(0) for p in partes)
         tot = tot.where(tot.index >= "2003-01-01")
         out.append(S("bcra_pasivos_rem", "Pasivos remunerados del BCRA (LEBAC, pases, LELIQ, LEFI)", DB, "ars", "millones de $", tot, -1,
@@ -413,8 +406,8 @@ def mercados(idx):
     hasta = int(pd.Timestamp.now().timestamp())
 
     def yahoo(tk):
-        d = json.loads(_get(f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(tk)}?interval=1d&period1=631152000&period2={hasta}",
-                            headers={"User-Agent": "Mozilla/5.0"}, timeout=120))["chart"]["result"][0]
+        d = json.loads(red.bajar(f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(tk)}?interval=1d&period1=631152000&period2={hasta}",
+                                 timeout=120, ua="Mozilla/5.0"))["chart"]["result"][0]
         s = pd.Series(d["indicators"]["quote"][0]["close"], index=pd.to_datetime(d["timestamp"], unit="s") - pd.Timedelta(hours=5), dtype="float64")
         return s[s > 0].dropna()
     out = []
@@ -426,7 +419,7 @@ def mercados(idx):
         lista.append((tk, f"{n} (ADR)", ACC, "usd", "US$ por acción", f"Cotización de {n} en Nueva York ({tk}), en dólares."))
     for tk, n, ruta, tipo, u, desc in lista:
         try:
-            s = _cacheado("y_" + slug(tk), lambda tk=tk: yahoo(tk))
+            s = red.cacheado("y_" + slug(tk), lambda tk=tk: yahoo(tk))
         except Exception as e:  # noqa: BLE001
             print(f"  Yahoo {tk}: {e}")
             continue
@@ -451,8 +444,7 @@ def _bono(idx):
 
 
 def _cacheado_dict(nombre, ids):
-    from salarios import CACHE
-    f = CACHE / f"{nombre}.pkl"
+    f = red.CACHE / f"{nombre}.pkl"
     try:
         viejo = pd.read_pickle(f) if f.exists() else {}
         d = {**{k: v for k, v in viejo.items() if k in ids}, **_series_api(ids)}
@@ -466,12 +458,12 @@ def _cacheado_dict(nombre, ids):
 def indec_social(token, idx):
     out = []
     if token:
-        can = _cache_df("indec_canastas", lambda: _indec("valorizacion_canastas_cba_cbt", token,
+        can = red.cache_df("indec_canastas", lambda: _indec("valorizacion_canastas_cba_cbt", token,
               "clasificador,nivel,codigo,descripcion,periodo,anio,mes,indicador,tipo_de_indicador,tipo_de_indicador_descripcion,region,unidad_de_medida"))
-        pob = _cache_df("indec_pobreza", lambda: _indec("pobreza_eph", token, "area_geografica_nom,periodo"))
+        pob = red.cache_df("indec_pobreza", lambda: _indec("pobreza_eph", token, "area_geografica_nom,periodo"))
     else:
-        can = _cache_df("indec_canastas", lambda: (_ for _ in ()).throw(RuntimeError("sin token")))
-        pob = _cache_df("indec_pobreza", lambda: (_ for _ in ()).throw(RuntimeError("sin token")))
+        can = red.cache_df("indec_canastas", lambda: (_ for _ in ()).throw(RuntimeError("sin token")))
+        pob = red.cache_df("indec_pobreza", lambda: (_ for _ in ()).throw(RuntimeError("sin token")))
     if not can.empty:
         can["fecha"] = pd.to_datetime(can["periodo"].astype(str).str[:6], format="%Y%m")
         # La tabla trae, con el mismo código, el valor en pesos y sus variaciones en %: solo sirven los pesos.
