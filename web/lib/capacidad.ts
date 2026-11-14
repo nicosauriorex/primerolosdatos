@@ -2,7 +2,7 @@
 // Una sola fuente de verdad para la sección de Presidentes, el recuadro del mandato y las plantillas.
 // Los datos vienen de capacidad.json (cargados a mano en datos/manual/, D-009). No se aplica la configuración de inicio (T±N): un DNU es de quien lo firmó.
 import { PRES_DEF } from "./estadisticas";
-import { nf0, nf1, ok } from "./formato";
+import { fmtMes, nf0, nf1, ok, r1 } from "./formato";
 
 export type Camara = "dip" | "sen";
 export interface Banca { fecha: string; camara: Camara; pres: string; propios: number; aliados: number; total: number; nota?: string }
@@ -140,4 +140,73 @@ export function queHayCargado(d: DatosCap, M: Mandato[]): string {
     con.push(`${i === "vetos" && parcial ? "vetos insistidos" : nombres[i]} (${de})`);
   });
   return `Hay cargado: ${con.length ? con.join("; ") : "nada todavía"}.${sin.length ? ` Todavía sin datos: ${sin.join(" y ")}.` : ""}`;
+}
+
+// ---- Frase-respuesta de la página de Congreso (spec 3.5, C1). Solo hechos (D-012); todo sale de los datos, con los valores redondeados que se muestran.
+/** Mes anterior a "AAAA-MM" (el mandato termina el mes antes de que asuma el siguiente). */
+const mesAnterior = (f: string) => { const a = +f.slice(0, 4), m = +f.slice(5, 7); return m === 1 ? `${a - 1}-12` : `${a}-${String(m - 1).padStart(2, "0")}`; };
+/** "dic 2023 a hoy" o "may 2003 a may 2007". */
+export const periodoMandato = (m: Mandato) => (m.enCurso ? `${fmtMes(m.ini)} a hoy` : `${fmtMes(m.ini)} a ${fmtMes(mesAnterior(m.fin as string))}`);
+
+export interface FraseCap { titulo: string; cifra: string; unidad?: string; fecha: string; frase: string }
+/** Puesto de `mio` entre `todos` de mayor a menor, con los valores ya redondeados como se muestran (los iguales comparten puesto). */
+const puestoDe = (todos: number[], mio: number) => 1 + todos.filter((v) => v > mio).length;
+
+/** Qué dice el indicador elegido del gobierno `pres`; null si no tiene dato. `M` = todos los mandatos (para ubicarlo entre los gobiernos con dato). */
+export function fraseCapacidad(d: DatosCap, ind: Indicador, pres: Mandato, M: Mandato[]): FraseCap | null {
+  const nf = (x: number) => nf0.format(x);
+  const tiene = pres.enCurso ? "tiene" : "tuvo", firmo = pres.enCurso ? "firmó hasta hoy" : "firmó";
+  const per = periodoMandato(pres);
+  if (ind === "bancas") {
+    const bd = bancasDe(d, pres.id, "dip"), bs = bancasDe(d, pres.id, "sen");
+    const ld = bd[bd.length - 1], ls = bs[bs.length - 1];
+    if (!ld && !ls) return null;
+    const trozo = (b: Banca, cam: string) => `${nf(b.propios)} bancas propias de ${nf(b.total)} en ${cam} (${nf(Math.round(pctPropios(b) as number))} %)`;
+    const partes: string[] = [];
+    if (ld) partes.push(trozo(ld, "Diputados"));
+    if (ls) partes.push(trozo(ls, "el Senado"));
+    const ali: string[] = [];
+    if (ld && ld.aliados > 0) ali.push(`${nf(Math.round(pctOficialismo(ld) as number))} % de Diputados`);
+    if (ls && ls.aliados > 0) ali.push(`${nf(Math.round(pctOficialismo(ls) as number))} % del Senado`);
+    const b0 = (ld ?? ls) as Banca;
+    return {
+      titulo: `Bancas propias${ld ? " en Diputados" : " en el Senado"}`, cifra: `${nf(Math.round(pctPropios(b0) as number))} %`, fecha: `corte de ${fmtMes(b0.fecha.slice(0, 7))}`,
+      frase: `${pres.n} ${tiene} ${partes.join(" y ")}, en el último corte cargado.${ali.length ? ` Sumando las aliadas, ${ali.join(" y ")}.` : ""}`,
+    };
+  }
+  if (ind === "leyes") {
+    const l = resumenLeyes(d, pres.id);
+    if (!l || !ok(l.pct)) return null;
+    const todos = M.map((m) => resumenLeyes(d, m.id)?.pct).filter(ok).map((v) => Math.round(v));
+    const k = puestoDe(todos, Math.round(l.pct));
+    return {
+      titulo: "Leyes del Ejecutivo aprobadas", cifra: `${nf(Math.round(l.pct))} %`, fecha: per,
+      frase: `${pres.n}: ${nf(l.aprobadas)} de las ${nf(l.enviadas)} leyes que envió el Ejecutivo se aprobaron (${nf(Math.round(l.pct))} %). Entre los ${todos.length} gobiernos con dato, puesto ${k} de mayor a menor porcentaje.`,
+    };
+  }
+  if (ind === "dnu") {
+    const n = resumenDnu(d, pres.id, pres);
+    if (!n || !ok(n.porAnio)) return null;
+    const todos = M.map((m) => resumenDnu(d, m.id, m)?.porAnio).filter(ok).map(r1);
+    const k = puestoDe(todos, r1(n.porAnio));
+    return {
+      titulo: "DNU por año de mandato", cifra: nf1.format(n.porAnio), unidad: "DNU por año", fecha: per,
+      frase: `${pres.n} ${firmo} ${nf(n.total)} DNU, ${nf1.format(n.porAnio)} por año. Entre los ${todos.length} gobiernos con dato, puesto ${k} de mayor a menor por año.`,
+    };
+  }
+  const v = resumenVetos(d, pres.id, pres);
+  if (!v) return null;
+  const conTotal = v.total != null && ok(v.porAnio);
+  const val = (x: ResVetos | null) => (x ? (conTotal ? (x.total != null ? x.porAnio : null) : (x.total == null ? x.insistidosPorAnio : null)) : null);
+  const todos = M.map((m) => val(resumenVetos(d, m.id, m))).filter(ok).map(r1);
+  const mio = r1((conTotal ? v.porAnio : v.insistidosPorAnio) as number);
+  const k = puestoDe(todos, mio);
+  const dif = `Entre los ${todos.length} gobiernos con este dato, puesto ${k} de mayor a menor por año.`;
+  return conTotal ? {
+    titulo: "Vetos por año de mandato", cifra: nf1.format(v.porAnio as number), unidad: "vetos por año", fecha: per,
+    frase: `${pres.n} registra ${nf(v.total as number)} vetos, ${nf1.format(v.porAnio as number)} por año; el Congreso insistió en ${nf(v.insistidos)}. ${dif}`,
+  } : {
+    titulo: "Vetos insistidos por año de mandato", cifra: nf1.format(v.insistidosPorAnio), unidad: "vetos insistidos por año", fecha: per,
+    frase: `${pres.n}: el Congreso insistió en ${nf(v.insistidos)} vetos, ${nf1.format(v.insistidosPorAnio)} por año (todavía falta cargar el total de vetos). ${dif}`,
+  };
 }

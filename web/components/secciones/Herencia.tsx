@@ -3,18 +3,23 @@
 // Los cálculos están en lib/herencia.ts y lib/herencia-informes.ts (datos de informes cargados a mano, fase 2); acá solo se dibuja. Estado en la URL: `p` (presidente), `vista` (uno / traspasos) y `v` (variable de "Todos los traspasos").
 import Link from "next/link";
 import { Fragment, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useSeccion } from "../useSeccion";
-import { Cargando, Modal, Selector, Seg } from "../ui";
+import { Cargando, Modal } from "../ui";
 import { useHerenciaInformes, useReservasNetas } from "../useHerenciaInformes";
 import { BotonInfo } from "../Variables";
-import { BotonCompartir } from "../PanelCompartir";
-import { BotonLink } from "../BotonLink";
-import { IconoCompartir } from "../Iconos";
+import { PanelCompartir, type VistaCompartir } from "../PanelCompartir";
+import { CabeceraDato } from "../sistema/CabeceraDato";
+import { Capitulo } from "../sistema/Capitulo";
+import { FilaChips } from "../sistema/FilaChips";
+import { BarraVista } from "../sistema/BarraVista";
+import { Hoja } from "../sistema/Hoja";
+import { CompartirHoja } from "../sistema/CompartirHoja";
 import { CeldaVar, Valor } from "./comunes";
 import { crearPres, type Pres } from "@/lib/estadisticas";
 import { fmtMes } from "@/lib/formato";
 import {
-  BASE_HERENCIA, FALTA_CARGAR, FILAS_HERENCIA, GRUPOS_HERENCIA, MAX_ATRASO, NO_MEDIBLE, defPorClave, idsHerencia, tablaHerencia, traspasos,
+  BASE_HERENCIA, FALTA_CARGAR, FILAS_HERENCIA, GRUPOS_HERENCIA, MAX_ATRASO, NO_MEDIBLE, defPorClave, fraseHerencia, fraseTraspasos, idsHerencia, tablaHerencia, traspasos,
   type FilaHerencia, type Punto,
 } from "@/lib/herencia";
 import {
@@ -28,9 +33,9 @@ const IDS = idsHerencia();
 const VISTAS: [string, string][] = [["uno", "Un presidente"], ["traspasos", "Todos los traspasos"]];
 
 /** Celda de un dato: el valor y su mes; si no hay, "sin dato" y por qué. */
-function CeldaDato({ p, motivo }: { p: Punto | null; motivo: string }) {
-  if (p) return <td>{p.txt}<small>{p.mes}</small></td>;
-  return <td className="her-sin">sin dato<small>{motivo}</small></td>;
+function CeldaDato({ p, motivo, rotulo }: { p: Punto | null; motivo: string; rotulo?: string }) {
+  if (p) return <td data-rotulo={rotulo}>{p.txt}<small>{p.mes}</small></td>;
+  return <td className="her-sin" data-rotulo={rotulo}>sin dato<small>{motivo}</small></td>;
 }
 
 /** Lo que se abre al tocar un dato de informe: el documento, la página y la cita. */
@@ -113,10 +118,10 @@ function VentanaEstimacion({ rn, cual, onCerrar }: { rn: ReservasNetas; cual: De
 }
 
 /** Celda de un dato de informe: el valor y su mes son un botón que abre la cita. */
-function CeldaInforme({ d, p, verCita, motivo }: { d: DefInforme; p: PuntoInforme | null; verCita: VerCita; motivo?: string }) {
-  if (!p) return <td className="her-sin">sin dato<small>{motivo ?? d.sinDato ?? "no hay informe de esa fecha"}</small></td>;
+function CeldaInforme({ d, p, verCita, motivo, rotulo }: { d: DefInforme; p: PuntoInforme | null; verCita: VerCita; motivo?: string; rotulo?: string }) {
+  if (!p) return <td className="her-sin" data-rotulo={rotulo}>sin dato<small>{motivo ?? d.sinDato ?? "no hay informe de esa fecha"}</small></td>;
   return (
-    <td>
+    <td data-rotulo={rotulo}>
       <button type="button" className="her-inf" onClick={() => verCita(d, p.dato)} aria-label={`${p.txt}, ${p.mes}: ver de qué documento sale`}>
         {p.txt}<small>{p.mes} · {d.grupo === "Estimaciones" ? "estimación" : "informe"}</small>
       </button>
@@ -124,26 +129,35 @@ function CeldaInforme({ d, p, verCita, motivo }: { d: DefInforme; p: PuntoInform
   );
 }
 
-function FilaInf({ f, verCita }: { f: FilaInforme; verCita: VerCita }) {
+function FilaInf({ f, verCita, fin }: { f: FilaInforme; verCita: VerCita; fin: string }) {
   return (
     <tr>
       <CeldaVar nombre={f.def.nombre} unidad={f.def.unidad} />
-      <CeldaInforme d={f.def} p={f.recibio} verCita={verCita} />
-      <CeldaInforme d={f.def} p={f.entrego} verCita={verCita} motivo={f.sinEntrego} />
-      <Valor tono={null} sub={f.cambioAbs ? <small>{f.cambioAbs}</small> : null}>{f.cambio}</Valor>
+      <CeldaInforme d={f.def} p={f.recibio} verCita={verCita} rotulo="Recibió" />
+      <CeldaInforme d={f.def} p={f.entrego} verCita={verCita} motivo={f.sinEntrego} rotulo={fin} />
+      <Valor tono={null} data-rotulo="Cambio" sub={f.cambioAbs ? <small>{f.cambioAbs}</small> : null}>{f.cambio}</Valor>
     </tr>
   );
 }
 
-function FilaTabla({ f }: { f: FilaHerencia }) {
+function FilaTabla({ f, fin }: { f: FilaHerencia; fin: string }) {
   const nombre = f.href ? <Link prefetch={false} href={f.href} title="Ver la ficha de este dato">{f.nombre}</Link> : f.nombre;
   return (
     <tr>
       <CeldaVar nombre={nombre} unidad={f.unidad || undefined} info={f.c && !f.def.cociente ? <BotonInfo id={f.def.id} /> : null} />
-      <CeldaDato p={f.recibio} motivo={f.sinRecibio} />
-      <CeldaDato p={f.entrego} motivo={f.sinEntrego} />
-      <Valor tono={f.cls === "neutro" ? null : f.cls} sub={f.cambioAbs ? <small>{f.cambioAbs}</small> : null}>{f.cambio}</Valor>
+      <CeldaDato p={f.recibio} motivo={f.sinRecibio} rotulo="Recibió" />
+      <CeldaDato p={f.entrego} motivo={f.sinEntrego} rotulo={fin} />
+      <Valor tono={f.cls === "neutro" ? null : f.cls} data-rotulo="Cambio" sub={f.cambioAbs ? <small>{f.cambioAbs}</small> : null}>{f.cambio}</Valor>
     </tr>
+  );
+}
+
+/** Elección única en una lista de botones de 44 px (dentro de la hoja de ajustes). */
+function Opciones({ opciones, valor, onElegir, etiqueta }: { opciones: [string, string][]; valor: string; onElegir: (v: string) => void; etiqueta: string }) {
+  return (
+    <div className="her-opc" role="group" aria-label={etiqueta}>
+      {opciones.map(([v, t]) => <button key={v} type="button" aria-pressed={v === valor} onClick={() => onElegir(v)}>{t}</button>)}
+    </div>
   );
 }
 
@@ -155,6 +169,8 @@ export function Herencia() {
   const rn = useReservasNetas();
   const [verRN, setVerRN] = useState<DefinicionRN | null>(null);
   const [cita, setCita] = useState<{ d: DefInforme; x: DatoInforme } | null>(null);
+  const [hoja, setHoja] = useState(false);
+  const [img, setImg] = useState<VistaCompartir | null>(null);
   const verCita: VerCita = (d, x) => { const c = cualRNPropia(d.clave); if (c) setVerRN(c); else setCita({ d, x }); };
   const PRES: Pres[] = useMemo(() => (m ? crearPres(m.F) : []), [m]);
 
@@ -177,6 +193,29 @@ export function Herencia() {
   ];
   const enCurso = tabla.enCurso, finTxt = fmtMes(m.F[Math.min(pres.i1, m.F.length - 1)]);
   const colFin = enCurso ? "Hoy" : "Entregó";
+  const query = p.toString(), hrefPag = `/herencia/${query ? "?" + query : ""}`;
+  const elegirVar = (v: string) => set({ v: v === FILAS_HERENCIA[0].clave ? null : v });
+
+  // la respuesta de arriba: la de un presidente, o la de la variable elegida en "Todos los traspasos"
+  const esInf = clave.startsWith(PREF_INF);
+  const tr = vista === "traspasos" && !esInf ? traspasos(m, clave) : null;
+  const ti = vista === "traspasos" && esInf ? traspasosInforme(datosInf, clave.slice(PREF_INF.length), PRES) : null;
+  const respUno = fraseHerencia(tabla);
+  let respTr: { titulo: string; unidad: string; cifra: string; fecha: string; frase: string } | null = null;
+  if (tr) {
+    const f = [...tr.filas].reverse().find((x) => x.dato);
+    const r = fraseTraspasos(tr.nombre, f?.dato ? { quien: f.a.n, mes: f.mes, txt: f.dato.txt } : null, tr.hoy.dato ? { quien: tr.hoy.p.n, mes: tr.hoy.dato.mes, txt: tr.hoy.dato.txt } : null);
+    respTr = { titulo: tr.nombre, unidad: tr.unidad, ...r };
+  } else if (ti) {
+    const f = [...ti.filas].reverse().find((x) => x.dato);
+    const r = fraseTraspasos(ti.def.nombre, f?.dato ? { quien: f.a.n, mes: f.mes, txt: f.dato.txt } : null, ti.hoy ? { quien: ultimo.n, mes: ti.hoy.mes, txt: ti.hoy.txt } : null);
+    respTr = { titulo: ti.def.nombre, unidad: ti.def.unidad, ...r };
+  }
+  const textoFuente = "Fuente: datos oficiales (INDEC, Banco Central, Ministerio de Economía y otros); detalle en Primero los Datos.";
+  const resumen = vista === "uno" ? [{ clave: "p", texto: pres.n }] : [{ clave: "v", texto: opcionesVar.find(([v]) => v === clave)?.[1] ?? clave }];
+  const abrirImagen = () => {
+    setImg({ tipo: "herencia", presId: pres.id, ids: IDS.filter((id) => !!m.SER[id]), base: BASE_HERENCIA, informes: datosInf, rn } as VistaCompartir);
+  };
 
   const notaT = (
     <details className="her-plegado">
@@ -192,24 +231,37 @@ export function Herencia() {
 
   return (
     <section>
-      <div className="card">
-        <div className="controls">
-          <Seg valor={vista} opciones={VISTAS} onElegir={(v) => set({ vista: v === "uno" ? null : v })} />
-        </div>
-        {vista === "uno" ? (
-          <>
-            <div className="controls">
-              <Selector etiqueta="Presidente" valor={pres.id} opciones={PRES.slice().reverse().map((x) => [x.id, x.n] as [string, string])}
-                onElegir={(v) => set({ p: v === ultimo.id ? null : v })} />
-              <BotonCompartir className="btn" titulo={`Primero los Datos: herencia de ${pres.n}`} href={() => window.location.href}
-                title="Armar una imagen de esta tabla para compartir" aria-label={`Compartir como imagen: herencia de ${pres.n}`}
-                crearVista={() => ({ tipo: "herencia", presId: pres.id, ids: IDS.filter((id) => !!m.SER[id]), base: BASE_HERENCIA, informes: datosInf, rn })}><IconoCompartir />Compartir</BotonCompartir>
-            </div>
-            <p className="note">
-              {pres.n} asumió en {fmtMes(pres.ini)}. <b>Recibió</b>: último dato en o antes de {tabla.mesT1 ?? "el mes anterior a asumir"}.{" "}
-              <b>{colFin}</b>: {enCurso ? "último dato publicado de cada variable." : `último dato en o antes de ${finTxt}, el último mes del mandato.`}
-            </p>
-            <div className="tablewrap fija her-tabla"><table>
+      {vista === "uno" ? (
+        <CabeceraDato nivel={2} titulo={`Herencia: ${pres.n}`} cifra={respUno.cifra} unidad={respUno.unidad} fecha={respUno.fecha} deltas={[]} frase={respUno.frase} />
+      ) : respTr ? (
+        <CabeceraDato nivel={2} titulo={respTr.titulo} cifra={respTr.cifra} unidad={respTr.unidad} fecha={respTr.fecha} deltas={[]} frase={respTr.frase} />
+      ) : null}
+
+      <div className="her-controles">
+        <FilaChips etiqueta="Qué ver" opciones={VISTAS} valor={vista} onElegir={(v) => set({ vista: v === "uno" ? null : v })} />
+        <BarraVista items={resumen} onAbrir={() => setHoja(true)} />
+      </div>
+      <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
+        {(cerrar) => vista === "uno" ? (
+          <div className="her-hoja-sec">
+            <h3>Presidente</h3>
+            <Opciones etiqueta="Presidente" valor={pres.id} opciones={PRES.slice().reverse().map((x) => [x.id, x.n] as [string, string])}
+              onElegir={(v) => { set({ p: v === ultimo.id ? null : v }); cerrar(); }} />
+          </div>
+        ) : (
+          <div className="her-hoja-sec">
+            <h3>Variable</h3>
+            <Opciones etiqueta="Variable" valor={clave} opciones={opcionesVar} onElegir={(v) => { elegirVar(v); cerrar(); }} />
+          </div>
+        )}
+      </Hoja>
+
+      {vista === "uno" ? (
+        <>
+          <Capitulo id="her-tabla" titulo="Recibido y entregado"
+            bajada={`${pres.n} asumió en ${fmtMes(pres.ini)}. Recibió: último dato en o antes de ${tabla.mesT1 ?? "el mes anterior a asumir"}. ${colFin}: ${enCurso ? "último dato publicado de cada variable." : `último dato en o antes de ${finTxt}, el último mes del mandato.`}`}
+            acciones={<CompartirHoja href={hrefPag} titulo={`Herencia de ${pres.n}`} texto={`${respUno.frase} ${textoFuente}`} onImagen={abrirImagen} />}>
+            <div className="tablewrap fija her-tabla her-ap"><table>
               <thead><tr><th>Variable</th><th>Recibió</th><th>{colFin}</th><th>Cambio</th></tr></thead>
               <tbody>
                 {GRUPOS_HERENCIA.map((g) => {
@@ -218,8 +270,8 @@ export function Herencia() {
                   return (
                     <Fragment key={g}>
                       <tr className="her-grupo"><td colSpan={4}>{g}</td></tr>
-                      {filas.map((f) => <FilaTabla key={f.def.clave} f={f} />)}
-                      {fi.map((f) => <FilaInf key={f.def.clave} f={f} verCita={verCita} />)}
+                      {filas.map((f) => <FilaTabla key={f.def.clave} f={f} fin={colFin} />)}
+                      {fi.map((f) => <FilaInf key={f.def.clave} f={f} verCita={verCita} fin={colFin} />)}
                     </Fragment>
                   );
                 })}
@@ -233,49 +285,90 @@ export function Herencia() {
                 {filasInf.filter((f) => f.def.nota).map((f) => <li key={f.def.clave}><b>{f.def.nombre}</b>: {f.def.nota}</li>)}
               </ul>
             </details>
-            {filasEst.length ? (
-              <div className="her-est">
-                <h3 className="her-est-t">Estimaciones y cifras sin serie oficial</h3>
-                <p className="note">Datos que no tienen una serie oficial: los estima el FMI, el Banco Central en un informe, un centro de estudios o este sitio, y cada uno dice quién. Sin color: no se califican.</p>
-                {(() => {
-                  const dd = dosDefiniciones(datosInf, rn);
-                  return dd ? (
-                    <p className="note">
-                      Hay más de una definición de reservas netas. Al {fechaTxt(dd.fecha)}: {fmtUS(dd.fmi)} millones de US$ según el FMI y {dd.bcra > 0 ? "+" : ""}{fmtUS(dd.bcra)} según el Banco Central, {fmtUS(dd.dif)} de diferencia.
-                      {dd.credito != null ? ` La diferencia es casi igual a lo que prestó el FMI desde abril de 2025 (${fmtUS(dd.credito)} en la cuenta propia a esa fecha), que la definición del FMI resta y la del Banco Central no, porque es deuda del Tesoro.` : ""}
-                    </p>
-                  ) : null;
-                })()}
-                <div className="tablewrap fija her-tabla"><table>
-                  <thead><tr><th>Variable</th><th>Recibió</th><th>{colFin}</th><th>Cambio</th></tr></thead>
-                  <tbody>{filasEst.map((f) => <FilaInf key={f.def.clave} f={f} verCita={verCita} />)}</tbody>
-                </table></div>
-                {rn && filasEst.some((f) => cualRNPropia(f.def.clave) && f.entrego)
-                  ? <p className="note">Las estimaciones propias se apartaron {rangoControles(rn, "fmi")} de las cifras del FMI y {rangoControles(rn, "bcra")} de las del Banco Central, en las fechas en que cada uno publicó. Tocá su valor para ver la cuenta.</p>
-                  : null}
-                <details className="her-plegado">
-                  <summary>Notas de las estimaciones</summary>
-                  <ul className="method">
-                    {filasEst.filter((f) => f.def.nota).map((f) => <li key={f.def.clave}><b>{f.def.nombre}</b> ({f.def.quien}): {f.def.nota}</li>)}
-                  </ul>
-                </details>
-              </div>
-            ) : null}
             {notaT}
-          </>
-        ) : (
-          clave.startsWith(PREF_INF)
-            ? <TraspasosInf datos={datosInf} PRES={PRES} clave={clave} onVariable={(v) => set({ v: v === FILAS_HERENCIA[0].clave ? null : v })} opciones={opcionesVar} verCita={verCita} />
-            : <Traspasos m={m} clave={clave} onVariable={(v) => set({ v: v === FILAS_HERENCIA[0].clave ? null : v })} opciones={opcionesVar} nota={notaT} />
-        )}
-      </div>
-      <div className="card">
-        <details className="her-plegado">
-          <summary>Lo que no se puede medir con datos oficiales</summary>
-          <ul className="method">
-            {NO_MEDIBLE.map(([t, por]) => <li key={t}><b>{t}</b>: {por}</li>)}
-          </ul>
-        </details>
+          </Capitulo>
+          {filasEst.length ? (
+            <Capitulo id="her-est" titulo="Estimaciones y cifras sin serie oficial"
+              bajada="Datos que no tienen una serie oficial: los estima el FMI, el Banco Central en un informe, un centro de estudios o este sitio, y cada uno dice quién. Sin color: no se califican.">
+              {(() => {
+                const dd = dosDefiniciones(datosInf, rn);
+                return dd ? (
+                  <p className="note">
+                    Hay más de una definición de reservas netas. Al {fechaTxt(dd.fecha)}: {fmtUS(dd.fmi)} millones de US$ según el FMI y {dd.bcra > 0 ? "+" : ""}{fmtUS(dd.bcra)} según el Banco Central, {fmtUS(dd.dif)} de diferencia.
+                    {dd.credito != null ? ` La diferencia es casi igual a lo que prestó el FMI desde abril de 2025 (${fmtUS(dd.credito)} en la cuenta propia a esa fecha), que la definición del FMI resta y la del Banco Central no, porque es deuda del Tesoro.` : ""}
+                  </p>
+                ) : null;
+              })()}
+              <div className="tablewrap fija her-tabla her-ap"><table>
+                <thead><tr><th>Variable</th><th>Recibió</th><th>{colFin}</th><th>Cambio</th></tr></thead>
+                <tbody>{filasEst.map((f) => <FilaInf key={f.def.clave} f={f} verCita={verCita} fin={colFin} />)}</tbody>
+              </table></div>
+              {rn && filasEst.some((f) => cualRNPropia(f.def.clave) && f.entrego)
+                ? <p className="note">Las estimaciones propias se apartaron {rangoControles(rn, "fmi")} de las cifras del FMI y {rangoControles(rn, "bcra")} de las del Banco Central, en las fechas en que cada uno publicó. Tocá su valor para ver la cuenta.</p>
+                : null}
+              <details className="her-plegado">
+                <summary>Notas de las estimaciones</summary>
+                <ul className="method">
+                  {filasEst.filter((f) => f.def.nota).map((f) => <li key={f.def.clave}><b>{f.def.nombre}</b> ({f.def.quien}): {f.def.nota}</li>)}
+                </ul>
+              </details>
+            </Capitulo>
+          ) : null}
+        </>
+      ) : tr ? (
+        <Capitulo id="traspasos" titulo="Cada traspaso presidencial" acciones={<CompartirHoja href={hrefPag} titulo={`${tr.nombre} en cada traspaso presidencial`} texto={`${respTr?.frase ?? ""} ${textoFuente}`} />}>
+          <p className="note">
+            {tr.href ? <Link prefetch={false} href={tr.href}>{tr.nombre}</Link> : tr.nombre}{tr.unidad ? ` (${tr.unidad})` : ""}: el último dato en o antes del mes anterior a cada asunción.
+            {tr.def.nota ? ` ${tr.def.nota}` : ""}
+          </p>
+          <div className="tablewrap fija her-tabla"><table>
+            <thead><tr><th>Traspaso</th><th>Entregó → recibió</th><th>Valor</th></tr></thead>
+            <tbody>
+              {tr.filas.map((f) => (
+                <tr key={f.a.id}>
+                  <td>{f.mes}</td>
+                  <td className="her-quien">{f.de.n} →<small>{f.a.n}</small></td>
+                  <CeldaDato p={f.dato} motivo={f.motivo} />
+                </tr>
+              ))}
+              <tr className="her-hoy">
+                <td>Hoy</td>
+                <td className="her-quien">{tr.hoy.p.n}<small>en funciones</small></td>
+                <CeldaDato p={tr.hoy.dato} motivo={tr.hoy.motivo} />
+              </tr>
+            </tbody>
+          </table></div>
+          {notaT}
+        </Capitulo>
+      ) : ti ? (
+        <Capitulo id="traspasos" titulo="Cada traspaso presidencial" acciones={<CompartirHoja href={hrefPag} titulo={`${ti.def.nombre} en cada traspaso presidencial`} texto={`${respTr?.frase ?? ""} ${textoFuente}`} />}>
+          <p className="note">
+            {ti.def.nombre} ({ti.def.unidad}): el dato de cada traspaso, copiado a mano de un documento oficial. Tocá un valor para ver de cuál.{ti.def.nota ? ` ${ti.def.nota}` : ""}
+          </p>
+          <div className="tablewrap fija her-tabla"><table>
+            <thead><tr><th>Traspaso</th><th>Entregó → recibió</th><th>Valor</th></tr></thead>
+            <tbody>
+              {ti.filas.map((f) => (
+                <tr key={f.a.id}>
+                  <td>{f.mes}</td>
+                  <td className="her-quien">{f.de.n} →<small>{f.a.n}</small></td>
+                  <CeldaInforme d={ti.def} p={f.dato} verCita={verCita} />
+                </tr>
+              ))}
+              <tr className="her-hoy">
+                <td>Hoy</td>
+                <td className="her-quien">{ultimo.n}<small>en funciones</small></td>
+                <CeldaInforme d={ti.def} p={ti.hoy} verCita={verCita} />
+              </tr>
+            </tbody>
+          </table></div>
+        </Capitulo>
+      ) : null}
+
+      <Capitulo id="her-limites" titulo="Lo que no se puede medir con datos oficiales">
+        <ul className="method">
+          {NO_MEDIBLE.map(([t, por]) => <li key={t}><b>{t}</b>: {por}</li>)}
+        </ul>
         {faltan.length ? (
           <details className="her-plegado">
             <summary>Lo que falta cargar</summary>
@@ -286,81 +379,10 @@ export function Herencia() {
           </details>
         ) : null}
         {inf.error ? <p className="note">{inf.error}</p> : null}
-      </div>
+      </Capitulo>
       {cita ? <VentanaCita d={cita.d} x={cita.x} onCerrar={() => setCita(null)} /> : null}
       {verRN && rn ? <VentanaEstimacion rn={rn} cual={verRN} onCerrar={() => setVerRN(null)} /> : null}
+      {img && createPortal(<PanelCompartir vista={img} href={new URL(hrefPag, window.location.origin).href} titulo={`Primero los Datos: herencia de ${pres.n}`} onCerrar={() => setImg(null)} />, document.body)}
     </section>
-  );
-}
-
-/** "Todos los traspasos": una variable, una fila por traspaso. */
-function Traspasos({ m, clave, onVariable, opciones, nota }: { m: Motor; clave: string; onVariable: (v: string) => void; opciones: [string, string][]; nota: React.ReactNode }) {
-  const t = traspasos(m, clave);
-  if (!t) return null;
-  return (
-    <div id="traspasos">
-      <div className="controls">
-        <Selector etiqueta="Variable" valor={clave} opciones={opciones} onElegir={onVariable} />
-        <BotonLink id="traspasos" titulo={`Primero los Datos: ${t.nombre} en cada traspaso presidencial`} />
-      </div>
-      <p className="note">
-        {t.href ? <Link prefetch={false} href={t.href}>{t.nombre}</Link> : t.nombre}{t.unidad ? ` (${t.unidad})` : ""}: el último dato en o antes del mes anterior a cada asunción.
-        {t.def.nota ? ` ${t.def.nota}` : ""}
-      </p>
-      <div className="tablewrap fija her-tabla"><table>
-        <thead><tr><th>Traspaso</th><th>Entregó → recibió</th><th>Valor</th></tr></thead>
-        <tbody>
-          {t.filas.map((f) => (
-            <tr key={f.a.id}>
-              <td>{f.mes}</td>
-              <td className="her-quien">{f.de.n} →<small>{f.a.n}</small></td>
-              <CeldaDato p={f.dato} motivo={f.motivo} />
-            </tr>
-          ))}
-          <tr className="her-hoy">
-            <td>Hoy</td>
-            <td className="her-quien">{t.hoy.p.n}<small>en funciones</small></td>
-            <CeldaDato p={t.hoy.dato} motivo={t.hoy.motivo} />
-          </tr>
-        </tbody>
-      </table></div>
-      {nota}
-    </div>
-  );
-}
-
-/** "Todos los traspasos" de un dato de informe: la misma tabla, con cada valor como botón que abre su cita. */
-function TraspasosInf({ datos, PRES, clave, onVariable, opciones, verCita }: {
-  datos: DatoInforme[]; PRES: Pres[]; clave: string; onVariable: (v: string) => void; opciones: [string, string][]; verCita: VerCita }) {
-  const t = traspasosInforme(datos, clave.slice(PREF_INF.length), PRES);
-  if (!t) return null;
-  const hoy = PRES[PRES.length - 1];
-  return (
-    <div id="traspasos">
-      <div className="controls">
-        <Selector etiqueta="Variable" valor={clave} opciones={opciones} onElegir={onVariable} />
-        <BotonLink id="traspasos" titulo={`Primero los Datos: ${t.def.nombre} en cada traspaso presidencial`} />
-      </div>
-      <p className="note">
-        {t.def.nombre} ({t.def.unidad}): el dato de cada traspaso, copiado a mano de un documento oficial. Tocá un valor para ver de cuál.{t.def.nota ? ` ${t.def.nota}` : ""}
-      </p>
-      <div className="tablewrap fija her-tabla"><table>
-        <thead><tr><th>Traspaso</th><th>Entregó → recibió</th><th>Valor</th></tr></thead>
-        <tbody>
-          {t.filas.map((f) => (
-            <tr key={f.a.id}>
-              <td>{f.mes}</td>
-              <td className="her-quien">{f.de.n} →<small>{f.a.n}</small></td>
-              <CeldaInforme d={t.def} p={f.dato} verCita={verCita} />
-            </tr>
-          ))}
-          <tr className="her-hoy">
-            <td>Hoy</td>
-            <td className="her-quien">{hoy.n}<small>en funciones</small></td>
-            <CeldaInforme d={t.def} p={t.hoy} verCita={verCita} />
-          </tr>
-        </tbody>
-      </table></div>
-    </div>
   );
 }

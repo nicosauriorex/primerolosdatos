@@ -212,6 +212,36 @@ export function traspasos(m: Motor, clave: string): VistaTraspasos | null {
   return { def: d, nombre: d.nombre ?? c.corto, unidad: c.unidad, expr: e, href: d.cociente || d.base100 ? null : hrefDato(e), filas, hoy: { p: PRES[ult], dato: hoy.p, motivo: hoy.motivo } };
 }
 
+// ---------------------------------------------------------------- la respuesta de arriba (remodelación 3.5, H1)
+/** Lo que abre la página: una cifra, su período y una frase con hechos (D-012: sin adjetivos propios; "mejor" y "peor" son el color de cada dato). */
+export interface RespuestaHerencia { cifra: string; unidad: string; fecha: string; frase: string; total: number; mejor: number; peor: number }
+
+/** "Un presidente": de los datos con valor al asumir y al entregar, cuántos quedaron mejor y cuántos peor según el color de cada fila
+ *  (el mismo que se ve en la tabla: las filas sin color o sin cambio no entran en ninguna de las dos cuentas). */
+export function fraseHerencia(t: TablaHerencia): RespuestaHerencia {
+  const ambos = t.filas.filter((f) => f.recibio && f.entrego);
+  const total = ambos.length, mejor = ambos.filter((f) => f.cls === "bueno").length, peor = ambos.filter((f) => f.cls === "malo").length, resto = total - mejor - peor;
+  const fin = t.enCurso ? "hoy" : "al entregar", asumio = fmtMes(t.pres.ini);
+  const fecha = `Asumió en ${asumio}`;
+  if (!total) return { cifra: "–", unidad: "", fecha, frase: `${t.pres.n} asumió en ${asumio}: todavía no hay datos con valor al asumir y ${fin}.`, total, mejor, peor };
+  const de = total === 1 ? "Del único dato con valor" : `De los ${total} datos con valor`;
+  const cola = resto > 0 ? `; en ${resto === 1 ? "1 el cambio no se califica o fue nulo" : `${resto} el cambio no se califica o fue nulo`}` : "";
+  return {
+    cifra: `${mejor} de ${total}`, unidad: `datos mejor ${fin}`, fecha, total, mejor, peor,
+    frase: `${de} al asumir y ${fin}, ${mejor} ${mejor === 1 ? "estaba" : "estaban"} mejor ${fin} y ${peor} peor (según el color con que el sitio marca cada dato)${cola}.`,
+  };
+}
+
+/** Un valor con su mes, para la frase de "Todos los traspasos". */
+export interface ValorTraspaso { quien: string; mes: string; txt: string }
+/** "Todos los traspasos": el valor de hoy y el del último traspaso con dato, tal como se ven en la tabla. */
+export function fraseTraspasos(nombre: string, ultimo: ValorTraspaso | null, hoy: ValorTraspaso | null): { cifra: string; fecha: string; frase: string } {
+  if (hoy && ultimo) return { cifra: hoy.txt, fecha: hoy.mes, frase: `${nombre}: ${ultimo.quien} lo recibió en ${ultimo.mes} con ${ultimo.txt}; hoy, con ${hoy.quien}, es ${hoy.txt} (${hoy.mes}).` };
+  if (hoy) return { cifra: hoy.txt, fecha: hoy.mes, frase: `${nombre}: hoy, con ${hoy.quien}, es ${hoy.txt} (${hoy.mes}).` };
+  if (ultimo) return { cifra: ultimo.txt, fecha: ultimo.mes, frase: `${nombre}: ${ultimo.quien} lo recibió en ${ultimo.mes} con ${ultimo.txt}.` };
+  return { cifra: "–", fecha: "", frase: `${nombre}: todavía no hay un dato cargado para ningún traspaso.` };
+}
+
 // ---------------------------------------------------------------- lo que no se puede medir y lo que falta cargar (al pie de la página)
 /** Lista C de la spec: sin dato oficial. */
 export const NO_MEDIBLE: [string, string][] = [

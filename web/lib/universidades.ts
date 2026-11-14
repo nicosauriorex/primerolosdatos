@@ -234,6 +234,36 @@ export function armarVistaU(c: Contexto, o: { anio: number; medida: MedidaU; ord
   };
 }
 
+// ---------------------------------------------------------------- la respuesta de arriba
+export interface RespuestaU { cifra: string; fecha: string; frase: string; delta: { texto: string; dir: 1 | -1 | 0; contra: string } | null }
+const r2 = (x: number): number => Math.round(x * 100) / 100;
+/** La frase-respuesta de la página: "En 2024, la Nación transfirió $ 5,1 billones a las universidades nacionales: un 3,2 % más que el año anterior, en pesos de hoy."
+ *  La variación es la que se ve en la página (un decimal, ya redondeada); en % del PIB se compara en puntos, con los dos valores como se muestran (dos decimales).
+ *  El año en curso no se compara con el anterior. Sin juicio: "más" y "menos", nunca "bien" ni "mal" (D-012). */
+export function fraseUniversidades(c: Contexto, v: VistaU): RespuestaU {
+  const pib = v.medidaUsada === "pib";
+  const cifra = (pib ? v.totalPib : v.totalHoy) ?? v.total;
+  const inicio = v.enCurso ? `En lo que va de ${v.anio}` : `En ${v.anio}`;
+  const base = `${inicio}, la Nación transfirió ${cifra}${pib ? " del PIB" : ""} a las universidades nacionales`;
+  const fecha = `${v.anio}${v.enCurso ? " · en curso" : ""}`;
+  const sinComparar = { cifra, fecha, frase: `${base}${pib ? "" : `, en pesos de ${v.ref}`}.`, delta: null };
+  if (v.enCurso) return sinComparar;
+  const contra = `vs ${v.anio - 1}`;
+  if (pib) {
+    const pa = c.pibDe(v.anio), pb = c.pibDe(v.anio - 1), ta = c.d.programa.dev[v.i], tb = c.d.programa.dev[v.i - 1];
+    if (!pa || !pb || ta == null || tb == null || !(tb > 0)) return sinComparar;
+    const dif = r2(r2((ta / pa) * 100) - r2((tb / pb) * 100));
+    const abs = nfDec(2).format(Math.abs(dif));
+    const frase = dif === 0 ? `${base}: lo mismo que el año anterior, en % del PIB.` : `${base}: ${abs} puntos del PIB ${dif > 0 ? "más" : "menos"} que el año anterior.`;
+    return { cifra, fecha, frase, delta: { texto: `${dif > 0 ? "+" : dif < 0 ? "−" : ""}${abs} p.p.`, dir: dif > 0 ? 1 : dif < 0 ? -1 : 0, contra } };
+  }
+  const vari = variacionReal(c, c.d.programa.dev, v.i);
+  if (vari == null) return sinComparar;
+  const abs = nfDec(1).format(Math.abs(vari));
+  const frase = vari === 0 ? `${base}: lo mismo que el año anterior, en pesos de ${v.ref}.` : `${base}: un ${abs} % ${vari > 0 ? "más" : "menos"} que el año anterior, en pesos de ${v.ref}.`;
+  return { cifra, fecha, frase, delta: { texto: txtVariacion(vari), dir: vari > 0 ? 1 : vari < 0 ? -1 : 0, contra } };
+}
+
 /** Las filas que coinciden con lo escrito en el buscador (todas las palabras; entiende UBA y UTN). Vacío = todas. */
 export function filtrar(filas: FilaU[], q: string): FilaU[] {
   const palabras = norm(q).split(/\s+/).filter(Boolean);

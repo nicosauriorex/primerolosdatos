@@ -3,20 +3,27 @@
 // "Desarrollo de la Educación Superior", en pesos de hoy y % del PIB, la evolución 2018-2026, la lista con buscador, lo transferido por estudiante (2023 y 2024)
 // y el control y la rendición de cuentas. Todas las cuentas están en lib/universidades.ts; acá solo se dibuja.
 // Estado en la URL: anio, med (hoy | pib), orden (monto | var | est), u (universidad abierta) y q (lo escrito en el buscador).
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useUniversidades } from "../useUniversidades";
 import { useGastoIndice } from "../useGasto";
 import { useSeccion } from "../useSeccion";
-import { Cargando, Selector, Seg } from "../ui";
+import { Cargando, Seg } from "../ui";
 import { PanelGasto } from "../PanelGasto";
-import { avisoCompartir, compartir } from "@/lib/compartir";
+import { Capitulo } from "../sistema/Capitulo";
+import { CabeceraDato } from "../sistema/CabeceraDato";
+import { BarraVista } from "../sistema/BarraVista";
+import { Hoja } from "../sistema/Hoja";
+import { FilaChips } from "../sistema/FilaChips";
+import { InfoPunto } from "../sistema/InfoPunto";
+import { CompartirHoja } from "../sistema/CompartirHoja";
+import { ListaBarras, type FilaBarra } from "../sistema/ListaBarras";
 import { nf0 } from "@/lib/formato";
-import { crearDeflactor, fechaLarga } from "@/lib/gasto";
+import { FUENTE_GASTO, crearDeflactor, fechaLarga } from "@/lib/gasto";
 import {
   MEDIDAS_U, MEDIDA_U_DEFECTO, ORDENES_U, ORDEN_U_DEFECTO, anioDefectoU, anioValidoU, armarEvolucion, armarImagenU, armarVistaU, buscarUniv, crearContexto, enCursoTxt,
-  esMedidaU, esOrdenU, extremoTxt, filtrar, hrefU, opcionesAnioU, tituloU,
-  type Contexto, type DatosUniv, type Evolucion, type FilaU, type MedidaU, type OrdenU, type VistaU,
+  esMedidaU, esOrdenU, extremoTxt, filtrar, fraseUniversidades, hrefU, opcionesAnioU, tituloU, txtPorEstudiante,
+  NOMBRE_PROGRAMA, type Contexto, type DatosUniv, type Evolucion, type FilaU, type MedidaU, type OrdenU, type VistaU,
 } from "@/lib/universidades";
 import { useParams } from "@/lib/url";
 
@@ -42,7 +49,7 @@ export function Universidades() {
     return crearContexto(datos, deflactor, { enCurso, pib, actualizado: act });
   }, [datos, deflactor, ixListo, ix.datos]);
   if (error) return (
-    <div className="card">
+    <div className="uni-error">
       <p className="error" role="alert">{error}</p>
       <p className="note">Todavía no está el archivo con lo transferido a cada universidad, o no se pudo leer. El resto del sitio sigue funcionando; el total del programa por año está en <Link prefetch={false} href="/gasto/">En qué gasta la Nación</Link>.</p>
     </div>
@@ -55,7 +62,7 @@ export function Universidades() {
 function Cuerpo({ c }: { c: Contexto }) {
   const [p, set, montado] = useParams();
   const [imagen, setImagen] = useState(false);
-  const [aviso, setAviso] = useState<string | null>(null);
+  const [hoja, setHoja] = useState(false);
   const [q, setQ] = useState("");
   useEffect(() => { if (montado) setQ(p.get("q") ?? ""); }, [montado]);   // eslint-disable-line react-hooks/exhaustive-deps
   const def = anioDefectoU(c);
@@ -67,27 +74,42 @@ function Cuerpo({ c }: { c: Contexto }) {
   const href = vista ? hrefU(vista, def, abierta) : "/universidades/";
   const titulo = vista ? tituloU(vista) : "Cuánto reciben las universidades";
   const armarImg = useCallback((f: Parameters<typeof armarImagenU>[1]) => armarImagenU(vista!, f), [vista]);
-  const mostrar = (t: string | null) => { setAviso(t); if (t) setTimeout(() => setAviso(null), 4000); };
+  const resp = useMemo(() => (vista ? fraseUniversidades(c, vista) : null), [c, vista]);
+  const chips = [
+    { clave: "anio", texto: `${anio}${c.enCurso.has(anio) ? " · en curso" : ""}` },
+    { clave: "med", texto: vista?.medidaUsada === "pib" || (!vista && medida === "pib") ? "% del PIB" : "Pesos de hoy" },
+  ];
 
   return (
     <section className="uni">
       <p className="sub">Cuánto transfiere la Nación a cada universidad nacional, año por año, y lo que se sabe de cómo se controla. Datos oficiales del presupuesto.</p>
-      <div className="controls uni-controles">
-        <Selector etiqueta="Año" valor={String(anio)} opciones={opcionesAnioU(c)} onElegir={(a) => set({ anio: Number(a) === def ? null : a })} />
-        <Seg valor={medida} opciones={MEDIDAS_U} onElegir={(v) => set({ med: v === MEDIDA_U_DEFECTO ? null : v })} />
-      </div>
-      {!vista ? <div className="card"><p className="note">No hay datos de lo transferido en {anio}.</p></div> : (
+      <BarraVista items={chips} onAbrir={() => setHoja(true)} />
+      <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
+        {(cerrar) => (
+          <div className="uni-hoja">
+            <p className="uni-hoja-rotulo" id="uni-h-anio">Año</p>
+            <div className="uni-opciones" role="group" aria-labelledby="uni-h-anio">
+              {opcionesAnioU(c).map(([v, t]) => (
+                <button key={v} type="button" className="uni-opcion" aria-pressed={Number(v) === anio} onClick={() => set({ anio: Number(v) === def ? null : v })}>{t}</button>
+              ))}
+            </div>
+            <p className="uni-hoja-rotulo">Medida</p>
+            <Seg valor={medida} opciones={MEDIDAS_U} onElegir={(v) => set({ med: v === MEDIDA_U_DEFECTO ? null : v })} />
+            <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
+          </div>
+        )}
+      </Hoja>
+      {!vista || !resp ? <p className="note" role="status">No hay datos de lo transferido en {anio}.</p> : (
         <>
+          <CabeceraDato nivel={2} titulo="Lo transferido a las universidades" cifra={resp.cifra} fecha={resp.fecha} frase={resp.frase}
+            deltas={resp.delta ? [{ ...resp.delta, tono: "neutro" }] : []}
+            info={<p>Lo gastado (devengado) por el programa «{NOMBRE_PROGRAMA}» del presupuesto nacional en transferencias a las universidades nacionales, {vista.medidaUsada === "hoy" ? `en pesos de ${vista.ref}, ajustados por inflación con el IPC` : `en % del PIB de ${vista.anio}`}.</p>} />
           <Resumen c={c} v={vista} onAnio={(a) => set({ anio: a === def ? null : String(a) })} />
           <Lista c={c} v={vista} q={q} orden={orden} abierta={abierta} medida={medida}
+            acciones={<CompartirHoja href={href} titulo={titulo} onImagen={() => setImagen(true)} texto={`${resp.frase} Fuente: ${FUENTE_GASTO}.`} />}
             onQ={(t) => { setQ(t); set({ q: t.trim() ? t : null }); }}
             onOrden={(o) => set({ orden: o === ORDEN_U_DEFECTO ? null : o })}
             onAbrir={(n) => set({ u: n })} />
-          <div className="uni-compartir" role="group" aria-label="Compartir esta vista">
-            <button type="button" className="btn primario" onClick={() => setImagen(true)}>Compartir como imagen</button>
-            <button type="button" className="btn" onClick={async () => mostrar(avisoCompartir(await compartir(href, titulo)))}>Copiar link</button>
-          </div>
-          {aviso && <p className="aviso-link" role="status">{aviso}</p>}
           {vista.sistema && <PorEstudiante v={vista} />}
         </>
       )}
@@ -98,16 +120,14 @@ function Cuerpo({ c }: { c: Contexto }) {
   );
 }
 
-/** El total del año, su peso en el PIB y la evolución 2018-2026. */
+/** Lo que va debajo de la cifra: el peso en el PIB, las notas y la evolución 2018-2026. Sin caja. */
 function Resumen({ c, v, onAnio }: { c: Contexto; v: VistaU; onAnio: (anio: number) => void }) {
   const evo = useMemo(() => armarEvolucion(c, v.medida, c.d.programa.dev), [c, v.medida]);
+  const pib = v.medidaUsada === "hoy" ? (v.totalPib ? `Equivale a ${v.totalPib} del PIB.` : `El PIB de ${v.anio} todavía no está publicado.`) : v.totalHoy ? `En pesos de ${v.ref}: ${v.totalHoy}.` : "";
   return (
-    <div className="card uni-resumen">
-      <h2>Gastado por el programa de universidades en {v.anio}{v.enCurso ? " (en curso)" : ""}</h2>
-      <p className="uni-total"><b>{v.totalHoy ?? v.total}</b>{v.totalPib ? <span> · {v.totalPib} del PIB</span> : <span> · el PIB de {v.anio} todavía no está publicado</span>}</p>
+    <div className="uni-resumen-lin">
       <p className="note">
-        {v.enCurso ? `Lo gastado (devengado) hasta la fecha, en pesos de ${v.ref}. ` : `Lo gastado (devengado) en el año, en pesos de ${v.ref} (ajustados por inflación con el IPC). `}
-        {v.varTotal ? `Contra ${v.anio - 1}: ${v.varTotal} en términos reales.` : v.enCurso ? "El año en curso no se compara con el anterior porque todavía no terminó." : ""}
+        {pib} {v.enCurso ? "Lo gastado (devengado) hasta la fecha. El año en curso no se compara con el anterior porque todavía no terminó." : "Lo gastado (devengado) en el año."}
       </p>
       {v.aviso && <p className="note" role="status">{v.aviso}</p>}
       <Evo evo={evo} elegido={v.anio} etiqueta="Evolución del total" onElegir={onAnio} nota={v.enCurso || evo.hayEnCurso ? enCursoTxt(c, c.d.anios.find((a) => c.enCurso.has(a)) ?? v.anio) : null} />
@@ -144,77 +164,93 @@ function Evo({ evo, elegido, etiqueta, onElegir, nota }: { evo: Evolucion; elegi
   );
 }
 
-/** Buscador, orden y la lista de universidades con barras. Tocar una abre su serie. */
-function Lista({ c, v, q, orden, abierta, medida, onQ, onOrden, onAbrir }: {
-  c: Contexto; v: VistaU; q: string; orden: OrdenU; abierta: string | null; medida: MedidaU;
+/** Buscador, orden y la lista de universidades con barras. Tocar una abre su serie, en el lugar, debajo de su fila. */
+function Lista({ c, v, q, orden, abierta, medida, acciones, onQ, onOrden, onAbrir }: {
+  c: Contexto; v: VistaU; q: string; orden: OrdenU; abierta: string | null; medida: MedidaU; acciones: ReactNode;
   onQ: (t: string) => void; onOrden: (o: OrdenU) => void; onAbrir: (n: string | null) => void;
 }) {
   const filas = useMemo(() => filtrar(v.filas, q), [v.filas, q]);
   const filtrando = filas.length !== v.filas.length;
   const sinOrden = orden === "est" && !v.hayEstudiantes;
+  const usado = v.ordenUsado;
   const anioAnt = v.anio - 1;
+  // cada fila según el orden elegido: monto (barra sobre el total), variación (divergente) o por estudiante
+  const aFila = (f: FilaU): FilaBarra => {
+    const puede = f.tipo === "univ" && !!f.u;
+    const monto = f.txt, parte = f.parte ? `${f.parte} del total` : "";
+    let valor: number | null, texto: string, sub: string;
+    if (usado === "var") {
+      valor = f.vari; texto = f.variTxt ?? "–";
+      sub = [monto, parte, f.variTxt ? `real vs ${anioAnt}` : v.enCurso ? "año en curso, sin comparar" : "sin variación"].filter(Boolean).join(" · ");
+    } else if (usado === "est") {
+      valor = f.porEst; texto = f.porEstTxt ?? (f.sinEst ? "sin dato" : "–");
+      sub = [monto, parte, f.sinEst && "sin dato de estudiantes"].filter(Boolean).join(" · ");
+    } else {
+      valor = Math.max(0, f.valor); texto = monto;
+      sub = [parte, f.variTxt && `${f.variTxt} real vs ${anioAnt}`, f.porEstTxt && `${f.porEstTxt} por estudiante`, f.sinEst && "sin dato de estudiantes"].filter(Boolean).join(" · ");
+    }
+    const abre = abierta === f.n;
+    return {
+      id: f.clave, nombre: f.n, valor, texto, sub: sub || undefined, flecha: puede,
+      onClick: puede ? () => onAbrir(abre ? null : f.n) : undefined,
+      aria: puede ? `${f.n}: ${texto}${sub ? `, ${sub}` : ""}. ${abre ? "Cerrar" : "Ver desde 2018"}` : undefined,
+    };
+  };
+  const barras = filas.map(aFila);
+  const tope = Math.max(0, ...barras.map((b) => (b.valor == null ? 0 : Math.abs(b.valor))));
+  const k = abierta ? filas.findIndex((f) => f.n === abierta && f.tipo === "univ") : -1;
+  const abiertaFila = k >= 0 ? filas[k] : null;
+  const claveRes = abiertaFila?.clave;
+  const lista = (fs: FilaBarra[], etiqueta: string) => <ListaBarras filas={fs} divergente={usado === "var"} max={tope} resaltar={claveRes} etiqueta={etiqueta} />;
   return (
-    <div className="card uni-lista-card">
-      <h2>Qué recibió cada universidad en {v.anio}</h2>
+    <Capitulo id="lista" titulo={`Qué recibió cada universidad en ${v.anio}`} acciones={acciones}>
       <div className="uni-buscar">
         <label className="lbl" htmlFor="uni-q">Buscar una universidad</label>
         <input id="uni-q" type="search" value={q} onChange={(e) => onQ(e.target.value)} placeholder="Por ejemplo: Córdoba, UBA, Cuyo" autoComplete="off" />
       </div>
-      <div className="controls uni-orden"><label>Ordenar por</label><Seg valor={orden} opciones={ORDENES_U} onElegir={(o) => onOrden(o as OrdenU)} /></div>
+      <div className="uni-orden">
+        <span className="uni-hoja-rotulo" aria-hidden="true">Ordenar por</span>
+        <FilaChips etiqueta="Ordenar por" valor={usado} opciones={ORDENES_U} onElegir={(o) => onOrden(o as OrdenU)} />
+      </div>
       {sinOrden && <p className="note" role="status">No hay estudiantes de {v.anio} (solo de 2023 y 2024): se ordena por monto.</p>}
-      <p className="note uni-unidad">{v.unidad}. Cada barra, sobre el total del programa.{v.enCurso ? "" : ` La variación es real (descontada la inflación) contra ${anioAnt}.`}</p>
+      <div className="uni-encabezado note">
+        {usado === "var" ? `Cada barra es la variación real contra ${anioAnt} (descontada la inflación).` : usado === "est" ? "Cada barra es lo transferido por estudiante de pregrado y grado." : "Cada barra, sobre el total del programa."}
+        {" "}{v.unidad}.
+        <InfoPunto etiqueta="Cómo leer la lista">
+          <p>{v.unidad}. {usado === "monto" ? "La variación real" : "La variación"} es la de los pesos de hoy contra el año anterior{v.enCurso ? "; el año en curso no se compara porque todavía no terminó" : ""}. «Sin asignar a una universidad» y «Otros gastos del programa» no son de una universidad en particular.</p>
+        </InfoPunto>
+      </div>
       {filtrando && <p className="note" role="status">{filas.length ? `Se muestran ${nf0.format(filas.length)} de ${nf0.format(v.filas.length)} filas. El total de arriba es el del programa entero.` : "No hay ninguna con ese nombre."}</p>}
       {filas.length > 0 && (
         <>
-          <p className="gas-enc" aria-hidden="true"><span>Universidad</span><span>% del total · variación real</span></p>
-          <ol className="gas-lista">
-            {filas.map((f) => <FilaUniv key={f.clave} f={f} v={v} c={c} medida={medida} abierta={abierta === f.n} onToggle={() => onAbrir(abierta === f.n ? null : f.n)} />)}
-          </ol>
+          {abiertaFila ? (
+            <>
+              {lista(barras.slice(0, k + 1), "Universidades, hasta la abierta")}
+              <Detalle c={c} f={abiertaFila} medida={medida} onCerrar={() => onAbrir(null)} />
+              {k + 1 < barras.length && lista(barras.slice(k + 1), "Universidades, el resto")}
+            </>
+          ) : lista(barras, "Universidades")}
           {!filtrando && <p className="uni-suma note">Las filas de la lista suman el total del programa: {v.total}.</p>}
         </>
       )}
-    </div>
-  );
-}
-
-function FilaUniv({ f, v, c, medida, abierta, onToggle }: { f: FilaU; v: VistaU; c: Contexto; medida: MedidaU; abierta: boolean; onToggle: () => void }) {
-  const sub = [
-    f.parte && `${f.parte} del total`,
-    f.variTxt && `${f.variTxt} real vs ${v.anio - 1}`,
-    f.porEstTxt && `${f.porEstTxt} por estudiante`,
-    f.sinEst && "sin dato de estudiantes",
-  ].filter(Boolean).join(" · ");
-  const contenido = (
-    <>
-      <span className="gas-fila-arriba"><span className="gas-nombre">{f.n}</span><span className="gas-monto">{f.txt}</span></span>
-      <span className="gas-pista" aria-hidden="true"><span className={`gas-barra${f.tipo !== "univ" ? " gas-barra-otros" : ""}`} style={{ width: `${(f.ancho * 100).toFixed(2)}%` }} /></span>
-      {sub && <span className="gas-sub">{sub}</span>}
-    </>
-  );
-  const puede = f.tipo === "univ" && !!f.u;
-  return (
-    <li className={`gas-fila${f.tipo === "redondeo" ? " gas-redondeo" : ""}`}>
-      {puede
-        ? <button type="button" className="gas-abrir" aria-expanded={abierta} onClick={onToggle} aria-label={`${f.n}: ${f.txt}${sub ? `, ${sub}` : ""}. ${abierta ? "Cerrar" : "Ver desde 2018"}`}>{contenido}</button>
-        : <div className="gas-abrir gas-quieta">{contenido}</div>}
-      {abierta && f.u && <Detalle c={c} f={f} medida={medida} />}
-    </li>
+    </Capitulo>
   );
 }
 
 /** La serie 2018-2026 de una universidad, en pesos de hoy (o % del PIB), con la tabla año por año. */
-function Detalle({ c, f, medida }: { c: Contexto; f: FilaU; medida: MedidaU }) {
+function Detalle({ c, f, medida, onCerrar }: { c: Contexto; f: FilaU; medida: MedidaU; onCerrar: () => void }) {
   const u = f.u!;
   const evo = useMemo(() => armarEvolucion(c, medida, u.dev), [c, medida, u]);
   const anios = Object.keys(u.est ?? {}).map(Number).sort();
   const enCurso = c.d.anios.find((a) => c.enCurso.has(a));
   return (
     <div className="uni-detalle">
+      <button type="button" className="uni-cerrar" onClick={onCerrar}>Cerrar {u.n}</button>
       <Evo evo={evo} elegido={null} etiqueta={u.n} nota={enCurso != null && evo.hayEnCurso ? enCursoTxt(c, enCurso) : null} />
       {anios.length > 0 && (
         <p className="note">Estudiantes de pregrado y grado: {anios.map((a) => `${nf0.format(u.est![a].total ?? 0)} en ${a}${u.est![a].nuevos != null ? ` (${nf0.format(u.est![a].nuevos!)} nuevos inscriptos)` : ""}`).join("; ")}. Los provee el Consejo Interuniversitario Nacional y la Auditoría General no los audita.</p>
       )}
-      <details className="gas-tabla-anios">
+      <details className="uni-mas">
         <summary>Ver año por año</summary>
         <div className="tablewrap">
           <table>
@@ -235,29 +271,26 @@ function Detalle({ c, f, medida }: { c: Contexto; f: FilaU; medida: MedidaU }) {
 function PorEstudiante({ v }: { v: VistaU }) {
   const s = v.sistema!;
   return (
-    <div className="card uni-est">
-      <h2>Transferido por estudiante en {s.anio}</h2>
-      <p className="uni-total"><b>$ {new Intl.NumberFormat("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(s.porEst / 1e6)} millones</b><span> por estudiante de pregrado y grado</span></p>
-      <p className="note">Es lo transferido a las universidades en {s.anio} (en pesos de {v.ref}) dividido los {nf0.format(s.estudiantes61)} estudiantes de pregrado y grado de las 61 universidades nacionales. Cada universidad con dato de estudiantes lo muestra en su fila ({nf0.format(s.conArchivo)} con dato; {nf0.format(s.sinArchivo)} dicen “sin dato de estudiantes”).</p>
-      <details className="gas-pie">
-        <summary>Cómo leer esta cuenta</summary>
-        <ul className="method">
-          <li>Los datos de estudiantes los provee el Consejo Interuniversitario Nacional a partir de lo que informa cada universidad; la Auditoría General de la Nación los publica en el <a href={PIU} target="_blank" rel="noopener noreferrer">Portal de Información Universitaria</a> y aclara que no los audita. Hay datos de 2023 y 2024.</li>
-          <li>Cuenta a todos los inscriptos, incluidos los que no cursan.</li>
-          <li>Lo transferido paga también investigación, extensión, colegios preuniversitarios y hospitales universitarios: por eso <b>no es el costo de un estudiante</b>.</li>
-          <li>Las universidades sin archivo en el portal no tienen su cuenta por estudiante y dicen “sin dato de estudiantes”. Las {nf0.format(s.conArchivo)} con dato suman {nf0.format(s.estudiantesConArchivo)} estudiantes.</li>
-        </ul>
-      </details>
-    </div>
+    <Capitulo id="estudiante" titulo={`Transferido por estudiante en ${s.anio}`}>
+      <div className="uni-total"><b>{txtPorEstudiante(s.porEst)}</b><span> por estudiante de pregrado y grado</span>
+        <InfoPunto etiqueta="Cómo leer esta cuenta">
+          <ul className="method">
+            <li>Los datos de estudiantes los provee el Consejo Interuniversitario Nacional a partir de lo que informa cada universidad; la Auditoría General de la Nación los publica en el <a href={PIU} target="_blank" rel="noopener noreferrer">Portal de Información Universitaria</a> y aclara que no los audita. Hay datos de 2023 y 2024.</li>
+            <li>Cuenta a todos los inscriptos, incluidos los que no cursan.</li>
+            <li>Lo transferido paga también investigación, extensión, colegios preuniversitarios y hospitales universitarios: por eso <b>no es el costo de un estudiante</b>.</li>
+            <li>Las universidades sin archivo en el portal no tienen su cuenta por estudiante y dicen «sin dato de estudiantes». Las {nf0.format(s.conArchivo)} con dato suman {nf0.format(s.estudiantesConArchivo)} estudiantes.</li>
+          </ul>
+        </InfoPunto>
+      </div>
+      <p className="note">Es lo transferido a las universidades en {s.anio} (en pesos de {v.ref}) dividido los {nf0.format(s.estudiantes61)} estudiantes de pregrado y grado de las 61 universidades nacionales. Cada universidad con dato de estudiantes lo muestra en su fila ({nf0.format(s.conArchivo)} con dato; {nf0.format(s.sinArchivo)} dicen «sin dato de estudiantes»).</p>
+    </Capitulo>
   );
 }
 
 /** Quién controla y qué se sabe de la rendición de cuentas, con las citas y sin veredicto. */
 function Control() {
   return (
-    <div className="card uni-control">
-      <h2>Control y rendición de cuentas</h2>
-      <p className="note">Lo que dicen los documentos oficiales, sin agregar nada más. Esta página no afirma que una universidad rindió bien o mal sus cuentas.</p>
+    <Capitulo id="control" titulo="Control y rendición de cuentas" bajada="Lo que dicen los documentos oficiales, sin agregar nada más. Esta página no afirma que una universidad rindió bien o mal sus cuentas.">
       <ul className="uni-citas">
         <li><b>Quién controla.</b> El artículo 59 bis de la Ley de Educación Superior (24.521, incorporado por la Ley 27.204) dice que el control administrativo externo de las universidades estatales es competencia de la Auditoría General de la Nación.</li>
         <li><b>Qué dice la Cuenta de Inversión 2024.</b> En su página 1, el comentario sobre las universidades dice que “han dado cumplimiento la totalidad de las instituciones (61) en cuanto a la presentación de la información requerida por las pertinentes normas de cierre”. Eso es presentar la información de cierre: no es una auditoría. <a href={CUENTA_2024} target="_blank" rel="noopener noreferrer">Comentario a la ejecución presupuestaria de las universidades nacionales, 2024</a>.</li>
@@ -272,15 +305,15 @@ function Control() {
         </li>
         <li><b>Por qué no se muestran los gastos que declaran las universidades.</b> La Cuenta de Inversión 2024 trae los recursos y gastos que declara cada universidad, pero no cierran con lo que la Nación transfirió: el total de gastos declarados es de $1.437.082 millones y las transferencias corrientes recibidas, $1.359.127 millones, contra $3.285.292 millones transferidos. La Universidad de Buenos Aires declara $240.745 millones de transferencias recibidas contra $602.898 millones transferidos. No se sabe por qué, y por eso esos números no se usan acá.</li>
       </ul>
-    </div>
+    </Capitulo>
   );
 }
 
 function Pie({ d, v }: { d: DatosUniv; v: VistaU | null }) {
   const gen = fechaLarga(d.generado || null);
   return (
-    <details className="gas-pie">
-      <summary>Qué incluye, cómo se calcula y fuentes</summary>
+    <details className="uni-mas">
+      <summary>Cómo se mide</summary>
       <ul className="method">
         <li><b>Qué es</b>: lo gastado (devengado) por el programa “Desarrollo de la Educación Superior” del presupuesto nacional en transferencias a cada universidad. Es casi todo lo que reciben las universidades de la Nación (en 2024, el 99,9 %, según la Cuenta de Inversión). “Sin asignar a una universidad” junta lo que el presupuesto no reparte por universidad y “Otros gastos del programa” no es de ninguna universidad en particular.</li>
         <li><b>Pesos de hoy</b>: el monto de cada año ajustado por inflación con el IPC (el IPC del último mes publicado sobre el IPC promedio de ese año). <b>% del PIB</b>: sobre el producto bruto de ese año a precios corrientes. <b>Variación real</b>: la de los pesos de hoy contra el año anterior; el año en curso no se compara porque todavía no terminó.</li>

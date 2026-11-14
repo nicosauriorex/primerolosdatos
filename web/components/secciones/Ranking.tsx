@@ -2,16 +2,23 @@
 import { Fragment, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSeccion } from "../useSeccion";
-import { Cargando, Seg, alternar } from "../ui";
+import { createPortal } from "react-dom";
+import { Cargando, alternar } from "../ui";
 import { FilaVariable } from "../Variables";
 import { ContextoMandato } from "./ContextoMandato";
-import { BotonCompartir } from "../PanelCompartir";
-import { IconoCompartir } from "../Iconos";
+import { PanelCompartir } from "../PanelCompartir";
+import { Capitulo } from "../sistema/Capitulo";
+import { CabeceraDato } from "../sistema/CabeceraDato";
+import { BarraVista } from "../sistema/BarraVista";
+import { Hoja } from "../sistema/Hoja";
+import { InfoPunto } from "../sistema/InfoPunto";
+import { CompartirHoja } from "../sistema/CompartirHoja";
 import { CeldaPres, CeldaVar, LineaInicio, Valor, useBase } from "./comunes";
 import { columnaComparable, periodoMandato, variacionMostrada } from "@/lib/tablas";
 import { fmtMes, nf0, nf1, ok } from "@/lib/formato";
 import { crearPres, mejorPeor, rankingPresidentes, tablasIndicadores, type CritRk, type FilaMP, type IndRk, type Pres, type TablaInd } from "@/lib/estadisticas";
 import { crearIndicadores } from "@/lib/catalogo";
+import { fraseRanking, ordenPorIndicador } from "@/lib/ranking";
 import type { Expr, Motor } from "@/lib/motor";
 import { decExpr, encExpr, lista, unoDe, useParams } from "@/lib/url";
 
@@ -67,11 +74,7 @@ type DesRk = NonNullable<TablaInd["des"][number]>;
 /** Para cada indicador, el orden de los presidentes según el criterio, con quién quedó primero y quién último. */
 function Comparacion({ m, tablas, PRES, crit, conUnidad }: { m: Motor; tablas: TablaInd[]; PRES: Pres[]; crit: CritRk; conUnidad: boolean }) {
   const nom = (k: number) => PRES[k].corto ?? PRES[k].n;
-  const filas = tablas.map((t) => {
-    const orden = t.des.map((d, k) => (d && d.puesto ? { k, d, score: crit === "ambos" ? (d.puesto.mejora[2] + d.puesto.nivel[2]) / 2 : d.puesto[crit][2] } : null))
-      .filter((x): x is { k: number; d: DesRk; score: number } => !!x).sort((a, c) => c.score - a.score);
-    return { t, orden };
-  }).filter((f) => f.orden.length >= 2);
+  const filas = ordenPorIndicador(tablas, crit);
   const cifra = (t: TablaInd, d: DesRk) => (crit === "nivel" ? `promedio ${m.fmtC(t.c, d.st.prom)}` : menos(variacionMostrada(m, t.c, d.st.ini, d.st.fin)));
   if (!filas.length) return <p className="note">No hay indicadores con datos de al menos dos presidentes para comparar.</p>;
   return (
@@ -96,7 +99,9 @@ export function Ranking() {
   const [p, set, montado] = useParams();
   const sec = useSeccion("todo");
   const info = useBase(p, set, montado), b = info.b;
-  const [puntajeAbierto, setPuntajeAbierto] = useState(true);   // "Puntaje combinado" arranca desplegado; si se pliega, queda plegado
+  const [puntajeAbierto, setPuntajeAbierto] = useState(true);   // la tabla de puntajes arranca desplegada; si se pliega, queda plegada
+  const [hoja, setHoja] = useState(false);
+  const [imagen, setImagen] = useState(false);
   const { motor: m, version } = sec;
   const PRES = useMemo(() => (m ? crearPres(m.F) : []), [m]);
   const I = useMemo(() => (m && !sec.ocupado ? crearIndicadores(m) : null), [m, sec.ocupado, version]);  // eslint-disable-line react-hooks/exhaustive-deps
@@ -129,41 +134,61 @@ export function Ranking() {
   const setVars = (nv: Expr[]) => set({ rkv: nv.map((e) => encExpr(e)).join(",") || "-" });
   const agregar = (e: Expr | null) => { if (e && vars.length < MAX_V) setVars([...vars, e]); };
 
+  const rta = valido ? fraseRanking(tablasComp, PRES, crit, inds.length) : null;
+  const CRIT_NOM: Record<CritRk, string> = { mejora: "Mejora", nivel: "Nivel promedio", ambos: "Ambos" };
+  const chips = [
+    { clave: "modo", texto: usaVars ? "Elegir variables" : "Por grupos" },
+    { clave: "criterio", texto: CRIT_NOM[crit] },
+    { clave: "que", texto: usaVars ? `${vars.length} variables` : `${grupos.size} de ${I.GRUPOS_IND.length} grupos` },
+  ];
+  const textoCompartir = rta ? `${rta.frase} Fuente: Primero los Datos.` : undefined;
+
   return (
     <section>
-      <p className="sub">Quién quedó mejor y quién peor en cada indicador, con los indicadores que elijas. Cada presidente se evalúa con los mismos indicadores y el mismo criterio. Más abajo, un puntaje combinado de 0 a 100.</p>
-      <div className="controls">
-        <label>Qué entra</label>
-        <Seg valor={usaVars ? "vars" : "grupos"} opciones={[["grupos", "Por grupos"], ["vars", "Elegir variables"]]} onElegir={cambiarModo} />
-        <label>Criterio</label>
-        <Seg valor={crit} opciones={[["mejora", "Mejora"], ["nivel", "Nivel promedio"], ["ambos", "Ambos"]]} onElegir={(v) => set({ rkc: v === "mejora" ? null : v })} />
-      </div>
-      {usaVars ? (
-        <div className="card">
-          <p className="note">Variables elegidas ({vars.length} de {MAX_V}; hacen falta al menos {MIN_V}). Cada una cuenta como su propio grupo.</p>
+      {rta ? <CabeceraDato nivel={2} titulo={rta.titulo} cifra={rta.cifra} unidad={rta.unidad} fecha={rta.fecha} deltas={[]} frase={rta.frase} />
+        : <p className="note rk-sin">{valido ? "No hay indicadores con datos de al menos dos presidentes para comparar." : `Con al menos ${MIN_V} variables se arma la comparación.`}</p>}
+
+      <BarraVista items={chips} onAbrir={() => setHoja(true)} />
+      <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
+        {(cerrar) => (
+          <div className="rk-hoja">
+            <Grupo titulo="Qué entra" forma="lista" valor={usaVars ? "vars" : "grupos"} onElegir={cambiarModo} opciones={[["grupos", "Por grupos"], ["vars", "Elegir variables"]]} />
+            <Grupo titulo="Criterio" forma="lista" valor={crit} onElegir={(v) => set({ rkc: v === "mejora" ? null : v })} opciones={[["mejora", "Mejora"], ["nivel", "Nivel promedio"], ["ambos", "Ambos"]]} />
+            {usaVars
+              ? <p className="note">Las variables se eligen en &quot;Variables elegidas&quot;, debajo de esta hoja.</p>
+              : <Grupo titulo="Grupos de indicadores" forma="chips" valor={grupos} onElegir={(v) => set({ rk: [...alternar(grupos, v)].join(",") })} opciones={I.GRUPOS_IND.map((g) => [g, g] as [string, string])} />}
+            <button type="button" className="btn primario rk-listo" onClick={() => cerrar()}>Listo</button>
+          </div>
+        )}
+      </Hoja>
+      <LineaInicio info={info} F={F} />
+
+      {usaVars && (
+        <Capitulo id="rk-variables" titulo="Variables elegidas" bajada={`${vars.length} de ${MAX_V}; hacen falta al menos ${MIN_V}. Cada una cuenta como su propio grupo.`}>
           {vars.map((e, k) => (
             <FilaVariable key={k + e.id} e={e} sinRel quitable onChange={(ne) => setVars(ne ? vars.map((x, j) => (j === k ? ne : x)) : vars.filter((_, j) => j !== k))} />
           ))}
           {vars.length < MAX_V && <FilaVariable e={null} agregable textoAgregar="+ Agregar variable" onChange={agregar} />}
-        </div>
-      ) : (
-        <div className="controls"><label>Grupos de indicadores</label>
-          <Seg valor={grupos} opciones={I.GRUPOS_IND.map((g) => [g, g] as [string, string])} onElegir={(v) => set({ rk: [...alternar(grupos, v)].join(",") })} /></div>
+        </Capitulo>
       )}
-      <LineaInicio info={info} F={F} />
-      <h2 id="rk-comparacion">Indicador por indicador</h2>
-      <p className="note">Para cada indicador, los presidentes se ordenan según <b>{CRIT_TXT[crit]}</b>. Verde = el que quedó mejor, rojo = el que quedó peor; debajo del nombre va el dato que lo explica. Cada presidente se evalúa con los mismos indicadores y el mismo criterio.</p>
-      <Comparacion m={m} tablas={tablasComp} PRES={PRES} crit={crit} conUnidad={!usaVars} />
+
+      <Capitulo id="rk-comparacion" titulo="Indicador por indicador"
+        bajada="Quién quedó mejor y quién peor en cada indicador, con los mismos indicadores y el mismo criterio para todos."
+        acciones={<InfoPunto etiqueta="Cómo se ordena"><p>Para cada indicador, los presidentes se ordenan según <b>{CRIT_TXT[crit]}</b>. Verde = el que quedó mejor, rojo = el que quedó peor; debajo del nombre va el dato que lo explica. Cada presidente se evalúa con los mismos indicadores y el mismo criterio.</p></InfoPunto>}>
+        <Comparacion m={m} tablas={tablasComp} PRES={PRES} crit={crit} conUnidad={!usaVars} />
+      </Capitulo>
+
       {!res ? <p className="note">Con al menos {MIN_V} variables se arma también el puntaje combinado.</p> : (
-        <details className="callout contexto-plegado rk-puntaje" open={puntajeAbierto} onToggle={(ev) => setPuntajeAbierto(ev.currentTarget.open)}>
-          <summary><b>Puntaje combinado</b>{" "}<span className="resumen">Depende de los indicadores elegidos; no es una medida oficial</span></summary>
-          <p className="note">Un puntaje de 0 (el peor) a 100 (el mejor) por presidente. Se promedia dentro de cada grupo y después entre grupos, para que ningún grupo pese más por tener más series. <b>Ojo:</b> muchos datos empiezan en 2003, 2012 o 2016, así que Menem, De la Rúa y Duhalde se evalúan con pocos indicadores; Milei, con un mandato en curso; y el contexto internacional y la herencia de cada uno no entran en el número. En la tabla, la barra va de 0 a 100, verde es la mitad de arriba y rojo la de abajo, y las marcas “mejor” y “peor” señalan los extremos.
-            {res.incompletas && usaVars ? " Algunas variables no tienen datos para todos los presidentes." : ""}</p>
-          <div className="controls">
-            <BotonCompartir className="btn" titulo="Primero los Datos: ranking de presidentes" href={() => window.location.href} deshabilitado={!res.filas.length}
-              title="Armar una imagen del ranking para compartir" aria-label="Compartir como imagen: ranking de presidentes"
-              crearVista={() => ({ tipo: "ranking", crit, inds, usaVars, base: b })}><IconoCompartir />Compartir</BotonCompartir>
-          </div>
+        <Capitulo id="rk-puntaje" titulo="Puntaje combinado" bajada="Depende de los indicadores elegidos; no es una medida oficial."
+          acciones={<>
+            <InfoPunto etiqueta="Cómo se arma el puntaje">
+              <p>Un puntaje de 0 (el peor) a 100 (el mejor) por presidente. Se promedia dentro de cada grupo y después entre grupos, para que ningún grupo pese más por tener más series. <b>Ojo:</b> muchos datos empiezan en 2003, 2012 o 2016, así que Menem, De la Rúa y Duhalde se evalúan con pocos indicadores; Milei, con un mandato en curso; y el contexto internacional y la herencia de cada uno no entran en el número. En la tabla, la barra va de 0 a 100, verde es la mitad de arriba y rojo la de abajo, y las marcas “mejor” y “peor” señalan los extremos.
+                {res.incompletas && usaVars ? " Algunas variables no tienen datos para todos los presidentes." : ""}</p>
+            </InfoPunto>
+            {res.filas.length > 0 && <CompartirHoja href={window.location.pathname + window.location.search} titulo="Ranking de presidentes" onImagen={() => setImagen(true)} texto={textoCompartir} />}
+          </>}>
+          <details className="rk-plegado" open={puntajeAbierto} onToggle={(ev) => setPuntajeAbierto(ev.currentTarget.open)}>
+            <summary>Tabla de puntajes</summary>
           {abiertos.length > 0 && <div className="rk-abiertos"><button type="button" className="btn" onClick={() => set({ rka: null })}>Cerrar todos</button></div>}
           <div className="tablewrap fija rk-tabla"><table>
             <thead><tr><th>Presidente</th><th>Puntaje</th><th>Indicadores</th><th className="rk-col-mejor" style={{ textAlign: "left" }}>Mejor en</th><th style={{ textAlign: "left" }}>Peor en</th></tr></thead>
@@ -205,8 +230,25 @@ export function Ranking() {
               );
             })}</tbody>
           </table></div>
-        </details>
+          </details>
+        </Capitulo>
       )}
+      {imagen && res && createPortal(<PanelCompartir vista={{ tipo: "ranking", crit, inds, usaVars, base: b }} href={window.location.href} titulo="Primero los Datos: ranking de presidentes" onCerrar={() => setImagen(false)} />, document.body)}
     </section>
+  );
+}
+
+/** Un grupo de opciones de la hoja de ajustes: botones de 44 px que se marcan. En "lista" va uno por renglón; en "chips" se acomodan en varios renglones (la hoja lo permite). */
+function Grupo({ titulo, opciones, valor, onElegir, forma }: {
+  titulo: string; opciones: [string, string][]; valor: string | Set<string>; onElegir: (v: string) => void; forma: "lista" | "chips";
+}) {
+  const activo = (v: string) => (valor instanceof Set ? valor.has(v) : valor === v);
+  return (
+    <div className="rk-grupo" role="group" aria-label={titulo}>
+      <span className="rk-rotulo">{titulo}</span>
+      <div className="rk-opcs" data-forma={forma}>
+        {opciones.map(([v, t]) => <button key={v} type="button" className="rk-opc" aria-pressed={activo(v)} onClick={() => onElegir(v)}>{t}</button>)}
+      </div>
+    </div>
   );
 }

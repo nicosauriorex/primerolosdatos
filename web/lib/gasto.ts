@@ -483,3 +483,58 @@ export function textosPreviaGasto(v: Vista): { titulo: string; descripcion: stri
   ].filter(Boolean).join(" ");
   return { titulo, descripcion };
 }
+
+// ---------------------------------------------------------------- la respuesta de arriba (remodelación 3.5)
+/** "2026-11-10" → "10 de noviembre" (sin el año: se usa donde el año ya está en la frase). */
+const diaMesTxt = (iso: string | null): string | null => { const l = fechaLarga(iso); return l ? l.replace(/ de \d{4}$/, "") : null; };
+
+/** La respuesta de la página, con lo que se muestra: la cifra grande (el total del nivel abierto) y una frase en lenguaje llano.
+ *  Sin ruta: "En 2024 la Nación gastó $ X; N de cada 100 pesos fueron para Y." Con ruta: "Y: $ X en 2024, N % del gasto total."
+ *  N sale de la parte que muestra la primera barra (la lista), entera. Nunca escribe una cuenta que la lista no muestre. */
+export function fraseGasto(v: Vista): { cifra: string; frase: string } {
+  const anio = v.anio.anio, enCursoDev = v.anio.en_curso && v.etapa === "dev";
+  const dia = diaMesTxt(v.anio.actualizado);
+  const cuando = enCursoDev ? `en lo que va de ${anio}${dia ? ` (hasta el ${dia})` : ""}` : `en ${anio}`;
+  const inicio = `${cuando.charAt(0).toUpperCase()}${cuando.slice(1)}`;
+  const m = v.medidaUsada;
+  const total = m === "pib" ? `${v.total} del PIB` : m === "pct" ? `${v.total} del gasto total` : v.total;
+  if (v.ruta.length) {
+    const nombre = v.ruta[v.ruta.length - 1];
+    const k = IDX[v.etapa], raiz = v.camino[0].v[k];
+    const parte = m !== "pct" && raiz > 0 ? `${conSigno(r1((v.nodo.v[k] / raiz) * 100), 1)} %` : null;
+    return { cifra: v.total, frase: `${nombre}: ${total} ${cuando}${parte ? `, ${parte} del gasto total` : ""}.` };
+  }
+  const verbo = v.etapa === "dev" ? "gastó" : v.etapa === "pres" ? "presupuestó gastar" : enCursoDev || v.anio.en_curso ? "tiene como presupuesto vigente" : "tuvo como presupuesto vigente";
+  const primera = v.barras.find((b) => b.tipo === "nodo");
+  const txtN = primera ? (primera.parte ?? (m === "pct" ? primera.txt : null)) : null;
+  const n = txtN ? valorMostrado(txtN) : null;
+  const resto = primera && n != null ? `${n >= 0 ? Math.round(n) : 0} de cada 100 pesos fueron para ${primera.n}` : null;
+  if (m === "pct") return { cifra: v.total, frase: resto ? `${inicio}, ${resto.replace(/^(\d+) de cada 100 pesos fueron/, "$1 de cada 100 pesos del gasto de la Nación fueron")}.` : `${inicio}, ${total}.` };
+  const cabeza = m === "pib" ? `${inicio} el gasto de la Nación fue de ${total}` : `${inicio} la Nación ${verbo} ${total}`;
+  return { cifra: v.total, frase: `${cabeza}${resto ? `; ${resto}` : ""}.` };
+}
+
+// ---------------------------------------------------------------- evolución por finalidad (remodelación 3.5, G5)
+export interface EvolucionFinalidades {
+  anios: number[];
+  /** Una capa por finalidad (las de `serie_larga`), de la que más gastó en total a la que menos; `v` en pesos de hoy, un valor por año de `anios`. */
+  capas: { n: string; v: number[] }[];
+  /** Gasto total de cada año (el de `serieNodo` del gasto total), en pesos de hoy. */
+  total: number[];
+  ref: string; larga: boolean;
+}
+/** Barras apiladas por año: el gasto de cada finalidad, en pesos de hoy. Reutiliza `serieNodo` (la misma serie que "Comparar años"),
+ *  así el total de cada año coincide con el del gasto total. Un año entra solo si todas las finalidades y el total tienen valor.
+ *  null si no hay serie por finalidad. `archivos`: los años cerrados ya cargados (con los que no estén, solo salen los años de la serie larga). */
+export function evolucionFinalidades(ix: IndiceGasto, archivos: Map<number, ArchivoAnio>, d: Deflactor): EvolucionFinalidades | null {
+  const sl = ix.serie_larga;
+  if (!sl || !sl.finalidades.length) return null;
+  const tot = serieNodo(ix, archivos, "para_que", [], d);
+  const series = sl.finalidades.map((f) => ({ n: f.n, s: serieNodo(ix, archivos, "para_que", [f.n], d) }));
+  const valor = (s: SerieNodo, anio: number) => s.puntos.find((p) => p.anio === anio)?.hoy ?? null;
+  const anios = tot.puntos.map((p) => p.anio).filter((a) => valor(tot, a) != null && series.every((x) => valor(x.s, a) != null));
+  if (!anios.length) return null;
+  const capas = series.map((x) => ({ n: x.n, v: anios.map((a) => valor(x.s, a) as number) }))
+    .sort((a, b) => b.v.reduce((s, y) => s + y, 0) - a.v.reduce((s, y) => s + y, 0));
+  return { anios, capas, total: anios.map((a) => valor(tot, a) as number), ref: d.ref, larga: tot.larga };
+}

@@ -379,3 +379,20 @@ export function extremosTramo(clave: ClaveDiario, t: Tramo): { alto: { fecha: st
   t.v.forEach((x, i) => { if (x > t.v[imax]) imax = i; if (x < t.v[imin]) imin = i; });
   return { alto: puntoTxt(clave, t.dias[imax], t.v[imax]), bajo: puntoTxt(clave, t.dias[imin], t.v[imin]) };
 }
+
+// ---------------------------------------------------------------- cambios para mostrar con Delta (etapa 3.5)
+export interface CambioParte { texto: string; tono: ClsDiario; dir: 1 | -1 | 0; contra: string }
+const dirDeTexto = (t: string): 1 | -1 | 0 => (t.startsWith("+") ? 1 : /^[-−]/.test(t) ? -1 : 0);
+
+/** Los cambios de una variable de nivel o tasa contra el día anterior y contra un mes atrás, tal como ya los calcula el parte
+ *  (con los valores mostrados). Las compras (un flujo) no se comparan con el día anterior: sin cambios. */
+export function cambiosDe(v: ResumenVariable): CambioParte[] {
+  const r: CambioParte[] = [];
+  // con su unidad: "−US$ 851 millones", "+$ 5,20", "+0,25 p.p." (una diferencia de tasas va en puntos)
+  const def = DEFS[v.clave];
+  const conUnidad = (t: string) => /%|p\.p\./.test(t) ? t : def.tipo === "tasa" ? `${t} p.p.` : t.replace(/^([+−-]?)/, `$1${def.pref}`) + def.suf;
+  if (v.difAnterior) r.push({ texto: conUnidad(v.difAnterior), tono: v.clsAnterior, dir: dirDeTexto(v.difAnterior), contra: "vs día anterior" });
+  const mes = v.tipo === "flujo" ? null : v.filas.find((f) => f.rotulo === "Hace un mes");
+  if (mes) r.push({ texto: conUnidad(mes.valor), tono: mes.cls, dir: dirDeTexto(mes.valor), contra: "vs hace un mes" });
+  return r;
+}

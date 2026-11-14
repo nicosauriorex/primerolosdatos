@@ -409,3 +409,42 @@ function fraseJuntas(v: VistaP): string {
   const txt = partes.filter(Boolean).join(" · ");
   return txt ? `Las 24 jurisdicciones juntas: ${txt}` : "Las 24 jurisdicciones";
 }
+
+// ---------------------------------------------------------------- frases de la remodelación 3.5 (sin React; con los valores como se muestran)
+/** Un valor para una celda chica del mosaico: "$ 1.234.567" → "1,2 M", "$ 12,3 billones" → "12,3 B", "$ 850 millones" → "850 M"; los % y las tasas quedan como están. */
+export function valorCorto(txt: string): string {
+  const t = txt.trim();
+  if (!t.startsWith("$")) return t;
+  const sin = t.replace(/^\$\s*/, "");
+  if (/^[\d.]+$/.test(sin)) {
+    const n = Number(sin.replace(/\./g, ""));
+    if (n >= 1e6) return `${nfDec(1).format(n / 1e6)} M`;
+    if (n >= 1e3) return `${nf0.format(Math.round(n / 1e3))} mil`;
+    return sin;
+  }
+  return sin.replace(/\s*billones$/, " B").replace(/\s*millones$/, " M");
+}
+
+/** La respuesta de arriba: la provincia que más y la que menos recibió de la Nación, con la medida elegida. Sin "Sin provincia" ni las provincias sin dato. */
+export function fraseProvincias(v: VistaP): { cifra: string; unidad: string; frase: string } | null {
+  const con = v.filas.filter((f) => f.pos != null && !f.sinDato);
+  if (!con.length) return null;
+  const a = con[0], z = con[con.length - 1];
+  const cuando = v.enCurso ? `En lo que va de ${v.anio}` : `En ${v.anio}`;
+  const que = v.medida === "hab" ? "la provincia que más recibió de la Nación por habitante" : v.medida === "total" ? "la provincia que más recibió de la Nación en total" : "la provincia con más parte del gasto ubicado";
+  const menos = "la que menos";
+  return { cifra: a.txt, unidad: `en ${a.n}`, frase: `${cuando}, ${que} fue ${a.n} (${a.txt}); ${menos}, ${z.n} (${z.txt}).` };
+}
+
+/** El puesto de una provincia por habitante (con el "Qué gasto" elegido) entre las que tienen dato, y cuántas son. */
+export function puestoHab(c: Contexto, id: string, anio: number, gasto: GastoP): { pos: number | null; de: number } | null {
+  const v = armarVistaP(c, { anio, medida: "hab", gasto });
+  if (!v) return null;
+  return { pos: v.filas.find((f) => f.id === id)?.pos ?? null, de: v.filas.filter((f) => f.pos != null).length };
+}
+
+/** La frase de una provincia abierta: "$ X por habitante, puesto N de 24." */
+export function fraseProvincia(hab: string | null, puesto: { pos: number | null; de: number } | null): string {
+  if (!hab) return "Sin dato de población, no se puede calcular por habitante.";
+  return `${hab} por habitante${puesto?.pos != null ? `, puesto ${puesto.pos} de ${puesto.de}` : ""}.`;
+}

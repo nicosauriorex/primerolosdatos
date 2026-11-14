@@ -236,3 +236,20 @@ export function textosPreviaSemaforo(t: Tabla): { titulo: string; descripcion: s
 
 /** Id de la serie en el catálogo del sitio a partir del id de datos.gob.ar (misma regla que `slug` de pipeline/catalogo.py: caracteres repetidos en uno y sin guiones bajos en los extremos) que trae el archivo ("143.3_NO_PR_2004_A_31" → "dg_143_3_no_pr_2004_a_31"). */
 export const idCatalogo = (id: string): string => `dg_${id.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "")}`;
+
+// ---------------------------------------------------------------- la respuesta de arriba (etapa 3.5)
+export interface CambioFrase { texto: string; tono: "bueno" | "malo" | "neutro"; dir: 1 | -1 | 0; contra: string }
+
+/** La respuesta del semáforo: el porcentaje de indicadores que subieron en el último mes con difusión no atenuada, con la diferencia
+ *  en puntos contra el mes anterior (la cuenta usa los enteros que se muestran: 54 % y 50 % dan +4 p.p.). Más indicadores en alza es "bueno". */
+export function fraseSemaforo(t: Tabla): { cifra: string; fecha: string; frase: string; delta: CambioFrase | null } {
+  const d = t.difusion[t.columnaResumen], prev = t.columnaResumen > 0 ? t.difusion[t.columnaResumen - 1] : null;
+  const verbo = d.suben === 1 ? "subió" : "subieron";
+  const frase = `En ${txtMes(d.mes)} ${verbo} ${nf0.format(d.suben)} de ${nf0.format(d.entran)} ${d.entran === 1 ? "indicador" : "indicadores"} de actividad (${d.txtPct}).`;
+  let delta: CambioFrase | null = null;
+  if (prev && prev.entran > 0 && d.entran > 0) {
+    const dif = d.pct - prev.pct;
+    delta = { texto: dif === 0 ? "0 p.p." : `${dif > 0 ? "+" : "−"}${nf0.format(Math.abs(dif))} p.p.`, tono: dif > 0 ? "bueno" : dif < 0 ? "malo" : "neutro", dir: dif > 0 ? 1 : dif < 0 ? -1 : 0, contra: `vs ${txtMes(prev.mes)}` };
+  }
+  return { cifra: d.txtPct, fecha: txtMes(d.mes), frase, delta };
+}

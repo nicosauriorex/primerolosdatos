@@ -1,22 +1,32 @@
 "use client";
-// "Cómo viene el año" de /gasto/ (vista=mes, docs/specs/gasto-nacion.md, fase 2): tarjetas, barras por mes y la lista de un nivel.
+// "Cómo viene el año" de /gasto/ (vista=mes, docs/specs/gasto-nacion.md, fase 2): respuesta arriba, barras por mes y la lista de un nivel.
 // Las cuentas están en lib/gasto-mensual.ts; acá solo se dibuja. Estado en la URL: vista=mes, forma, ruta, orden y todas.
-import { useCallback, useMemo, useState } from "react";
-import { Seg } from "./ui";
+// Remodelación 3.5 (docs/specs/remodelacion-herramientas.md, G): mismo tratamiento que /gasto/ (sin cajas, ajustes en una hoja, compartir en una hoja).
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { PanelGasto } from "./PanelGasto";
-import { avisoCompartir, compartir } from "@/lib/compartir";
+import { CabLista, GrupoAjuste, Migas, Opciones } from "./GastoPiezas";
+import { CabeceraDato } from "./sistema/CabeceraDato";
+import { Capitulo } from "./sistema/Capitulo";
+import { BarraVista } from "./sistema/BarraVista";
+import { FilaChips } from "./sistema/FilaChips";
+import { Hoja } from "./sistema/Hoja";
+import { InfoPunto } from "./sistema/InfoPunto";
+import { ListaBarras, type FilaBarra } from "./sistema/ListaBarras";
+import { CompartirHoja } from "./sistema/CompartirHoja";
 import type { FormatoImg } from "@/lib/config";
 import { BAJADA_FORMA, NIVELES, escribirRuta, leerRuta, nombreForma } from "@/lib/gasto";
 import {
-  FORMAS_M, ORDENES, ORDEN_DEFECTO, armarImagenMensual, armarMensual, esOrden, formaMDe, fuenteMensual, hrefMensual, tituloMensual,
+  FORMAS_M, ORDENES, ORDEN_DEFECTO, armarImagenMensual, armarMensual, esOrden, formaMDe, fraseMensual, fuenteMensual, hrefMensual, tituloMensual,
   type ArchivoMensual, type DeflactorMensual, type FilaM, type MesM, type Orden, type VistaM,
 } from "@/lib/gasto-mensual";
 
-export function GastoMensual({ ar, deflactor, p, set }: {
+export function GastoMensual({ ar, deflactor, p, set, periodo }: {
   ar: ArchivoMensual; deflactor: DeflactorMensual; p: URLSearchParams; set: (c: Record<string, string | null | undefined>) => void;
+  /** El selector "Año completo / Cómo viene el año" (lo arma /gasto/): va debajo de la respuesta. */
+  periodo?: ReactNode;
 }) {
   const [imagen, setImagen] = useState(false);
-  const [aviso, setAviso] = useState<string | null>(null);
+  const [ajustes, setAjustes] = useState(false);
   const forma = formaMDe(ar, p.get("forma"));
   const orden: Orden = esOrden(p.get("orden")) ? (p.get("orden") as Orden) : ORDEN_DEFECTO;
   const ruta = leerRuta(p.get("ruta")), todas = p.get("todas") === "1";
@@ -27,66 +37,66 @@ export function GastoMensual({ ar, deflactor, p, set }: {
     [vista, todas, ar, forma, p.get("ruta"), orden, deflactor]);   // eslint-disable-line react-hooks/exhaustive-deps
   const armar = useCallback((f: FormatoImg) => armarImagenMensual(vistaImg!, ar, f), [vistaImg, ar]);
 
-  const mostrar = (t: string | null) => { setAviso(t); if (t) setTimeout(() => setAviso(null), 4000); };
   const ir = (r: string[]) => set({ ruta: escribirRuta(r), todas: null });
-  if (!vista) return <div className="card"><p className="note">No hay datos mensuales de esta forma.</p></div>;
+  if (!vista) return <><p className="note">No hay datos mensuales de esta forma.</p>{periodo}</>;
   const href = hrefMensual(vista), titulo = tituloMensual(vista);
+  const resp = fraseMensual(vista);
+  const t = vista.tarjetas;
+  const nivel = NIVELES[forma][vista.ruta.length] ?? "Partida";
+  const filas: FilaBarra[] = vista.filas.map((f, i) => filaDe(f, i, () => ir([...vista.ruta, f.n]), () => set({ todas: "1" })));
+  const notas = vista.filas.filter((f) => f.nota);
+  const infoLista = (
+    <>
+      <p>Cada fila: lo gastado en los meses completos, la variación real contra los mismos meses de {vista.anioAnt} y el % del vigente. El % del vigente es lo gastado (devengado) sobre el crédito vigente a fin del último mes completo; entre paréntesis, lo mismo en {vista.anioAnt} a la misma altura.</p>
+      {notas.map((f, i) => <p key={i}><b>{f.n}</b>: {f.nota}</p>)}
+    </>
+  );
 
   return (
     <>
-      <div className="gas-formas" role="group" aria-label="Forma de mirar el gasto">
-        <Seg valor={forma} opciones={FORMAS_M.filter((f) => ar.arboles[f[0]])} onElegir={(f) => set({ forma: f === "para_que" ? null : f, ruta: null, todas: null })} />
+      <Migas raiz={nombreForma(forma)} ruta={vista.ruta} onIr={ir} />
+      <CabeceraDato nivel={2} titulo={vista.ruta.length ? vista.ruta[vista.ruta.length - 1] : `Gasto total de la Nación, ${vista.periodo} de ${vista.anio}`}
+        cifra={resp.cifra} fecha={`${vista.periodo} de ${vista.anio}`} deltas={[]} frase={resp.frase}
+        secundarias={[{ rotulo: "Variación real", valor: t.variacion.valor }, { rotulo: "Del crédito vigente", valor: t.ejecutado.valor }]}
+        info={vista.nodo.t ? <p>Nombre en el presupuesto: {vista.nodo.t}</p> : undefined} />
+      <div className="note gas-unidad">
+        Meses completos ({vista.periodo}) contra los mismos meses de {vista.anioAnt}. {vista.unidad}.
+        <InfoPunto etiqueta="Cómo leer las cifras">
+          <p><b>Gastado</b>: {t.gastado.valor}, {t.gastado.sub}.</p>
+          <p><b>Variación real</b>: {t.variacion.valor}, {t.variacion.sub}.</p>
+          <p><b>Del crédito vigente</b>: {t.ejecutado.valor}{t.ejecutado.sub ? `, ${t.ejecutado.sub}` : `, ya gastado a fin de ${vista.periodo.split("–").pop()}`}.</p>
+        </InfoPunto>
       </div>
-      <p className="note gas-bajada">{BAJADA_FORMA[forma]}</p>
-
-      <div className="card gas-card">
-        {vista.ruta.length > 0 && (
-          <nav className="migas gas-migas" aria-label="Niveles abiertos">
-            <button type="button" onClick={() => ir([])}>{nombreForma(forma)}</button>
-            {vista.ruta.map((n, i) => (
-              <span key={i} className="gas-miga">
-                <span aria-hidden="true">›</span>
-                {i < vista.ruta.length - 1 ? <button type="button" onClick={() => ir(vista.ruta.slice(0, i + 1))}>{n}</button> : <span aria-current="page">{n}</span>}
-              </span>
-            ))}
-          </nav>
+      {vista.ipcAviso && <p className="note gas-aviso" role="status">{vista.ipcAviso}</p>}
+      {vista.sinIpc && <p className="note gas-aviso" role="status">No hay inflación cargada: los montos están en pesos corrientes de cada mes y la variación real no descuenta la inflación.</p>}
+      {periodo}
+      <BarraVista items={[{ clave: "orden", texto: `Orden: ${ORDENES.find((o) => o[0] === orden)![1]}` }]} onAbrir={() => setAjustes(true)} />
+      <Hoja titulo="Ajustes" abierta={ajustes} onCerrar={() => setAjustes(false)}>
+        {(cerrar) => (
+          <div className="gas-hoja">
+            <GrupoAjuste rotulo="Ordenar la lista por"><Opciones etiqueta="Orden de la lista" valor={orden} opciones={ORDENES} onElegir={(o) => set({ orden: o === ORDEN_DEFECTO ? null : o, todas: null })} /></GrupoAjuste>
+            <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
+          </div>
         )}
-        <div className="gas-total">
-          <h2>{vista.ruta.length ? vista.ruta[vista.ruta.length - 1] : `Gasto total de la Nación, ${vista.periodo} de ${vista.anio}`}</h2>
-          {vista.nodo.t && <p className="note gas-tecnico">Nombre en el presupuesto: {vista.nodo.t}</p>}
-          <p className="note">Meses completos ({vista.periodo}) contra los mismos meses de {vista.anioAnt}. {vista.unidad}.</p>
-          {vista.ipcAviso && <p className="note gas-aviso" role="status">{vista.ipcAviso}</p>}
-          {vista.sinIpc && <p className="note gas-aviso" role="status">No hay inflación cargada: los montos están en pesos corrientes de cada mes y la variación real no descuenta la inflación.</p>}
-        </div>
+      </Hoja>
 
-        <div className="gm-tarjetas">
-          <Tarjeta titulo="Gastado" valor={vista.tarjetas.gastado.valor} sub={vista.tarjetas.gastado.sub} />
-          <Tarjeta titulo="Variación real" valor={vista.tarjetas.variacion.valor} sub={vista.tarjetas.variacion.sub} />
-          <Tarjeta titulo="Del crédito vigente" valor={vista.tarjetas.ejecutado.valor} sub={vista.tarjetas.ejecutado.sub ?? `ya gastado a fin de ${vista.periodo.split("–").pop()}`} />
-        </div>
-
+      <Capitulo titulo={`Mes a mes, ${vista.anio} contra ${vista.anioAnt}`}>
         <GraficoMeses v={vista} />
+      </Capitulo>
 
-        <div className="gm-orden" role="group" aria-label="Orden de la lista">
-          <span className="lbl">Ordenar por</span>
-          <Seg valor={orden} opciones={ORDENES} onElegir={(o) => set({ orden: o === ORDEN_DEFECTO ? null : o, todas: null })} />
+      <Capitulo titulo={vista.ruta.length ? `Cómo se divide ${vista.ruta[vista.ruta.length - 1]}` : "Cómo se reparte el gasto"}
+        acciones={<CompartirHoja href={href} titulo={titulo} onImagen={() => setImagen(true)} texto={`${resp.frase} Fuente: ${fuenteMensual(ar)}.`} />}>
+        <div className="gas-formas-fila">
+          <FilaChips etiqueta="Forma de mirar el gasto" valor={forma} opciones={FORMAS_M.filter((f) => ar.arboles[f[0]]) as [string, string][]} onElegir={(f) => set({ forma: f === "para_que" ? null : f, ruta: null, todas: null })} />
+          <InfoPunto etiqueta="Qué muestra esta forma"><p>{BAJADA_FORMA[forma]}</p></InfoPunto>
         </div>
-        {vista.filas.length ? (
+        {filas.length ? (
           <>
-            <p className="gas-enc" aria-hidden="true"><span>{NIVELES[forma][vista.ruta.length] ?? "Partida"}</span><span>Gastado · variación real · % del vigente</span></p>
-            <ol className="gas-lista">
-              {vista.filas.map((f, i) => <Fila key={i} f={f} onAbrir={f.nodo?.h?.length ? () => ir([...vista.ruta, f.n]) : f.tipo === "otros" ? () => set({ todas: "1" }) : null} />)}
-            </ol>
+            <CabLista nivel={nivel} derecha="Gastado · variación real · % del vigente" info={infoLista} />
+            <ListaBarras etiqueta={`${nivel}: ${vista.unidad}`} filas={filas} max={1} />
           </>
         ) : <p className="note">No se divide en un nivel más abajo.</p>}
-        <p className="note gas-pie-lista">El % del vigente es lo gastado (devengado) en los meses completos sobre el crédito vigente a fin del último mes completo. Entre paréntesis, lo mismo en {vista.anioAnt} a la misma altura.</p>
-      </div>
-
-      <div className="gas-compartir" role="group" aria-label="Compartir esta vista">
-        <button type="button" className="btn primario" onClick={() => setImagen(true)}>Compartir como imagen</button>
-        <button type="button" className="btn" onClick={async () => mostrar(avisoCompartir(await compartir(href, titulo)))}>Copiar link</button>
-      </div>
-      {aviso && <p className="aviso-link" role="status">{aviso}</p>}
+      </Capitulo>
 
       <Nota ar={ar} v={vista} />
       {imagen && vistaImg && <PanelGasto armar={armar} titulo={titulo} href={href} onCerrar={() => setImagen(false)} />}
@@ -94,37 +104,15 @@ export function GastoMensual({ ar, deflactor, p, set }: {
   );
 }
 
-function Tarjeta({ titulo, valor, sub }: { titulo: string; valor: string; sub: string }) {
-  return (
-    <div className="gm-tarjeta">
-      <p className="gm-tj-k">{titulo}</p>
-      <p className="gm-tj-v">{valor}</p>
-      <p className="gm-tj-s">{sub}</p>
-    </div>
-  );
-}
-
-function Fila({ f, onAbrir }: { f: FilaM; onAbrir: (() => void) | null }) {
+function filaDe(f: FilaM, i: number, abrir: () => void, todas: () => void): FilaBarra {
   const sub = [f.varTxt, f.ejec].filter(Boolean).join(" · ");
-  const contenido = (
-    <>
-      <span className="gas-fila-arriba">
-        <span className="gas-nombre">{f.n}{f.tipo === "otros" && <small> · ver todas</small>}</span>
-        <span className="gas-monto">{f.txt}</span>
-      </span>
-      <span className="gas-pista" aria-hidden="true"><span className={`gas-barra${f.tipo !== "nodo" ? " gas-barra-otros" : ""}`} style={{ width: `${(f.ancho * 100).toFixed(2)}%` }} /></span>
-      {sub && <span className="gas-sub">{sub}</span>}
-      {f.nota && <span className="gas-sub gm-nota">{f.nota}</span>}
-    </>
-  );
-  return (
-    <li className={`gas-fila gas-${f.tipo}`}>
-      {onAbrir
-        ? <button type="button" className="gas-abrir" onClick={onAbrir} title={f.t ? `Nombre en el presupuesto: ${f.t}` : undefined}
-          aria-label={f.tipo === "otros" ? `${f.n}: ${f.txt}. Ver todas` : `${f.n}: ${f.txt}${sub ? `, ${sub}` : ""}. Abrir`}>{contenido}</button>
-        : <div className="gas-abrir gas-quieta">{contenido}</div>}
-    </li>
-  );
+  const abre = f.tipo === "nodo" && !!f.nodo?.h?.length, esOtros = f.tipo === "otros";
+  return {
+    id: String(i), nombre: esOtros ? `${f.n} · ver todas` : f.n, valor: f.ancho, texto: f.txt, sub: sub || undefined,
+    color: f.tipo === "nodo" ? undefined : "--text-muted",
+    ...(abre ? { onClick: abrir, flecha: true, aria: `${f.n}: ${f.txt}${sub ? `, ${sub}` : ""}. Abrir` }
+      : esOtros ? { onClick: todas, flecha: true, aria: `${f.n}: ${f.txt}. Ver todas` } : {}),
+  };
 }
 
 /** Barras por mes: el año contra el anterior, en pesos de hoy. El mes parcial va aparte, más claro, y no entra en ninguna cuenta. */
@@ -142,7 +130,6 @@ function GraficoMeses({ v }: { v: VistaM }) {
   );
   return (
     <div className="gm-graf">
-      <h3>Mes a mes, {v.anio} contra {v.anioAnt}</h3>
       <p className="gm-leyenda">
         <span><i className="gm-sw gm-b-a" aria-hidden="true" /> {v.anio}</span>
         <span><i className="gm-sw gm-b-ant" aria-hidden="true" /> {v.anioAnt}</span>
@@ -173,8 +160,8 @@ const nombreMesLargo = (m: MesM) => MESES_L[m.mes - 1];
 
 function Nota({ ar, v }: { ar: ArchivoMensual; v: VistaM }) {
   return (
-    <details className="gas-pie">
-      <summary>Cómo se calcula “Cómo viene {ar.anio}”</summary>
+    <details className="gas-mide">
+      <summary>Cómo se mide</summary>
       <ul className="method">
         <li><b>Gastado (devengado)</b>: el gasto ya hecho, cuando el bien o el servicio se recibió y nace la obligación de pagarlo, aunque todavía no se haya pagado.</li>
         <li><b>El último mes no cuenta</b>: la fuente lo trae incompleto{v.parcial ? ` (${nombreMesLargo(v.parcial)} está ${v.parcialTxt})` : ""}. Se compara {v.periodo} de {v.anio} contra {v.periodo} de {v.anioAnt}, la misma cantidad de meses.</li>

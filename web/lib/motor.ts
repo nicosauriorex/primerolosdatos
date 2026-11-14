@@ -368,8 +368,16 @@ export function crearMotor(F: string[]) {
     if (c.serie.tipo === "idx" || /índice/i.test(c.unidad)) return "";
     const d = hasta - desde, a = Math.abs(d), u = c.unidad;
     const mon = u.match(/US\$|\$/), pre = mon ? mon[0] + " " : "";
-    const num = a >= 1e6 ? nf1.format(a / 1e6) + " M" : fmtNum(a);
-    const mag = u.match(/(miles|millones|billones) de/i), magTxt = mag ? " " + mag[1].toLowerCase() : "";
+    // Una sola escala: con la unidad en "millones de $", 105.900.000 son "105,9 billones" (escala larga), no "105,9 M millones".
+    const mag = u.match(/(miles|millones|billones) de/i)?.[1].toLowerCase();
+    const factor = mag === "miles" ? 1e3 : mag === "millones" ? 1e6 : mag === "billones" ? 1e12 : 1;
+    const abs = a * factor;
+    let num: string, magTxt = "";
+    // Debajo del millón (en la unidad de la serie) queda como siempre: "851 millones", "1.500 miles".
+    if (!mag) num = a >= 1e6 ? nf1.format(a / 1e6) + " M" : fmtNum(a);
+    else if (a < 1e6) { num = fmtNum(a); magTxt = " " + mag; }
+    else if (abs >= 1e12) { num = nf1.format(abs / 1e12); magTxt = " billones"; }
+    else { num = nf1.format(abs / 1e6); magTxt = " millones"; }
     const suf = !pre && u.length <= 14 && !u.includes('"') ? " " + u : "";
     return `${d > 0 ? "+" : d < 0 ? "−" : ""}${pre}${num}${magTxt}${suf}`;
   };

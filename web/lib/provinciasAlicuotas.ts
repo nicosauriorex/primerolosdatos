@@ -117,3 +117,12 @@ export function armarVistaA(d: DatosAlicuotas, c: Contexto, o: { actividad: Acti
   });
   return { actividad: a, anio: o.anio, orden: o.orden, tope: tope == null ? "Sin dato" : txtAlicuota(tope), filas, vacia: filas.every((f) => f.num == null && f.txt === "Sin dato" && !f.aperturas.length) };
 }
+// ---------------------------------------------------------------- remodelación 3.5
+const enMinusc = (s: string) => (/^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+/** La respuesta: la alícuota más alta y la más baja de la actividad (solo las que son un número, con el valor como se ve). */
+export function fraseAlicuotas(v: VistaA): string | null {
+  const num = v.filas.filter((f) => f.num != null);
+  if (!num.length) return null;
+  const alta = num.reduce((a, f) => (redondeo2(f.num!) > redondeo2(a.num!) ? f : a)), baja = num.reduce((a, f) => (redondeo2(f.num!) < redondeo2(a.num!) ? f : a));
+  return `Para ${enMinusc(v.actividad.n)}, la alícuota más alta es la de ${alta.n} (${alta.txt}) y la más baja, la de ${baja.n} (${baja.txt}).`;
+}

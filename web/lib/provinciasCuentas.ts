@@ -481,3 +481,28 @@ export function textosPreviaC(v: VistaC): { titulo: string; descripcion: string 
     descripcion: `Cuánto gasta, cuánto recauda, cuánto recibe de la Nación y cuánto debe cada provincia, con datos oficiales. Por ejemplo: ${v.ind.n.toLowerCase()}, de las 24 jurisdicciones. Fuente: Dirección Nacional de Asuntos Provinciales (Ministerio de Economía).`,
   };
 }
+
+// ---------------------------------------------------------------- remodelación 3.5
+/** Indicadores con valores positivos y negativos (el cero va en el centro de la barra). */
+export const CON_SIGNO: IdInd[] = ["res_fin", "res_pri"];
+/** Los indicadores agrupados para elegirlos en la hoja de ajustes. */
+export const GRUPOS_IND: [string, IdInd[]][] = [
+  ["Gasto", ["gasto_hab", "sueldos", "obra"]],
+  ["Ingresos", ["recaud_hab", "ib", "depende"]],
+  ["Resultado", ["res_fin", "res_pri"]],
+  ["Empleo público", ["empleados", "sueldo_medio"]],
+  ["Deuda", ["deuda_hab", "deuda_ing"]],
+];
+export const gruposIndicador = (x?: CtxC): [string, [string, string][]][] =>
+  GRUPOS_IND.map(([g, ids]): [string, [string, string][]] => [g, ids.filter((id) => indicadorOfrecido(x, id)).map((id): [string, string] => [id, indicadorDe(id).n])]).filter(([, o]) => o.length > 0);
+
+const enMinuscula = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+/** La respuesta de arriba: el valor más alto y el más bajo del indicador. */
+export function fraseCuentas(v: VistaC): { cifra: string; unidad: string; frase: string } | null {
+  const con = v.filas.filter((f) => f.valor != null);
+  if (!con.length) return null;
+  const alto = con.reduce((a, f) => (f.valor! > a.valor! ? f : a)), bajo = con.reduce((a, f) => (f.valor! < a.valor! ? f : a));
+  const cuando = v.ind.fijo ? `Al ${fechaLarga(v.fechaDeuda) ?? "último dato publicado"}` : `En ${v.etq}`;
+  const nombre = v.ind.id === "ib" ? "Ingresos Brutos sobre la recaudación propia" : enMinuscula(v.ind.n);
+  return { cifra: alto.txt, unidad: `en ${alto.n}`, frase: `${cuando}, ${nombre}: más alto en ${alto.n} (${alto.txt}), más bajo en ${bajo.n} (${bajo.txt}).` };
+}

@@ -6,6 +6,10 @@ import { useAparecer } from "./useAparecer";
 export type FilaBarra = {
   id: string; nombre: string; valor: number | null; texto: string; sub?: string;
   href?: string; onClick?: () => void; tono?: "bueno" | "malo" | null; color?: string;
+  /** Marca "›" al lado del valor: la fila abre un nivel más abajo. */
+  flecha?: boolean;
+  /** Texto para lectores de pantalla en vez del contenido visible (solo filas tocables). */
+  aria?: string;
 };
 export type ListaBarrasProps = { filas: FilaBarra[]; divergente?: boolean; max?: number; resaltar?: string; etiqueta: string };
 
@@ -31,7 +35,7 @@ export function ListaBarras({ filas, divergente, max, resaltar, etiqueta }: List
           <>
             <span className="lbar-cab">
               <span className="lbar-nombre">{f.nombre}</span>
-              <span className="lbar-valor">{f.texto}</span>
+              <span className="lbar-valor">{f.texto}{f.flecha && <span className="lbar-flecha" aria-hidden="true">›</span>}</span>
             </span>
             {f.sub && <span className="lbar-sub">{f.sub}</span>}
             <span className="lbar-riel" aria-hidden="true">
@@ -43,8 +47,8 @@ export function ListaBarras({ filas, divergente, max, resaltar, etiqueta }: List
         const estilo = { "--i": i, "--c": colorDe(f) } as CSSProperties;
         return (
           <li key={f.id} className="lbar-item" style={estilo}>
-            {f.href ? <Link href={f.href} prefetch={false} className={`${cls} lbar-toca`}>{cuerpo}</Link>
-              : f.onClick ? <button type="button" className={`${cls} lbar-toca`} onClick={f.onClick}>{cuerpo}</button>
+            {f.href ? <Link href={f.href} prefetch={false} className={`${cls} lbar-toca`} aria-label={f.aria}>{cuerpo}</Link>
+              : f.onClick ? <button type="button" className={`${cls} lbar-toca`} onClick={f.onClick} aria-label={f.aria}>{cuerpo}</button>
               : <div className={cls}>{cuerpo}</div>}
           </li>
         );

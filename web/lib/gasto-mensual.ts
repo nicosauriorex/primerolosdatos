@@ -303,3 +303,15 @@ export function armarImagenMensual(v: VistaM, ar: ArchivoMensual, formato: Forma
     marcaUltimo: false,
   };
 }
+
+// ---------------------------------------------------------------- la respuesta de arriba (remodelación 3.5)
+/** Cifra grande y frase de "Cómo viene el año": "En lo que va de 2026 (ene–oct), la Nación gastó $ X en pesos de oct-26: 3,2 % más que en ene–oct de 2025."
+ *  La variación es la que muestra la tarjeta (con los montos redondeados); sin veredicto (D-012): más o menos, no bueno ni malo. */
+export function fraseMensual(v: VistaM): { cifra: string; frase: string } {
+  const sujeto = v.ruta.length ? `${v.ruta[v.ruta.length - 1]} gastó` : "la Nación gastó";
+  const pesos = v.sinIpc ? "en pesos corrientes" : `en pesos de ${v.ref}`;
+  const t = v.varTotalTxt, cuerpo = t.replace(/^[+−]/, "");
+  const comp = t === "—" ? "" : /^[+]/.test(t) ? `: ${cuerpo} más que en ${v.periodo} de ${v.anioAnt}` : /^−/.test(t) ? `: ${cuerpo} menos que en ${v.periodo} de ${v.anioAnt}` : `: lo mismo que en ${v.periodo} de ${v.anioAnt}`;
+  const inicio = `En lo que va de ${v.anio} (${v.periodo}), ${sujeto}`;
+  return { cifra: v.totalTxt, frase: `${inicio} ${v.totalTxt} ${pesos}${comp}.` };
+}

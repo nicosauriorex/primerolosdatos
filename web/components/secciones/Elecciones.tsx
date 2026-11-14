@@ -1,7 +1,11 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useSeccion } from "../useSeccion";
-import { Cargando, Seg, alternar } from "../ui";
+import { Cargando, alternar } from "../ui";
+import { Capitulo } from "../sistema/Capitulo";
+import { BarraVista } from "../sistema/BarraVista";
+import { Hoja } from "../sistema/Hoja";
+import { InfoPunto } from "../sistema/InfoPunto";
 import { BotonInfo } from "../Variables";
 import { CeldaVar, LineaInicio, Valor, useBase } from "./comunes";
 import { PALETA } from "../util";
@@ -76,6 +80,7 @@ export function Elecciones() {
   const [ord, setOrd] = useState<{ k: string; d: number }>({ k: "abs", d: -1 });
   const [buscar, setBuscar] = useState("");
   const [sel, setSel] = useState<string[]>([]);
+  const [hoja, setHoja] = useState(false);
   const PRES = useMemo(() => (m ? crearPres(m.F) : []), [m]);
   const ELEC = useMemo(() => (m ? crearElec(m.F) : []), [m]);
   const tipos = new Set(lista(p.has("et") ? p.get("et") : "pres,leg").filter((t) => t === "pres" || t === "leg"));
@@ -116,8 +121,9 @@ export function Elecciones() {
   const el = ELEC.filter((e) => tipos.has(e.tipo));
   const elegidos = sel.length ? sel.map((id) => todas.find((o) => o.s.id === id)).filter(Boolean) as Corr[] : filas.slice().sort((a, c) => Math.abs(c.r) - Math.abs(a.r)).slice(0, 12);
   const th = (k: string, t: string) => (
-    <th className={ord.k === k ? (ord.d > 0 ? "ord-asc" : "ord-desc") : ""} style={{ cursor: "pointer" }} tabIndex={0} role="button"
-      onClick={() => setOrd(ord.k === k ? { k, d: -ord.d } : { k, d: -1 })} onKeyDown={(ev) => { if (ev.key === "Enter") setOrd(ord.k === k ? { k, d: -ord.d } : { k, d: -1 }); }}>{t}</th>
+    <th aria-sort={ord.k === k ? (ord.d > 0 ? "ascending" : "descending") : "none"}>
+      <button type="button" className="elec-th" onClick={() => setOrd(ord.k === k ? { k, d: -ord.d } : { k, d: -1 })}>{t}{ord.k === k ? (ord.d > 0 ? " ▲" : " ▼") : ""}</button>
+    </th>
   );
   const sinDetalle = todas.filter((o) => !esDetalle(o.s));
   const voto = estimarVoto(m, m.F, PRES, metrica, b, sinDetalle, corte);
@@ -131,80 +137,101 @@ export function Elecciones() {
   const ultima = el.length ? el[el.length - 1] : null;
   const textoRel = (o: Corr) => `Cuanto ${metrica === "nivel" ? "más alto" : "más subió"} → ${o.r > 0 ? "más" : "menos"} votos al oficialismo`;
 
+  const rta = voto ? fraseVoto(voto, corte) : null;
+  const chips = [
+    { clave: "tipos", texto: tipos.size === 2 ? "Presidenciales y legislativas" : tipos.has("pres") ? "Presidenciales" : tipos.has("leg") ? "Legislativas" : "Ninguna elección" },
+    { clave: "metrica", texto: `Medir: ${METRICA_E[metrica][0].toLowerCase()}` },
+    { clave: "corte", texto: `r ≥ ${nf1.format(corte)}` },
+    { clave: "vars", texto: `${filas.length} variables · mín. ${minN} elecciones` },
+    { clave: "detalle", texto: conIpc === "si" ? "Con detalle regional" : "Sin detalle regional" },
+  ];
+
   return (
     <section>
-      <p className="aviso-elecciones" role="note"><b>Ejercicio estadístico, no un pronóstico.</b> Se basa en pocas elecciones y una relación entre dos datos no prueba que uno cause el otro.</p>
-      <p className="sub">¿Qué dato de la economía va de la mano con lo que vota la gente? Cada variable se compara con el % que sacó el oficialismo nacional en cada elección desde 1995.</p>
-      <div className="controls">
-        <label>Elecciones</label><Seg valor={tipos} opciones={[["pres", "Presidenciales"], ["leg", "Legislativas"]]} onElegir={(v) => set({ et: [...alternar(tipos, v)].join(",") })} />
-        <label>Medir</label><Seg valor={metrica} opciones={Object.entries(METRICA_E).map(([k, v]) => [k, v[0]] as [string, string])} onElegir={(v) => set({ em: v === "var12" ? null : v })} />
-      </div>
-      {metrica === "mandato" && <LineaInicio info={info} F={m.F} />}
-      <details className="contexto-plegado">
-        <summary>Cómo leer estos números</summary>
-        <p className="note">Para cada variable se calcula su valor en cada elección ({METRICA_E[metrica][1]}) y se lo compara con el % que sacó el oficialismo nacional. <b>r</b> es la correlación: +1 = se mueven juntos, −1 = al revés, 0 = nada que ver. Con tan pocas elecciones ({el.length}), una correlación alta puede ser casualidad; con menos de 8 puntos, |r| por debajo de ~0,7 no dice mucho. Los montos de toda la economía se miden como % del PIB y los montos en pesos, en pesos reales.</p>
-        <p className="note">Lo que dice el resultado de abajo <b>no es una encuesta ni un pronóstico</b>: son cuentas simples con pocas elecciones, que muestran qué pasó en el pasado cuando la economía estaba como hoy, no qué va a pasar. Una relación fuerte puede ser casualidad.</p>
-      </details>
-      <div className="card">
-        <h2>¿Qué dicen los datos sobre el voto al oficialismo hoy?</h2>
-        <div className="controls"><label>Relación mínima (|r|)</label>
-          <Seg valor={String(corte)} opciones={CORTES_R.map((r) => [String(r), nf1.format(r)] as [string, string])} onElegir={(v) => set({ elr: v === "0.6" ? null : v })} /></div>
+      <Capitulo id="elec-hoy" titulo="¿Qué dicen los datos sobre el voto al oficialismo hoy?"
+        bajada="Cada variable se compara con el % que sacó el oficialismo nacional en cada elección desde 1995."
+        acciones={<InfoPunto etiqueta="Cómo leer estos números">
+          <p>Para cada variable se calcula su valor en cada elección ({METRICA_E[metrica][1]}) y se lo compara con el % que sacó el oficialismo nacional. <b>r</b> es la correlación: +1 = se mueven juntos, −1 = al revés, 0 = nada que ver. Con tan pocas elecciones ({el.length}), una correlación alta puede ser casualidad; con menos de 8 puntos, |r| por debajo de ~0,7 no dice mucho. Los montos de toda la economía se miden como % del PIB y los montos en pesos, en pesos reales.</p>
+        </InfoPunto>}>
         {!voto ? <p className="note">Con las elecciones y la medida elegidas no hay suficientes variables para estimar nada (hacen falta al menos 3 con 8 elecciones o más).</p> : (
           <>
-            <div className="voto-dos">
-              <div><small>Solo las de relación fuerte (|r| ≥ {nf1.format(corte)})</small>
-                {voto.fuerte ? <div className="voto-rango">Entre {nf0.format(voto.fuerte.min)} % y {nf0.format(voto.fuerte.max)} %, mediana {nf0.format(voto.fuerte.mediana)} %</div>
-                  : <p className="note">No alcanza: hay {voto.fuertes} variable{voto.fuertes === 1 ? "" : "s"} con esa relación y hacen falta al menos 3.</p>}</div>
-              <div><small>Todas, ponderadas por r²</small>
-                {voto.ponderada != null ? <div className="voto-rango">{nf1.format(voto.ponderada)} %</div>
-                  : <p className="note">No se muestra: ninguna variable acompaña al voto (la suma de r² es muy baja).</p>}</div>
+            {rta && rta.cifra && (
+              <p className="elec-cifra"><span className="elec-num">{rta.cifra}</span><span className="elec-rot">{rta.rotulo}</span></p>
+            )}
+            {rta && rta.frases.map((f) => <p key={f} className="elec-frase">{f}</p>)}
+            {ultima && <p className="elec-frase">Como referencia, el último resultado real del oficialismo fue <b>{nf1.format(ultima.v)} %</b> ({ultima.of}, {fmtMes(ultima.f)}).</p>}
+          </>
+        )}
+        <p className="elec-aviso">
+          <span><b>Ejercicio estadístico, no un pronóstico.</b> Se basa en pocas elecciones y una relación entre dos datos no prueba que uno cause el otro.</span>
+          <InfoPunto etiqueta="Más sobre este ejercicio">
+            <p><b>Ejercicio estadístico, no un pronóstico.</b> Se basa en pocas elecciones y una relación entre dos datos no prueba que uno cause el otro.</p>
+            <p>Lo que dice el resultado <b>no es una encuesta ni un pronóstico</b>: son cuentas simples con pocas elecciones, que muestran qué pasó en el pasado cuando la economía estaba como hoy, no qué va a pasar. Una relación fuerte puede ser casualidad.</p>
+          </InfoPunto>
+        </p>
+        <BarraVista items={chips} onAbrir={() => setHoja(true)} />
+        <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
+          {(cerrar) => (
+            <div className="elec-hoja">
+              <Opciones titulo="Elecciones" forma="dos" valor={tipos} onElegir={(v) => set({ et: [...alternar(tipos, v)].join(",") })}
+                opciones={[["pres", "Presidenciales"], ["leg", "Legislativas"]]} />
+              <Opciones titulo="Medir" forma="lista" valor={metrica} onElegir={(v) => set({ em: v === "var12" ? null : v })}
+                opciones={Object.entries(METRICA_E).map(([k, v]) => [k, v[0]] as [string, string])} />
+              {metrica === "mandato" && <LineaInicio info={info} F={m.F} />}
+              <Opciones titulo="Relación mínima (|r|)" forma="seis" valor={String(corte)} onElegir={(v) => set({ elr: v === "0.6" ? null : v })}
+                opciones={CORTES_R.map((r) => [String(r), nf1.format(r)] as [string, string])} />
+              <div className="elec-grupo">
+                <label className="elec-rotulo" htmlFor="e_minn">Mínimo de elecciones</label>
+                <input id="e_minn" type="number" className="elec-num-n" min={4} max={16} value={minN} onChange={(ev) => set({ emn: String(Math.max(4, Math.min(16, +ev.target.value || 6))) })} />
+              </div>
+              <Opciones titulo="Detalle regional de precios" forma="lista" valor={conIpc} onElegir={(v) => set({ eipc: v === "no" ? null : v })}
+                opciones={[["no", "Sin detalle regional de precios"], ["si", "Con todo"]]} />
+              <button type="button" className="btn primario elec-listo" onClick={() => cerrar()}>Listo</button>
             </div>
-            {ultima && <p className="note">Como referencia, el último resultado real del oficialismo fue <b>{nf1.format(ultima.v)} %</b> ({ultima.of}, {fmtMes(ultima.f)}).</p>}
-            <details className="contexto-plegado">
+          )}
+        </Hoja>
+        {voto && (
+          <>
+            <details className="elec-mas">
               <summary>Cómo se calcula</summary>
               <p className="note">Para cada variable se ajustó una recta y se la evaluó en el valor de hoy, medido igual que en las elecciones ({METRICA_E[metrica][0].toLowerCase()}). Se usan las variables con al menos 8 elecciones; las de relación fuerte van primero y resaltadas.</p>
               <p className="note"><b>Cómo se pondera:</b> el número ponderado promedia las estimaciones de todas las variables, y cada una pesa según su r² (&quot;cuánto del voto acompaña a la variable&quot;: 0 % = nada, 100 % = todo). Ojo: muchas variables miden casi lo mismo (varios salarios, por ejemplo), y eso hace que ese tema pese más de lo que correspondería.</p>
             </details>
-            <details className="contexto-plegado">
+            <details className="elec-mas">
               <summary>Ver las {voto.vars.length} variables detrás del número</summary>
               <div className="tablewrap alto fija"><table>
-              <thead><tr><th>Variable</th><th>r</th><th>Peso</th><th>Valor de hoy</th><th>% estimado</th></tr></thead>
-              <tbody>{voto.vars.map((v) => (
-                <tr key={v.o.s.id} className={v.fuerte ? "fila-fuerte" : ""}>
-                  <CeldaVar nombre={v.o.s.n} unidad={v.o.c.unidad} extra={v.fuera ? <small title="El valor de hoy está fuera del rango que tuvo esta variable en las elecciones: es una extrapolación">fuera de lo visto antes</small> : null} />
-                  <Valor tono={null}>{fmtR(v.o.r)}</Valor>
-                  <td>{nf1.format(v.peso * 100)} %</td>
-                  <td>{metrica === "nivel" ? v.o.c.pct ? nf1.format(v.hoy) + " %" : fmtNum(v.hoy) : (v.hoy > 0 ? "+" : "") + nf1.format(v.hoy) + (v.o.c.pct ? " pp" : " %")}</td>
-                  <td>{nf1.format(v.est)} %</td>
-                </tr>
-              ))}</tbody>
-            </table></div>
+                <thead><tr><th>Variable</th><th>r</th><th>Peso</th><th>Valor de hoy</th><th>% estimado</th></tr></thead>
+                <tbody>{voto.vars.map((v) => (
+                  <tr key={v.o.s.id} className={v.fuerte ? "fila-fuerte" : ""}>
+                    <CeldaVar nombre={v.o.s.n} unidad={v.o.c.unidad} extra={v.fuera ? <small title="El valor de hoy está fuera del rango que tuvo esta variable en las elecciones: es una extrapolación">fuera de lo visto antes</small> : null} />
+                    <Valor tono={null}>{fmtR(v.o.r)}</Valor>
+                    <td>{nf1.format(v.peso * 100)} %</td>
+                    <td>{metrica === "nivel" ? v.o.c.pct ? nf1.format(v.hoy) + " %" : fmtNum(v.hoy) : (v.hoy > 0 ? "+" : "") + nf1.format(v.hoy) + (v.o.c.pct ? " pp" : " %")}</td>
+                    <td>{nf1.format(v.est)} %</td>
+                  </tr>
+                ))}</tbody>
+              </table></div>
             </details>
           </>
         )}
-      </div>
-      <div className="card">
-        <h2>Gráficos de dispersión</h2>
-        <p className="note">{sel.length ? `${elegidos.length} variables elegidas.` : "Las 12 de correlación más fuerte (elegí otras con \"+ graficar\")."} Lleno = presidencial, vacío = legislativa; rombo = hoy.{" "}
-          {sel.length > 0 && <button type="button" className="btn" onClick={() => setSel([])}>Volver a las 12 más fuertes</button>}</p>
-        <div className="disps">
+      </Capitulo>
+
+      <Capitulo id="elec-dispersion" titulo="Gráficos de dispersión"
+        bajada={`${sel.length ? `${elegidos.length} variables elegidas.` : "Las 12 de correlación más fuerte (elegí otras con \"+ graficar\")."} Lleno = presidencial, vacío = legislativa; rombo = hoy.`}
+        acciones={sel.length > 0 ? <button type="button" className="btn elec-vuelta" onClick={() => setSel([])}>Volver a las 12 más fuertes</button> : undefined}>
+        <div className="elec-disps">
           {elegidos.map((o, k) => (
-            <div className="disp" key={o.s.id}><div className="k">{o.s.n}</div><div className="d">r = {fmtR(o.r)} · {o.n} elecciones</div>
+            <div className="elec-disp" key={o.s.id}><div className="elec-disp-k">{o.s.n}</div><div className="elec-disp-d">r = {fmtR(o.r)} · {o.n} elecciones</div>
               <Dispersion o={o} color={PALETA[k % 8]} metrica={metrica} hoy={hoyDe(o)} />
-              {!hoyDe(o) && <div className="d">Sin dato actual: la serie no tiene datos recientes.</div>}
-              <div className="d">eje X: {metrica === "nivel" ? o.c.unidad : o.c.pct ? "cambio en puntos" : "cambio %"} · eje Y: % del oficialismo</div></div>
+              {!hoyDe(o) && <div className="elec-disp-d">Sin dato actual: la serie no tiene datos recientes.</div>}
+              <div className="elec-disp-d">eje X: {metrica === "nivel" ? o.c.unidad : o.c.pct ? "cambio en puntos" : "cambio %"} · eje Y: % del oficialismo</div></div>
           ))}
         </div>
-      </div>
-      <div className="card">
-        <h2>Correlación de cada variable con el voto al oficialismo</h2>
-        <div className="controls">
-          <input type="search" aria-label="Buscar variable" placeholder="Buscar variable: salario, inflación, dólar…" style={{ flex: 1, minWidth: 200 }} value={buscar} onChange={(ev) => setBuscar(ev.target.value)} />
-          <label htmlFor="e_minn">Mínimo de elecciones</label>
-          <input id="e_minn" type="number" className="num-n" min={4} max={16} value={minN} onChange={(ev) => set({ emn: String(Math.max(4, Math.min(16, +ev.target.value || 6))) })} />
-          <Seg valor={conIpc} opciones={[["no", "Sin detalle regional de precios"], ["si", "Con todo"]]} onElegir={(v) => set({ eipc: v === "no" ? null : v })} />
-        </div>
-        <p className="note">{filas.length} variables{filas.length > 300 ? " (se muestran las primeras 300)" : ""}. Tocá un encabezado para ordenar.</p>
+      </Capitulo>
+
+      <Capitulo id="elec-correlacion" titulo="Correlación de cada variable con el voto al oficialismo"
+        bajada={`${filas.length} variables${filas.length > 300 ? " (se muestran las primeras 300)" : ""}. Tocá un encabezado para ordenar.`}>
+        <input type="search" className="elec-buscar" aria-label="Buscar variable" placeholder="Buscar variable: salario, inflación, dólar…" value={buscar} onChange={(ev) => setBuscar(ev.target.value)} />
         <div className="tablewrap alto fija"><table>
           <thead><tr><th>Variable</th>{th("r", "r")}{th("abs", "Fuerza |r|")}{th("n", "Elecciones")}<th style={{ textAlign: "left" }}>Qué dice</th><th>Gráfico</th></tr></thead>
           <tbody>
@@ -215,14 +242,15 @@ export function Elecciones() {
                   <Valor tono={null}>{fmtR(o.r)}</Valor>
                   <td><span className="barrita" style={{ ["--w" as string]: `${Math.round(Math.abs(o.r) * 100)}%` }} />{nf0.format(o.r * o.r * 100)} %<small>r²</small></td>
                   <td>{o.n}</td><td className="unidad">{textoRel(o)}</td>
-                  <td><button type="button" className={`btn${on ? " on" : ""}`} onClick={() => setSel(on ? sel.filter((x) => x !== o.s.id) : [...sel, o.s.id])}>{on ? "✓ en gráficos" : "+ graficar"}</button></td></tr>
+                  <td><button type="button" className={`btn elec-graficar${on ? " on" : ""}`} aria-pressed={on} onClick={() => setSel(on ? sel.filter((x) => x !== o.s.id) : [...sel, o.s.id])}>{on ? "✓ en gráficos" : "+ graficar"}</button></td></tr>
               );
             })}
             {!filas.length && <tr><td colSpan={6} style={{ textAlign: "center", color: "var(--text-muted)" }}>Nada para mostrar.</td></tr>}
           </tbody>
         </table></div>
-      </div>
-      <details><summary>Ver las elecciones usadas</summary>
+      </Capitulo>
+
+      <details className="elec-mas elec-usadas"><summary>Ver las elecciones usadas</summary>
         <p className="note">Presidenciales: primera vuelta. Legislativas: diputados nacionales, total del país; son aproximadas porque las alianzas cambian de nombre entre provincias. En 2003 el &quot;oficialismo&quot; es Kirchner, el candidato que apoyó Duhalde.</p>
         <div className="tablewrap fija"><table>
           <thead><tr><th>Fecha</th><th>Tipo</th><th style={{ textAlign: "left" }}>Oficialismo</th><th>% de votos</th><th>Resultado</th></tr></thead>
@@ -230,4 +258,31 @@ export function Elecciones() {
         </table></div></details>
     </section>
   );
+}
+
+/** Un grupo de opciones de la hoja de ajustes: botones de 44 px que se marcan. `forma` fija cuántas van por renglón para que nunca se parta un grupo. */
+function Opciones({ titulo, opciones, valor, onElegir, forma }: {
+  titulo: string; opciones: [string, string][]; valor: string | Set<string>; onElegir: (v: string) => void; forma: "dos" | "seis" | "lista";
+}) {
+  const activo = (v: string) => (valor instanceof Set ? valor.has(v) : valor === v);
+  return (
+    <div className="elec-grupo" role="group" aria-label={titulo}>
+      <span className="elec-rotulo">{titulo}</span>
+      <div className="elec-opcs" data-forma={forma}>
+        {opciones.map(([v, t]) => <button key={v} type="button" className="elec-opc" aria-pressed={activo(v)} onClick={() => onElegir(v)}>{t}</button>)}
+      </div>
+    </div>
+  );
+}
+
+/** Frases de la respuesta, solo con lo que ya calcula `estimarVoto` y los valores redondeados que se ven. */
+function fraseVoto(voto: NonNullable<ReturnType<typeof estimarVoto>>, corte: number): { cifra: string | null; rotulo: string; frases: string[] } {
+  const frases: string[] = [];
+  const fuerte = voto.fuerte
+    ? `Con las ${voto.fuertes} variables de relación fuerte (|r| ≥ ${nf1.format(corte)}), la cuenta da entre ${nf0.format(voto.fuerte.min)} % y ${nf0.format(voto.fuerte.max)} %, con una mediana de ${nf0.format(voto.fuerte.mediana)} %.`
+    : `Con relación fuerte (|r| ≥ ${nf1.format(corte)}) no alcanza: hay ${voto.fuertes} variable${voto.fuertes === 1 ? "" : "s"} y hacen falta al menos 3.`;
+  frases.push(fuerte);
+  if (voto.ponderada != null) return { cifra: `${nf1.format(voto.ponderada)} %`, rotulo: "con todas las variables, ponderadas por r²", frases };
+  frases.push("La cuenta ponderada de todas las variables no se muestra: ninguna acompaña al voto (la suma de r² es muy baja).");
+  return voto.fuerte ? { cifra: `${nf0.format(voto.fuerte.mediana)} %`, rotulo: "mediana de las variables de relación fuerte", frases } : { cifra: null, rotulo: "", frases };
 }

@@ -7,15 +7,19 @@ import Link from "next/link";
 import { useSemaforo } from "../useSemaforo";
 import { useDatos } from "../DatosProvider";
 import { useConfig } from "../ConfigProvider";
-import { Cargando, Modal, Seg } from "../ui";
+import { Cargando, Modal } from "../ui";
+import { Capitulo } from "../sistema/Capitulo";
+import { CabeceraDato } from "../sistema/CabeceraDato";
+import { CompartirHoja } from "../sistema/CompartirHoja";
+import { FilaChips } from "../sistema/FilaChips";
+import { InfoPunto } from "../sistema/InfoPunto";
 import { GraficoSemaforo } from "../GraficoSemaforo";
 import { PanelSemaforo } from "../PanelSemaforo";
-import { avisoCompartir, compartir } from "@/lib/compartir";
 import { medidaInicial } from "@/lib/config";
 import { MESES } from "@/lib/formato";
 import { medDefaultDe } from "@/lib/motor";
 import {
-  MEDIDA_DEFECTO, MEDIDAS, NO_INCLUIDOS, admiteMedida, armarTabla, controlTxt, esMedida, idCatalogo, txtMes, txtVariacion, ultimoMesConVariacion, variacionEn,
+  MEDIDA_DEFECTO, MEDIDAS, NO_INCLUIDOS, admiteMedida, armarTabla, controlTxt, esMedida, fraseSemaforo, idCatalogo, txtMes, txtVariacion, ultimoMesConVariacion, variacionEn,
   type FilaSem, type Indicador, type Medida, type Semaforo, type Tabla,
 } from "@/lib/semaforo";
 import { hrefDato } from "@/lib/temas";
@@ -31,7 +35,7 @@ function actualizadoTxt(iso: string): string | null {
 
 export function Semaforo() {
   const { datos, error } = useSemaforo();
-  if (error) return <div className="card"><p className="error" role="alert">{error}</p><p className="note">El resto del sitio sigue funcionando. Probá de nuevo en un rato.</p></div>;
+  if (error) return <div className="sem-error"><p className="error" role="alert">{error}</p><p className="note">El resto del sitio sigue funcionando. Probá de nuevo en un rato.</p></div>;
   if (!datos) return <Cargando texto="Cargando el semáforo…" />;
   return <Cuerpo datos={datos} />;
 }
@@ -39,45 +43,57 @@ export function Semaforo() {
 function Cuerpo({ datos }: { datos: Semaforo }) {
   const [p, set, montado] = useParams();
   const [imagen, setImagen] = useState(false);
-  const [aviso, setAviso] = useState<string | null>(null);
   const medida: Medida = esMedida(p.get("med")) ? (p.get("med") as Medida) : MEDIDA_DEFECTO;
   const tabla = useMemo(() => armarTabla(datos, medida), [datos, medida]);
   const abierto = montado ? datos.indicadores.find((i) => i.clave === p.get("v")) ?? null : null;
-  const mostrar = (t: string | null) => { setAviso(t); if (t) setTimeout(() => setAviso(null), 4000); };
   const act = actualizadoTxt(datos.actualizado);
   const href = medida === MEDIDA_DEFECTO ? RUTA : `${RUTA}?med=${medida}`;
   const titulo = tabla ? `Semáforo de actividad: ${tabla.resumen.charAt(0).toLowerCase()}${tabla.resumen.slice(1)}` : "Semáforo de actividad";
+  const resp = tabla ? fraseSemaforo(tabla) : null;
 
   return (
     <section className="sem">
-      <div className="sem-cab">
-        <p className="sub">Cómo viene la actividad de un vistazo: cada fila es un indicador y cada columna, un mes. Cada celda muestra cuánto cambió y se pinta de verde si subió y de rojo si bajó.</p>
-        {tabla && <p className="sem-resumen" aria-live="polite"><b>{tabla.resumen}.</b> <span>{tabla.comparado}</span></p>}
-        <div className="sem-controles">
-          <Seg valor={medida} opciones={MEDIDAS} onElegir={(m) => set({ med: m === MEDIDA_DEFECTO ? null : m, v: null })} />
-          {tabla && (
-            <div className="sem-compartir" role="group" aria-label="Compartir el semáforo">
-              <button type="button" className="btn primario" onClick={() => setImagen(true)}>Compartir como imagen</button>
-              <button type="button" className="btn" onClick={async () => mostrar(avisoCompartir(await compartir(href, titulo)))}>Copiar link</button>
-            </div>
-          )}
-        </div>
-        {aviso && <p className="aviso-link" role="status">{aviso}</p>}
+      {tabla && resp && (
+        <CabeceraDato nivel={2} titulo="Indicadores que subieron" cifra={resp.cifra} fecha={resp.fecha} frase={resp.frase}
+          deltas={resp.delta ? [resp.delta] : []}
+          info={<>Cómo viene la actividad de un vistazo: cada fila es un indicador y cada columna, un mes. {tabla.comparado}</>} />
+      )}
+
+      <div className="sem-controles">
+        <FilaChips opciones={MEDIDAS} valor={medida} etiqueta="Medida del semáforo" onElegir={(m) => set({ med: m === MEDIDA_DEFECTO ? null : m, v: null })} />
+        <InfoPunto etiqueta="Por qué mes contra mes no tiene todos los indicadores">
+          Mes contra mes usa solo las series sin estacionalidad que publica el organismo (actividad económica, industria, minería, construcción y empleo) y la confianza del consumidor.
+          En los demás indicadores, la fila dice “solo interanual”. El detalle está en “Cómo se mide”.
+        </InfoPunto>
       </div>
 
-      {tabla ? <Grilla tabla={tabla} medida={medida} onAbrir={(i) => set({ v: i.clave })} /> : <div className="card"><p className="note">No hay datos para esta medida.</p></div>}
+      <Capitulo titulo="Indicador por indicador" bajada="Cada fila es un indicador y cada columna, un mes. Verde: subió. Rojo: bajó. Tocá una fila para ver su gráfico."
+        acciones={tabla ? <CompartirHoja href={href} titulo={titulo} onImagen={() => setImagen(true)} /> : undefined}>
+        {tabla ? <Grilla tabla={tabla} medida={medida} onAbrir={(i) => set({ v: i.clave })} /> : <p className="note">No hay datos para esta medida.</p>}
+      </Capitulo>
 
-      <p className="note">
-        Variación en %, con un decimal. Verde: subió. Rojo: bajó. Sin color: la variación se lee 0,0. Cuanto más intenso el color, más lejos de lo habitual de ese indicador en los últimos 5 años.
-        Cada fila dice su fuente y el mes de su último dato; tocá una fila para ver su gráfico.{act ? ` Última actualización del sitio: ${act}.` : ""}
-      </p>
-
-      <ComoSeCalcula datos={datos} />
+      <ComoSeCalcula datos={datos} act={act} />
       <NoIncluidos />
 
       {abierto && <VentanaFila ind={abierto} onCerrar={() => set({ v: null })} />}
       {imagen && tabla && <PanelSemaforo tabla={tabla} titulo={titulo} href={href} onCerrar={() => setImagen(false)} />}
     </section>
+  );
+}
+
+/** Fila de difusión: el porcentaje de indicadores que subieron cada mes. Va arriba de los grupos (es la respuesta) y se repite abajo. */
+function FilaDifusion({ t, id }: { t: Tabla; id: string }) {
+  return (
+    <tr className="sem-dif" id={id}>
+      <th scope="row">Indicadores que subieron<small>% de los que tienen dato ese mes</small></th>
+      {t.difusion.map((d) => (
+        <td key={d.mes} className={d.atenuada ? "atenuada" : undefined}>
+          <b>{d.txtPct}</b>
+          <small>{d.entran ? `${d.suben} de ${d.entran}` : "sin datos"}</small>
+          {d.atenuada && <span className="sr-solo">, pocos indicadores con dato</span>}
+        </td>
+      ))}
+    </tr>
   );
 }
 
@@ -95,22 +111,14 @@ function Grilla({ tabla: t, medida, onAbrir }: { tabla: Tabla; medida: Medida; o
           </tr>
         </thead>
         <tbody>
+          <FilaDifusion t={t} id="sem-dif-arriba" />
           {t.grupos.map((g) => (
             <Fragment key={g.grupo}>
               <tr className="sem-grupo"><th scope="rowgroup">{g.grupo}</th><td colSpan={t.meses.length} /></tr>
               {g.filas.map((f) => <Fila key={f.ind.clave} f={f} n={t.meses.length} onAbrir={onAbrir} />)}
             </Fragment>
           ))}
-          <tr className="sem-dif">
-            <th scope="row">Indicadores que subieron<small>% de los que tienen dato ese mes</small></th>
-            {t.difusion.map((d) => (
-              <td key={d.mes} className={d.atenuada ? "atenuada" : undefined}>
-                <b>{d.txtPct}</b>
-                <small>{d.entran ? `${d.suben} de ${d.entran}` : "sin datos"}</small>
-                {d.atenuada && <span className="sr-solo">, pocos indicadores con dato</span>}
-              </td>
-            ))}
-          </tr>
+          <FilaDifusion t={t} id="sem-dif-abajo" />
         </tbody>
       </table>
     </div>
@@ -161,13 +169,14 @@ function VentanaFila({ ind, onCerrar }: { ind: Indicador; onCerrar: () => void }
   );
 }
 
-function ComoSeCalcula({ datos }: { datos: Semaforo }) {
+function ComoSeCalcula({ datos, act }: { datos: Semaforo; act: string | null }) {
   const control = controlTxt(datos);
   const reales = datos.indicadores.filter((i) => i.real).map((i) => i.nombre.replace(/\s*\(.*\)$/, ""));
   return (
     <details>
-      <summary>Cómo se calcula</summary>
+      <summary>Cómo se mide</summary>
       <ul className="method">
+        <li><b>Qué se ve</b>: variación en %, con un decimal. Sin color: la variación se lee 0,0. Cada fila dice su fuente y el mes de su último dato.{act ? ` Última actualización del sitio: ${act}.` : ""}</li>
         <li><b>Interanual</b> (la medida de entrada): cada mes se compara con el mismo mes del año anterior, con la serie original, así que no hace falta quitarle la estacionalidad. Es la única medida con todos los indicadores.</li>
         <li><b>Mes contra mes</b>: cada mes se compara con el anterior, con la serie sin estacionalidad que publica el organismo. Solo entran los indicadores que tienen ese ajuste oficial (actividad económica, industria, minería, construcción y empleo) y la confianza del consumidor, que es una encuesta y no lo necesita. En los demás, la fila dice “solo interanual”.</li>
         <li><b>El color</b>: verde si subió, rojo si bajó, sin color si la variación se lee 0,0. La intensidad compara cada celda con lo habitual de ese mismo indicador en los últimos 5 años (la mediana de sus variaciones, sin importar si subieron o bajaron): así un salto de 30 % en un indicador muy movido no apaga a los demás.</li>
