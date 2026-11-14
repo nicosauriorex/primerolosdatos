@@ -855,7 +855,6 @@ tr.clic.abierto > td { font-weight: 700; }
 .pm-n { min-width: 0; overflow-wrap: anywhere; }
 .pm-barra { position: relative; height: 14px; background: color-mix(in srgb, var(--text-muted) 16%, transparent); border-radius: var(--r-1); }
 .pm-rel { position: absolute; top: 2px; bottom: 2px; border-radius: var(--r-1); }
-.pm-medio { position: absolute; left: 50%; top: -2px; bottom: -2px; border-left: var(--linea) solid var(--text-primary); z-index: 1; }
 .pm-v { text-align: right; font-weight: 700; }
 .pm-v small { font-weight: 400; }
 @media (max-width: 639.98px) { .pm-fila { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 54px; gap: var(--e-2); padding: var(--e-2); } }
@@ -1968,3 +1967,66 @@ a.zocalo:focus-visible { outline: var(--linea) solid var(--foco); outline-offset
 .pres-hoja-acciones { display: flex; gap: var(--e-2); margin-bottom: var(--e-3); }
 .pres-cuerpo { min-width: 0; }
 .pres-nota { margin: var(--e-3) 0 0; font-size: var(--v-rotulo); color: var(--text-secondary); line-height: 1.4; }
+
+/* ==== Remodelación 3.4: Contexto ==== */
+/* La pregunta de Contexto (PreguntaPrecios.tsx). */
+.pq { min-width: 0; }
+.pq-espera { min-height: 360px; }
+.pq-titulo { line-height: 1.5; }
+.pq-titulo .hueco-menu { font-size: var(--t-base); font-weight: 400; font-stretch: normal; line-height: 1.4; text-transform: none; }
+.pq-cuerpo { min-height: 320px; }
+.pq .preg-resp { min-height: 0; border-top: 0; padding-top: 0; }
+.pq .preg-cifra { font-size: var(--v-titular); }
+.pq-cifra-fila { display: flex; align-items: center; flex-wrap: wrap; gap: var(--e-2); }
+.pq-sub-lista { margin: var(--e-4) 0 var(--e-1); font-size: var(--v-rotulo); color: var(--text-muted); }
+.pq-otros { margin-top: var(--e-3); }
+.pq-otros > summary { display: flex; align-items: center; min-height: var(--toque); cursor: pointer; font-weight: 700; color: var(--acento-texto); }
+.pq-otros > summary:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.pq-kilos { margin: var(--e-4) 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-1) var(--e-2); line-height: 1.5; overflow-wrap: anywhere; }
+.pq-ver { margin: var(--e-2) 0 0; }
+.pq-link { display: inline-flex; align-items: center; min-height: var(--toque); padding: 0; background: none; border: 0; font: inherit; font-weight: 700; color: var(--acento-texto); text-decoration: none; cursor: pointer; }
+.pq-link:hover { text-decoration: underline; }
+.pq-link:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+
+/* Página de Contexto (prefijo ctx-) */
+
+/* Frase-respuesta con la que abre cada bloque */
+.ctx-respuesta { margin: 0 0 var(--e-3); font-size: var(--t-md); font-weight: 700; line-height: 1.35; color: var(--text-primary); overflow-wrap: anywhere; }
+
+/* Índice de los cuatro contextos: filas enteras tocables, dos columnas desde 900 px (mismo aspecto que .indice-fila de la portada) */
+.ctx-indice { margin-top: var(--e-6); }
+.ctx-indice ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 0 var(--e-6); }
+@media (min-width: 900px) { .ctx-indice ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ctx-indice-fila { display: flex; align-items: center; gap: var(--e-3); min-height: var(--alto-toque); padding: var(--e-3) 0; border-bottom: 1px solid var(--border); color: inherit; text-decoration: none; }
+.ctx-indice-fila:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: -2px; }
+.ctx-indice-textos { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ctx-indice-textos b { font-size: 1rem; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+.ctx-indice-textos small { font-size: var(--t-sm); color: var(--text-muted); line-height: 1.35; overflow-wrap: anywhere; }
+.ctx-indice-fila .icono { flex: none; color: var(--acento-texto); }
+.ctx-indice-fila:hover b { color: var(--acento-texto); }
+
+/* Controles en fila de chips, con su rótulo */
+.ctx-fila { display: flex; align-items: center; gap: var(--e-3); min-width: 0; margin-bottom: var(--e-2); }
+.ctx-fila .chips { flex: 1 1 auto; min-width: 0; }
+.ctx-rotulo { flex: none; min-width: 4.5rem; font-size: var(--v-rotulo); font-weight: 700; color: var(--text-secondary); }
+
+/* Título de un gráfico o tabla con su ⓘ al lado */
+.ctx-titulo-graf { display: flex; align-items: center; gap: var(--e-1); min-width: 0; margin-top: var(--e-4); }
+.ctx-titulo-graf h3 { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+
+/* Plegados de lo largo ("Cómo se mide", año por año, en palabras) */
+.ctx-mas { margin-top: var(--e-3); min-width: 0; }
+.ctx-mas > summary { display: flex; align-items: center; min-height: var(--toque); cursor: pointer; font-size: var(--t-sm); font-weight: 700; color: var(--text-secondary); }
+.ctx-mas > summary:hover { color: var(--text-primary); }
+.ctx-mas .tablewrap { overflow-x: auto; }
+
+/* Alto reservado mientras llegan los precios del mundo (la página no salta) */
+.ctx-reserva { min-height: 420px; }
+
+/* Contenido de las hojas de ajustes */
+.ctx-hoja { display: grid; gap: var(--e-3); min-width: 0; }
+.ctx-hoja .controls label { min-width: min(120px, 100%); }
+.ctx-hoja .btn { min-height: var(--toque); justify-content: center; }
+
+/* Final de la página: cómo se mide y fuente */
+.ctx-pie { margin-top: var(--e-7); padding-top: var(--e-4); border-top: 1px solid var(--border); }

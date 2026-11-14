@@ -1,7 +1,8 @@
 // Contexto internacional (bloque 6b, D-008): cálculos de la sección Contexto y del recuadro "Contexto del mandato".
 // Una sola fuente de verdad: la sección y el recuadro usan estas funciones.
 // Datos: web/public/datos/contexto.json (FMI, anual) + series mensuales del catálogo (viento de cola o de frente).
-import { ok } from "./formato";
+import { fmtMes, nf0, nf1, ok, r1 } from "./formato";
+import { ultimoArg, type ArgPM, type DatosPM, type Dolar } from "./preciosMundo";
 import { PRES_DEF, type Pres } from "./estadisticas";
 import type { Motor } from "./motor";
 
@@ -217,3 +218,82 @@ export function resumenMandato(m: Motor, d: DatosContexto, pres: Pres, grupo: st
     contra: v.filter((x) => x.marca === "contra").length, hayViento: v.length > 0,
   };
 }
+
+// ---------------------------------------------------------------- frases-respuesta (índice y apertura de cada bloque de /contexto/)
+// Una sola fuente: el índice de la página y el comienzo de cada bloque usan estas funciones. Devuelven null si falta el dato.
+const entero = (v: number): string => nf0.format(Math.abs(Math.round(v)));
+const verboCrece = (v: number): string => `${v < 0 ? "cayó" : "creció"} ${entero(v)} %`;
+
+/** "Desde 2000, el PIB de la Argentina creció X % y el del mundo, Y %." (años cerrados; cifras enteras como se muestran). */
+export function fraseComparar(d: DatosContexto): string | null {
+  const base = 2000, hasta = ultimoCerrado(d);
+  const anios: number[] = [];
+  for (let y = base + 1; y <= hasta; y++) anios.push(y);
+  const crec = (ent: string): number | null => {
+    if (!d.entidades[ent]) return null;
+    const v = crecimientoIndice(d, indiceCrecimiento(d, ent, base), anios).v;
+    return ok(v) ? Math.round(v) : null;
+  };
+  const a = crec(ARG), w = crec("WEOWORLD");
+  if (a == null || w == null) return null;
+  return (a < 0) === (w < 0)
+    ? `Desde ${base}, el PIB de la Argentina ${verboCrece(a)} y el del mundo, ${entero(w)} %.`
+    : `Desde ${base}, el PIB de la Argentina ${verboCrece(a)} y el del mundo ${verboCrece(w)}.`;
+}
+
+/** Cómo se dice un grupo de comparación en una frase ("el mundo", "los vecinos"). */
+export function grupoDicho(grupo: string): string {
+  if (grupo === VEC) return "los vecinos";
+  if (grupo === "WEOWORLD") return "el mundo";
+  if (grupo === "OEMDC") return "los emergentes";
+  const g = GRUPOS_CMP.find((x) => x[2] === grupo);
+  return g ? g[1] : grupo;
+}
+
+/** Sorpresa de un año con los valores como se ven en la tabla (real − proyectado, cada uno con un decimal). */
+const sorpresaVista = (real: number | null, proy: number | null): number | null => (ok(real) && ok(proy) ? r1(r1(real) - r1(proy)) : null);
+
+/** "Entre 1995 y 2022, la Argentina creció en promedio X puntos por año más/menos de lo que proyectaba el FMI en abril; el mundo, Y puntos más/menos." */
+/** `codigo`: el dato del bloque (crecimiento o inflación), para que la frase hable de lo mismo que el gráfico de abajo. */
+export function fraseEsperado(d: DatosContexto, grupo: string, codigo = "NGDP_RPCH"): string | null {
+  const filas = filasEsperado(d, codigo, grupo);
+  const pares = filas.map((f) => ({ y: f.y, a: sorpresaVista(f.rArg, f.pArg), g: sorpresaVista(f.rGrp, f.pGrp) })).filter((x) => x.a != null && x.g != null);
+  if (!pares.length) return null;
+  const prom = (xs: number[]) => r1(xs.reduce((s, x) => s + x, 0) / xs.length);
+  const a = prom(pares.map((x) => x.a as number)), g = prom(pares.map((x) => x.g as number));
+  const dif = (v: number, verbo: string) => (v === 0 ? `${verbo} en promedio lo mismo que proyectaba el FMI en abril` : `${verbo} en promedio ${nf1.format(Math.abs(v))} puntos por año ${v > 0 ? "más" : "menos"} de lo que proyectaba el FMI en abril`);
+  const sobreG = g === 0 ? "lo mismo" : `${nf1.format(Math.abs(g))} puntos ${g > 0 ? "más" : "menos"}`;
+  const verbo = codigo === "PCPIPCH" ? "tuvo una inflación" : "creció";
+  return `Entre ${pares[0].y} y ${pares[pares.length - 1].y}, la Argentina ${dif(a, verbo)}; ${grupoDicho(grupo)}, ${sobreG}.`;
+}
+
+/** Último presidente (en orden cronológico) con al menos un indicador de afuera con marca. */
+export function presParaViento(m: Motor, d: DatosContexto | null, pres: Pres[]): Pres | null {
+  for (let i = pres.length - 1; i >= 0; i--) if (vientosPres(m, d, pres[i]).some((x) => x.marca !== "sin")) return pres[i];
+  return null;
+}
+
+/** "Con Milei, N de los M indicadores de afuera estuvieron a favor y K en contra (contra el promedio de toda la serie)." */
+export function fraseViento(m: Motor, d: DatosContexto, pres: Pres | null): string | null {
+  if (!pres) return null;
+  const v = vientosPres(m, d, pres).filter((x) => x.marca !== "sin");
+  if (!v.length) return null;
+  const favor = v.filter((x) => x.marca === "favor").length, contra = v.filter((x) => x.marca === "contra").length;
+  return `Con ${pres.corto}, ${favor} de los ${v.length} indicadores de afuera estuvieron ${MARCA_TXT.favor} y ${contra} ${MARCA_TXT.contra} (contra el promedio de toda la serie).`;
+}
+
+/** "En oct-2026, el consumo de los hogares en la Argentina estaba N % más barato que el promedio del mundo (estimado, dólar oficial)."
+ *  N sale del nivel como se muestra (entero): 100 − 62 = 38. */
+export function fraseRubroMundo(d: DatosPM, arg: ArgPM, rid: string, dolar: Dolar): string | null {
+  const u = ultimoArg(d, rid, arg, dolar);
+  if (!u) return null;
+  const nivel = Math.round(u.nivel), dif = Math.abs(100 - nivel);
+  const cuando = u.modo === "estimado" ? fmtMes(u.fecha) : u.fecha;
+  const que = rid === "total" ? "el consumo de los hogares" : `el nivel de precios de ${d.rubros[rid].n.toLowerCase()}`;
+  const como = `${u.modo === "estimado" ? "estimado" : "medido"}, dólar ${dolar === "blue" ? "blue" : "oficial"}`;
+  const comp = dif === 0 ? "al mismo nivel que el promedio del mundo" : `${nf0.format(dif)} % más ${nivel < 100 ? "barato" : "caro"} que el promedio del mundo`;
+  return `En ${cuando}, ${que} en la Argentina estaba ${comp} (${como}).`;
+}
+
+/** Link a un bloque de /contexto/ con los parámetros de la vista actual y su ancla. */
+export const hrefBloque = (p: URLSearchParams, id: string): string => { const q = p.toString(); return `/contexto/${q ? `?${q}` : ""}#${id}`; };

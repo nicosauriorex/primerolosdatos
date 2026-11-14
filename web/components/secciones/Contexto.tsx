@@ -1,9 +1,16 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSeccion } from "../useSeccion";
 import { useContexto } from "../useContexto";
+import { usePreciosMundo } from "../usePreciosMundo";
 import { Cargando, Seg, Selector, alternar } from "../ui";
-import { BotonLink } from "../BotonLink";
+import { IconoDerecha } from "../Iconos";
+import { Capitulo } from "../sistema/Capitulo";
+import { FilaChips } from "../sistema/FilaChips";
+import { BarraVista } from "../sistema/BarraVista";
+import { Hoja } from "../sistema/Hoja";
+import { InfoPunto } from "../sistema/InfoPunto";
+import { CompartirHoja } from "../sistema/CompartirHoja";
 import { Grafico, type Fila, type OpcionesG, type SerieG } from "../Grafico";
 import { useConfig } from "../ConfigProvider";
 import { baseDeConfig } from "@/lib/config";
@@ -14,12 +21,13 @@ import { nf0, nf1, ok, r1 } from "@/lib/formato";
 import { PRES_DEF, crearPres, franjasPres, nombreCorto, type Pres } from "@/lib/estadisticas";
 import {
   ARG, COMPARAR, ESPERADO, GRUPOS_CMP, GRUPOS_EXTRA, MARCA_TXT, PAISES, VEC, VECINOS, VIENTOS,
-  aniosDe, crecimientoIndice, filasEsperado, nombreEnt, promedioAnios, serieAnual, serieComparar, sorpresaPres, textoAnios, ultimoCerrado, vientosPres,
+  aniosDe, crecimientoIndice, filasEsperado, fraseComparar, fraseEsperado, fraseRubroMundo, fraseViento, hrefBloque, nombreEnt, presParaViento, promedioAnios, serieAnual, serieComparar, sorpresaPres, textoAnios, ultimoCerrado, vientosPres,
   type DatosContexto, type DefInd, type DefViento, type Marca,
 } from "@/lib/contexto";
 import { lista, unoDe, useParams } from "@/lib/url";
-import { IDS_PM } from "@/lib/preciosMundo";
+import { IDS_PM, IDS_PREGUNTA, argDesdeMotor, type Dolar } from "@/lib/preciosMundo";
 import { PreciosMundo } from "./PreciosMundo";
+import { PreguntaPrecios } from "./PreguntaPrecios";
 
 const f1 = (v: number | null | undefined) => (ok(v) ? nf1.format(v) : "—");
 const signo = (v: number) => { const r = Math.round(v * 10) / 10; return (r > 0 ? "+" : r < 0 ? "−" : "") + nf1.format(Math.abs(r)); };
@@ -33,15 +41,21 @@ const nDe = (p: { n: number; de: number }) => (p.n < p.de ? <small>{p.n} de {p.d
 
 export function Contexto() {
   const [p, set, montado] = useParams();
-  const sec = useSeccion(["ctx_soja", "ctx_maiz", "ctx_trigo", "ctx_petroleo", "ctx_fed", "ctx_terminos", ...IDS_PM]);
+  const sec = useSeccion(["ctx_soja", "ctx_maiz", "ctx_trigo", "ctx_petroleo", "ctx_fed", "ctx_terminos", ...IDS_PM, ...IDS_PREGUNTA]);
   const { datos, error } = useContexto();
+  const pm = usePreciosMundo();
   const m = sec.motor;
   const PRES = useMemo(() => (m ? crearPres(m.F) : []), [m]);
+  const dolar = unoDe<Dolar>(p.get("pmd"), ["oficial", "blue"], "oficial");
+  const fraseMundo = useMemo(() => (m && pm.datos ? fraseRubroMundo(pm.datos, argDesdeMotor(m, pm.datos), "total", dolar) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [m, pm.datos, dolar, sec.version, sec.ocupado]);   // el motor es el mismo objeto: se recalcula cuando llegan las series
   const listo = !!m && !sec.ocupado && !!datos;
-  useEffect(() => {   // los bloques existen recién cuando llegan los datos: un link con ancla (#esperado, #comparar, #viento) va al bloque una vez
+  const pmListo = !!pm.datos || !!pm.error;
+  useEffect(() => {   // los bloques existen recién cuando llegan los datos (y los de precios, que están más arriba y cambian el alto): un link con ancla va al bloque una vez
     const h = window.location.hash.slice(1);
-    if (listo && h) document.getElementById(h)?.scrollIntoView();
-  }, [listo]);
+    if (listo && pmListo && h) document.getElementById(h)?.scrollIntoView();
+  }, [listo, pmListo]);
 
   if (sec.errorGeneral) return <p className="error" role="alert">{sec.errorGeneral}</p>;
   if (error) return <p className="error" role="alert">{error}</p>;
@@ -51,30 +65,59 @@ export function Contexto() {
   const grupo = GRUPOS_CMP.find((g) => g[0] === grupoId) as [string, string, string];
   const resalta = PRES_DEF.some((x) => x.id === p.get("cpr")) ? p.get("cpr") : null;
   const hasta = ultimoCerrado(datos);
+  // Una frase-respuesta por bloque: el índice y la apertura de cada bloque usan la misma
+  const indice = [
+    { id: "precios-mundo", n: "Precios en el mundo", f: fraseMundo },
+    { id: "comparar", n: "La Argentina y otros países", f: fraseComparar(datos) },
+    { id: "esperado", n: "Lo esperado y lo que pasó", f: fraseEsperado(datos, grupo[2], (ESPERADO.find((x) => x.id === p.get("cd")) ?? ESPERADO[0]).origen) },
+    { id: "viento", n: "Viento de cola o de frente", f: fraseViento(m, datos, presParaViento(m, datos, PRES)) },
+  ];
 
   return (
     <section>
-      <p className="sub">Lo que pasaba en el mundo mientras gobernaba cada presidente: qué se esperaba, cómo le fue a la Argentina contra otros países y si el contexto soplaba a favor o en contra. La misma vara para todos.</p>
-      <div className="controls">
-        <label>Grupo de comparación</label>
-        <Seg valor={grupoId} opciones={GRUPOS_CMP.map((g) => [g[0], g[1]] as [string, string])} onElegir={(v) => set({ cg: v === "mundo" ? null : v })} />
-      </div>
-      <details className="contexto-plegado">
-        <summary>Cómo se asignan los años y qué es «Vecinos»</summary>
-        <p className="note"><b>Cómo se asignan los años:</b> cada año calendario es del presidente que gobernó 6 meses o más de ese año (2003 es de Néstor Kirchner; 2015, de CFK 2; 2023, de Alberto Fernández; si son 6 y 6, como 1995, va para el que ya estaba al empezar el año).
-        Si un presidente no tiene ningún año así, figura &quot;sin años completos&quot;. Los gráficos y los promedios usan los años cerrados (hasta {hasta}); los años siguientes son proyecciones del FMI y no se muestran.</p>
-        <p className="note">«Vecinos» es el promedio simple de Brasil, Chile, Uruguay, Paraguay y Bolivia.</p>
-      </details>
-      <Esperado datos={datos} grupo={grupo[2]} nombreGrupo={grupo[1]} p={p} set={set} resalta={resalta} />
-      <Comparar datos={datos} p={p} set={set} resalta={resalta} />
+      <p className="sub">Qué pasaba en el mundo mientras gobernaba cada presidente: precios, otros países, lo esperado y el viento de afuera. La misma vara para todos.</p>
+      <PreguntaPrecios m={m} p={p} set={set} />
+      <nav className="ctx-indice" aria-label="Los cuatro contextos">
+        <ul>
+          {indice.map((x) => (
+            <li key={x.id}>
+              <a href={`#${x.id}`} className="ctx-indice-fila">
+                <span className="ctx-indice-textos"><b>{x.n}</b>{x.f ? <small>{x.f}</small> : null}</span>
+                <IconoDerecha />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
       <PreciosMundo m={m} p={p} set={set} />
-      <Viento m={m} datos={datos} PRES={PRES} resalta={resalta} />
-      <p className="note">Fuente: {datos.fuente}.</p>
+      <Comparar datos={datos} p={p} set={set} resalta={resalta} />
+      <Esperado datos={datos} grupoId={grupoId} grupo={grupo[2]} nombreGrupo={grupo[1]} p={p} set={set} resalta={resalta} />
+      <Viento m={m} datos={datos} PRES={PRES} resalta={resalta} p={p} />
+      <div className="ctx-pie">
+        <details className="ctx-mas">
+          <summary>Cómo se mide</summary>
+          <p className="note"><b>Cómo se asignan los años:</b> cada año calendario es del presidente que gobernó 6 meses o más de ese año (2003 es de Néstor Kirchner; 2015, de CFK 2; 2023, de Alberto Fernández; si son 6 y 6, como 1995, va para el que ya estaba al empezar el año).
+          Si un presidente no tiene ningún año así, figura &quot;sin años completos&quot;. Los gráficos y los promedios usan los años cerrados (hasta {hasta}); los años siguientes son proyecciones del FMI y no se muestran.</p>
+          <p className="note">«Vecinos» es el promedio simple de Brasil, Chile, Uruguay, Paraguay y Bolivia.</p>
+        </details>
+        <p className="note">Fuente: {datos.fuente}.</p>
+      </div>
     </section>
   );
 }
 
 type Setter = (c: Record<string, string | null | undefined>) => void;
+
+/** Plegado que arma su contenido recién al abrirse (los gráficos miden su ancho al montarse: cerrados medirían cero). */
+function Plegado({ resumen, children }: { resumen: string; children: ReactNode }) {
+  const [abierto, setAbierto] = useState(false);
+  return (
+    <details className="ctx-mas" onToggle={(e) => setAbierto((e.currentTarget as HTMLDetailsElement).open)}>
+      <summary>{resumen}</summary>
+      {abierto && children}
+    </details>
+  );
+}
 
 function Leyenda({ items }: { items: { color: string; n: string; dash?: boolean }[] }) {
   return (
@@ -87,7 +130,7 @@ function Leyenda({ items }: { items: { color: string; n: string; dash?: boolean 
 }
 
 // ------------------------------------------------------------------ lo esperado vs. lo que pasó
-function Esperado({ datos, grupo, nombreGrupo, p, set, resalta }: { datos: DatosContexto; grupo: string; nombreGrupo: string; p: URLSearchParams; set: Setter; resalta: string | null }) {
+function Esperado({ datos, grupoId, grupo, nombreGrupo, p, set, resalta }: { datos: DatosContexto; grupoId: string; grupo: string; nombreGrupo: string; p: URLSearchParams; set: Setter; resalta: string | null }) {
   const def = ESPERADO.find((x) => x.id === p.get("cd")) ?? ESPERADO[0];
   const filas = useMemo(() => filasEsperado(datos, def.origen, grupo), [datos, def, grupo]);
   const hasta = ultimoCerrado(datos);
@@ -113,19 +156,32 @@ function Esperado({ datos, grupo, nombreGrupo, p, set, resalta }: { datos: Datos
     grp: columnaComparable(porPres.map((q) => q.s.sGrp), dir, true),
     dif: columnaComparable(porPres.map((q) => q.s.dif), dir, true),
   };
+  const resp = fraseEsperado(datos, grupo, def.origen);
   return (
-    <div className="card" id="esperado">
-      <div className="cab-bloque"><h2>Lo esperado vs. lo que pasó</h2><BotonLink id="esperado" titulo="Primero los Datos: lo esperado contra lo que pasó" /></div>
-      <p className="note">Cada año, lo que el FMI proyectaba en abril y lo que terminó pasando. «Sorpresa» = real − proyectado. Se usa siempre la última edición del FMI para lo que pasó y la de abril de cada año para lo esperado (el FMI corrige datos viejos en cada edición).</p>
-      <div className="controls">
-        <label>Dato</label>
-        <Seg valor={def.id} opciones={ESPERADO.map((x) => [x.id, x.n] as [string, string])} onElegir={(v) => set({ cd: v === "crec" ? null : v })} />
+    <Capitulo id="esperado" titulo="Lo esperado y lo que pasó"
+      acciones={<CompartirHoja href={hrefBloque(p, "esperado")} titulo="Lo esperado y lo que pasó" texto={resp ? `${resp} Fuente: ${datos.fuente}.` : undefined} />}>
+      {resp && <p className="ctx-respuesta">{resp}</p>}
+      <div className="ctx-fila"><span className="ctx-rotulo">Dato</span>
+        <FilaChips etiqueta="Dato" valor={def.id} opciones={ESPERADO.map((x) => [x.id, x.n] as [string, string])} onElegir={(v) => set({ cd: v === "crec" ? null : v })} /></div>
+      <div className="ctx-fila"><span className="ctx-rotulo">Comparar con</span>
+        <FilaChips etiqueta="Grupo de comparación" valor={grupoId} opciones={GRUPOS_CMP.map((g) => [g[0], g[1]] as [string, string])} onElegir={(v) => set({ cg: v === "mundo" ? null : v })} /></div>
+      <div className="ctx-titulo-graf">
+        <h3>{def.n}: proyectado en abril y real</h3>
+        <InfoPunto etiqueta="Cómo se mide lo esperado">
+          <p>Cada año, lo que el FMI proyectaba en abril y lo que terminó pasando. «Sorpresa» = real − proyectado. Se usa siempre la última edición del FMI para lo que pasó y la de abril de cada año para lo esperado (el FMI corrige datos viejos en cada edición).</p>
+          <p>Las proyecciones de abril que publica el FMI como base descargable llegan hasta la edición de 2022 y cubren crecimiento e inflación (no desempleo ni América Latina): los años sin proyección no tienen sorpresa y no entran en los promedios.</p>
+          {ok(estA) && <p>{hasta + 1} (estimado, todavía sin dato real): la última proyección del FMI es {f1(estA)} para la Argentina y {f1(estG)} para {nombre}. No entra en las sorpresas.</p>}
+        </InfoPunto>
       </div>
+      <p className="note">{def.u}. Línea punteada: lo proyectado en abril.</p>
       <Grafico rows={rows} series={series} opts={opts} />
       <Leyenda items={series.map((s) => ({ color: s.color, n: s.name, dash: s.dash }))} />
-      {ok(estA) && <p className="note">{hasta + 1} (estimado, todavía sin dato real): la última proyección del FMI es {f1(estA)} para la Argentina y {f1(estG)} para {nombre}. No entra en las sorpresas.</p>}
-      <p className="note">Las proyecciones de abril que publica el FMI como base descargable llegan hasta la edición de 2022 y cubren crecimiento e inflación (no desempleo ni América Latina): los años sin proyección no tienen sorpresa y no entran en los promedios.</p>
-      <h3>Por presidente</h3>
+      <div className="ctx-titulo-graf">
+        <h3>Por presidente</h3>
+        <InfoPunto etiqueta="Cómo leer la tabla">
+          <p>La barra muestra la magnitud frente al mayor de la columna (a la derecha si es positiva, a la izquierda si es negativa) y las marcas “mejor” y “peor” señalan los extremos. {dir > 0 ? "Verde: mejor de lo esperado." : "Que salga más alto es peor: verde = más bajo de lo esperado."}</p>
+        </InfoPunto>
+      </div>
       <div className="tablewrap fija"><table>
         <thead><tr><th>Presidente</th><th>Sorpresa Argentina</th><th>Sorpresa {nombreGrupo}</th><th>Diferencia</th></tr></thead>
         <tbody>{porPres.map(({ x, s, anios }, k) => (
@@ -139,13 +195,16 @@ function Esperado({ datos, grupo, nombreGrupo, p, set, resalta }: { datos: Datos
           </tr>
         ))}</tbody>
       </table></div>
-      <p className="note" style={{ marginTop: "var(--e-2)" }}>Sorpresa promedio por año, en puntos. {dir > 0 ? "Verde: mejor de lo esperado." : "Que salga más alto es peor: verde = más bajo de lo esperado."} La barra muestra la magnitud frente al mayor de la columna (a la derecha si es positiva, a la izquierda si es negativa) y las marcas “mejor” y “peor” señalan los extremos.</p>
-      <ul className="note" style={{ paddingLeft: 18 }}>
-        {porPres.filter(({ s, anios }) => anios.length && ok(s.sArg) && ok(s.sGrp) && ok(s.dif)).map(({ x, s }) => (
-          <li key={x.id}>Con {x.n}, la Argentina rindió {frase(s.sArg as number)} por año; {nombre}, {frase(s.sGrp as number)}. Diferencia: {signo(difMostrada(s.sArg, s.sGrp) ?? (s.dif as number))} puntos.</li>
-        ))}
-      </ul>
-      <details>
+      <p className="note" style={{ marginTop: "var(--e-2)" }}>Sorpresa promedio por año, en puntos.</p>
+      <details className="ctx-mas">
+        <summary>Presidente por presidente, en palabras</summary>
+        <ul className="note" style={{ paddingLeft: 18 }}>
+          {porPres.filter(({ s, anios }) => anios.length && ok(s.sArg) && ok(s.sGrp) && ok(s.dif)).map(({ x, s }) => (
+            <li key={x.id}>Con {x.n}, la Argentina rindió {frase(s.sArg as number)} por año; {nombre}, {frase(s.sGrp as number)}. Diferencia: {signo(difMostrada(s.sArg, s.sGrp) ?? (s.dif as number))} puntos.</li>
+          ))}
+        </ul>
+      </details>
+      <details className="ctx-mas">
         <summary>Ver año por año</summary>
         <div className="tablewrap alto fija"><table>
           <thead><tr><th>Año</th><th>Arg. proyectado</th><th>Arg. real</th><th>Sorpresa Arg.</th><th>{nombreGrupo} proyectado</th><th>{nombreGrupo} real</th><th>Sorpresa {nombreGrupo}</th><th>Diferencia</th></tr></thead>
@@ -155,7 +214,7 @@ function Esperado({ datos, grupo, nombreGrupo, p, set, resalta }: { datos: Datos
           ))}</tbody>
         </table></div>
       </details>
-    </div>
+    </Capitulo>
   );
 }
 
@@ -199,31 +258,54 @@ function Comparar({ datos, p, set, resalta }: { datos: DatosContexto; p: URLSear
     return { x, anios, vals, puesto, de: mejores, pctIni, pctFin };
   });
   const tonoPuesto = (pu: number | null, de: number) => { if (!pu || de < 2) return null; const sc = 1 - (2 * (pu - 1)) / (de - 1); return sc > 0 ? "bueno" as const : sc < 0 ? "malo" as const : null; };
+  const [hoja, setHoja] = useState(false);
+  const resp = fraseComparar(datos);
+  const chips = [
+    { clave: "dato", texto: def.n },
+    ...(esIdx ? [{ clave: "base", texto: baseAnio == null ? "Valor" : `Base 100 desde ${baseAnio}` }] : []),
+    { clave: "paises", texto: `Argentina y ${sel.length} más` },
+  ];
   const sufijo = esIdx ? "Crecimiento acumulado en el mandato (%)" : `Promedio del mandato (${def.u})`;
 
   return (
-    <div className="card" id="comparar">
-      <div className="cab-bloque"><h2>La Argentina y otros países</h2><BotonLink id="comparar" titulo="Primero los Datos: la Argentina y otros países" /></div>
-      <p className="note">Datos anuales del FMI. Elegí el dato y con quién comparar.</p>
-      <div className="controls">
-        <label>Dato</label>
-        <Selector etiqueta="Dato" valor={def.id} opciones={COMPARAR.map((x) => [x.id, x.n] as [string, string])} onElegir={(v) => set({ cpd: v === "crec" ? null : v })} />
-        {esIdx && <>
-          <label>Ver como</label>
-          <Seg valor={baseAnio == null ? "valor" : "base"} opciones={[["valor", "Valor"], ["base", "Base 100"]]} onElegir={(v) => set({ cpb: v === "valor" ? "valor" : null })} />
-          {baseAnio != null && <Selector etiqueta="Año base" valor={String(baseAnio)} opciones={datos.anios.filter((y) => y <= hasta).map((y) => [String(y), `desde ${y}`] as [string, string])} onElegir={(v) => set({ cpb: v === "2000" ? null : v })} />}
-        </>}
+    <Capitulo id="comparar" titulo="La Argentina y otros países"
+      acciones={<CompartirHoja href={hrefBloque(p, "comparar")} titulo="La Argentina y otros países" texto={resp ? `${resp} Fuente: ${datos.fuente}.` : undefined} />}>
+      {resp && <p className="ctx-respuesta">{resp}</p>}
+      <BarraVista items={chips} onAbrir={() => setHoja(true)} />
+      <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
+        {(cerrar) => (
+          <div className="ctx-hoja">
+            <div className="controls">
+              <label>Dato</label>
+              <Selector etiqueta="Dato" valor={def.id} opciones={COMPARAR.map((x) => [x.id, x.n] as [string, string])} onElegir={(v) => set({ cpd: v === "crec" ? null : v })} />
+              {esIdx && <>
+                <label>Ver como</label>
+                <Seg valor={baseAnio == null ? "valor" : "base"} opciones={[["valor", "Valor"], ["base", "Base 100"]]} onElegir={(v) => set({ cpb: v === "valor" ? "valor" : null })} />
+                {baseAnio != null && <Selector etiqueta="Año base" valor={String(baseAnio)} opciones={datos.anios.filter((y) => y <= hasta).map((y) => [String(y), `desde ${y}`] as [string, string])} onElegir={(v) => set({ cpb: v === "2000" ? null : v })} />}
+              </>}
+            </div>
+            <div className="controls">
+              <label>Países</label>
+              <Seg valor={new Set(sel)} opciones={[...PAISES.filter((e) => validas.has(e)), VEC, ...grupos.filter((g) => g !== VEC)].map((e) => [e, nombreEnt(datos, e)] as [string, string])}
+                onElegir={(v) => set({ cpp: [...alternar(new Set(sel), v, true)].join(",") || "-" })} />
+            </div>
+            <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
+          </div>
+        )}
+      </Hoja>
+      <div className="ctx-titulo-graf">
+        <h3>{def.n}</h3>
+        <InfoPunto etiqueta="Cómo se mide este dato">
+          <p>Datos anuales del FMI, hasta {hasta}.</p>
+          {esIdx && <p>{def.id === "pibr"
+            ? "El PIB real de cada país se arma encadenando su crecimiento anual, así se ve cuánto creció cada uno sin importar su tamaño."
+            : "PIB por habitante a precios constantes y paridad de poder adquisitivo (FMI), llevado a 100 en el año base."}
+            {baseAnio == null ? ` En «Valor» el índice arranca en 100 en ${datos.anios[0]}.` : ` Todas las líneas valen 100 en ${baseAnio}.`}</p>}
+          {log && <p>Escala logarítmica: la inflación de algunos años es mucho mayor que la del resto y aplastaría el gráfico.{todosPos ? "" : " En esta escala no se pueden dibujar los años con inflación cero o negativa."}</p>}
+          {esIdx && <p>En la tabla, el crecimiento se mide del cierre del año anterior al mandato al último año.</p>}
+        </InfoPunto>
       </div>
-      <div className="controls">
-        <label>Países</label>
-        <Seg valor={new Set(sel)} opciones={[...PAISES.filter((e) => validas.has(e)), VEC, ...grupos.filter((g) => g !== VEC)].map((e) => [e, nombreEnt(datos, e)] as [string, string])}
-          onElegir={(v) => set({ cpp: [...alternar(new Set(sel), v, true)].join(",") || "-" })} />
-      </div>
-      {esIdx && <p className="note">{def.id === "pibr"
-        ? "El PIB real de cada país se arma encadenando su crecimiento anual, así se ve cuánto creció cada uno sin importar su tamaño."
-        : "PIB por habitante a precios constantes y paridad de poder adquisitivo (FMI), llevado a 100 en el año base."}
-        {baseAnio == null ? ` En «Valor» el índice arranca en 100 en ${datos.anios[0]}.` : ` Todas las líneas valen 100 en ${baseAnio}.`}</p>}
-      {log && <p className="note">Escala logarítmica: la inflación de algunos años es mucho mayor que la del resto y aplastaría el gráfico.{todosPos ? "" : " En esta escala no se pueden dibujar los años con inflación cero o negativa."}</p>}
+      <p className="note">{def.u}{esIdx ? (baseAnio == null ? ` · 100 = ${datos.anios[0]}` : ` · 100 = ${baseAnio}`) : ""}{log ? " · escala logarítmica" : ""}</p>
       <Grafico rows={rows} series={sg} opts={opts} />
       <Leyenda items={sg.map((s) => ({ color: s.color, n: s.name, dash: s.dash }))} />
       <h3>Por presidente</h3>
@@ -239,8 +321,8 @@ function Comparar({ datos, p, set, resalta }: { datos: DatosContexto; p: URLSear
           </tr>
         ))}</tbody>
       </table></div>
-      <p className="note" style={{ marginTop: "var(--e-2)" }}>{sufijo}. Puesto 1 = el mejor entre los elegidos ({def.dir > 0 ? "más alto es mejor" : "más bajo es mejor"}).{esIdx ? " Se mide del cierre del año anterior al mandato al último año." : ""}</p>
-    </div>
+      <p className="note" style={{ marginTop: "var(--e-2)" }}>{sufijo}. Puesto 1 = el mejor entre los elegidos ({def.dir > 0 ? "más alto es mejor" : "más bajo es mejor"}).</p>
+    </Capitulo>
   );
 }
 
@@ -266,7 +348,7 @@ function GraficoMensual({ rows, series, opts, F }: { rows: Fila[]; series: Serie
 const fmtV = (def: Omit<DefViento, "fmt">, v: number | null) => (ok(v) ? (def.u.includes("%") ? nf1.format(v) : nf0.format(v)) : "—");
 const tonoMarca = (mk: Marca) => (mk === "favor" ? "bueno" as const : mk === "contra" ? "malo" as const : null);
 
-function Viento({ m, datos, PRES, resalta }: { m: NonNullable<ReturnType<typeof useSeccion>["motor"]>; datos: DatosContexto; PRES: Pres[]; resalta: string | null }) {
+function Viento({ m, datos, PRES, resalta, p }: { m: NonNullable<ReturnType<typeof useSeccion>["motor"]>; datos: DatosContexto; PRES: Pres[]; resalta: string | null; p: URLSearchParams }) {
   const hasta = ultimoCerrado(datos);
   const mensuales = VIENTOS.filter((v) => v.fuente === "mensual" && v.serie && m.SER[v.serie]);
   const porPres = PRES.map((x) => ({ x, v: vientosPres(m, datos, x) }));
@@ -277,10 +359,13 @@ function Viento({ m, datos, PRES, resalta }: { m: NonNullable<ReturnType<typeof 
   const optsMes = (def: (typeof VIENTOS)[number]): OpcionesG => ({ height: 220, fmtAxis: (v) => fmtV(def, v), fmtTip: (v) => fmtV(def, v) + " " + def.u.replace("US$ de hoy", "US$ de hoy"), zero: def.id === "fed" });
   const rowsAnual = datos.anios.filter((y) => y <= hasta).map((y) => { const i = datos.anios.indexOf(y); return ({ fecha: `${y}-01`, per: String(y), bra: (datos.real.NGDP_RPCH?.BRA ?? [])[i] ?? null, chn: (datos.real.NGDP_RPCH?.CHN ?? [])[i] ?? null }); });
   const sgAnual: SerieG[] = [{ key: "bra", name: "Brasil", color: "--series-2" }, { key: "chn", name: "China", color: "--series-4" }];
+  const resp = fraseViento(m, datos, presParaViento(m, datos, PRES));
   return (
-    <div className="card" id="viento">
-      <div className="cab-bloque"><h2>Viento de cola o de frente</h2><BotonLink id="viento" titulo="Primero los Datos: viento de cola o de frente" /></div>
+    <Capitulo id="viento" titulo="Viento de cola o de frente"
+      acciones={<CompartirHoja href={hrefBloque(p, "viento")} titulo="Viento de cola o de frente" texto={resp ? `${resp} Fuente: ${datos.fuente}.` : undefined} />}>
+      {resp && <p className="ctx-respuesta">{resp}</p>}
       <p className="note">Lo que pasaba afuera y la Argentina no controlaba. Precios en dólares de hoy (descontada la inflación de EE.UU.).</p>
+      <Plegado resumen={`Ver los ${mensuales.length + 1} gráficos`}>
       <div className="bloque-graf">
         {mensuales.map((def) => (
           <div key={def.id}>
@@ -294,7 +379,13 @@ function Viento({ m, datos, PRES, resalta }: { m: NonNullable<ReturnType<typeof 
           <Leyenda items={sgAnual.map((s) => ({ color: s.color, n: s.name }))} />
         </div>
       </div>
-      <h3>Por presidente</h3>
+      </Plegado>
+      <div className="ctx-titulo-graf">
+        <h3>Por presidente</h3>
+        <InfoPunto etiqueta="Cómo se marca a favor o en contra">
+          <p>Promedio del mandato contra el de toda la serie. «A favor» o «en contra»: más de 10 % mejor o peor (en la tasa de la Fed y en el crecimiento de Brasil y China, más de 1 punto). El petróleo va sin marca porque no es ni bueno ni malo para todos. Brasil y China se promedian en los años cerrados (hasta {hasta}).</p>
+        </InfoPunto>
+      </div>
       <div className="tablewrap fija"><table>
         <thead><tr><th>Presidente</th>{VIENTOS.map((v) => <th key={v.id}>{v.n}</th>)}</tr></thead>
         <tbody>{porPres.map(({ x, v }) => (
@@ -306,9 +397,8 @@ function Viento({ m, datos, PRES, resalta }: { m: NonNullable<ReturnType<typeof 
           </tr>
         ))}</tbody>
       </table></div>
-      <p className="note" style={{ marginTop: "var(--e-2)" }}>Promedio del mandato contra el de toda la serie. «A favor» o «en contra»: más de 10 % mejor o peor (en la tasa de la Fed y en el crecimiento de Brasil y China, más de 1 punto). El petróleo va sin marca porque no es ni bueno ni malo para todos. Brasil y China se promedian en los años cerrados (hasta {hasta}).</p>
+      <p className="note" style={{ marginTop: "var(--e-2)" }}>Promedio del mandato contra el de toda la serie.</p>
       <p className="note"><b>Que el contexto haya sido favorable no dice si se aprovechó bien; que haya sido desfavorable no explica todo lo que pasó.</b></p>
-    </div>
+    </Capitulo>
   );
 }
-

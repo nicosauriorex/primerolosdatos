@@ -1,6 +1,6 @@
 "use client";
 // "Preguntale a los datos": oraciones con huecos y buscador libre.
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useCargar, useDatos } from "../DatosProvider";
 import { useConfig } from "../ConfigProvider";
@@ -23,7 +23,7 @@ import {
 
 /** Lista de opciones de un hueco. Va pegada a su botón (posición absoluta dentro del hueco): al deslizar la página se mueve con él y nunca queda flotando ni se va de la pantalla.
  *  Se abre hacia arriba si abajo no entra y se corre si se saldría por un costado. Flechas, Enter y Escape; el clic afuera la cierra. */
-function ListaHueco({ etiqueta, valor, opciones, onElegir }: { etiqueta: string; valor: string; opciones: Opcion[]; onElegir: (v: string) => void }) {
+export function ListaHueco({ etiqueta, valor, opciones, onElegir }: { etiqueta: string; valor: string; opciones: Opcion[]; onElegir: (v: string) => void }) {
   const [abierto, setAbierto] = useState(false);
   const [activo, setActivo] = useState(0);
   const [arriba, setArriba] = useState(false);
@@ -158,18 +158,19 @@ const PREGUNTAS: [Clave, string][] = [["compra", "Cuánto compra"], ["presidente
 const IDS_PRES = PRES_DEF.map((x) => x.id);
 
 /** La respuesta en el lugar: cifra grande, fecha, detalle, minigráfico y cambios. Mientras carga, "Calculando…" con el mismo alto. */
-function RespuestaVista({ r, listo, href }: { r: Respuesta | null; listo: boolean; href: string }) {
+export function RespuestaVista({ r, listo, href, info }: { r: Respuesta | null; listo: boolean; href?: string; info?: ReactNode }) {
+  const cifra = <p className="preg-cifra">{r?.cifra}</p>;
   return (
     <div className="preg-resp" aria-live="polite">
       {!listo ? <p className="preg-espera">Calculando…</p> : !r ? <p className="preg-espera">No hay datos para esta combinación.</p> : (
         <div className="preg-fundido" key={r.cifra + (r.fecha ?? "")}>
-          <p className="preg-cifra">{r.cifra}</p>
+          {info ? <div className="pq-cifra-fila">{cifra}{info}</div> : cifra}
           {(r.fecha || r.detalle) && <p className="preg-meta">{[r.fecha, r.detalle].filter(Boolean).join(" · ")}</p>}
           {r.v && <div className="preg-mini"><Sparkline v={r.v} desde={r.desde ?? 0} /></div>}
           {r.deltas && <div className="preg-deltas">{r.deltas.map((d, i) => <Delta key={i} {...d} />)}</div>}
         </div>
       )}
-      <Link prefetch={false} href={href} className="preg-ver">Ver completo<IconoIr /></Link>
+      {href && <Link prefetch={false} href={href} className="preg-ver">Ver completo<IconoIr /></Link>}
     </div>
   );
 }

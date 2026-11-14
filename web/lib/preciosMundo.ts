@@ -4,7 +4,7 @@
 // el IPC por rubro y el dólar de la Argentina salen del catálogo (no se duplican).
 import type { Motor } from "./motor";
 import type { Pres } from "./estadisticas";
-import { ok } from "./formato";
+import { fmtMes, nf0, ok, r1 } from "./formato";
 
 export interface RubroPM { n: string; icp: string; arg: string; tipo: "d" | "p"; nota: string }
 export interface DatosPM {
@@ -160,4 +160,133 @@ export function extremosMandato(m: Motor, d: DatosPM, pres: Pres): { fecha: stri
   if (filas.length < 2) return null;
   filas.sort((a, b) => b.nivel - a.nivel);
   return { fecha: fin, caro: filas[0], barato: filas[filas.length - 1] };
+}
+
+// ---- La pregunta de Contexto: "¿Es más cara la carne en la Argentina que en la zona euro?"
+// Misma cuenta (`niveles`) que la lista y el detalle del bloque de precios: ninguna cifra se escribe a mano.
+/** Rubros que se pueden elegir en la pregunta. `dicho`: cómo se dice en la oración; `caro`/`barato`: concordancia; `producto`: precio promedio del INDEC (GBA) para los kilos por salario; `cosa`: qué se compra ("de asado"). */
+export interface PregRubro { rid: string; dicho: string; caro: string; barato: string; producto?: string; cosa?: string }
+export const PREG_RUBROS: PregRubro[] = [
+  { rid: "carne", dicho: "la carne", caro: "cara", barato: "barata", producto: "pp_gba_asado", cosa: "de asado" },
+  { rid: "pan", dicho: "el pan y los cereales", caro: "caros", barato: "baratos", producto: "pp_gba_pan_frances", cosa: "de pan" },
+  { rid: "leche", dicho: "la leche, los quesos y los huevos", caro: "caros", barato: "baratos", producto: "pp_gba_leche_fresca_entera_sachet", cosa: "de leche" },
+  { rid: "frutas", dicho: "la fruta", caro: "cara", barato: "barata", producto: "pp_gba_manzana_deliciosa", cosa: "de manzana" },
+  { rid: "verduras", dicho: "la verdura", caro: "cara", barato: "barata", producto: "pp_gba_papa", cosa: "de papa" },
+  { rid: "01", dicho: "la comida", caro: "cara", barato: "barata" },
+  { rid: "03", dicho: "la ropa", caro: "cara", barato: "barata" },
+  { rid: "04", dicho: "la vivienda y los servicios", caro: "caros", barato: "baratos" },
+  { rid: "06", dicho: "la salud", caro: "cara", barato: "barata" },
+  { rid: "07", dicho: "el transporte", caro: "caro", barato: "barato" },
+  { rid: "11", dicho: "comer afuera", caro: "caro", barato: "barato" },
+  { rid: "total", dicho: "vivir", caro: "caro", barato: "barato" },
+];
+/** Series extra del catálogo que necesita la pregunta (además de IDS_PM): el salario mediano y los productos de los rubros. */
+export const IDS_PREGUNTA: string[] = ["sipa_med", ...PREG_RUBROS.flatMap((r) => (r.producto ? [r.producto] : []))];
+
+/** Contra quién se compara. `ents`: países que entran (vacío en "el mundo", que vale 100 por definición). */
+export interface PregContra { id: string; dicho: string; ents: string[] }
+export const REGION = ["BRA", "CHL", "MEX", "COL"];
+export const PREG_CONTRA: PregContra[] = [
+  { id: "EA", dicho: "la zona euro", ents: ["EA"] },
+  { id: "mundo", dicho: "el mundo", ents: [] },
+  { id: "region", dicho: "la región", ents: REGION },
+  { id: "USA", dicho: "Estados Unidos", ents: ["USA"] },
+  { id: "BRA", dicho: "Brasil", ents: ["BRA"] },
+  { id: "CHL", dicho: "Chile", ents: ["CHL"] },
+  { id: "MEX", dicho: "México", ents: ["MEX"] },
+  { id: "COL", dicho: "Colombia", ents: ["COL"] },
+];
+
+/** Argentina contra una entrada (país, "mundo" o "region") en un mes (estimado) o un año (medido). */
+export interface FilaComparacion {
+  ent: string; nombre: string; nivelArg: number; nivelOtro: number;
+  dif: number;                       // % entero: (nivel de la Argentina / nivel del otro − 1) × 100, con los niveles que se muestran (un decimal)
+  fecha: string;                     // "2026-10" o "2021"
+  modo: "estimado" | "medido";
+  entran?: string[];                 // solo "region": países que entraron en el promedio
+}
+const difPct = (a: number, o: number): number => Math.round((r1(a) / r1(o) - 1) * 100) || 0;
+/** Último índice en que todas las series tienen valor (o -1). */
+function ultimoComun(series: Serie[]): number {
+  const n = Math.min(...series.map((s) => s.length));
+  for (let i = n - 1; i >= 0; i--) if (series.every((s) => ok(s[i]))) return i;
+  return -1;
+}
+
+/** Argentina contra cada país con estimado, el mundo y la región (último mes en que hay estimado de los dos), y aparte los países sin IPC por rubro (solo medido). Todo con el dólar elegido. */
+export function comparacionRubro(d: DatosPM, arg: ArgPM, rid: string, dolar: Dolar): { filas: FilaComparacion[]; soloMedido: FilaComparacion[] } {
+  const filas: FilaComparacion[] = [], soloMedido: FilaComparacion[] = [];
+  if (!d.rubros[rid]) return { filas, soloMedido };
+  const a = niveles(d, rid, ARG, arg, dolar);
+  const sin = new Set(Object.keys(d.sin_datos));
+  const nv: Record<string, Niveles> = {};
+  const de = (c: string) => (nv[c] ??= niveles(d, rid, c, arg, dolar));
+  const mk = (ent: string, nombre: string, i: number, otro: number, extra: Partial<FilaComparacion> = {}): FilaComparacion => {
+    const na = a.est[i] as number;
+    return { ent, nombre, nivelArg: na, nivelOtro: otro, dif: difPct(na, otro), fecha: d.fechas[i], modo: "estimado", ...extra };
+  };
+  // Países con estimado
+  for (const c of Object.keys(d.paises)) {
+    if (c === ARG || sin.has(c)) continue;
+    const i = ultimoComun([a.est, de(c).est]);
+    if (i >= 0) filas.push(mk(c, d.paises[c], i, de(c).est[i] as number));
+  }
+  // El mundo: último mes con estimado de la Argentina, nivel 100
+  const iMundo = ultimoComun([a.est]);
+  if (iMundo >= 0) filas.push(mk("mundo", "El mundo", iMundo, 100));
+  // La región: último mes en que los cuatro tienen estimado; si no, el último en que al menos dos tienen
+  const reg = REGION.filter((c) => d.paises[c] && !sin.has(c));
+  let iReg = reg.length ? ultimoComun([a.est, ...reg.map((c) => de(c).est)]) : -1;
+  let entran = reg;
+  if (iReg < 0 && reg.length >= 2) {
+    for (let i = d.fechas.length - 1; i >= 0 && iReg < 0; i--) {
+      const hay = reg.filter((c) => ok(de(c).est[i]));
+      if (ok(a.est[i]) && hay.length >= 2) { iReg = i; entran = hay; }
+    }
+  }
+  if (iReg >= 0) {
+    const prom = entran.reduce((s, c) => s + (de(c).est[iReg] as number), 0) / entran.length;
+    filas.push(mk("region", "La región", iReg, prom, { entran }));
+  }
+  // Sin estimado de este rubro (no publican su IPC, o no el de este rubro): último año medido en que también hay nivel de la Argentina
+  const conEst = new Set(filas.map((f) => f.ent));
+  for (const c of Object.keys(d.paises)) {
+    if (c === ARG || conEst.has(c)) continue;
+    const anios = aniosMedidos(d).filter((y) => a.med[y] != null && d.medido[y]?.[rid]?.[c] != null).sort((x, y) => y - x);
+    if (!anios.length) continue;
+    const y = anios[0], o = d.medido[y][rid][c];
+    soloMedido.push({ ent: c, nombre: d.paises[c], nivelArg: a.med[y], nivelOtro: o, dif: difPct(a.med[y], o), fecha: String(y), modo: "medido" });
+  }
+  const orden = (x: FilaComparacion, y: FilaComparacion) => x.dif - y.dif || x.nombre.localeCompare(y.nombre, "es");
+  return { filas: filas.sort(orden), soloMedido: soloMedido.sort(orden) };
+}
+
+const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+export interface RespuestaPregunta {
+  fila: FilaComparacion;
+  cifra: string;       // "54 % más barata"
+  que: string;         // "que en la zona euro"
+  fechaTxt: string;    // "estimado oct-2026"
+  dolarTxt: string;    // "dólar oficial"
+  frase: string;       // "La carne está 54 % más barata en la Argentina que en la zona euro (estimado oct-2026, dólar oficial)."
+}
+/** La respuesta a "¿Es más cara <rubro> en la Argentina que en <contra>?" (null si no hay estimado de esa combinación). Sin adjetivos de juicio. */
+export function respuestaPregunta(d: DatosPM, arg: ArgPM, rid: string, contra: string, dolar: Dolar): RespuestaPregunta | null {
+  const rub = PREG_RUBROS.find((x) => x.rid === rid), con = PREG_CONTRA.find((x) => x.id === contra);
+  if (!rub || !con) return null;
+  const cmp = comparacionRubro(d, arg, rid, dolar);
+  const fila = cmp.filas.find((f) => f.ent === contra) ?? cmp.soloMedido.find((f) => f.ent === contra);
+  if (!fila) return null;
+  const n = Math.abs(fila.dif), igual = n < 1;
+  const adj = fila.dif < 0 ? rub.barato : rub.caro;
+  const que = `que en ${con.dicho}`;
+  const fechaTxt = fila.modo === "estimado" ? `estimado ${fmtMes(fila.fecha)}` : `medido en ${fila.fecha}`;
+  const dolarTxt = `dólar ${dolar}`;
+  const plural = rub.caro.endsWith("s");
+  const nn = nf0.format(n);
+  const cifra = igual ? "Cuesta lo mismo" : `${nn} % más ${adj}`;
+  const cuerpo = rid === "total"
+    ? (igual ? `Vivir en la Argentina cuesta lo mismo ${que}` : `Vivir en la Argentina es ${nn} % más ${adj} ${que}`)
+    : (igual ? `${cap(rub.dicho)} ${plural ? "cuestan" : "cuesta"} lo mismo en la Argentina ${que}` : `${cap(rub.dicho)} ${plural ? "están" : "está"} ${nn} % más ${adj} en la Argentina ${que}`);
+  return { fila, cifra, que, fechaTxt, dolarTxt, frase: `${cuerpo} (${fechaTxt}, ${dolarTxt}).` };
 }
