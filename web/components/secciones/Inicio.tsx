@@ -297,7 +297,7 @@ export function Inicio() {
           <h1 className="titular">¿Cansado de que en redes hablen <em>sin datos?</em></h1>
           <p className="bajada">Buscá el dato, comparalo en el tiempo, entre presidentes y con el mundo.</p>
           <div className="apertura-buscar">
-            <Buscador sinAtajos />
+            <Buscador sinAtajos flotante />
             <MasBuscado />
           </div>
           <p className="lema"><strong>Datos de Argentina, en debate.</strong> Oficiales, sin opinión y actualizados todos los días.</p>

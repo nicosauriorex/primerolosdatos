@@ -3,7 +3,12 @@ import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSeccion } from "../useSeccion";
 import { BarraPlantilla, usePlantillaVista } from "./BarraPlantilla";
 import { BotonCompartir } from "../PanelCompartir";
-import { Cargando, Desplegable, Modal, Selector, Seg, alternar, useCerrarModal } from "../ui";
+import { Cargando, Desplegable, Selector, Seg, alternar } from "../ui";
+import { GraficosListos } from "../GraficosListos";
+import { CabeceraDato } from "../sistema/CabeceraDato";
+import { BarraVista } from "../sistema/BarraVista";
+import { Hoja, type CerrarHoja } from "../sistema/Hoja";
+import type { DeltaProps } from "../sistema/Delta";
 import { FilaVariable, RenglonVariable } from "../Variables";
 import { Grafico, hayDatos, type Fila, type Marca, type OpcionesG, type Ref, type SerieG, type TipoRef } from "../Grafico";
 import { PALETA, vcolor } from "../util";
@@ -11,7 +16,7 @@ import { fmtMes, MESES, nf0, nf1, ok, redondeadoComo, restaLimpia } from "@/lib/
 import type { Calculo, Expr, Motor } from "@/lib/motor";
 import { PRES_DEF, aBase100, claseVariacion, estadisticasRows, etiqueta, filasGrafico, franjasPres, type EstRows } from "@/lib/estadisticas";
 import { admiteContexto, contextoDato } from "@/lib/contexto-dato";
-import { MAX_GRAFICOS, MAX_MISMA_UNIDAD, PG, TODOS_MESES, claseVariacionMostrada, comparacionesCabecera, exprsUsadas, fraseUltimoVs, frecuenciaOrigen, leerComun, leerGrafico, sfx, textoTemporalidad, type Comun, type GEst } from "@/lib/historico";
+import { MAX_GRAFICOS, MAX_MISMA_UNIDAD, PG, TODOS_MESES, claseVariacionMostrada, comparacionesCabecera, deltaDeFrase, exprsUsadas, fraseUltimoVs, frecuenciaOrigen, leerComun, leerGrafico, sfx, textoPeriodo, textoTemporalidad, type Comun, type GEst } from "@/lib/historico";
 import { fmtEjeDe, notaInflacion, tituloGrafico, type VistaImg } from "@/lib/imagen-datos";
 import { useConfig } from "../ConfigProvider";
 import { baseDeConfig, medidaPreferida } from "@/lib/config";
@@ -19,6 +24,7 @@ import { encExpr, useParams } from "@/lib/url";
 import { avisoTabla, copiarTexto } from "@/lib/compartir";
 import { filasDeTabla, tablaATexto, type ColTabla } from "@/lib/tabla-texto";
 import { IconoCompartir } from "../Iconos";
+import { fuentePublica } from "@/lib/fuente-publica";
 
 /** Los parámetros de la vista que "Volver a lo de fábrica" borra (todos menos `v`, `pl` y `pn`). */
 const PARAMS_FABRICA = ["d", "h", "ms", "f", "ag", ...PG.filter((k) => k !== "v")];
@@ -142,6 +148,7 @@ export function Historico() {
   }
   return (
     <section>
+      <h1 className="sr-solo">Histórico: {total} gráficos</h1>
       <BarraPlantilla p={p} set={set} info={info} />
       <Barra E={E} set={cambiar} F={m.F} fija={total > 1} />
       <div className={`grilla-graf${total > 1 ? " multi" : ""}`}>
@@ -338,23 +345,24 @@ function SeccionPers({ titulo, abiertaInicial = false, children }: { titulo: str
   );
 }
 
-/** Contenido de la ventana de Personalizar: variable, fechas, opciones del gráfico y guardar, plegables. Va dentro de un `Modal`. */
-function ContenidoPers({ simple, opciones, tituloOpciones }: { simple: Simple & { variables: ReactNode }; opciones: ReactNode; tituloOpciones: string }) {
-  const cerrar = useCerrarModal();
+/** Sección de la hoja de ajustes que se abre sola: la del chip que se tocó ("Ajustes" abre la de la variable). */
+type SecPers = "variable" | "fechas" | "opciones";
+
+/** Contenido de la hoja de ajustes: variable, fechas, opciones del gráfico y guardar, plegables, y al pie "Volver a lo de fábrica" y "Listo". Va dentro de una `Hoja`. */
+function ContenidoPers({ simple, opciones, tituloOpciones, abrir, cerrar }: {
+  simple: Simple & { variables: ReactNode }; opciones: ReactNode; tituloOpciones: string; abrir: SecPers; cerrar: CerrarHoja;
+}) {
   const alIr: CerrarAntes = (luego) => cerrar(luego);
   return (
-    <div className="pers-panel">
-      <header className="vp-cab"><h2>Personalizar</h2></header>
-      <div className="config-cuerpo vp-cuerpo">
-        <SeccionPers titulo="Variable" abiertaInicial>{simple.variables}{simple.agregar(alIr)}</SeccionPers>
-        <SeccionPers titulo="Fechas">{simple.fecha}</SeccionPers>
-        <SeccionPers titulo={tituloOpciones}>{opciones}</SeccionPers>
-        <SeccionPers titulo="Guardar y compartir">{simple.acciones(alIr)}</SeccionPers>
-      </div>
-      <footer>
+    <div className="hi-pers">
+      <SeccionPers titulo="Variable" abiertaInicial={abrir === "variable"}>{simple.variables}{simple.agregar(alIr)}</SeccionPers>
+      <SeccionPers titulo="Fechas" abiertaInicial={abrir === "fechas"}>{simple.fecha}</SeccionPers>
+      <SeccionPers titulo={tituloOpciones} abiertaInicial={abrir === "opciones"}>{opciones}</SeccionPers>
+      <SeccionPers titulo="Guardar y compartir">{simple.acciones(alIr)}</SeccionPers>
+      <div className="hi-pers-pie">
         {simple.alFabrica && <button type="button" className="btn" onClick={simple.alFabrica}>Volver a lo de fábrica</button>}
         <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
-      </footer>
+      </div>
     </div>
   );
 }
@@ -392,9 +400,9 @@ function CardGrafico({ titulo, temporal, nota, leyenda, visibles, config, rows, 
     ) : <p className="note">Sin datos para esta selección.</p>)
     : null;
   if (simple) {
-    // Vista simple: el gráfico y debajo la unidad, la fuente y Expandir (los controles están en "Personalizar").
+    // Vista simple: el gráfico suelto y debajo la unidad, la fuente y Expandir (los controles están en la hoja de ajustes).
     return (
-      <div className="card card-simple">
+      <div className="hi-grafico">
         {cab}
         {tabla ?? <Grafico rows={rows} series={series} opts={opts} expandir={{ titulo, leyenda: cab, abierto: exp, onCerrar: () => setExp(false) }} />}
         <div className="pie-graf">
@@ -439,7 +447,8 @@ const DEFS_RES: DefResumen[] = [
 function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Estado; set: SetFn; version: number; compacto: boolean; simple?: Simple & { variables: ReactNode } }) {
   const { F } = m;
   const { config: cfg } = useConfig();
-  const [personalizando, setPersonalizando] = useState(false); // ventana de Personalizar abierta
+  const { metas } = useSeccion([]);
+  const [personalizando, setPersonalizando] = useState<SecPers | null>(null); // hoja de ajustes abierta, con la sección que se despliega
   const b100 = E.modo === "b100";
   const conFranjas = E.pf === "1" ? true : E.pf === "0" ? false : cfg.franjas;
   // Claves estables: el gráfico solo se rehace (y pierde el zoom) si cambia algo que lo afecta
@@ -591,62 +600,74 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
       : null;
     const nombre = simple.titulo ?? titulo;
     const vista = { exprs: E.exprs, modo: E.modo, eje: E.eje, desde: E.desde, hasta: E.hasta, meses: E.meses, freq: E.freq, ag: E.ag, titulo: simple.titulo ?? undefined, tabla: E.tabla === "tabla" } satisfies VistaImg;
+    // Dos a la vista (período anterior y un año atrás), con el mismo número que la frase de siempre; el resto, en una tabla plegada
+    const aLaVista = comps.filter((c) => c.clave === "anterior" || c.clave === "anio");
+    const resto = comps.filter((c) => c.clave !== "anterior" && c.clave !== "anio");
+    const deltas: DeltaProps[] = aLaVista.map((c) => {
+      const d = deltaDeFrase(c.frase), ref = c.fecha ?? c.titulo.toLowerCase();
+      return { texto: d.texto, tono: c.cls, dir: d.dir, contra: `vs ${ref}`, etiqueta: `${c.titulo}${c.fecha ? ` (${c.fecha})` : ""}: ${m.fmtC(o0.c, c.valor)}. Cambio: ${d.texto}` };
+    });
+    const frase = multi ? (comps.length ? `Cambios y comparaciones de: ${o0.c.corto}` : undefined) : ctx?.frases[0]?.texto;
+    // Sin contexto (trimestral, anual) pero con una sola variable: igual va la cifra del último dato
+    const suelta = !ctx && lista.length === 1 && !b100 && !!s0;
+    const cifra = ctx ? ctx.valor : suelta ? m.fmtC(o0.c, s0.ult[0]) : "";
+    const fechaCifra = ctx ? `${ctx.mes}${ctx.ultimoDisponible ? " · Último dato disponible" : ""}` : suelta ? String(s0.ult[1] ?? "") : "";
+    const periodo = textoPeriodo(E.desde, E.hasta, E.meses);
+    const chips = [
+      { clave: "periodo", texto: periodo },
+      { clave: "frecuencia", texto: E.freq === "M" ? "Mensual" : `${E.freq === "T" ? "Trimestral" : "Anual"}, ${E.ag === "cierre" ? "cierre" : "promedio"}` },
+      ...(E.tabla === "tabla" ? [{ clave: "tabla", texto: "Tabla" }] : []),
+      ...(b100 ? [{ clave: "b100", texto: "Base 100" }] : []),
+      ...(puedeLog && E.escala === "log" ? [{ clave: "escala", texto: "Escala log." }] : []),
+    ];
+    const abrirHoja = (clave?: string) => setPersonalizando(clave === "periodo" ? "fechas" : clave ? "opciones" : "variable");
     return (
       <>
-        <div className="vs-cab">
-          <h2 className="vs-titulo">{nombre}</h2>
-          <p className="temporal vs-temporal">{temporal}</p>
-          <div className="vs-dato">
-            <div>
-              {ctx ? (
-                <>
-                  <p className="vs-cifra"><span className="v">{ctx.valor}</span><span className="mes">{ctx.mes}{ctx.ultimoDisponible ? " · Último dato disponible" : ""}</span></p>
-                  {ctx.frases.map((f) => <p key={f.texto} className={`vs-frase${f.cls ? " var-" + f.cls : ""}`}>{f.texto}</p>)}
-                </>
-              ) : (lista.length > 1 || b100) && (
-                <ul className="vs-leyenda">{lista.map((o, k) => {
-                  const s1 = st[k];
-                  return <li key={o.key}><span className="punto" style={vcolor(o.color)} /> <span className="n">{o.c.corto}</span> <b>{s1 ? (b100 ? nf1.format(s1.ult[0]) : m.fmtC(o.c, s1.ult[0])) : "–"}</b></li>;
-                })}</ul>
-              )}
-            </div>
-            {comps.length > 0 && (
-              <div className="vs-comps-caja">
-                {multi && <p className="note vs-comps-de">Comparaciones de: {o0.c.corto}</p>}
-                <ul className="vs-comps" tabIndex={0} aria-label="Comparaciones del último dato">
-                  {comps.map((c) => (
-                    <li className="vs-comp" key={c.clave}>
-                      <span className="k">{c.titulo}</span>
-                      <span className="v">{m.fmtC(o0.c, c.valor)}</span>
-                      {c.fecha && <span className="mes">{c.fecha}</span>}
-                      <span className={`fr var-${c.cls}`}>{c.frase}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
+        <CabeceraDato titulo={nombre} nivel={1} cifra={cifra} fecha={fechaCifra}
+          deltas={deltas} frase={frase}
+          info={<>{o0.c.serie.desc ? <p>{o0.c.serie.desc}</p> : null}<p>Fuente: {fuentePublica(o0.c.serie.fuente)}.</p></>}>
+          {!ctx && (lista.length > 1 || b100) && (
+            <ul className="vs-leyenda hi-leyenda">{lista.map((o, k) => {
+              const s1 = st[k];
+              return <li key={o.key}><span className="punto" style={vcolor(o.color)} /> <span className="n">{o.c.corto}</span> <b>{s1 ? (b100 ? nf1.format(s1.ult[0]) : m.fmtC(o.c, s1.ult[0])) : "–"}</b></li>;
+            })}</ul>
+          )}
+        </CabeceraDato>
+        <p className="temporal hi-temporal">{temporal}</p>
+        {resto.length > 0 && (
+          <details className="hi-mas">
+            <summary>Más comparaciones</summary>
+            <div className="tablewrap"><table>
+              <caption className="sr-solo">Último dato contra otros valores{multi ? ` de ${o0.c.corto}` : ""}</caption>
+              <thead><tr><th>Contra</th><th>Valor</th><th>Diferencia</th></tr></thead>
+              <tbody>{resto.map((c) => (
+                <tr key={c.clave}><td>{c.titulo}{c.fecha && <small>{c.fecha}</small>}</td><td>{m.fmtC(o0.c, c.valor)}</td>
+                  <td className={`var-${c.cls}`}>{deltaDeFrase(c.frase).texto}</td></tr>
+              ))}</tbody>
+            </table></div>
+          </details>
+        )}
+        <BarraVista items={chips} onAbrir={abrirHoja} />
         <CardGrafico simple titulo={titulo} nota={nota} leyenda={leyenda} rows={rows} series={series} opts={opts} unidades={unidades} vista={E.tabla} onVista={onVista} />
-        <div className="vs-acciones">
-          <div className="vs-fila">
-            {botonPresidentes}
-            <button type="button" className="btn" aria-haspopup="dialog" onClick={() => setPersonalizando(true)}>Personalizar</button>
-          </div>
+        <div className="hi-acciones">
+          {botonPresidentes}
           <BotonCompartir className="btn primario" titulo={nombre} href={() => window.location.href} crearVista={() => vista}>
             <IconoCompartir />Compartir</BotonCompartir>
         </div>
-        {personalizando && (
-          <Modal titulo="Personalizar" onCerrar={() => setPersonalizando(false)}>
-            <ContenidoPers simple={simple} tituloOpciones={cuenta ? `Opciones del gráfico (${cuenta})` : "Opciones del gráfico"}
+        <Hoja titulo="Ajustes" abierta={personalizando !== null} onCerrar={() => setPersonalizando(null)}>
+          {(cerrar) => (
+            <ContenidoPers simple={simple} abrir={personalizando ?? "variable"} cerrar={cerrar} tituloOpciones={cuenta ? `Opciones del gráfico (${cuenta})` : "Opciones del gráfico"}
               opciones={<>
                 {simple.frecuencia}
                 <div className="controls"><label>Mostrar como</label><Seg valor={E.tabla} opciones={[["grafico", "Gráfico"], ["tabla", "Tabla"]]} onElegir={(v) => onVista(v as Vista)} /></div>
                 {config}
               </>} />
-          </Modal>
-        )}
+          )}
+        </Hoja>
         {b100 && resumen}
+        {!b100 && lista.length === 1 && (
+          <GraficosListos m={m} e={E.exprs[0]} metas={metas} nivel={2} id="hi-laminas" titulo="Gráficos listos con este dato" nombre={metas.find((x) => x.id === E.exprs[0].id)?.n ?? o0.c.nombre} />
+        )}
       </>
     );
   }

@@ -1,6 +1,6 @@
 "use client";
 // Buscador: un campo claro y grande, y debajo los resultados en un solo orden (ver `lib/busqueda.ts`).
-// Los resultados empujan el contenido (no flotan). El primero lleva la cifra en vivo.
+// Los resultados empujan el contenido (en la hoja del buscador global) o flotan encima de la página (`flotante`, la portada). El primero lleva la cifra en vivo.
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -40,8 +40,9 @@ function CifraViva({ r }: { r: ResultadoBusqueda }) {
   );
 }
 
-/** `sinAtajos`: no muestra su propio "Ir directo a" al enfocar (la portada ya lo tiene a la vista debajo). */
-export function Buscador({ autoFoco, onElegido, sinAtajos }: { autoFoco?: boolean; onElegido?: () => void; sinAtajos?: boolean }) {
+/** `sinAtajos`: no muestra su propio "Ir directo a" al enfocar (la portada ya lo tiene a la vista debajo).
+ *  `flotante`: los resultados se abren como una capa encima de la página, sin empujarla, y se cierran al salir del buscador. */
+export function Buscador({ autoFoco, onElegido, sinAtajos, flotante }: { autoFoco?: boolean; onElegido?: () => void; sinAtajos?: boolean; flotante?: boolean }) {
   const router = useRouter();
   const { listo, metas } = useDatos();
   const { config } = useConfig();
@@ -78,13 +79,14 @@ export function Buscador({ autoFoco, onElegido, sinAtajos }: { autoFoco?: boolea
   };
 
   const mostrarMas = listo && !busca && enfocado && !sinAtajos;
+  const verCapa = !flotante || enfocado;   // la capa flotante solo con el buscador en uso: si no, taparía la página
   return (
-    <div className="busq" ref={raiz} onFocus={() => setEnfocado(true)}
+    <div className={flotante ? "busq busq-flotante" : "busq"} ref={raiz} onFocus={() => setEnfocado(true)}
       onBlur={(ev) => { if (!ev.currentTarget.contains(ev.relatedTarget as Node | null)) setEnfocado(false); }}>
       <form className="busq-campo" role="search" onSubmit={(ev) => { ev.preventDefault(); const r = resultados[activo] ?? resultados[0]; if (r) abrir(r); else campo.current?.focus(); }}>
         <input ref={campo} type="text" inputMode="search" enterKeyHint="search" autoComplete="off" autoCorrect="off" spellCheck={false}
-          role="combobox" aria-expanded={resultados.length > 0} aria-controls={`${id}-lista`} aria-autocomplete="list"
-          aria-activedescendant={resultados.length ? idOpcion(activo) : undefined} aria-label="Buscar un dato"
+          role="combobox" aria-expanded={verCapa && resultados.length > 0} aria-controls={`${id}-lista`} aria-autocomplete="list"
+          aria-activedescendant={verCapa && resultados.length ? idOpcion(activo) : undefined} aria-label="Buscar un dato"
           value={q} disabled={!listo} placeholder={listo ? "Buscá: inflación, dólar blue, asado…" : "Cargando…"}
           onChange={(ev) => setQ(ev.target.value)} onKeyDown={tecla} />
         {q && <button type="button" className="busq-borrar" aria-label="Borrar lo escrito" onClick={() => { setQ(""); campo.current?.focus(); }}><IconoCerrar /></button>}
@@ -104,8 +106,8 @@ export function Buscador({ autoFoco, onElegido, sinAtajos }: { autoFoco?: boolea
         </div>
       )}
 
-      {resultados.length > 0 && (
-        <ul className="busq-lista" id={`${id}-lista`} role="listbox" aria-label="Resultados">
+      {verCapa && resultados.length > 0 && (
+        <ul className="busq-lista" id={`${id}-lista`} role="listbox" aria-label="Resultados" onMouseDown={(ev) => ev.preventDefault()}>
           {resultados.map((r, i) => (
             <li key={r.tipo + r.href} id={idOpcion(i)} data-i={i} role="option" aria-selected={i === activo} className={i === activo ? "busq-activo" : undefined}
               onMouseMove={() => { if (i !== activo) setActivo(i); }}>
@@ -120,8 +122,8 @@ export function Buscador({ autoFoco, onElegido, sinAtajos }: { autoFoco?: boolea
         </ul>
       )}
 
-      {sinResultados && (
-        <div className="busq-sin">
+      {verCapa && sinResultados && (
+        <div className="busq-sin" onMouseDown={(ev) => ev.preventDefault()}>
           <p className="busq-sin-texto">No encontramos «{q.trim()}». Probá con otra palabra o elegí un tema:</p>
           <ul className="busq-chips">
             {TEMAS.map((t) => <li key={t.slug}><Link prefetch={false} href={`/tema/${t.slug}/`} onClick={() => onElegido?.()}>{t.nombre}</Link></li>)}

@@ -272,6 +272,10 @@ Son ajustes a lo ya hecho, no ideas nuevas.
 - ~~**"Otros gráficos interesantes" del Histórico** (soja, Chicago, brecha, dólar): los datos ya están en el catálogo, así que ya no tiene sentido tenerlos como gráficos sueltos. Pasarlos a **variables elegibles** como cualquier otra (queda la plantilla si hace falta una vista armada) y sacar la sección.~~ ✅ 2026-11-09
 - ~~**Hasta 4 gráficos en la vista, uno al lado del otro**, para comparar 4 cosas al mismo tiempo (en celular, apilados). Verificar cómo quedó con lo ya implementado.~~ ✅ 2026-11-09
 
+## ~~Portada: ajustes pedidos (2026-11-14)~~ ✅ 2026-11-14
+- En la computadora, "Ir directo a" deja a veces un chip solo abajo (Riesgo país): que entren todos juntos. → spec: docs/specs/remodelacion-historico-presidentes.md
+- Al escribir en el buscador, muchas opciones empujan toda la página para abajo: que la lista quede por encima, sin empujar. → spec: docs/specs/remodelacion-historico-presidentes.md
+
 ## Sugerencias de Claude (a discutir)
 - Comparación internacional, fuentes a investigar (con `investigador-datos`): IPC por división COICOP de EE.UU. (BLS), Eurostat (HICP por categoría) y OECD; el Banco Mundial y el FMI para PBI y otras variables. Los vecinos (Brasil, Chile, Uruguay, Paraguay, Bolivia) a veces solo tienen el IPC general desde fuentes unificadas, así que la comparación por categoría puede quedar limitada. Las divisiones COICOP no son idénticas entre países, y para comparar **niveles** de precios (no solo variaciones) hacen falta paridad de poder adquisitivo o tipo de cambio real. Mostrar siempre en base 100 o en variación para no comparar manzanas con naranjas.
 - Capacidad de gobierno, fuentes: HCDN y Senado publican composición de bloques y leyes; Boletín Oficial para decretos y vetos. La parte difícil es "propios y aliados" (los bloques cambian y hay criterio de por medio): definir una regla clara y publicarla. "Leyes que quiso sacar" tampoco sale de una base: hay que definir qué cuenta (proyectos del Ejecutivo ingresados, por ejemplo) y es mejor mostrar el número crudo antes que un puntaje.

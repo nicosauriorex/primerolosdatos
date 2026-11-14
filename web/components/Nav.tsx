@@ -29,6 +29,8 @@ const TITULOS: Record<string, string> = {
   curiosidades: "Curiosidades", congreso: "Gobierno y Congreso", elecciones: "Elecciones", contexto: "Contexto internacional", bcra: "Parte del Banco Central", semaforo: "Semáforo de actividad", gasto: "En qué gasta la Nación", universidades: "Cuánto reciben las universidades", provincias: "Las provincias", plantillas: "Gráficos listos", fuentes: "Fuentes",
 };
 /** Páginas donde aparece "Volver" si se llegó desde otra página del sitio. */
+/** Páginas cuyo título de sección no es el h1: lo es el nombre del dato que muestran (la página pone su propio h1). */
+const SIN_H1 = new Set(["historico"]);
 const CON_VOLVER = new Set(["historico", "tema", "dato", "bcra", "semaforo", "gasto", "universidades", "provincias", ...GRUPO_PRES]);
 
 const carpetaDe = (ruta: string) => ruta.split("/")[1] ?? "";
@@ -178,7 +180,7 @@ export function CabeceraPagina() {
   return (
     <div className="cab-pagina">
       {volver && <button type="button" className="volver-atras" onClick={() => window.history.back()}><IconoVolver />Volver</button>}
-      {titulo && <h1>{titulo}</h1>}
+      {titulo && (SIN_H1.has(carpeta) ? <p className="cab-sobre">{titulo}</p> : <h1>{titulo}</h1>)}
     </div>
   );
 }

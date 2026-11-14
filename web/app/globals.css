@@ -593,35 +593,18 @@ th small { display: block; font-size: var(--t-micro); font-weight: 400; color: v
 .bloque-graf .cab-graf { display: flex; align-items: center; gap: var(--e-2); margin: 14px 0 var(--e-1); }
 .bloque-graf .cab-graf h3 { margin: 0; flex: 1 1 auto; }
 
-/* Vista simple de Histórico (un solo gráfico): el dato, su contexto, el gráfico, y los controles en "Personalizar" */
-.vs-cab { margin: 0 0 var(--e-3); }
-.vs-titulo { font-size: var(--t-xl); font-weight: 800; font-stretch: var(--ancho-semi); line-height: 1.15; margin: 0 0 var(--e-1); text-wrap: balance; }
-.vs-cifra { margin: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 var(--e-3); }
-.vs-cifra .v { font-size: clamp(2.25rem, 12vw, 4rem); font-weight: 900; font-stretch: var(--ancho-cifra); line-height: 1.05; color: var(--acento-texto); overflow-wrap: anywhere; }
-.vs-cifra .mes { font-size: var(--t-sm); font-weight: 600; color: var(--text-secondary); }
-.vs-frase { margin: var(--e-1) 0 0; font-size: var(--t-base); font-weight: 600; line-height: 1.3; color: var(--text-secondary); }
-.vs-frase.var-bueno { color: var(--bueno); } .vs-frase.var-malo { color: var(--malo); }
 .vs-leyenda { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e-1); }
 .vs-leyenda li { display: flex; align-items: baseline; gap: var(--e-2); }
 .vs-leyenda b { margin-left: auto; font-size: var(--t-md); }
-.card-simple { padding-top: var(--e-3); margin-bottom: var(--e-2); }
 .pie-graf { display: flex; align-items: flex-start; gap: var(--e-2); }
 .pie-graf .note { flex: 1 1 auto; margin: var(--e-2) 0; }
 .pie-graf .btn.expandir { flex: none; margin-top: var(--e-2); }
-.vs-acciones { display: grid; gap: var(--e-2); padding: var(--e-2) 0; margin-bottom: var(--e-2); }   /* fila [Presidentes] [Personalizar] y debajo Compartir a todo el ancho */
-.vs-fila { display: flex; gap: var(--e-2); }
-.vs-fila .btn { flex: 1 1 0; justify-content: center; min-height: 44px; }
-.vs-acciones .btn.primario { width: 100%; justify-content: center; min-height: 44px; }
 .acciones-graf { display: flex; flex-wrap: wrap; gap: var(--e-2); margin-top: var(--e-2); }
 .tabla-acciones { display: flex; align-items: center; gap: var(--e-2); flex-wrap: wrap; margin-bottom: var(--e-2); }
 .tabla-acciones .btn { min-height: 44px; }
 .comp-elegir-botones { display: flex; flex-wrap: wrap; gap: var(--e-2); }
 .comp-elegir-botones .btn { flex: 1 1 auto; justify-content: center; min-height: 44px; }
-/* Ventana de Personalizar (R15): una sola ventana con secciones plegables. En computadora (≥ 900 px) es un panel al costado derecho:
-   el fondo no se oscurece ni bloquea, el gráfico sigue a la vista (la página deja lugar a la derecha) y se ve cambiar. En celular, ventana completa. */
-.pers-panel { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
-.modal > .modal-cruz + .pers-panel { padding-right: 0; }
-.pers-panel > header { padding-right: 48px; }
+/* Secciones plegables de la hoja de Ajustes del Histórico */
 .pers-sec { border-bottom: 1px solid var(--border); }
 .pers-sec h3 { margin: 0; font-size: var(--t-base); }
 .pers-sec-btn { display: flex; align-items: center; justify-content: space-between; gap: var(--e-2); width: 100%; min-height: 44px; padding: var(--e-2) 0; border: 0; background: none; color: var(--text-primary); font: inherit; font-weight: 800; text-align: left; cursor: pointer; }
@@ -631,36 +614,9 @@ th small { display: block; font-size: var(--t-micro); font-weight: 400; color: v
 .pers-sec-cuerpo .acciones-vista { margin: 0; gap: var(--e-1) var(--e-4); }
 .pers-sec-cuerpo .acciones-vista .enlace, .pers-sec-cuerpo .acciones-vista a.enlace { display: inline-flex; align-items: center; min-height: 44px; }
 .pers-sec-cuerpo .aviso-link, .pers-sec-cuerpo .form-guardar { margin-top: 0; }
-.modal-fondo:has(> .modal > .pers-panel) { padding: 0; }
-.modal-fondo:has(> .modal > .pers-panel) > .modal { width: 100%; max-height: 100dvh; height: 100dvh; border-radius: 0; border-width: 0; }
-@media (min-width: 900px) {
-  .modal-fondo:has(> .modal > .pers-panel) { background: none; pointer-events: none; justify-content: flex-end; align-items: stretch; padding: var(--e-3); }
-  .modal-fondo:has(> .modal > .pers-panel) > .modal { pointer-events: auto; width: min(440px, 100%); height: auto; max-height: none; border-width: 1px; border-radius: var(--r-2); }
-  body:has(.modal-fondo > .modal > .pers-panel) main { padding-right: calc(440px + var(--e-6, 32px)); }
-}
-
-/* Cabecera del dato de Histórico: el dato y, a su derecha (debajo en celular), sus comparaciones en el mismo estilo tipográfico */
-.vs-dato { display: grid; gap: var(--e-3); min-width: 0; }
-.vs-dato > * { min-width: 0; }
-.vs-comps-caja { min-width: 0; max-width: 100%; }
-.vs-comps-de { margin: 0 0 var(--e-1); }
-.vs-comps { list-style: none; margin: 0; padding: 0 0 var(--e-1); display: flex; gap: var(--e-3); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: thin; }
-.vs-comp { flex: 0 0 10.5rem; display: flex; flex-direction: column; gap: 2px; scroll-snap-align: start; min-width: 0; padding-left: var(--e-2); border-left: var(--linea) solid var(--border-fuerte); }
-.vs-comp .k { font-size: var(--t-xs); font-weight: 700; text-transform: uppercase; font-stretch: var(--ancho-semi); letter-spacing: .02em; color: var(--text-secondary); }
-.vs-comp .v { font-size: clamp(1.25rem, 5vw, 1.75rem); font-weight: 900; font-stretch: var(--ancho-cifra); line-height: 1.1; overflow-wrap: anywhere; }
-.vs-comp .mes { font-size: var(--t-sm); font-weight: 600; color: var(--text-secondary); }
-.vs-comp .fr { font-size: var(--t-sm); font-weight: 700; line-height: 1.3; }
-@media (min-width: 900px) {
-  .vs-dato { grid-template-columns: auto minmax(0, 1fr); column-gap: var(--e-6, 32px); align-items: end; }
-  .vs-comps { display: grid; grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); overflow: visible; row-gap: var(--e-3); }
-  .vs-comp { flex: none; }
-  /* con el panel de Personalizar abierto la página se angosta: el dato arriba y las comparaciones debajo, en varias columnas */
-  body:has(.modal-fondo > .modal > .pers-panel) .vs-dato { grid-template-columns: minmax(0, 1fr); }
-}
 
 /* Línea de temporalidad bajo el título */
 .temporal { margin: 0 0 var(--e-2); font-size: var(--t-sm); color: var(--text-secondary); }
-.vs-temporal { margin: 0 0 var(--e-1); }
 
 /* Resumen del período: seis celdas fijas e iguales (sin deslizar): 2 columnas en celular, 3 en pantallas medianas, 6 en computadora */
 .resumen { margin-bottom: 14px; }
@@ -1477,7 +1433,7 @@ button.gas-abrir:focus-visible { outline: var(--linea) solid var(--foco); outlin
 .cabdato-frase { margin: var(--e-4) 0 0; max-width: 60ch; font-size: var(--v-texto); line-height: 1.5; color: var(--text-secondary); }
 .cabdato-grafico { margin-top: var(--e-5); min-width: 0; }
 @media (min-width: 900px) {
-  .cabdato { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--e-7); align-items: start; }
+  .cabdato { display: grid; grid-template-columns: minmax(0, max-content) minmax(max-content, 1fr); column-gap: var(--e-7); align-items: start; }
   .cabdato-num { font-size: var(--t-cifra); }
   .cabdato-deltas { justify-self: start; }
   .cabdato-deltas .delta { font-size: var(--t-md); }
@@ -1924,10 +1880,91 @@ a.zocalo:focus-visible { outline: var(--linea) solid var(--foco); outline-offset
 .inicio .bloque > .capitulo:first-child { margin-top: 0; }
 .inicio .bloque { padding-top: var(--e-7); }
 .inicio .zocalo + .bloque, .inicio .bloque + .zocalo { margin-top: 0; }
-@media (min-width: 900px) { .inicio .mas-buscados-lista { flex-wrap: wrap; overflow: visible; } }
+/* En la computadora "Ir directo a" va arriba de los chips y los cinco entran en un renglón (sin uno suelto abajo) */
+@media (min-width: 900px) {
+  .inicio .mas-buscados { flex-direction: column; align-items: flex-start; gap: var(--e-2); }
+  .inicio .mas-buscados-lista { flex-wrap: wrap; overflow: visible; }
+  .inicio .mas-buscados-lista .chip-buscado { padding: 0 var(--e-3); }
+}
+/* Resultados del buscador de la portada: una capa encima de la página, sin empujarla */
+.busq-flotante .busq-lista, .busq-flotante .busq-sin { position: absolute; top: calc(100% + var(--e-2)); left: 0; right: 0; z-index: 45; margin: 0;
+  max-height: min(60vh, 460px); overflow-y: auto; overscroll-behavior: contain; background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--r-2); box-shadow: var(--sombra-2); }
+.busq-flotante .busq-lista li:last-child { border-bottom: 0; }
+.busq-flotante .busq-sin { padding: 0 var(--e-3) var(--e-3); }
 .busq-sin-texto { margin: var(--e-3) 0 var(--e-2); color: var(--text-secondary); font-size: var(--t-base); }
 /* En el celular la fila de pestañas ya no está (va abajo): lo fijo arriba mide 0, o la fila de Presidentes cuando la hay */
 @media (max-width: 767.98px) {
   :root { --nav-h: 0px; }
   :root:has(.subtabs) { --nav-h: 38px; }
 }
+
+/* ===== Etapa 3.3: Histórico (prefijo hi-) ===== */
+
+/* El nombre de la sección ("Histórico") es solo un sobretítulo: el título de la página es el nombre del dato */
+.cab-sobre { margin: 0; font-size: var(--v-rotulo); font-weight: 700; font-stretch: var(--ancho-semi); letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+.hi-temporal { margin: var(--e-3) 0 var(--e-2); font-size: var(--v-rotulo); color: var(--text-muted); }
+/* Con varias variables (o base 100) no hay cifra: la leyenda va en su lugar */
+.cabdato:has(.hi-leyenda) .cabdato-cifra { display: none; }
+.hi-leyenda { margin-top: var(--e-3); }
+/* Más comparaciones: plegable con tabla de 3 columnas (entra a 360 px sin deslizar) */
+.hi-mas { margin: 0 0 var(--e-3); min-width: 0; }
+.hi-mas summary { display: inline-flex; align-items: center; min-height: var(--toque); cursor: pointer; font-size: var(--t-sm); font-weight: 700; font-stretch: var(--ancho-semi); color: var(--text-secondary); }
+.hi-mas summary:hover { color: var(--text-primary); }
+.hi-mas .tablewrap { overflow-x: auto; }
+.hi-mas table { width: 100%; }
+.hi-mas th, .hi-mas td { padding: var(--e-2) var(--e-2); white-space: normal; }
+.hi-mas th { position: static; }
+.hi-mas td:first-child { overflow-wrap: anywhere; }
+.hi-mas td:nth-child(2), .hi-mas td:nth-child(3) { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hi-mas td:nth-child(3) { font-weight: 700; }
+@media (min-width: 640px) { .hi-mas table { width: auto; min-width: 28rem; } }
+/* El gráfico va suelto, sin caja */
+.hi-grafico { position: relative; margin: var(--e-2) 0 var(--e-2); min-width: 0; }
+.hi-acciones { display: flex; gap: var(--e-2); padding: var(--e-2) 0; margin-bottom: var(--e-3); }
+.hi-acciones .btn { flex: 1 1 0; justify-content: center; min-height: var(--toque); }
+/* Hoja de ajustes: secciones plegables y, al pie, "Volver a lo de fábrica" y "Listo" siempre a la vista */
+.hi-pers { display: block; min-width: 0; }
+.hi-pers .controls label { min-width: min(120px, 100%); }
+.hi-pers-pie { position: sticky; bottom: calc(-1 * var(--e-4)); display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--e-2); padding: var(--e-3) 0; margin-top: var(--e-3); background: var(--surface-0); border-top: 1px solid var(--border); }
+.hi-pers-pie .btn { min-height: var(--toque); justify-content: center; }
+
+/* ===== Etapa 3.3: Presidentes (prefijos gp-, pres-) ===== */
+.tmand-nota { margin: var(--e-3) 0 0; font-size: var(--v-rotulo); color: var(--text-secondary); line-height: 1.4; }
+
+/* Grilla de presidentes × datos clave: tabla de posiciones; se desliza dentro de su contenedor, con la primera columna fija */
+.gp { min-width: 0; }
+.gp-desliza { overflow-x: auto; overscroll-behavior-x: contain; max-width: 100%; scrollbar-width: thin; --fd: 0px;
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - var(--fd)), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - var(--fd)), transparent 100%); }
+.gp-desliza[data-mas~="der"] { --fd: 28px; }
+.gp-tabla { border-collapse: separate; border-spacing: 0; width: 100%; font-variant-numeric: tabular-nums; }
+.gp-cap { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.gp-tabla th, .gp-tabla td { position: static; padding: 0; background: none; box-shadow: none; text-transform: none; letter-spacing: 0; border-bottom: 1px solid var(--border); }
+.gp-th-pres, .gp-th-fila { position: sticky !important; left: 0; z-index: 2; background: var(--surface-0) !important; text-align: left; min-width: 112px; padding: 0 var(--e-3) 0 var(--e-3) !important; }
+.gp-th-pres { font-size: var(--v-rotulo); font-weight: 700; color: var(--text-muted); vertical-align: bottom; padding-bottom: var(--e-2) !important; }
+.gp-th { min-width: 84px; padding: 0 var(--e-2) var(--e-2) !important; text-align: center; vertical-align: bottom; font-weight: 700; }
+.gp-dato { display: block; font-size: var(--v-rotulo); color: var(--text-primary); line-height: 1.2; }
+.gp-metrica { display: block; font-size: var(--v-rotulo); font-weight: 500; color: var(--text-muted); }
+.gp-th-fila { height: var(--toque); }
+.gp-th-fila .gp-raya { position: absolute; left: 0; top: var(--e-2); bottom: var(--e-2); width: 3px; background: var(--pc, var(--neutral)); }
+.gp-quien { display: flex; flex-direction: column; min-width: 0; padding-left: var(--e-1); }
+.gp-nombre { font-size: var(--v-texto); font-weight: 800; line-height: 1.2; color: var(--text-primary); }
+.gp-periodo { font-size: var(--v-rotulo); font-weight: 500; color: var(--text-muted); white-space: nowrap; }
+.gp-celda { min-width: 84px; height: 56px; text-align: center; padding: 0 !important; }
+.gp-link { display: flex; align-items: center; justify-content: center; gap: 2px; width: 100%; height: 100%; min-height: var(--toque); padding: 0 var(--e-2); color: var(--text-primary);
+  font-size: var(--t-base); font-weight: 700; text-decoration: none; white-space: nowrap; }
+.gp-link:hover { text-decoration: underline; }
+.gp-link:focus-visible { outline-offset: -3px; }
+.gp-tabla td.gp-bueno { background: color-mix(in srgb, var(--bueno) 20%, transparent); }
+.gp-tabla td.gp-malo { background: color-mix(in srgb, var(--malo) 20%, transparent); }
+.gp-vacia { color: var(--text-muted); }
+.gp-desde { font-weight: 600; color: var(--text-muted); }
+.gp-notas, .gp-leyenda { margin: var(--e-2) 0 0; font-size: var(--v-rotulo); color: var(--text-secondary); line-height: 1.4; }
+
+/* Página de Presidentes: bloques sin caja, uno debajo del otro */
+.pres-controles { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-3); margin: var(--e-3) 0; }
+.pres-hoja-sec { margin: 0 0 var(--e-4); }
+.pres-hoja-sec > .controls { margin-top: var(--e-2); }
+.pres-hoja-acciones { display: flex; gap: var(--e-2); margin-bottom: var(--e-3); }
+.pres-cuerpo { min-width: 0; }
+.pres-nota { margin: var(--e-3) 0 0; font-size: var(--v-rotulo); color: var(--text-secondary); line-height: 1.4; }

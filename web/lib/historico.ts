@@ -1,7 +1,7 @@
 // Cómo se lee Histórico desde la URL: parámetros de cada gráfico y del período. Lo usan la sección y la imagen de compartir.
 import { desdePreferido, type DesdePref } from "./config";
 import { claseVariacion, etiqueta, type EstRows, type Fila } from "./estadisticas";
-import { mesNum, nf0, nf1, ok, redondeadoComo, restaLimpia, rotuloAnterior } from "./formato";
+import { MESES, mesNum, nf0, nf1, ok, redondeadoComo, restaLimpia, rotuloAnterior } from "./formato";
 import type { Expr, Motor } from "./motor";
 import { decExpr, lista as listaUrl, unoDe } from "./url";
 
@@ -155,3 +155,23 @@ export function claseVariacionMostrada(dir: number | null | undefined, pct: bool
   if (!ok(desde) || !ok(hasta)) return "neutro";
   return claseVariacion(dir, pct, redondeadoComo(mostrado, desde), redondeadoComo(mostrado, hasta));
 }
+
+/** La parte numérica de la frase de una comparación ("El último está 7,2 % abajo" → "−7,2 %", "…2,1 puntos arriba" → "+2,1 p.p."), sin recalcular nada:
+ *  es el mismo número de `fraseUltimoVs`, con su signo y la dirección del último dato contra el valor comparado.
+ *  Sin número ("El último está arriba", contra un valor cero o negativo): "Arriba" / "Abajo". Igual: "Igual". */
+export function deltaDeFrase(frase: string): { texto: string; dir: 1 | -1 | 0 } {
+  const mt = /^El último está (?:(.+) )?(arriba|abajo)$/.exec(frase);
+  if (!mt) return { texto: "Igual", dir: 0 };
+  const dir = mt[2] === "arriba" ? 1 : -1;
+  if (!mt[1]) return { texto: dir > 0 ? "Arriba" : "Abajo", dir };
+  return { texto: `${dir > 0 ? "+" : "−"}${mt[1].replace(/\s+puntos?$/, " p.p.")}`, dir };
+}
+
+/** El período como se resume en el chip de la barra: "2003 – oct 2026" (si arranca en enero, solo el año) o "oct 2025 – oct 2026". */
+export function textoPeriodo(desde: string, hasta: string, meses: Set<number>): string {
+  const [y0, m0] = desde.split("-"), [y1, m1] = hasta.split("-");
+  const a = m0 === "01" ? y0 : `${MESES[+m0 - 1]} ${y0}`;
+  const sueltos = meses.size < 12 ? ` · ${[...meses].sort((p, q) => p - q).map((k) => MESES_CAP[k - 1]).join(", ")}` : "";
+  return `${a} – ${MESES[+m1 - 1]} ${y1}${sueltos}`;
+}
+const MESES_CAP = MESES.map((x) => x[0].toUpperCase() + x.slice(1));

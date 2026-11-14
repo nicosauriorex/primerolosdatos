@@ -12,9 +12,17 @@ import { BotonCompartir } from "../PanelCompartir";
 import { IconoCompartir } from "../Iconos";
 import { ContextoMandato } from "./ContextoMandato";
 import { INFO_CORTA } from "@/lib/info";
-import { CeldaPresMandato, CeldaVar, CeldasStats, COLS, Cabecera, LineaInicio, comparativaDe, siguienteOrden, useBase, valorCol, type Orden } from "./comunes";
+import { CeldaVar, CeldasStats, COLS, Cabecera, LineaInicio, siguienteOrden, useBase, valorCol, type Orden } from "./comunes";
+import { Capitulo } from "../sistema/Capitulo";
+import { FilaChips } from "../sistema/FilaChips";
+import { BarraVista } from "../sistema/BarraVista";
+import { Hoja } from "../sistema/Hoja";
+import { CompartirHoja } from "../sistema/CompartirHoja";
+import { TablaMandatos } from "../sistema/TablaMandatos";
+import { GrillaPresidentes } from "../sistema/GrillaPresidentes";
+import { grillaPresidentes, tablaPresidentes } from "@/lib/presidentes";
 import { fmtMes } from "@/lib/formato";
-import { baseIdx, crearPres, nivelComparable, ordenar, statsMandato, type Pres } from "@/lib/estadisticas";
+import { baseIdx, crearPres, type BaseCfg, nivelComparable, ordenar, statsMandato, type Pres } from "@/lib/estadisticas";
 import { velasDe } from "@/lib/ficha";
 import { grupoDe, ordenarGrupos, textoBusqueda } from "@/lib/catalogo";
 import { monedaEnSerie } from "@/lib/monedas";
@@ -24,12 +32,19 @@ import { useConfig } from "../ConfigProvider";
 import { medidaPreferida, paramSi } from "@/lib/config";
 import { decExpr, encExpr, lista, unoDe, useParams } from "@/lib/url";
 
+/** El inicio de mandato en palabras para el chip (sin "T-1"): "el mes antes de asumir", "el mes de asunción"… y "con excepciones" si las hay. */
+function inicioCorto(b: BaseCfg): string {
+  const k = b.t0;
+  const gral = k === -1 ? "el mes antes de asumir" : k === 0 ? "el mes de asunción" : k > 0 ? `${k} ${k === 1 ? "mes" : "meses"} después de asumir` : `${-k} meses antes de asumir`;
+  return Object.keys(b.t0p).length ? `${gral}, con excepciones` : gral;
+}
+
 export function Presidentes() {
   const [p, set, montado] = useParams();
   const sec = useSeccion("todo");
   const { config } = useConfig();
   const info = useBase(p, set, montado), b = info.b;
-  const [ordB, setOrdB] = useState<Orden>({ k: null, d: -1 });
+  const [hoja, setHoja] = useState(false);
   const [ordA, setOrdA] = useState<Orden>({ k: null, d: -1 });
   const [abiertos, setAbiertos] = useState<Set<string>>(() => new Set());   // al entrar, todos los grupos están contraídos
   const [tipo, setTipo] = useState("");
@@ -46,29 +61,40 @@ export function Presidentes() {
 
   const existe = (id: string) => !!m.SER[id];
   const presSel = new Set(lista(p.get("pr") ?? PRES.map((x) => x.id).join(",")).filter((id) => PRES.some((x) => x.id === id)));
-  const cols = COLS.filter((c) => (p.has("cl") ? lista(p.get("cl")) : COLS.map((x) => x[0])).includes(c[0]));
+  // `cl` lo comparten las dos tablas (como antes de la etapa 3.3); la de una variable escribe siempre también su columna principal: si en esta no queda ninguna columna (p. ej. `cl=ninguna` o solo `acum`), se ven todas.
+  const colsPedidas = COLS.filter((c) => (p.has("cl") ? lista(p.get("cl")) : COLS.map((x) => x[0])).includes(c[0]));
+  const cols = colsPedidas.length ? colsPedidas : COLS;
   const eB: Expr = decExpr(p.get("pv"), existe) || { id: m.SER.sipa_med ? "sipa_med" : "sipa_prom", med: medidaPreferida(config), rel: null, modo: "compra", esc: "" };
   const F = m.F;
 
   // ---- tabla B: una variable, todos los presidentes
   const c = m.calc(eB), dir = c.dir || 0, niv = nivelComparable(m, eB);
-  const sts = PRES.map((x) => statsMandato(F, c.v, x, b));
-  const comp = comparativaDe(c, sts, niv);
-  const filasB = ordenar(PRES.map((x, k) => ({ x, k })).filter((o) => presSel.has(o.x.id)), ordB, (o) => valorCol(c, sts[o.k], ordB.k));
-  const nota = (!dir ? "Sin verde ni rojo: para esta variable subir o bajar no es ni bueno ni malo en sí mismo; las marcas dicen “más alto” y “más bajo”."
-    : `Verde = mejor y rojo = peor entre todos los presidentes; la marca “mejor” o “peor” señala el extremo de cada columna${niv ? "" : "; en montos corrientes solo se compara la variación (los niveles no se pueden comparar con inflación de por medio)"}.`)
-    + " Barra: crece desde la izquierda según el valor entre el menor y el mayor de la columna (en Variación, con subas y bajas, sale del cero hacia cada lado)" + (dir ? "; su color va del rojo (el peor) al verde (el mejor), pasando por el amarillo." : "; en gris.");
+  const T = tablaPresidentes(m, eB, b, { presIds: presSel, cl: p.has("cl") ? lista(p.get("cl")) : null });
   const vista = unoDe(p.get("pvista"), ["tabla", "velas"] as const, "tabla");
   // velas: solo presidentes con datos; el resto se lista al pie
-  const { velas, sin: velasSin } = velasDe(m, c, filasB.map(({ x, k }) => ({ x, st: sts[k] })));
+  const selPres = PRES.filter((x) => presSel.has(x.id));
+  const { velas, sin: velasSin } = velasDe(m, c, selPres.map((x) => ({ x, st: statsMandato(F, c.v, x, b) })));
   // Compartir comparte lo que se ve: la tabla, o las velas. Si las velas no se pueden dibujar (pesos corrientes o sin datos), no hay nada para compartir.
   const sinVelas = vista === "velas" && (!niv || velas.length === 0);
   const compartirB = (
-    <BotonCompartir className="btn" titulo={`Primero los Datos: ${c.corto} por presidente${vista === "velas" ? " (velas)" : ""}`} href={() => window.location.href} deshabilitado={filasB.length === 0 || sinVelas}
+    <BotonCompartir className="btn" titulo={`Primero los Datos: ${c.corto} por presidente${vista === "velas" ? " (velas)" : ""}`} href={() => window.location.href} deshabilitado={(vista === "velas" ? selPres.length : T.filas.length) === 0 || sinVelas}
       title={sinVelas ? "Las velas no se pueden armar con estos datos: no hay nada para compartir" : vista === "velas" ? "Armar una imagen de estas velas para compartir" : "Armar una imagen de esta tabla para compartir"}
       aria-label={`Compartir como imagen: una variable, todos los presidentes, en ${vista === "velas" ? "velas" : "tabla"}`}
-      crearVista={() => ({ tipo: vista === "velas" ? "velas" : "barras", expr: eB, presIds: filasB.map((o) => o.x.id), base: b })}><IconoCompartir />Compartir</BotonCompartir>
+      crearVista={() => (vista === "velas"
+        ? { tipo: "velas", expr: eB, presIds: selPres.map((x) => x.id), base: b }
+        : { tipo: "barras", expr: eB, presIds: T.filas.map((f) => f.id), base: b, ...(T.tasa ? { metrica: "prom" as const } : {}) })}><IconoCompartir />Compartir</BotonCompartir>
   );
+  const bajadaB = T.tasa ? "Inicio y cierre de cada mandato y el promedio de todos sus meses." : "Del inicio al cierre de cada mandato.";
+  const notaB = (dir ? "Verde = mejoró y rojo = empeoró; el signo también está escrito." : "Sin verde ni rojo: subir o bajar no es ni bueno ni malo en sí mismo.")
+    + (niv ? "" : " En montos corrientes los niveles de épocas distintas no se pueden comparar (hay inflación de por medio): solo vale la variación.")
+    + ` Unidad: ${c.unidad}.`;
+  const resumenB = [
+    { clave: "pres", texto: presSel.size === PRES.length ? "Todos los presidentes" : `${presSel.size} de ${PRES.length} presidentes` },
+    { clave: "inicio", texto: `Desde: ${inicioCorto(b)}` },
+  ];
+  const cambiarPres = (v: string) => { const n = [...alternar(presSel, v)]; set({ pr: n.length ? n.join(",") : "ninguno" }); };
+  const grilla = grillaPresidentes(m, b, m.SER);
+  const hrefPag = window.location.pathname + window.location.search;
 
   // ---- tabla A: un presidente, todas las variables
   const paPres = PRES.find((x) => x.id === p.get("pap")) || PRES[PRES.length - 1];
@@ -128,42 +154,51 @@ export function Presidentes() {
 
   return (
     <section>
-      <div className="controls">
-        <VentanaConfig etiqueta="Presidentes y columnas" titulo="Presidentes y columnas">
-          <div className="controls"><label>Presidentes</label><Seg valor={presSel} opciones={PRES.map((x) => [x.id, x.n] as [string, string])} onElegir={(v) => set({ pr: [...alternar(presSel, v)].join(",") })} /></div>
-          {columnas}
-        </VentanaConfig>
-      </div>
-      <div className="card">
-        <h2>Una variable, todos los presidentes</h2>
-        <LineaInicio info={info} F={F}>
-          <p className="note">Mínimo, máximo, promedio y mediana usan solo los meses del mandato. Verde y rojo indican si el cambio fue bueno o malo (un salario que sube es verde; precios, dólar o riesgo país que suben son rojos).</p>
-        </LineaInicio>
+      <Capitulo id="pres-grilla" titulo="Todos los presidentes, de un vistazo" bajada="Cómo cambió cada dato clave en cada mandato. Tocá una celda para ver el dato."
+        acciones={<CompartirHoja href={hrefPag} titulo="Datos clave por presidente" texto="Cómo cambió cada dato clave en cada mandato presidencial." />}>
+        <LineaInicio info={info} F={F} />
+        <GrillaPresidentes grilla={grilla} />
+      </Capitulo>
+      <Capitulo id="pres-variable" titulo="Una variable, todos los presidentes" bajada={bajadaB} acciones={compartirB}>
         <FilaVariable e={eB} onChange={(e) => e && set({ pv: encExpr(e) })} />
-        <div className="controls">
-          <Seg valor={vista} opciones={[["tabla", "Tabla"], ["velas", "Velas"]]} onElegir={(v) => set({ pvista: v === "tabla" ? null : v })} />
-          {compartirB}
+        <BarraVista items={resumenB} onAbrir={() => setHoja(true)} />
+        <div className="pres-controles">
+          <FilaChips etiqueta="Vista" opciones={[["tabla", "Tabla"], ["velas", "Velas"]]} valor={vista} onElegir={(v) => set({ pvista: v === "tabla" ? null : v })} />
         </div>
+        <Hoja titulo="Presidentes" abierta={hoja} onCerrar={() => setHoja(false)}>
+          {(cerrar) => (
+            <>
+              <div className="pres-hoja-sec">
+                <div className="pres-hoja-acciones">
+                  <button type="button" className="btn" onClick={() => set({ pr: null })}>Todos</button>
+                  <button type="button" className="btn" onClick={() => set({ pr: "ninguno" })}>Ninguno</button>
+                </div>
+                <Seg valor={presSel} opciones={PRES.map((x) => [x.id, x.n] as [string, string])} onElegir={cambiarPres} />
+              </div>
+              <div className="pres-hoja-sec">
+                <LineaInicio info={info} F={F} />
+              </div>
+              <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
+            </>
+          )}
+        </Hoja>
+        <div className="pres-cuerpo">
         {vista === "tabla" ? (
-          <>
-            <p className="note">Tocá un encabezado para ordenar.</p>
-            <div className="tablewrap fija"><table>
-              <thead><tr><th>Presidente</th><Cabecera cols={cols} ord={ordB} onOrden={(k) => setOrdB(siguienteOrden(ordB, k))} /></tr></thead>
-              <tbody>{filasB.map(({ x, k }) => (
-                <tr key={x.id}><CeldaPresMandato x={x} F={F} arr={c.v} />
-                  <CeldasStats m={m} c={c} st={sts[k]} cols={cols} comp={{ cols: comp, k }} /></tr>
-              ))}</tbody>
-            </table></div>
-          </>
+          T.filas.length ? (
+            <TablaMandatos etiqueta={`${c.corto} por presidente`} filas={T.filas} columnas={T.columnas} visibles={T.visibles} extras={T.extras}
+              elegidas={T.elegidas} onElegidas={(claves) => set({ cl: [...new Set([...(T.principal ? [T.principal] : []), ...claves])].join(",") })} nota={notaB} />
+          ) : <p className="note">Ningún presidente elegido tiene datos de esta variable.</p>
         ) : !niv ? (
           <p className="note">En montos corrientes los valores de épocas distintas no se pueden poner en una misma escala (hay inflación de por medio). Elegí una medida real o un índice, o mirá la vista Tabla, que compara las variaciones.</p>
         ) : velas.length ? (
-          <Velas velas={velas} sinDatos={velasSin} unidad={c.unidad} minEscala={m.fmtC(c, Math.min(...velas.map((v) => v.min)))} maxEscala={m.fmtC(c, Math.max(...velas.map((v) => v.max)))} />
+          <>
+            <Velas velas={velas} sinDatos={velasSin} unidad={c.unidad} minEscala={m.fmtC(c, Math.min(...velas.map((v) => v.min)))} maxEscala={m.fmtC(c, Math.max(...velas.map((v) => v.max)))} />
+            <p className="pres-nota">Unidad: {c.unidad}. Verde = mejoró y rojo = empeoró entre el inicio y el cierre del mandato; el signo del cambio también está escrito.</p>
+          </>
         ) : <p className="note">Ningún presidente elegido tiene datos de esta variable.</p>}
-        <p className="note" style={{ marginTop: "var(--e-2)" }}>Unidad: {c.unidad}. {vista === "tabla" ? nota : "Verde = mejoró y rojo = empeoró entre el inicio y el cierre del mandato; el signo del cambio también está escrito."}</p>
-      </div>
-      <div className="card">
-        <h2>Un presidente, todas las variables</h2>
+        </div>
+      </Capitulo>
+      <Capitulo id="pres-uno" titulo="Un presidente, todas las variables">
         <div className="controls">
           <Seg valor={modoA} opciones={[["todas", "Todas"], ["mis", "Mis variables"]]} onElegir={(v) => set({ pam2: v === "todas" ? null : v, pav: v === "mis" && !misPedidas.length ? recomendadas.map((e) => encExpr(e)).join(",") : undefined })} />
         </div>
@@ -231,7 +266,7 @@ export function Presidentes() {
           </tbody>
         </table></div>
         )}
-      </div>
+      </Capitulo>
       {metas.length === 0 && <Fragment />}
     </section>
   );

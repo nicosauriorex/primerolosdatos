@@ -22,17 +22,16 @@ import { Capitulo } from "./sistema/Capitulo";
 import { CompartirHoja } from "./sistema/CompartirHoja";
 import { FilaChips } from "./sistema/FilaChips";
 import { TablaMandatos } from "./sistema/TablaMandatos";
-import { Lamina, Laminas } from "./sistema/Lamina";
+import { GraficosListos } from "./GraficosListos";
 import { BarrasMes } from "./sistema/BarrasMes";
 import { unoDe } from "@/lib/url";
 import { baseDeConfig } from "@/lib/config";
 import { AYUDA_T, PRES_DEF, baseTxt, crearPres, etiqueta, franjasPres, nivelComparable, nombreCorto, statsMandato } from "@/lib/estadisticas";
 import { fmtMes } from "@/lib/formato";
 import { frecuenciaOrigen, textoTemporalidad } from "@/lib/historico";
-import { datoFijoDe, hrefFijo, mismaVariable } from "@/lib/datos-fijos";
+import { datoFijoDe, hrefFijo } from "@/lib/datos-fijos";
 import { fmtEjeDe, notaInflacion, tituloVariable } from "@/lib/imagen-datos";
 import { fuentePublica } from "@/lib/fuente-publica";
-import { crearPlantillas, evaluar, hrefPlantilla } from "@/lib/plantillas";
 import type { Expr, Motor, SerieMeta } from "@/lib/motor";
 import { hrefDato, hrefHistorico, idsDe } from "@/lib/temas";
 import {
@@ -112,7 +111,7 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
       <CapPresidentes m={m} e={e} info={info} nivel={nivel} pd={pd} inicio={inicio} nombre={nombre}
         velas={unoDe(p.get("pvista"), ["tabla", "velas"] as const, "tabla") === "velas"} onVista={(v) => set({ pvista: v ? "velas" : null })} />
       <CapMandato m={m} e={e} D={mandato} nivel={nivel} pd={pd} inicio={inicio} b={b} />
-      <CapLaminas m={m} e={e} metas={metas} nivel={nivel} nombre={S[e.id]?.n ?? c.nombre} />
+      <GraficosListos m={m} e={e} metas={metas} nivel={nivel} nombre={S[e.id]?.n ?? c.nombre} />
       <details className="fi-metodo">
         <summary>Cómo se mide</summary>
         <div className="fi-metodo-cuerpo">
@@ -285,31 +284,6 @@ function CapMandato({ m, e, D, nivel, pd, inicio, b }: { m: Motor; e: Expr; D: D
       <div className="legend">{D.pres.map((x) => <span key={x.id} style={vcolor(x.color)}>{x.n}</span>)}</div>
       <div className="fi-grafico"><Grafico rows={D.rows} series={G.series} opts={G.opts} /></div>
       {D.modo !== "teorico" && <p className="fi-nota">Unidad: {D.c.unidad}.</p>}
-    </Capitulo>
-  );
-}
-
-// ------------------------------------------------------------ Gráficos listos que usan esta serie
-const MAX_LAMINAS = 6;
-function CapLaminas({ m, e, metas, nivel, nombre }: { m: Motor; e: Expr; metas: SerieMeta[]; nivel: Nivel; nombre: string }) {
-  const kE = `${e.id}~${e.med}~${e.rel}~${e.modo}~${e.esc}`;
-  const todas = useMemo(() => crearPlantillas(metas), [metas]);
-  // Las curadas que usan la serie, sin la que muestra exactamente esta misma variable sola (sería la ficha otra vez)
-  const pls = useMemo(() => todas.filter((x) => x.curada && !x.propia && x.ids.includes(e.id) && !(x.e && mismaVariable(x.e, e) && x.ids.length === idsDe(e).length)).slice(0, MAX_LAMINAS),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [todas, kE]);
-  const ids = useMemo(() => [...new Set(pls.flatMap((x) => x.ids))], [pls]);
-  const sec = useSeccion(ids);
-  const evs = useMemo(() => (sec.ocupado ? [] : pls.map((x) => ({ x, ev: evaluar(m, x) })).filter((y) => y.ev)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pls, sec.ocupado, sec.version, m]);
-  if (!evs.length) return null;
-  return (
-    <Capitulo id="fi-laminas" nivel={nivel} titulo="Gráficos listos">
-      <Laminas etiqueta={`Gráficos listos con ${nombre}`}>
-        {evs.map(({ x, ev }) => <Lamina key={x.id} titulo={x.titulo} cifra={ev!.val} fecha={ev!.fecha} v={ev!.v} desde={m.idxDe("2003-01")} tono={ev!.cls} href={hrefPlantilla(x, ev!.vista)} />)}
-      </Laminas>
-      <p className="fi-mas"><Link prefetch={false} className="enlace" href={`/plantillas/?${new URLSearchParams({ q: nombre }).toString()}`}>Ver todos los gráficos listos</Link></p>
     </Capitulo>
   );
 }

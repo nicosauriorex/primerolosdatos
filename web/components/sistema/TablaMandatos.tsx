@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { FilaChips } from "./FilaChips";
 
 export type CeldaMandato = { texto: string; valor?: number | null; tono?: "bueno" | "malo" | null };
@@ -7,12 +7,17 @@ export type FilaMandato = { id: string; nombre: string; periodo: string; color: 
 export type ColumnaMandato = { clave: string; titulo: string; principal?: boolean };
 export type TablaMandatosProps = {
   filas: FilaMandato[]; columnas: ColumnaMandato[]; visibles: string[]; extras?: string[]; resaltar?: string; etiqueta: string;
+  /** Columnas sumadas controladas desde afuera (por ejemplo, en el link). Sin `elegidas`, el estado es local. */
+  elegidas?: string[]; onElegidas?: (claves: string[]) => void;
+  /** Una línea bajo la tabla. */
+  nota?: ReactNode;
 };
 
 const tonoVar = (t?: "bueno" | "malo" | null) => (t === "bueno" ? "var(--bueno)" : t === "malo" ? "var(--malo)" : "var(--text-primary)");
 
-export function TablaMandatos({ filas, columnas, visibles, extras = [], resaltar, etiqueta }: TablaMandatosProps) {
-  const [elegidas, setElegidas] = useState<Set<string>>(new Set());
+export function TablaMandatos({ filas, columnas, visibles, extras = [], resaltar, etiqueta, elegidas: elegidasFuera, onElegidas, nota }: TablaMandatosProps) {
+  const [elegidasLocal, setElegidas] = useState<Set<string>>(new Set());
+  const elegidas = useMemo(() => (elegidasFuera ? new Set(elegidasFuera) : elegidasLocal), [elegidasFuera, elegidasLocal]);
   const [orden, setOrden] = useState<{ clave: string; dir: 1 | -1 } | null>(null);
   const principal = columnas.find((c) => c.principal) ?? columnas[0];
   const mostradas = useMemo(
@@ -34,7 +39,11 @@ export function TablaMandatos({ filas, columnas, visibles, extras = [], resaltar
   const tope = Math.max(0, ...filas.map((f) => Math.abs((principal && f.celdas[principal.clave]?.valor) || 0)));
   const alternar = (clave: string) => setOrden((o) => (o && o.clave === clave ? (o.dir === -1 ? { clave, dir: 1 } : null) : { clave, dir: -1 }));
   const opcionesExtras: [string, string][] = extras.flatMap((k) => { const c = columnas.find((x) => x.clave === k); return c ? [[k, c.titulo] as [string, string]] : []; });
-  const tocar = (k: string) => setElegidas((s) => { const n = new Set(s); if (n.has(k)) n.delete(k); else n.add(k); return n; });
+  const tocar = (k: string) => {
+    const n = new Set(elegidas); if (n.has(k)) n.delete(k); else n.add(k);
+    if (onElegidas) onElegidas(extras.filter((x) => n.has(x)));   // en el orden de las columnas
+    else setElegidas(n);
+  };
 
   return (
     <div className="tmand">
@@ -116,6 +125,7 @@ export function TablaMandatos({ filas, columnas, visibles, extras = [], resaltar
         </tbody>
       </table>
       </div>
+      {nota ? <p className="tmand-nota">{nota}</p> : null}
     </div>
   );
 }
