@@ -1,6 +1,6 @@
 # Remodelación, etapa 3.4: Contexto
 
-Estado: implementada en local (2026-11-14), sin publicar. Sale de `docs/AUDITORIA-DISENO-2026-11-13.md` (sección "Contexto", C4 y "Límites de los datos"), D-023 y el sistema de `docs/specs/remodelacion-sistema.md` (componentes en `web/components/sistema/`). Sigue a la etapa 3.3 (`docs/specs/remodelacion-historico-presidentes.md`).
+Estado: implementada y publicada (2026-11-14, 8553461). Sale de `docs/AUDITORIA-DISENO-2026-11-13.md` (sección "Contexto", C4 y "Límites de los datos"), D-023 y el sistema de `docs/specs/remodelacion-sistema.md` (componentes en `web/components/sistema/`). Sigue a la etapa 3.3 (`docs/specs/remodelacion-historico-presidentes.md`).
 
 ## Objetivo
 - Que `/contexto/` (hoy 11.400 px que arrancan con las "sorpresas" del FMI) **abra con una pregunta respondida**: "¿Es más cara la carne en la Argentina que en la zona euro?", con la respuesta en una cifra, Argentina contra cada país en barras centradas en "igual", y cuántos kilos de asado compra un salario.
