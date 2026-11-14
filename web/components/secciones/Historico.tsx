@@ -9,7 +9,7 @@ import { CabeceraDato } from "../sistema/CabeceraDato";
 import { BarraVista } from "../sistema/BarraVista";
 import { Hoja, type CerrarHoja } from "../sistema/Hoja";
 import type { DeltaProps } from "../sistema/Delta";
-import { FilaVariable, RenglonVariable } from "../Variables";
+import { FilaVariable, Picker, RenglonVariable } from "../Variables";
 import { Grafico, hayDatos, type Fila, type Marca, type OpcionesG, type Ref, type SerieG, type TipoRef } from "../Grafico";
 import { PALETA, vcolor } from "../util";
 import { fmtMes, MESES, nf0, nf1, ok, redondeadoComo, restaLimpia } from "@/lib/formato";
@@ -19,7 +19,7 @@ import { admiteContexto, contextoDato } from "@/lib/contexto-dato";
 import { MAX_GRAFICOS, MAX_MISMA_UNIDAD, PG, TODOS_MESES, claseVariacionMostrada, comparacionesCabecera, deltaDeFrase, exprsUsadas, fraseUltimoVs, frecuenciaOrigen, leerComun, leerGrafico, sfx, textoPeriodo, textoTemporalidad, type Comun, type GEst } from "@/lib/historico";
 import { fmtEjeDe, notaInflacion, tituloGrafico, type VistaImg } from "@/lib/imagen-datos";
 import { useConfig } from "../ConfigProvider";
-import { baseDeConfig, medidaPreferida } from "@/lib/config";
+import { baseDeConfig, medidaInicial, medidaPreferida } from "@/lib/config";
 import { encExpr, useParams } from "@/lib/url";
 import { avisoTabla, copiarTexto } from "@/lib/compartir";
 import { filasDeTabla, tablaATexto, type ColTabla } from "@/lib/tabla-texto";
@@ -230,7 +230,7 @@ function BloqueGrafico({ i, total, compacto, g, E, m, set, version, onQuitar, on
   const falla = hayError && !sec.ocupado ? <p className="error">Las variables elegidas no se pudieron cargar. Probá otra o recargá la página.</p> : <Cargando />;
   if (simple) {
     return disp.length > 0
-      ? <Principal m={m} E={Ed} set={setG} version={version} compacto={false} simple={{ ...simple, variables: vars }} />
+      ? <Principal m={m} E={Ed} set={setG} version={version} compacto={false} simple={{ ...simple, variables: vars, cambiar: (x) => guardarExprs([x, ...base.slice(1)]) }} />
       : <div className={clase}>{vars}{falla}</div>;
   }
   return (
@@ -444,11 +444,12 @@ const DEFS_RES: DefResumen[] = [
 ];
 
 // ------------------------------------------------------------ gráfico principal
-function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Estado; set: SetFn; version: number; compacto: boolean; simple?: Simple & { variables: ReactNode } }) {
+function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Estado; set: SetFn; version: number; compacto: boolean; simple?: Simple & { variables: ReactNode; cambiar: (x: Expr) => void } }) {
   const { F } = m;
   const { config: cfg } = useConfig();
   const { metas } = useSeccion([]);
   const [personalizando, setPersonalizando] = useState<SecPers | null>(null); // hoja de ajustes abierta, con la sección que se despliega
+  const [cambiando, setCambiando] = useState(false);   // el elegidor de variable abierto desde el botón "Cambiar" de la cabecera
   const b100 = E.modo === "b100";
   const conFranjas = E.pf === "1" ? true : E.pf === "0" ? false : cfg.franjas;
   // Claves estables: el gráfico solo se rehace (y pierde el zoom) si cambia algo que lo afecta
@@ -599,7 +600,9 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
       ? contextoDato(m, E.exprs[0], admiteContexto({ variables: 1, modo: E.modo, freq: E.freq }), { sinRecord: comps.some((c) => c.clave === "max"), sinContraAnio: comps.some((c) => c.clave === "anio") })
       : null;
     const nombre = simple.titulo ?? titulo;
-    const vista = { exprs: E.exprs, modo: E.modo, eje: E.eje, desde: E.desde, hasta: E.hasta, meses: E.meses, freq: E.freq, ag: E.ag, titulo: simple.titulo ?? undefined, tabla: E.tabla === "tabla" } satisfies VistaImg;
+    const vista = { exprs: E.exprs, modo: E.modo, eje: E.eje, desde: E.desde, hasta: E.hasta, meses: E.meses, freq: E.freq, ag: E.ag, titulo: simple.titulo ?? undefined, tabla: E.tabla === "tabla",
+      // la imagen sale con las mismas frases de contexto que la cabecera (quien comparte puede cambiarlas en el panel)
+      frases: ctx ? ctx.frases.flatMap((f) => (f.clave ? [f.clave] : [])) : undefined } satisfies VistaImg;
     // Dos a la vista (período anterior y un año atrás), con el mismo número que la frase de siempre; el resto, en una tabla plegada
     const aLaVista = comps.filter((c) => c.clave === "anterior" || c.clave === "anio");
     const resto = comps.filter((c) => c.clave !== "anterior" && c.clave !== "anio");
@@ -612,7 +615,11 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     const suelta = !ctx && lista.length === 1 && !b100 && !!s0;
     const cifra = ctx ? ctx.valor : suelta ? m.fmtC(o0.c, s0.ult[0]) : "";
     const fechaCifra = ctx ? `${ctx.mes}${ctx.ultimoDisponible ? " · Último dato disponible" : ""}` : suelta ? String(s0.ult[1] ?? "") : "";
-    const periodo = textoPeriodo(E.desde, E.hasta, E.meses);
+    // Sin `h` en la URL el período llega hasta el último mes de F (el mes en curso): el chip dice hasta el mes del último dato
+    const ultimoConDato = rows.length ? String(rows[rows.length - 1].fecha).slice(0, 7) : null;
+    const hastaChip = E.hasta === E.ult && ultimoConDato && ultimoConDato >= E.desde && ultimoConDato < E.hasta ? ultimoConDato : E.hasta;
+    const periodo = textoPeriodo(E.desde, hastaChip, E.meses);
+    const fuente = [...new Set(lista.map((o) => fuentePublica(o.c.serie.fuente)))].join("; ");
     const chips = [
       { clave: "periodo", texto: periodo },
       { clave: "frecuencia", texto: E.freq === "M" ? "Mensual" : `${E.freq === "T" ? "Trimestral" : "Anual"}, ${E.ag === "cierre" ? "cierre" : "promedio"}` },
@@ -624,8 +631,9 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     return (
       <>
         <CabeceraDato titulo={nombre} nivel={1} cifra={cifra} fecha={fechaCifra}
-          deltas={deltas} frase={frase}
-          info={<>{o0.c.serie.desc ? <p>{o0.c.serie.desc}</p> : null}<p>Fuente: {fuentePublica(o0.c.serie.fuente)}.</p></>}>
+          deltas={deltas} frase={frase} fuente={fuente} mesDato={cifra ? (ctx ? ctx.mes : String(s0?.ult[1] ?? "")) || undefined : undefined}
+          accion={<button type="button" className="btn cambiar-dato" aria-haspopup="dialog" onClick={() => setCambiando(true)}>Cambiar</button>}
+          info={o0.c.serie.desc ? <p>{o0.c.serie.desc}</p> : undefined}>
           {!ctx && (lista.length > 1 || b100) && (
             <ul className="vs-leyenda hi-leyenda">{lista.map((o, k) => {
               const s1 = st[k];
@@ -646,6 +654,18 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
               ))}</tbody>
             </table></div>
           </details>
+        )}
+        {cambiando && (
+          <Picker onCerrar={() => setCambiando(false)} pedido={{
+            titulo: "Buscá o navegá",
+            cb: (id, med, esc) => {
+              const e0 = E.exprs[0], A = metas.find((x) => x.id === id);
+              if (!A) return;
+              const nuevo: Expr = { ...e0, id, med: med ?? medidaInicial(A.tipo, m.medDefault(A), cfg), esc: esc ?? "" };
+              if (!m.relPermitido(A)) nuevo.rel = null;
+              simple.cambiar(nuevo);
+            },
+          }} />
         )}
         <BarraVista items={chips} onAbrir={abrirHoja} />
         <CardGrafico simple titulo={titulo} nota={nota} leyenda={leyenda} rows={rows} series={series} opts={opts} unidades={unidades} vista={E.tabla} onVista={onVista} />

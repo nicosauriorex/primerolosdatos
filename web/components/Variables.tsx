@@ -38,13 +38,15 @@ export function Insignia({ s, esIndice }: { s: SerieMeta; esIndice: boolean }) {
     : <span className="tag val" title="Valor: monto, precio o cantidad con unidad">Valor</span>;
 }
 
+/** ⓘ de una variable: botón real con su nombre ("Qué es Inflación mensual"), no el mismo texto en todos. */
 export function BotonInfo({ id }: { id: string }) {
+  const { metas } = useDatos();
   const [abierto, setAbierto] = useState(false);
+  const nombre = metas.find((m) => m.id === id)?.n;
   return (
     <>
-      <span className="info-btn" role="button" tabIndex={0} title="Qué es y cómo se calcula" aria-label="Información de la variable"
-        onClick={(ev) => { ev.stopPropagation(); setAbierto(true); }}
-        onKeyDown={(ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); ev.stopPropagation(); setAbierto(true); } }}>i</span>
+      <button type="button" className="info-btn" title="Qué es y cómo se calcula" aria-label={nombre ? `Qué es ${nombre}` : "Qué es esta variable"} aria-haspopup="dialog"
+        onClick={(ev) => { ev.stopPropagation(); setAbierto(true); }}>i</button>
       {abierto && <Info id={id} onCerrar={() => setAbierto(false)} />}
     </>
   );

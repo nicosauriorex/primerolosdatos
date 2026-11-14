@@ -375,10 +375,11 @@ function GraficoBase({ rows, series, opts, lleno }: { rows: Fila[]; series: Seri
               lineas.push({ rf, v, tramo, y: uu.valToPos(v, ax ? "y2" : "y", false), yd: yy });
             });
             [0, 1].forEach((ax) => {
-              const l = labs.filter((o) => o.axis === ax).sort((a, b) => a.y - b.y);
-              for (let k = 1; k < l.length; k++) if (l[k].y - l[k - 1].y < 12 * d) l[k].y = l[k - 1].y + 12 * d;
-              // el texto va apenas arriba de su línea (no tachado por ella) y separado del eje; si no entra arriba, va debajo
-              l.forEach((o) => halo(o.t, ax ? L + W - 6 * d : L + 6 * d, o.y - 3 * d < T + 9 * d ? o.y + 11 * d : o.y - 3 * d, colorDe(o.color), ax ? "right" : "left", 10, true));
+              // el texto va apenas arriba de su línea (no tachado por ella) y separado del eje; si no entra arriba, va debajo.
+              // La separación se resuelve sobre la posición final del texto: dos rótulos nunca se pisan (si caen a menos de un renglón, el de abajo se corre).
+              const l = labs.filter((o) => o.axis === ax).map((o) => ({ ...o, ty: o.y - 3 * d < T + 9 * d ? o.y + 11 * d : o.y - 3 * d })).sort((a, b) => a.ty - b.ty);
+              for (let k = 1; k < l.length; k++) if (l[k].ty - l[k - 1].ty < 12 * d) l[k].ty = l[k - 1].ty + 12 * d;
+              l.forEach((o) => halo(o.t, ax ? L + W - 6 * d : L + 6 * d, o.ty, colorDe(o.color), ax ? "right" : "left", 10, true));
             });
           }
           // último dato de cada serie

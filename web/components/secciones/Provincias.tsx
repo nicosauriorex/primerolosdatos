@@ -27,7 +27,7 @@ import {
 } from "@/lib/gasto";
 import { extremoTxt } from "@/lib/universidades";
 import {
-  FORMAS_P, FORMA_P_DEFECTO, FUENTE_PROV, GASTOS_P, GASTO_P_DEFECTO, MEDIDAS_P, MEDIDA_P_DEFECTO, NOTA_CABA, TITULO_P,
+  ACLARACION_P, FORMAS_P, FORMA_P_DEFECTO, FUENTE_PROV, GASTOS_P, GASTO_P_DEFECTO, MEDIDAS_P, MEDIDA_P_DEFECTO, NOTA_CABA, TITULO_P,
   anioDefectoP, anioGastoDe, conPunto, anioValidoP, arbolesDe, armarAgregado, armarImagenP, armarVistaP, buscarProv, crearContexto, evolucionProv, esFormaP, esGastoP, esMedidaP,
   fraseProvincia, fraseProvincias, hrefP, opcionesAnioP, puestoHab, tituloP, valorCorto,
   type Contexto, type DatosProv, type EvoProv, type FormaP, type GastoP, type GraficoAgregado, type MedidaP, type ProvIx, type VistaP,
@@ -88,7 +88,7 @@ function Cuerpo({ c }: { c: Contexto }) {
     <section className="prov">
       {selectorVista}
       {vista && resp ? (
-        <CabeceraDato nivel={2} titulo={tituloMedida(medida)} cifra={resp.cifra} unidad={resp.unidad} fecha={`${anio}${vista.enCurso ? " (en curso)" : ""}`} deltas={[]} frase={resp.frase}
+        <CabeceraDato nivel={2} titulo={tituloMedida(medida)} cifra={resp.cifra} unidad={resp.unidad} fecha={`${anio}${vista.enCurso ? " (en curso)" : ""}`} deltas={[]} frase={`${resp.frase} ${ACLARACION_P}`}
           info={<>
             <p>Es el gasto que la Nación declara ubicado en cada provincia (jubilaciones, asignaciones, universidades, obras y transferencias no automáticas). <b>No es el gasto del gobierno provincial ni incluye la coparticipación.</b></p>
             <p>Mucho gasto figura en la Ciudad de Buenos Aires (donde están las sedes) o sin provincia.</p>
@@ -136,7 +136,6 @@ function Ranking({ v, resaltar, onAbrir }: { v: VistaP; resaltar: string | null;
         <InfoPunto etiqueta="Cómo leer este ranking">
           {v.aviso && <p>{v.aviso}</p>}
           <p>La variación es real (descontada la inflación) contra {ant}{v.medida === "hab" ? ", por habitante" : ", en pesos de hoy"}; el año en curso no se compara porque todavía no terminó. La población es la proyección del INDEC.{v.gasto === "sin_ss" ? " Sin jubilaciones, una provincia sin dato de Seguridad social queda sin valor." : ""}</p>
-          {hayCaba && <p>* {NOTA_CABA}</p>}
         </InfoPunto>
       </div>
       <div className="prov-par">
@@ -144,6 +143,7 @@ function Ranking({ v, resaltar, onAbrir }: { v: VistaP; resaltar: string | null;
         <div className="prov-par-lista">
           <ListaBarras etiqueta={`${tituloMedida(v.medida)} en ${v.anio}`} filas={filas} resaltar={resaltar ?? undefined} />
           <p className="prov-tope"><span>Las {v.filas.length} juntas</span><b>{v.total || "–"}</b></p>
+          {hayCaba && <p className="note prov-nota-caba">* {NOTA_CABA}</p>}
         </div>
       </div>
       {v.masa && (

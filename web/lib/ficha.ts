@@ -5,7 +5,7 @@
 import { calcularMandato, claseVariacion, crearPres, filasGrafico, statsMandato, varNum, type BaseCfg, type Fila, type ModoMandato, type Pres, type StatsM } from "./estadisticas";
 import { fmtMes, lastIdx, mesNum, nf1, ok, redondeadoComo, r1 } from "./formato";
 import { frecuenciaOrigen, leerComun, type Comun, type FrecOrigen } from "./historico";
-import type { DesdePref } from "./config";
+import type { ClaveFrase, DesdePref } from "./config";
 import { contextoDato, type ContextoDato } from "./contexto-dato";
 import { DATOS_FIJOS, datoFijoDe, mismaVariable } from "./datos-fijos";
 import type { Calculo, Expr, Motor, SerieMeta } from "./motor";
@@ -139,6 +139,8 @@ function masBajoDesde(m: Motor, c: Calculo): string | null {
 
 export interface CabeceraFicha {
   cifra: string; fecha: string; deltas: DeltaProps[]; secundarias: { rotulo: string; valor: string }[]; frase?: string; ultimoDisponible: boolean;
+  /** Clave de `frase` entre las del contexto del dato: la imagen que se comparte desde la ficha lleva esta misma frase. */
+  fraseClave?: ClaveFrase;
 }
 /** Lo que muestra la apertura de la ficha: la cifra con su fecha, hasta dos cambios (contra el período anterior y contra un año atrás),
  *  el interanual si la cifra es una variación mensual, y un hecho que los cambios no dicen (nunca un adjetivo, D-012). Null sin datos. */
@@ -158,8 +160,9 @@ export function cabeceraFicha(m: Motor, e: Expr): CabeceraFicha | null {
   const desde = de("desde");
   const bajo = c.dir < 0 && ctx.todas.length > 0 && !/desde que hay datos/.test(desde ?? "") ? masBajoDesde(m, c) : null;
   // C5: si más es peor, la distancia al récord no es la referencia natural: no se usa
-  const frase = bajo ?? desde ?? (c.dir < 0 ? null : de("record")) ?? de("minimo");
-  return { cifra: ctx.valor, fecha: ctx.mes, deltas, secundarias, frase, ultimoDisponible: ctx.ultimoDisponible };
+  const elegida: [ClaveFrase, string | null | undefined][] = [["desde", bajo], ["desde", desde], ["record", c.dir < 0 ? null : de("record")], ["minimo", de("minimo")]];
+  const [fraseClave, frase] = elegida.find(([, t]) => !!t) ?? [undefined, undefined];
+  return { cifra: ctx.valor, fecha: ctx.mes, deltas, secundarias, frase: frase ?? undefined, fraseClave, ultimoDisponible: ctx.ultimoDisponible };
 }
 
 /** ¿Es la variación mensual de un índice (se puede acumular)? */

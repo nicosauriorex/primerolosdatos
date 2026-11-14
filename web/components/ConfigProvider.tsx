@@ -104,6 +104,10 @@ function Panel({ onCerrar, guardado }: { onCerrar: () => void; guardado: boolean
       <div className="config-cuerpo">
         <h2>Configuración</h2>
         {!guardado && <p className="error" role="alert">No se pudo guardar en este navegador: se va a perder al cerrar.</p>}
+        <section aria-labelledby="cfg-tema">
+          <h3 id="cfg-tema">Tema</h3>
+          <Opciones etiqueta="Tema" valor={c.tema} opciones={TEMAS} onElegir={(tema) => cambiar({ tema })} />
+        </section>
         <section aria-labelledby="cfg-inicio">
           <h3 id="cfg-inicio">Inicio del mandato</h3>
           <p className="note">Desde qué mes se cuenta cada mandato (Por presidente, Meses de mandato, Curiosidades y Elecciones). T es el mes de asunción.</p>
@@ -141,10 +145,6 @@ function Panel({ onCerrar, guardado }: { onCerrar: () => void; guardado: boolean
             ))}
           </div>
           <button type="button" className="btn" disabled={!Object.keys(c.colPres).length} onClick={() => cambiar({ colPres: {} })}>Volver a los colores de fábrica</button>
-        </section>
-        <section aria-labelledby="cfg-tema">
-          <h3 id="cfg-tema">Tema</h3>
-          <Opciones etiqueta="Tema" valor={c.tema} opciones={TEMAS} onElegir={(tema) => cambiar({ tema })} />
         </section>
       </div>
       <footer>

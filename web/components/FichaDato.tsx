@@ -21,7 +21,7 @@ import { CabeceraDato } from "./sistema/CabeceraDato";
 import { Capitulo } from "./sistema/Capitulo";
 import { CompartirHoja } from "./sistema/CompartirHoja";
 import { FilaChips } from "./sistema/FilaChips";
-import { TablaMandatos } from "./sistema/TablaMandatos";
+import { AjustesTabla, TablaMandatos } from "./sistema/TablaMandatos";
 import { GraficosListos } from "./GraficosListos";
 import { BarrasMes } from "./sistema/BarrasMes";
 import { unoDe } from "@/lib/url";
@@ -98,15 +98,23 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [m, version, kE, b, pd, PRES]);
   const fuente = fuentePublica(c.serie.fuente);
+  const V = useViene(m, e, version, p);   // el período del gráfico: lo usan el capítulo "¿Cómo viene?" y el Compartir de la cabecera
+  const hrefV = hrefHistorico(e, V.per ? { d: V.D.E.desde, h: V.D.E.hasta } : {});
+  const textoV = cab ? `${nombre}: ${cab.cifra} en ${cab.fecha}. Fuente: ${fuente}.` : undefined;
 
   return (
     <div className="fi">
       <CabeceraDato titulo={nombre} nivel={nivel === 2 ? 1 : 2} tituloRef={tituloRef} tituloId={tituloId}
         cifra={cab?.cifra ?? "–"} fecha={cab ? `${cab.fecha}${cab.ultimoDisponible ? " · Último dato disponible" : ""}` : ""}
         deltas={cab?.deltas ?? []} secundarias={cab?.secundarias} frase={cab?.frase}
+        fuente={fuente} mesDato={cab?.fecha}
+        accion={<Compartir variante="principal" titulo={nombre} href={linkCompartir(e, hrefV, V.per ? { fper: V.per } : {})} texto={textoV}
+          vista={() => ({ exprs: [e], modo: "valor", eje: "propia", desde: V.D.E.desde, hasta: V.D.E.hasta, meses: V.D.E.meses, freq: "M", ag: "promedio",
+            // la imagen lleva las mismas frases de contexto que la cabecera (F4): la que se ve, o ninguna si la cabecera no muestra
+            frases: cab?.fraseClave ? [cab.fraseClave] : [], fraseFija: cab?.frase })} />}
         info={<>{c.serie.desc ? <p>{c.serie.desc}</p> : null}<p>Fuente: {fuente}.</p></>} />
       {rel.length > 0 && <VerTambien rel={rel} />}
-      <CapViene m={m} e={e} version={version} nivel={nivel} p={p} set={set} nombre={nombre} cab={cab} fuente={fuente} />
+      <CapViene m={m} e={e} nivel={nivel} set={set} V={V} />
       <CapMeses m={m} e={e} version={version} nivel={nivel} nombre={nombre} />
       <CapPresidentes m={m} e={e} info={info} nivel={nivel} pd={pd} inicio={inicio} nombre={nombre}
         velas={unoDe(p.get("pvista"), ["tabla", "velas"] as const, "tabla") === "velas"} onVista={(v) => set({ pvista: v ? "velas" : null })} />
@@ -139,12 +147,14 @@ function VerTambien({ rel }: { rel: { nombre: string; href: string }[] }) {
   );
 }
 
-/** Compartir de un capítulo: la hoja con imagen (si hay `vista`), link y texto; la imagen abre el panel de siempre. */
-function Compartir({ href, titulo, texto, vista }: { href: string; titulo: string; texto?: string; vista?: () => VistaCompartir | null }) {
+/** Compartir: la hoja con imagen (si hay `vista`), link y texto; la imagen abre el panel de siempre. Principal (cabecera del dato, con texto) o de ícono (capítulos). */
+function Compartir({ href, titulo, texto, vista, variante = "icono" }: {
+  href: string; titulo: string; texto?: string; vista?: () => VistaCompartir | null; variante?: "icono" | "principal";
+}) {
   const [abierto, setAbierto] = useState<VistaCompartir | null>(null);
   return (
     <>
-      <CompartirHoja href={href} titulo={titulo} texto={texto} onImagen={vista ? () => { const v = vista(); if (v) setAbierto(v); } : undefined} />
+      <CompartirHoja variante={variante} href={href} titulo={titulo} texto={texto} onImagen={vista ? () => { const v = vista(); if (v) setAbierto(v); } : undefined} />
       {abierto && createPortal(<PanelCompartir vista={abierto} href={absoluto(href)} titulo={titulo} onCerrar={() => setAbierto(null)} />, document.body)}
     </>
   );
@@ -159,13 +169,13 @@ function Acciones({ compartir, href, donde }: { compartir: ReactNode; href?: str
 }
 
 // ------------------------------------------------------------ ¿Cómo viene? El gráfico de la serie, con su período
-function CapViene({ m, e, version, nivel, p, set, nombre, cab, fuente }: {
-  m: Motor; e: Expr; version: number; nivel: Nivel; p: URLSearchParams; set: SetFn; nombre: string; cab: CabeceraFicha | null; fuente: string;
-}) {
+/** El período del gráfico de la ficha (`fper` en la URL) y lo que dibuja. Lo comparten el capítulo y el Compartir de la cabecera. */
+function useViene(m: Motor, e: Expr, version: number, p: URLSearchParams) {
   const { config } = useConfig();
   const kE = `${e.id}~${e.med}~${e.rel}~${e.modo}~${e.esc}`;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const opciones = useMemo(() => periodosFicha(m, m.calc(e), config.desde), [m, version, kE, config.desde]);
+  // sin `fper` en la URL queda el período de fábrica (el primero de la lista, "" = Desde 2003 o el que corresponda)
   const per = unoDe(p.get("fper"), opciones.map((o) => o[0]), "" as PeriodoFicha);
   const D = useMemo(() => {
     const c = m.calc(e);
@@ -178,18 +188,22 @@ function CapViene({ m, e, version, nivel, p, set, nombre, cab, fuente }: {
     return { c, E, rows, series, opts, temporal };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [m, version, kE, config.desde, per]);
+  return { opciones, per, D };
+}
+type Viene = ReturnType<typeof useViene>;
+
+function CapViene({ m, e, nivel, set, V }: { m: Motor; e: Expr; nivel: Nivel; set: SetFn; V: Viene }) {
+  const { config } = useConfig();
+  const { opciones, per, D } = V;
   const franjas = useMemo(() => (config.franjas ? franjasPres(m.F, baseDeConfig(config, PRES_DEF.map((x) => x.id))) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [config.franjas, m, config.t0, JSON.stringify(config.t0p)]);
   const opts = useMemo(() => (franjas ? { ...D.opts, franjas } : D.opts), [D.opts, franjas]);
   const { c, E } = D;
   const href = hrefHistorico(e, per ? { d: E.desde, h: E.hasta } : {});
-  const texto = cab ? `${nombre}: ${cab.cifra} en ${cab.fecha}. Fuente: ${fuente}.` : undefined;
+  // El Compartir de este capítulo está en la cabecera del dato (junto a la cifra): acá solo "Abrir completo"
   return (
-    <Capitulo id="fi-viene" nivel={nivel} titulo="¿Cómo viene?" acciones={
-      <Acciones donde="Histórico" href={href} compartir={
-        <Compartir titulo={nombre} href={linkCompartir(e, href, per ? { fper: per } : {})} texto={texto}
-          vista={() => ({ exprs: [e], modo: "valor", eje: "propia", desde: E.desde, hasta: E.hasta, meses: E.meses, freq: "M", ag: "promedio" })} />} />}>
+    <Capitulo id="fi-viene" nivel={nivel} titulo="¿Cómo viene?" acciones={<Acciones donde="Histórico" href={href} compartir={null} />}>
       {opciones.length > 1 && <FilaChips etiqueta="Período" opciones={opciones} valor={per} onElegir={(v) => set({ fper: v || null })} />}
       <div className="fi-grafico"><Grafico rows={D.rows} series={D.series} opts={opts} /></div>
       <p className="fi-nota">{D.temporal.replace(/\.?$/, ".")} Unidad: {c.unidad}.</p>
@@ -217,6 +231,7 @@ function CapPresidentes({ m, e, info, nivel, pd, inicio, velas: enVelas, onVista
   m: Motor; e: Expr; info: InicioMandato; nivel: Nivel; pd: string | null; inicio: Record<string, string>; velas: boolean; onVista: (velas: boolean) => void; nombre: string;
 }) {
   const F = m.F, c = m.calc(e);
+  const [sumadas, setSumadas] = useState<string[]>([]);   // columnas que se suman en "Ajustes de la tabla" (en la ficha no van en el link)
   const T = filasMandatosFicha(m, e, info.b);
   const titulo = "¿Cómo le fue con cada presidente?";
   if (!T.filas.length) {
@@ -231,17 +246,18 @@ function CapPresidentes({ m, e, info, nivel, pd, inicio, velas: enVelas, onVista
   const bajada = T.tasa ? "Inicio y cierre de cada mandato y el promedio de todos sus meses." : "Del inicio al cierre de cada mandato.";
   return (
     <Capitulo id="fi-pres" nivel={nivel} titulo={titulo} bajada={bajada} acciones={
-      <Acciones donde="Por presidente" href={href} compartir={
+      <Acciones donde="Por presidente" href={href} compartir={<>
+        <AjustesTabla vista={enVelas ? "velas" : "tabla"} onVista={(v) => onVista(v === "velas")} columnas={T.columnas} extras={T.extras ?? []}
+          elegidas={sumadas} onElegidas={setSumadas} />
         <Compartir titulo={`${c.corto} por presidente${enVelas ? " (velas)" : ""}`}
           href={linkCompartir(e, href, { ...inicio, ...(enVelas ? { pvista: "velas" } : {}), ...(pd ? { pd } : {}) })}
           vista={sinVelas ? undefined : () => (enVelas
             ? { tipo: "velas", expr: e, presIds: ids, base: info.b }
-            : { tipo: "barras", expr: e, presIds: ids, base: info.b, ...(T.tasa ? { metrica: "prom" as const } : {}) })} />} />}>
+            : { tipo: "barras", expr: e, presIds: ids, base: info.b, ...(T.tasa ? { metrica: "prom" as const } : {}) })} /></>} />}>
       <LineaInicio info={info} F={F} />
-      <FilaChips etiqueta="Vista" opciones={[["tabla", "Tabla"], ["velas", "Velas"]]} valor={enVelas ? "velas" : "tabla"} onElegir={(v) => onVista(v === "velas")} />
       <div className="fi-pres-cuerpo">
         {!enVelas ? (
-          <TablaMandatos etiqueta={`${nombre} por presidente`} filas={T.filas} columnas={T.columnas} visibles={T.visibles} extras={T.extras} resaltar={pd ?? undefined} />
+          <TablaMandatos etiqueta={`${nombre} por presidente`} filas={T.filas} columnas={T.columnas} visibles={T.visibles} extras={T.extras} elegidas={sumadas} resaltar={pd ?? undefined} />
         ) : !niv ? (
           <p className="note">En montos corrientes los valores de épocas distintas no se pueden poner en una misma escala (hay inflación de por medio). Elegí una medida real o un índice en &quot;Abrir completo&quot;, o mirá la vista Tabla, que compara las variaciones.</p>
         ) : velas.length ? (

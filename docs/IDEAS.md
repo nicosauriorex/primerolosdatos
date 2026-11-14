@@ -276,6 +276,16 @@ Son ajustes a lo ya hecho, no ideas nuevas.
 - En la computadora, "Ir directo a" deja a veces un chip solo abajo (Riesgo país): que entren todos juntos. → spec: docs/specs/remodelacion-historico-presidentes.md
 - Al escribir en el buscador, muchas opciones empujan toda la página para abajo: que la lista quede por encima, sin empujar. → spec: docs/specs/remodelacion-historico-presidentes.md
 
+## ~~Cierre de la remodelación: crítica final (2026-11-14)~~ ✅ 2026-11-14
+→ spec: docs/specs/remodelacion-cierre.md
+Crítica final de Impeccable: 26/40 (antes 21/40). El usuario eligió arreglar los P1, los P2 y los menores.
+- La fuente del dato a la vista en la ficha.
+- Sin contador animado en las cifras de dato (mostraba cifras intermedias).
+- Provincias: la aclaración de la Ciudad de Buenos Aires (sedes, sin coparticipación) a la vista.
+- La imagen compartida con la misma frase que la cabecera; un Compartir principal junto a la cifra.
+- Velas y Sumar columnas a la hoja de Ajustes; "T-1" en palabras.
+- Menores: objetivos de 44 px, leyenda del Semáforo, unidades del Banco Central, eje de Gasto, chip de período del Histórico, palabras sueltas, Tema arriba en la configuración, ⓘ con nombre.
+
 ## Sugerencias de Claude (a discutir)
 - Comparación internacional, fuentes a investigar (con `investigador-datos`): IPC por división COICOP de EE.UU. (BLS), Eurostat (HICP por categoría) y OECD; el Banco Mundial y el FMI para PBI y otras variables. Los vecinos (Brasil, Chile, Uruguay, Paraguay, Bolivia) a veces solo tienen el IPC general desde fuentes unificadas, así que la comparación por categoría puede quedar limitada. Las divisiones COICOP no son idénticas entre países, y para comparar **niveles** de precios (no solo variaciones) hacen falta paridad de poder adquisitivo o tipo de cambio real. Mostrar siempre en base 100 o en variación para no comparar manzanas con naranjas.
 - Capacidad de gobierno, fuentes: HCDN y Senado publican composición de bloques y leyes; Boletín Oficial para decretos y vetos. La parte difícil es "propios y aliados" (los bloques cambian y hay criterio de por medio): definir una regla clara y publicarla. "Leyes que quiso sacar" tampoco sale de una base: hay que definir qué cuenta (proyectos del Ejecutivo ingresados, por ejemplo) y es mejor mostrar el número crudo antes que un puntaje.

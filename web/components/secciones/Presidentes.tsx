@@ -14,11 +14,10 @@ import { ContextoMandato } from "./ContextoMandato";
 import { INFO_CORTA } from "@/lib/info";
 import { CeldaVar, CeldasStats, COLS, Cabecera, LineaInicio, siguienteOrden, useBase, valorCol, type Orden } from "./comunes";
 import { Capitulo } from "../sistema/Capitulo";
-import { FilaChips } from "../sistema/FilaChips";
 import { BarraVista } from "../sistema/BarraVista";
 import { Hoja } from "../sistema/Hoja";
 import { CompartirHoja } from "../sistema/CompartirHoja";
-import { TablaMandatos } from "../sistema/TablaMandatos";
+import { AjustesTabla, TablaMandatos } from "../sistema/TablaMandatos";
 import { GrillaPresidentes } from "../sistema/GrillaPresidentes";
 import { grillaPresidentes, tablaPresidentes } from "@/lib/presidentes";
 import { fmtMes } from "@/lib/formato";
@@ -159,12 +158,12 @@ export function Presidentes() {
         <LineaInicio info={info} F={F} />
         <GrillaPresidentes grilla={grilla} />
       </Capitulo>
-      <Capitulo id="pres-variable" titulo="Una variable, todos los presidentes" bajada={bajadaB} acciones={compartirB}>
+      <Capitulo id="pres-variable" titulo="Una variable, todos los presidentes" bajada={bajadaB} acciones={<>
+        <AjustesTabla vista={vista} onVista={(v) => set({ pvista: v === "tabla" ? null : v })} columnas={T.columnas} extras={T.extras} porDefecto={T.porDefecto}
+          elegidas={T.elegidas} onElegidas={(claves) => set({ cl: [...new Set([...(T.principal ? [T.principal] : []), ...claves])].join(",") })} />
+        {compartirB}</>}>
         <FilaVariable e={eB} onChange={(e) => e && set({ pv: encExpr(e) })} />
         <BarraVista items={resumenB} onAbrir={() => setHoja(true)} />
-        <div className="pres-controles">
-          <FilaChips etiqueta="Vista" opciones={[["tabla", "Tabla"], ["velas", "Velas"]]} valor={vista} onElegir={(v) => set({ pvista: v === "tabla" ? null : v })} />
-        </div>
         <Hoja titulo="Presidentes" abierta={hoja} onCerrar={() => setHoja(false)}>
           {(cerrar) => (
             <>
@@ -186,7 +185,7 @@ export function Presidentes() {
         {vista === "tabla" ? (
           T.filas.length ? (
             <TablaMandatos etiqueta={`${c.corto} por presidente`} filas={T.filas} columnas={T.columnas} visibles={T.visibles} extras={T.extras}
-              elegidas={T.elegidas} onElegidas={(claves) => set({ cl: [...new Set([...(T.principal ? [T.principal] : []), ...claves])].join(",") })} nota={notaB} />
+              elegidas={T.elegidas} nota={notaB} />
           ) : <p className="note">Ningún presidente elegido tiene datos de esta variable.</p>
         ) : !niv ? (
           <p className="note">En montos corrientes los valores de épocas distintas no se pueden poner en una misma escala (hay inflación de por medio). Elegí una medida real o un índice, o mirá la vista Tabla, que compara las variaciones.</p>

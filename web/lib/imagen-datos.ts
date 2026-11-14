@@ -2,7 +2,7 @@
 // Usa las mismas funciones que el gráfico de la página (filasGrafico, statsMandato, franjasPres, contextoDato) para que den lo mismo.
 import { aBase100, claseVariacion, crearPres, estadisticasRows, filasGrafico, franjasPres, baseIdx, oracionInicio, type BaseCfg, type EstRows, type Fila } from "./estadisticas";
 import { admiteContexto, contextoDato } from "./contexto-dato";
-import { DATOS_GEN, DATOS_PRES, type DatoGen, type DatoPres, type DesdePref, type FormatoImg, type OpcionesImagen } from "./config";
+import { DATOS_GEN, DATOS_PRES, type ClaveFrase, type DatoGen, type DatoPres, type DesdePref, type FormatoImg, type OpcionesImagen } from "./config";
 import { leerComun, leerGrafico, frecuenciaOrigen, textoTemporalidad, TODOS_MESES } from "./historico";
 import type { DatosImagen, TarjetaDato, TarjetaImg } from "./imagen";
 import { fmtMes, nf0, nf1, fmtNum, norm, ok } from "./formato";
@@ -17,6 +17,11 @@ export interface VistaImg {
   desde: string; hasta: string; meses: Set<number>; freq: "M" | "T" | "A"; ag: "promedio" | "cierre";
   titulo?: string;      // el de la plantilla, si la vista viene de una
   tabla?: boolean;      // la vista que se comparte es la Tabla: el panel ofrece copiar la tabla o compartir el gráfico
+  /** Frases de contexto con que sale la imagen por defecto: las que muestra la cabecera de la página desde donde se comparte (lo que se ve es lo que se comparte).
+   *  Lista vacía = ninguna. Sin esto, las dos de siempre. Lo que elija quien comparte en el panel (`OpcionesImagen.frases`) tiene prioridad. */
+  frases?: ClaveFrase[];
+  /** El texto de esa frase tal como lo muestra la página (la cabecera de la ficha la calcula sobre toda la serie): la imagen lo usa tal cual mientras quien comparte no elija otras. */
+  fraseFija?: string;
 }
 export interface OpcionesImg {
   formato: FormatoImg; comentario: string; base: BaseCfg; colPres?: Record<string, string>;
@@ -183,7 +188,7 @@ export function armarImagen(m: Motor, v: VistaImg, o: OpcionesImg): DatosImagen 
   const unico = lista.length === 1, fmtDe = (c: Calculo) => (b100 ? (x: number) => nf1.format(x) : (x: number) => m.fmtC(c, x));
   const ultimaFila = (key: string) => { for (let i = rows.length - 1; i >= 0; i--) if (ok(rows[i][key])) return rows[i][key] as number; return null; };
 
-  const ctx = unico && !b100 ? contextoDato(m, v.exprs[0], admiteContexto({ variables: 1, modo: v.modo, freq: v.freq }), { periodo: { desde: v.desde, hasta: v.hasta }, elegidas: pers?.frases ?? null }) : null;
+  const ctx = unico && !b100 ? contextoDato(m, v.exprs[0], admiteContexto({ variables: 1, modo: v.modo, freq: v.freq }), { periodo: { desde: v.desde, hasta: v.hasta }, elegidas: pers?.frases ?? v.frases ?? null }) : null;
   const tituloBase = v.titulo ?? (unico && !b100 ? tituloVariable(m, v.exprs[0], calcs[0]) : tituloGrafico(lista, b100));
   const titulo = o.periodoEnTitulo ? `${tituloBase} · ${fmtMes(v.desde)} a ${fmtMes(v.hasta)}` : tituloBase;
 
@@ -229,14 +234,14 @@ export function armarImagen(m: Motor, v: VistaImg, o: OpcionesImg): DatosImagen 
     formato: o.formato, titulo,
     temporalidad: textoTemporalidad({ freq: v.freq, ag: v.ag, meses: v.meses, suma: lista.some((x) => !!x.flujo), origen: frecuenciaOrigen(lista[0].c.v) }),   // el mismo texto que el gráfico
     cifra: ctx ? { valor: ctx.valor, mes: ctx.mes, aviso: ctx.ultimoDisponible } : null,
-    frases: ctx?.frases ?? [],
+    frases: ctx && !pers?.frases && v.fraseFija && v.frases?.length === 1 ? [{ texto: v.fraseFija, cls: ctx.todas.find((f) => f.clave === v.frases![0])?.cls ?? null, clave: v.frases[0] }] : ctx?.frases ?? [],
     leyenda: ctx ? null : lista.map((x) => { const u = ultimaFila(x.key); return { nombre: x.c.corto, valor: u == null ? "–" : fmtDe(x.c)(u), color: x.k }; }),
     x: filasDib.map((r) => mesDeFila(r)),
     series: lista.map((x) => ({ nombre: x.c.corto, color: x.k, axis: x.axis, v: filasDib.map((r) => (ok(r[x.key]) ? (r[x.key] as number) : null)) })),
     fmtEje: b100 ? (x) => nf0.format(x) : fmtEjeDe(calcs[0]),
     fmtEje2: !b100 && lista.length === 2 && v.eje !== "misma" ? fmtEjeDe(calcs[1]) : null,
     franjas, tarjetas, lineasRef, marcasExt, marcaUltimo: pers ? pers.marcaUltimo : true,
-    inicioTxt: conPres ? `${oracionInicio(o.base)} T = mes de asunción.` : null,
+    inicioTxt: conPres ? oracionInicio(o.base) : null,
     comentario: limpiarComentario(o.comentario),
     unidad: b100 ? "Base 100: primer dato del período = 100" : [...new Set(calcs.map((c) => c.unidad))].join(" · "),
     fuente: "Fuente: " + [...new Set(calcs.map((c) => fuenteLegible(c.serie.fuente)))].join("; "), nota: notaInflacion(calcs, b100),

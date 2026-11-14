@@ -32,7 +32,7 @@ export function useBase(p: URLSearchParams, set: (c: Record<string, string | nul
   return { b, delLink, usarMio };
 }
 
-/** Oración del inicio de mandato ("Mes inicial de cada presidente: T-1, excepto Milei (T+1).") con un ícono de información que abre la explicación y el botón Configurar.
+/** Oración del inicio de mandato ("Se cuenta desde el mes antes de asumir, excepto Milei: desde el mes después de asumir.") con un ícono de información que abre la explicación y el botón Configurar.
  *  Si el link trae otro inicio, avisa y ofrece volver al propio. `F` (opcional) permite poner un ejemplo con Milei; `children` suma texto propio de cada sección. */
 export function LineaInicio({ info, F, children, texto, sinAviso }: { info: InicioMandato; F?: string[]; children?: React.ReactNode; texto?: string; sinAviso?: boolean }) {
   const { abrirPanel } = useConfig();
@@ -42,7 +42,7 @@ export function LineaInicio({ info, F, children, texto, sinAviso }: { info: Inic
   return (
     <>
       <div className="linea-inicio"><span>{texto ?? oracionInicio(b)}</span>
-        <button type="button" className="btn-info" aria-label="Qué significa T y cómo se elige el mes inicial" aria-haspopup="dialog" onClick={() => setAbierto(true)}><span className="info-btn" aria-hidden>i</span></button></div>
+        <button type="button" className="btn-info" aria-label="Cómo se elige el mes inicial de cada presidente" aria-haspopup="dialog" onClick={() => setAbierto(true)}><span className="info-btn" aria-hidden>i</span></button></div>
       {info.delLink && !sinAviso && (
         <p className="aviso-link" role="status">Estás viendo el inicio de mandato del link · <button type="button" className="enlace" onClick={info.usarMio}>Usar el mío</button></p>
       )}

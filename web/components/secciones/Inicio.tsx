@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useCargar, useDatos } from "../DatosProvider";
 import { Sparkline } from "../Sparkline";
-import { Contador, useDeslizable } from "../Movimiento";
+import { useDeslizable } from "../Movimiento";
 import { IconoDerecha, IconoIzquierda, IconoPausa, IconoSeguir } from "../Iconos";
 import { Redireccion } from "../Redireccion";
 import { Oraciones } from "./Oraciones";
@@ -173,8 +173,8 @@ function Carrusel({ plantillas }: { plantillas: Plantilla[] }) {
       <div className="ancho carrusel-cab">
         <Capitulo id="mas-buscados" titulo="Los datos más buscados" acciones={
           <div className="carrusel-ctrl">
-            {!tactil && <button type="button" className="btn-icono pausa" aria-pressed={pausa} aria-label={pausa ? "Seguir pasando los datos" : "Pausar el carrusel"} onClick={() => setPausa(!pausa)}>
-              {pausa ? <IconoSeguir /> : <IconoPausa />}
+            {!tactil && <button type="button" className="btn pausa" aria-pressed={pausa} onClick={() => setPausa(!pausa)}>
+              {pausa ? <><IconoSeguir /> Seguir</> : <><IconoPausa /> Pausar</>}
             </button>}
             <button type="button" className="btn-icono" aria-label="Dato anterior" onClick={() => ir(activa - 1)}><IconoIzquierda /></button>
             <button type="button" className="btn-icono" aria-label="Dato siguiente" onClick={() => ir(activa + 1)}><IconoDerecha /></button>
@@ -188,13 +188,13 @@ function Carrusel({ plantillas }: { plantillas: Plantilla[] }) {
           </button>
         ))}
       </div>
-      <ol className="pista" ref={pista} aria-busy={!listo} onScroll={alDeslizar} onPointerDown={(ev) => { destino.current = null; if (ev.pointerType !== "mouse") setPausa(true); }}>
+      <ol className="pista" ref={pista} aria-busy={!listo} aria-live={corre ? "off" : undefined} onScroll={alDeslizar} onPointerDown={(ev) => { destino.current = null; if (ev.pointerType !== "mouse") setPausa(true); }}>
         {items.map(({ d, p, ev, extra, comp }, k) => (
           <li key={d.titulo} className="placa" aria-current={k === activa ? "true" : undefined} aria-roledescription="diapositiva" aria-label={`${k + 1} de ${n}`}>
             {ev ? (
               <Link prefetch={false} href={p.id.startsWith("c-") && p.e ? hrefHistorico(p.e) : hrefPlantilla(p, ev.vista)} className="placa-link" aria-label={`Abrir en Histórico: ${d.titulo}, ${ev.val}`}>
                 <h3 className="placa-titulo">{d.titulo}</h3>
-                <div className="placa-num" style={{ ["--n" as string]: Math.max(4, ev.val.length) }}><Contador texto={ev.val} /></div>
+                <div className="placa-num" style={{ ["--n" as string]: Math.max(4, ev.val.length) }}>{ev.val}</div>
                 {extra && <p className="placa-ctx">{extra.texto}</p>}
                 {comp && (
                   <ul className="placa-comps">
@@ -218,6 +218,14 @@ function Carrusel({ plantillas }: { plantillas: Plantilla[] }) {
   );
 }
 
+/** Medida corta para la cifra de un tema ("$", "US$ millones"): la unidad de la serie sin aclaraciones entre paréntesis ni después de la coma.
+ *  Los porcentajes ya traen su "%" en la cifra y lo que no tiene unidad conocida o es muy largo no lleva nada. */
+function unidadCorta(ev: Evaluada): string {
+  const u = (ev.unidad ?? "").split(/ \(|,/)[0].trim();
+  if (!u || (/%/.test(u) && !/\$/.test(u)) || u.length > 22) return "";
+  return u;
+}
+
 /** Cada fila se toca entera. Si el dato principal del tema es el de una placa, se usa la expresión de la placa: la misma serie no sale con dos medidas distintas (C3). */
 function FilaTema({ t, S }: { t: Tema; S: Record<string, SerieMeta> }) {
   const { motor, cargar, archivosDe, version } = useDatos();
@@ -237,7 +245,7 @@ function FilaTema({ t, S }: { t: Tema; S: Record<string, SerieMeta> }) {
         <span className="nombre-tema">{t.nombre}</span>
         <span className="corto-tema">{t.corto}</span>
       </span>
-      <span className="dato-tema">{ev && primero ? <><b><Contador texto={ev.val} /></b><small>{primero.corto}{expr && expr !== primero && expr.med !== primero.med && expr.med === "via" ? ", interanual" : ""} · {ev.fecha}</small></> : null}</span>
+      <span className="dato-tema">{ev && primero ? <><b>{ev.val}{unidadCorta(ev) && <span className="tema-un"> {unidadCorta(ev)}</span>}</b><small>{primero.corto}{expr && expr !== primero && expr.med !== primero.med && expr.med === "via" ? ", interanual" : ""} · {ev.fecha}</small></> : null}</span>
       <span className="mini-tema" aria-hidden="true">{ev ? <Sparkline v={ev.v} desde={desde} /> : null}</span>
       <IconoDerecha />
     </Link>

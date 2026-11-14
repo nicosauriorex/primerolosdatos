@@ -91,7 +91,7 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
   const ctxFrases = useMemo(() => (vistaG && motor && cargado && per && completa && admiteContexto({ variables: 1, modo: vistaG.modo, freq: vistaG.freq })
     ? contextoDato(motor, exprsV[0], true, { periodo: per }) : null),
     [vistaG && vistaG.modo, vistaG && vistaG.freq, motor, cargado, exprsV, per?.desde, per?.hasta, version]);   // eslint-disable-line react-hooks/exhaustive-deps
-  const frasesElegidas: ClaveFrase[] = img.frases ?? ctxFrases?.defecto ?? [];
+  const frasesElegidas: ClaveFrase[] = img.frases ?? vg?.frases ?? ctxFrases?.defecto ?? [];   // lo que eligió quien comparte; si no, las que mostraba la página; si no, las de siempre
   const alternarFrase = (k: ClaveFrase, on: boolean) => {
     const sin = frasesElegidas.filter((x) => x !== k);
     cambiarImg({ frases: on ? [...sin, k].slice(0, MAX_FRASES_IMG) : sin });

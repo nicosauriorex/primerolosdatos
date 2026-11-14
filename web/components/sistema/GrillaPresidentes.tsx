@@ -17,6 +17,8 @@ export function GrillaPresidentes({ grilla, etiqueta = "Presidentes y datos clav
   });
   return (
     <div className="gp">
+      {/* El marco dibuja una sombra en el borde derecho mientras haya más columnas (`data-mas` lo marca `useDeslizable`); al llegar al final desaparece */}
+      <div className="gp-marco">
       <div ref={caja} className="gp-desliza">
         <table className="gp-tabla">
           <caption className="gp-cap">{etiqueta}: cómo cambió cada dato en cada mandato</caption>
@@ -56,6 +58,7 @@ export function GrillaPresidentes({ grilla, etiqueta = "Presidentes y datos clav
             ))}
           </tbody>
         </table>
+      </div>
       </div>
       {notas.length > 0 && <p className="gp-notas">* {notas.join(" · ")}</p>}
       <p className="gp-leyenda">Verde = mejoró y rojo = empeoró en el mandato. Inflación: verde si quedó por debajo de la mediana de los presidentes.</p>

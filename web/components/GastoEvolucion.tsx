@@ -30,12 +30,17 @@ export function EvolucionFinalidades({ ix, deflactor, onElegir }: { ix: IndiceGa
 
 function Grafico({ ev, onElegir, cargando }: { ev: NonNullable<ReturnType<typeof evolucionFinalidades>>; onElegir: (f: string) => void; cargando: boolean }) {
   const n = ev.anios.length;
-  const tope = Math.max(...ev.anios.map((_, i) => ev.capas.reduce((s, c) => s + c.v[i], 0)));
-  const un = unidadMontoDe(tope), mY = (x: number) => MT + (H - MT - MB) * (1 - x / tope);
+  const maximo = Math.max(...ev.anios.map((_, i) => ev.capas.reduce((s, c) => s + c.v[i], 0)));
+  const un = unidadMontoDe(maximo);
+  // marcas del eje redondas: un paso de 1, 2 o 5 × 10ⁿ (en la unidad que se lee) y el tope es el primer múltiplo que alcanza
+  const enU = maximo / un.div, mag = 10 ** Math.floor(Math.log10(enU / 3 || 1));
+  const pasoU = [1, 2, 5, 10].map((f) => f * mag).find((p) => enU / p <= 4) ?? mag * 10;
+  const tope = Math.max(1, Math.ceil(enU / pasoU - 1e-9)) * pasoU * un.div;
+  const mY = (x: number) => MT + (H - MT - MB) * (1 - x / tope);
   const banda = (W - ML - MR) / n, ancho = banda * 0.78;
   const paso = Math.max(1, Math.ceil(n / Math.floor((W - ML - MR) / 34)));
-  const ticks = [0, tope / 2, tope];
-  const fmtT = (x: number) => nfDec(un.dec).format(x / un.div);
+  const ticks = Array.from({ length: Math.round(tope / un.div / pasoU) + 1 }, (_, k) => k * pasoU * un.div);
+  const fmtT = (x: number) => nfDec(pasoU >= 1 ? 0 : pasoU >= 0.1 ? 1 : 2).format(x / un.div);
   const cabe = (x: number) => fmtMillones(x, un);
   return (
     <>

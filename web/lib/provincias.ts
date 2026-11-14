@@ -112,6 +112,8 @@ export const TITULO_P = "Cuánto gasta la Nación en cada provincia";
 export const FUENTE_PROV = `${FUENTE_GASTO} (gasto por provincia) e INDEC (proyecciones de población)`;
 export const SEG_SOCIAL = "Seguridad social";
 export const NOTA_CABA = "En la Ciudad de Buenos Aires figuran las sedes de los organismos nacionales: parte de ese gasto se hace para todo el país.";
+/** Aclaración corta que va en la frase visible de la apertura (el detalle largo queda en la ⓘ). */
+export const ACLARACION_P = "Es lo que la Nación declara gastado en cada provincia: no es el gasto del gobierno provincial ni incluye la coparticipación. En la Ciudad de Buenos Aires figuran las sedes de los organismos nacionales.";
 export const nombreMedidaP = (m: MedidaP) => MEDIDAS_P.find((x) => x[0] === m)![1];
 
 /** Todo lo que hace falta para calcular: los datos, el deflactor y qué años están en curso. */

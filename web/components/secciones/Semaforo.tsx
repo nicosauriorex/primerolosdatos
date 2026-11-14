@@ -67,7 +67,7 @@ function Cuerpo({ datos }: { datos: Semaforo }) {
         </InfoPunto>
       </div>
 
-      <Capitulo titulo="Indicador por indicador" bajada="Cada fila es un indicador y cada columna, un mes. Verde: subió. Rojo: bajó. Tocá una fila para ver su gráfico."
+      <Capitulo titulo="Indicador por indicador" bajada="Cada fila es un indicador y cada columna, un mes. Verde: subió (más actividad). Rojo: bajó (menos actividad). El color sigue el signo de la variación; en importaciones, subir es más compras al exterior. Tocá una fila para ver su gráfico."
         acciones={tabla ? <CompartirHoja href={href} titulo={titulo} onImagen={() => setImagen(true)} /> : undefined}>
         {tabla ? <Grilla tabla={tabla} medida={medida} onAbrir={(i) => set({ v: i.clave })} /> : <p className="note">No hay datos para esta medida.</p>}
       </Capitulo>
@@ -99,8 +99,29 @@ function FilaDifusion({ t, id }: { t: Tabla; id: string }) {
 
 function Grilla({ tabla: t, medida, onAbrir }: { tabla: Tabla; medida: Medida; onAbrir: (i: Indicador) => void }) {
   const caja = useRef<HTMLDivElement>(null);
-  // arranca deslizada hacia los meses más nuevos (la primera columna queda fija a la izquierda)
-  useEffect(() => { const el = caja.current; if (el) el.scrollLeft = el.scrollWidth; }, [medida, t]);
+  // arranca deslizada hacia los meses más nuevos (la primera columna queda fija a la izquierda). El ancho de esa columna se ajusta
+  // para que los meses visibles entren enteros: ninguno queda a medias debajo de la columna fija (variable --sem-w1, ver globals.css)
+  useEffect(() => {
+    const el = caja.current;
+    if (!el) return;
+    // al cargar arranca en el último mes; al cambiar el ancho solo se reajusta la columna fija (en el celular, mostrar u ocultar la barra del navegador cambia solo el alto: no se toca nada)
+    let ancho = -1;
+    const ajustar = () => {
+      if (el.clientWidth === ancho) return;
+      const primera = ancho < 0;
+      ancho = el.clientWidth;
+      el.style.removeProperty("--sem-w1");
+      const th1 = el.querySelector("thead th:first-child") as HTMLElement | null, thMes = el.querySelector("thead th:nth-child(2)") as HTMLElement | null;
+      if (th1 && thMes && el.scrollWidth > el.clientWidth) {
+        const cw = thMes.offsetWidth, n = Math.floor((el.clientWidth - th1.offsetWidth) / cw);
+        if (n >= 1 && cw > 0) el.style.setProperty("--sem-w1", `${el.clientWidth - n * cw}px`);
+      }
+      if (primera) el.scrollLeft = el.scrollWidth;
+    };
+    ajustar();
+    window.addEventListener("resize", ajustar);
+    return () => window.removeEventListener("resize", ajustar);
+  }, [medida, t]);
   return (
     <div className="tablewrap fija sem-tabla" ref={caja} role="region" aria-label="Semáforo de actividad: tabla de indicadores por mes" tabIndex={0}>
       <table className="sem-t">
@@ -179,7 +200,7 @@ function ComoSeCalcula({ datos, act }: { datos: Semaforo; act: string | null }) 
         <li><b>Qué se ve</b>: variación en %, con un decimal. Sin color: la variación se lee 0,0. Cada fila dice su fuente y el mes de su último dato.{act ? ` Última actualización del sitio: ${act}.` : ""}</li>
         <li><b>Interanual</b> (la medida de entrada): cada mes se compara con el mismo mes del año anterior, con la serie original, así que no hace falta quitarle la estacionalidad. Es la única medida con todos los indicadores.</li>
         <li><b>Mes contra mes</b>: cada mes se compara con el anterior, con la serie sin estacionalidad que publica el organismo. Solo entran los indicadores que tienen ese ajuste oficial (actividad económica, industria, minería, construcción y empleo) y la confianza del consumidor, que es una encuesta y no lo necesita. En los demás, la fila dice “solo interanual”.</li>
-        <li><b>El color</b>: verde si subió, rojo si bajó, sin color si la variación se lee 0,0. La intensidad compara cada celda con lo habitual de ese mismo indicador en los últimos 5 años (la mediana de sus variaciones, sin importar si subieron o bajaron): así un salto de 30 % en un indicador muy movido no apaga a los demás.</li>
+        <li><b>El color</b>: es el signo de la variación, no un juicio sobre el indicador: verde si subió (más actividad), rojo si bajó (menos actividad), sin color si la variación se lee 0,0. La intensidad compara cada celda con lo habitual de ese mismo indicador en los últimos 5 años (la mediana de sus variaciones, sin importar si subieron o bajaron): así un salto de 30 % en un indicador muy movido no apaga a los demás.</li>
         <li><b>Indicadores que subieron</b>: el porcentaje de los indicadores con dato ese mes cuya variación es positiva. Abajo del porcentaje figura con cuántos se calculó. Si ese mes entraron menos de la mitad de los indicadores (porque todavía no se publicó el resto), la columna se ve en gris.</li>
         <li><b>Meses de cada columna</b>: los últimos 7 meses, hasta el dato más nuevo que haya. Cada indicador se publica con una demora distinta, por eso las columnas más nuevas tienen celdas vacías.</li>
         <li><b>Sin dato</b>: si el valor del mes anterior es cero o negativo, la variación no se calcula y la celda queda vacía.</li>

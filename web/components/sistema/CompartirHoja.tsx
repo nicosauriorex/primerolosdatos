@@ -19,7 +19,11 @@ function Accion({ icono, titulo, desc, onClick }: { icono: ReactNode; titulo: st
   );
 }
 
-export function CompartirHoja({ href, titulo, onImagen, texto }: { href: string; titulo: string; onImagen?: () => void; texto?: string }) {
+/** `variante`: "texto" (por defecto) = ícono con la palabra "Compartir"; "icono" = solo el ícono, de 44 px, con `aria-label` "Compartir <titulo>" (aspecto secundario, para los capítulos);
+ *  "principal" = ícono con la palabra, más grande, para la cabecera del dato. */
+export function CompartirHoja({ href, titulo, onImagen, texto, variante = "texto", etiqueta }: {
+  href: string; titulo: string; onImagen?: () => void; texto?: string; variante?: "texto" | "icono" | "principal"; etiqueta?: string;
+}) {
   const [abierta, setAbierta] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [manual, setManual] = useState<string | null>(null);   // si no se pudo copiar: el texto queda en un campo seleccionado
@@ -36,9 +40,15 @@ export function CompartirHoja({ href, titulo, onImagen, texto }: { href: string;
 
   return (
     <>
-      <button type="button" className="comphoja-boton" aria-haspopup="dialog" onClick={() => setAbierta(true)}>
-        <IconoCompartir /><span>Compartir</span>
-      </button>
+      {variante === "icono" ? (
+        <button type="button" className="comphoja-boton comphoja-icono" aria-haspopup="dialog" aria-label={`Compartir ${etiqueta ?? titulo}`} title="Compartir" onClick={() => setAbierta(true)}>
+          <IconoCompartir />
+        </button>
+      ) : (
+        <button type="button" className={`comphoja-boton${variante === "principal" ? " comphoja-principal" : ""}`} aria-haspopup="dialog" onClick={() => setAbierta(true)}>
+          <IconoCompartir /><span>Compartir</span>
+        </button>
+      )}
       <Hoja titulo={`Compartir: ${titulo}`} abierta={abierta} onCerrar={() => setAbierta(false)}>
         {(cerrar) => (
           <div className="comphoja">

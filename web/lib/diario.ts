@@ -340,6 +340,15 @@ export function reducir(t: Tramo, max: number): Tramo {
   }
   return { dias, v };
 }
+/** Lo que falta aclarar en la fila de una variable cuyo valor ya trae su unidad ("US$ 9 millones" + "por día"): sin repetir la unidad. */
+export function aclaracionFila(c: ClaveDiario): string | null {
+  switch (c) {
+    case "compras": return "por día";
+    case "minorista": case "mayorista": return "por dólar";
+    case "tamar": case "badlar": return "nominal anual";
+    default: return null;
+  }
+}
 /** Marcas "redondas" del eje vertical. */
 export function marcasY(min: number, max: number, n = 4): { marcas: number[]; paso: number } {
   const span = max - min || Math.abs(max) || 1, paso0 = span / n, mag = 10 ** Math.floor(Math.log10(paso0));
@@ -390,7 +399,8 @@ export function cambiosDe(v: ResumenVariable): CambioParte[] {
   const r: CambioParte[] = [];
   // con su unidad: "−US$ 851 millones", "+$ 5,20", "+0,25 p.p." (una diferencia de tasas va en puntos)
   const def = DEFS[v.clave];
-  const conUnidad = (t: string) => /%|p\.p\./.test(t) ? t : def.tipo === "tasa" ? `${t} p.p.` : t.replace(/^([+−-]?)/, `$1${def.pref}`) + def.suf;
+  // (la diferencia de una tasa ya viene en "puntos": se dice una sola vez, "+0,31 p.p.", nunca "puntos p.p.")
+  const conUnidad = (t: string) => /%|p\.p\./.test(t) ? t : def.tipo === "tasa" ? `${t.replace(/\s*puntos$/, "")} p.p.` : t.replace(/^([+−-]?)/, `$1${def.pref}`) + def.suf;
   if (v.difAnterior) r.push({ texto: conUnidad(v.difAnterior), tono: v.clsAnterior, dir: dirDeTexto(v.difAnterior), contra: "vs día anterior" });
   const mes = v.tipo === "flujo" ? null : v.filas.find((f) => f.rotulo === "Hace un mes");
   if (mes) r.push({ texto: conUnidad(mes.valor), tono: mes.cls, dir: dirDeTexto(mes.valor), contra: "vs hace un mes" });

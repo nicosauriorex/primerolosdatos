@@ -13,7 +13,7 @@ import { Sparkline } from "../Sparkline";
 import { GraficoDiario } from "../GraficoDiario";
 import { PanelParte } from "../PanelParte";
 import {
-  cambiosDe, esClaveDiario, esPeriodoDiario, extremosTramo, PERIODO_DEFECTO, PERIODOS_DIARIO, recorte, textoParte, variableDe,
+  aclaracionFila, cambiosDe, esClaveDiario, esPeriodoDiario, extremosTramo, PERIODO_DEFECTO, PERIODOS_DIARIO, recorte, textoParte, variableDe,
   type Diario, type Parte, type PeriodoDiario, type ResumenVariable,
 } from "@/lib/diario";
 import { MESES } from "@/lib/formato";
@@ -115,7 +115,7 @@ function Fila({ v, onAbrir }: { v: ResumenVariable; onAbrir: () => void }) {
           {v.etiqueta && <span className={`parte-v-etq var-${v.cls}`}>{v.etiqueta}</span>}
           <b className={`parte-v-valor${colorValor}`}>{v.valor}</b>
         </span>
-        <span className="parte-v-fecha">{v.unidad} · {v.atrasada ? `último dato: ${v.fechaTxt}` : v.fechaTxt}</span>
+        <span className="parte-v-fecha">{[aclaracionFila(v.clave), v.atrasada ? `último dato: ${v.fechaTxt}` : v.fechaTxt].filter(Boolean).join(" · ")}</span>
       </span>
       <span className="parte-v-der">
         {cambios.length > 0 && <span className="parte-v-cambios">{cambios.map((c) => <Delta key={c.contra} texto={c.texto} tono={c.tono} dir={c.dir} contra={c.contra} />)}</span>}

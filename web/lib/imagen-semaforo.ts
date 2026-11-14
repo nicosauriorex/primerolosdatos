@@ -1,7 +1,7 @@
 // Imagen compartible del semáforo de actividad (docs/specs/semaforo-actividad.md): la tabla con celdas de color y número, la fila de difusión,
 // el título, el mes, la fuente, la marca y la dirección. No toca `imagen.ts` más que para usar sus helpers (marca, tipografía, ajuste de texto):
 // la composición es propia porque la tabla de 30 indicadores no entra en ninguno de los lienzos de filas. Siempre con el aspecto oscuro de la marca.
-// Palabras neutras y sin veredicto (D-012): verde es "subió" y rojo es "bajó".
+// Palabras neutras y sin veredicto (D-012): verde es "subió" y rojo es "bajó" (el color es el signo, no un juicio).
 import type { FormatoImg } from "./config";
 import { ALTO_MARCA, FORMATOS, MARGEN, SITIO, ajustar, alto, dibujarMarca, fuenteDe, texto, type LienzoCanvas, type Paleta } from "./imagen";
 import { isoDeMes, mesResumen, type Direccion, type Tabla } from "./semaforo";
@@ -25,7 +25,7 @@ export function armarImagenSemaforo(t: Tabla, formato: FormatoImg, hoy: Date = n
   })));
   return {
     formato, titulo: "Semáforo de actividad", resumen: t.resumen,
-    unidad: `Verde: subió. Rojo: bajó. El número es la variación en %. ${t.comparado}`,
+    unidad: `Verde: subió (más actividad). Rojo: bajó (menos actividad). El color es el signo de la variación, no un juicio. El número es la variación en %. ${t.comparado}`,
     fuente: "Fuentes oficiales y cámaras del sector",
     fecha: hoy.toLocaleDateString("es-AR"),
     archivo: `primerolosdatos-semaforo-actividad-${t.medida === "ia" ? "interanual" : "mes-contra-mes"}-${isoDeMes(mesResumen(t))}`,

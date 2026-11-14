@@ -32,7 +32,7 @@ export const enteroEn = (s: string | null | undefined, min: number, max: number,
   return Number.isFinite(n) ? Math.max(min, Math.min(max, Math.round(n))) : def;
 };
 export const unoDe = <T extends string>(s: string | null | undefined, validos: readonly T[], def: T): T =>
-  (validos as readonly string[]).includes(s ?? "") ? (s as T) : def;
+  s != null && (validos as readonly string[]).includes(s) ? (s as T) : def;   // sin el parámetro, siempre `def` (antes devolvía null si "" era válido)
 
 /** Devuelve [params, escribir, montado]. `montado` es false hasta leer la URL real (evita desajustes de hidratación). */
 export function useParams(): [URLSearchParams, (cambios: Record<string, string | null | undefined>) => void, boolean] {

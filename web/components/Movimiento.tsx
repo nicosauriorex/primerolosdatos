@@ -1,8 +1,7 @@
 "use client";
-// Movimiento medido (bloque 5e): entrada de secciones, números que cuentan y filas que se deslizan.
+// Movimiento medido (bloque 5e): entrada de secciones y filas que se deslizan.
 // Todo es una mejora: sin JavaScript, sin IntersectionObserver o con "reducir movimiento" el contenido se ve completo y quieto.
 import { useEffect, useRef, type ReactNode, type RefObject } from "react";
-import { nfDec, partirNumero } from "@/lib/formato";
 
 const quieto = () => typeof window === "undefined" || typeof IntersectionObserver === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -20,31 +19,6 @@ export function Entrada({ children, className = "", id, etiqueta }: { children: 
     return () => io.disconnect();
   }, []);
   return <section ref={ref} id={id} className={className} aria-label={etiqueta}>{children}</section>;
-}
-
-/** Número que cuenta hasta su valor, una sola vez, cuando entra en pantalla. El texto final es exactamente `texto`. */
-export function Contador({ texto }: { texto: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    const el = ref.current, p = partirNumero(texto);
-    if (!el || !p || quieto()) return;
-    let raf = 0, hecho = false;
-    const nf = nfDec(p.decimales);
-    const io = new IntersectionObserver((es) => {
-      if (hecho || !es.some((x) => x.isIntersecting)) return;
-      hecho = true; io.disconnect();
-      const t0 = performance.now(), dur = 900;
-      const paso = (t: number) => {
-        const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 4);
-        el.textContent = k < 1 ? p.antes + nf.format(p.valor * e) + p.despues : texto;
-        if (k < 1) raf = requestAnimationFrame(paso);
-      };
-      raf = requestAnimationFrame(paso);
-    }, { threshold: 0.4 });
-    io.observe(el);
-    return () => { io.disconnect(); cancelAnimationFrame(raf); el.textContent = texto; };
-  }, [texto]);
-  return <span ref={ref}>{texto}</span>;
 }
 
 /** Fila que se desliza de costado: marca en `data-mas` de qué lado hay más contenido (para la sombra del borde)

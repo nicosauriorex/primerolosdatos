@@ -138,12 +138,18 @@ export function baseTxt(b: BaseCfg): string {
 function resumenExcepciones(b: BaseCfg): string {
   return PRES_DEF.filter((p) => b.t0p[p.id] != null).map((p) => `${p.n} ${txtT(b.t0p[p.id])}`).join(", ");
 }
-/** Resumen corto para la línea "Inicio: …" (ej. "T-1 · Milei T+1"). */
-/** El inicio del mandato en una oración: "Mes inicial de cada presidente: T-1, excepto Milei (T+1)." Con más de tres excepciones, "con excepciones". */
+/** El mes de partida en palabras (sin T-1): "el mes antes de asumir", "el mes de asunción", "el mes después de asumir", "3 meses después de asumir". */
+export function mesInicioTxt(k: number): string {
+  if (k === 0) return "el mes de asunción";
+  const n = Math.abs(k), cuando = k < 0 ? "antes" : "después";
+  return n === 1 ? `el mes ${cuando} de asumir` : `${n} meses ${cuando} de asumir`;
+}
+/** El inicio del mandato en una oración, en palabras: "Se cuenta desde el mes antes de asumir, excepto Milei: desde el mes después de asumir."
+ *  Con más de tres excepciones, "con excepciones". */
 export function oracionInicio(b: BaseCfg): string {
-  const exc = PRES_DEF.filter((p) => b.t0p[p.id] != null && b.t0p[p.id] !== b.t0).map((p) => `${p.n} (${txtT(b.t0p[p.id])})`);
-  const cola = !exc.length ? "" : exc.length > 3 ? ", con excepciones" : `, excepto ${exc.length === 1 ? exc[0] : exc.slice(0, -1).join(", ") + " y " + exc[exc.length - 1]}`;
-  return `Mes inicial de cada presidente: ${txtT(b.t0)}${cola}.`;
+  const exc = PRES_DEF.filter((p) => b.t0p[p.id] != null && b.t0p[p.id] !== b.t0).map((p) => `${p.n}: desde ${mesInicioTxt(b.t0p[p.id])}`);
+  const cola = !exc.length ? "" : exc.length > 3 ? ", con excepciones" : `, excepto ${exc.join("; ")}`;
+  return `Se cuenta desde ${mesInicioTxt(b.t0)}${cola}.`;
 }
 /** Qué significa T, para acompañar a `oracionInicio`. */
 export const AYUDA_T = "T = mes de asunción. T-1 = último mes del antecesor. T+1 = un mes después de asumir.";
