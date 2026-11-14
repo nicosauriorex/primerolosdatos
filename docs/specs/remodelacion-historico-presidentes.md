@@ -1,6 +1,6 @@
 # Remodelación, etapa 3.3: Histórico y Presidentes
 
-Estado: implementada (2026-11-14), sin publicar. Sale de `docs/AUDITORIA-DISENO-2026-11-13.md` (secciones "Histórico" y "Presidentes", C2), D-023 y el sistema de `docs/specs/remodelacion-sistema.md` (componentes en `web/components/sistema/`). Sigue a la etapa 3.2 (`docs/specs/remodelacion-fichas.md`), de la que reutiliza `filasMandatosFicha` y `TablaMandatos`.
+Estado: implementada y publicada (2026-11-14, a3de357). Sale de `docs/AUDITORIA-DISENO-2026-11-13.md` (secciones "Histórico" y "Presidentes", C2), D-023 y el sistema de `docs/specs/remodelacion-sistema.md` (componentes en `web/components/sistema/`). Sigue a la etapa 3.2 (`docs/specs/remodelacion-fichas.md`), de la que reutiliza `filasMandatosFicha` y `TablaMandatos`.
 
 ## Objetivo
 - **Histórico**: que el nombre del dato sea el título de la página (hoy "HISTÓRICO" pesa más que el dato), que las siete comparaciones dejen de repetir la misma frase (dos a la vista y el resto en una tabla compacta) y que la configuración quede detrás de una barra que resume la vista.
