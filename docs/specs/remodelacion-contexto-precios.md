@@ -1,6 +1,6 @@
 # Contexto internacional: precios contra el mundo, en un solo capítulo
 
-Estado: implementada en tres vueltas (2026-11-15), en local; falta commit y push. Aprobada con lo recomendado en A, B y C ("Sí, implementá").
+Estado: implementada (2026-11-15) y publicada en a74107c (corrida en verde). Aprobada con lo recomendado en A, B y C ("Sí, implementá").
 
 Sale de los pedidos 19 y 20 de la tanda 9 (`docs/IDEAS.md`, tanda 9, renglón "Contexto internacional") y del pedido 19 viejo ("falta un gráfico de líneas con los precios por producto de Argentina contra otros países", que ya existe pero queda lejos).
 
