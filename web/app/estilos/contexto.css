@@ -43,8 +43,6 @@
 .pmc-grupo { display: grid; gap: var(--e-1); min-width: 0; }
 .pmc-grupo-t { font-size: var(--t-xs); font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-top: var(--e-2); }
 .pmc-nota { font-weight: 400; opacity: .85; }
-.pmc-leyenda { list-style: none; margin: var(--e-2) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--e-1) var(--e-4); font-size: var(--t-sm); color: var(--text-secondary); }
-.pmc-leyenda li { display: inline-flex; align-items: center; gap: var(--e-2); min-width: 0; overflow-wrap: anywhere; }
 .pmc-clave { display: inline-block; width: 18px; border-top: 3px solid var(--text-muted); vertical-align: middle; }
 .pmc-punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); vertical-align: middle; }
 .pmc-claves { margin-top: var(--e-1); }

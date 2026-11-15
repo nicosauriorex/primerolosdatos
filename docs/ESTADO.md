@@ -8,6 +8,7 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-15.
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
 Últimos bloques (todos publicados, corrida en verde):
+- Tanda 11: Congreso en columnas con «Leyes por apoyo»; resaltar un país (y su imagen) en Otros países y «¿Cómo viene?» — 2026-11-15, corrida pendiente — [spec](specs/ajustes-tanda-11.md)
 - Tanda 10: la lupa encuentra Herencia y el parte del Banco Central; selector de Herencia agrupado — 2026-11-15, b296c75 — [spec](specs/ajustes-tanda-10.md)
 - EE.UU. (BLS) y Chile (INE) en precios contra el mundo, productos de EE.UU. desde el BLS y aviso de presidente sin dato — 2026-11-15, 4078c3e — [spec](specs/precios-mundo-bls-ine.md)
 - Chips compactos en todo el sitio (R24) y cierre de Contexto — 2026-11-15, 63d1e40 — [spec](specs/chips-compactos.md)
@@ -21,13 +22,13 @@ Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes
 2. **Mantenimiento a mano cuando salgan datos nuevos:** herencia (`datos/manual/herencia.json`; nivel de reservas netas del FMI en la 3ª revisión, dic-2026, y saldos de DEG cada mes en `reservas_netas_supuestos.json`); Congreso (cada 1 de marzo, cortes de las dos cámaras y vetos del año); provincias (el III trimestre de la DNAP entra solo: mirar que pase el control).
 3. **Pendientes sin fuente o sin decidir:** semáforo (desestacionalizado X-13; CAME, patentamientos, Construya, escrituras, leche, petróleo); gasto (empresas públicas sin fuente; universidades: estudiantes antes de 2023 y las 8 sin datos en el PIU); Congreso (leyes del Ejecutivo de Menem a CFK 1); herencia (cepo de 2003 y 2007, FMI de 1995 a 2002).
 4. **Lupa:** el semáforo todavía no está en el buscador (sus indicadores salen de su archivo de datos).
-5. **Imagen al compartir que falta:** "La Argentina y otros países", "Lo esperado" y "Viento" en Contexto; Resumen por hitos; alícuotas de provincias. Elecciones ya tiene.
+5. **Imagen al compartir que falta:** Gobierno y Congreso, "Lo esperado" y "Viento" en Contexto; Resumen por hitos; alícuotas de provincias. Elecciones ya tiene.
 
 A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunidad) y 7c-3 (relatos, posts y video), en `docs/ROADMAP.md`.
 
 ## Sin verificar (lo que sigue abierto)
 - **En general:** tema claro, celular real (Atrás, teclado, safe-area de la barra inferior) y aspecto en capturas de casi todas las páginas: el panel del navegador suele estar oculto y se verifica midiendo.
-- **Imágenes compartidas** sin mirar dentro del panel: formatos 1:1/4:5/16:9 de gasto, provincias, universidades y herencia; meses y barras con variación de la ficha; aviso "Sin <presidente>" en la imagen de precios por presidente.
+- **Imágenes compartidas** sin mirar dentro del panel: «¿Cómo viene?» (sin puntos medidos); formatos 1:1/4:5/16:9 de gasto, provincias, universidades y herencia; meses y barras con variación de la ficha; aviso "Sin <presidente>" en la imagen de precios por presidente.
 - **Animaciones:** Mes a mes con lápiz, despliegue del parte del Banco Central, carrusel de la portada (con el panel oculto no corren).
 - **Datos:**
   - Herencia: "Pasivos remunerados del Banco Central" pasa de 106.150.927 a 233.216 (millones de $ de oct-26, −99,8 %): parece un salto de unidad en la serie, sin revisar.

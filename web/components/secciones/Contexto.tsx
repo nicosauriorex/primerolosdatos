@@ -11,7 +11,10 @@ import { CompartirHoja } from "../sistema/CompartirHoja";
 import { Grafico, type Fila, type OpcionesG, type SerieG } from "../Grafico";
 import { useConfig } from "../ConfigProvider";
 import { baseDeConfig } from "@/lib/config";
-import { PALETA } from "../util";
+import { PALETA, vcolor } from "../util";
+import { BotonCompartir } from "../PanelCompartir";
+import { IconoCompartir } from "../Iconos";
+import type { VistaCtx } from "@/lib/imagen-contexto";
 import { CeldaPres, FilaAjuste, HojaListo, Valor } from "./comunes";
 import { columnaComparable, periodoMandato } from "@/lib/tablas";
 import { nf0, nf1, ok, r1 } from "@/lib/formato";
@@ -312,6 +315,15 @@ function Comparar({ datos, p, set, resalta }: { datos: DatosContexto; p: URLSear
   const [hoja, setHoja] = useState(false);
   const [hojaPaises, setHojaPaises] = useState(false);
   const resp = fraseComparar(datos);
+  // R27: país resaltado (`cpx`); inválido o fuera del gráfico = ninguno
+  const cpx = p.get("cpx");
+  const pais = sg.some((s) => s.key === cpx) ? cpx : null;
+  const unidadGraf = `${def.u}${esIdx ? (baseAnio == null ? ` · 100 = ${datos.anios[0]}` : ` · 100 = ${baseAnio}`) : ""}${log ? " · escala logarítmica" : ""}`;
+  const vistaLineas = (): VistaCtx | null => (rows.length > 1 ? {
+    tipo: "ctx-lineas", titulo: `${def.n}: la Argentina y otros países`, frase: `${def.n}, de ${datos.anios[0]} a ${hasta}.`,
+    x: rows.map((r) => Number(r.per) * 12), series: sg.map((s, k) => ({ id: s.key, nombre: s.name, color: k, v: rows.map((r) => ((r as Record<string, unknown>)[s.key] as number | null) ?? null) })),
+    ...(pais ? { resaltados: [pais] } : {}), unidad: unidadGraf, fuente: `Fuente: ${datos.fuente}`, decimales: !esIdx && def.u.startsWith("US$") ? 0 : 1, log,
+  } : null);
   const resumen = [def.n, ...(esIdx ? [baseAnio == null ? "Valor" : `Base 100 desde ${baseAnio}`] : []), `Argentina y ${sel.length} más`].join(" · ");
   const sufijo = esIdx ? "Crecimiento acumulado en el mandato (%)" : `Promedio del mandato (${def.u})`;
 
@@ -360,9 +372,19 @@ function Comparar({ datos, p, set, resalta }: { datos: DatosContexto; p: URLSear
           {esIdx && <p>En la tabla, el crecimiento se mide del cierre del año anterior al mandato al último año.</p>}
         </InfoPunto>
       </div>
-      <p className="note">{def.u}{esIdx ? (baseAnio == null ? ` · 100 = ${datos.anios[0]}` : ` · 100 = ${baseAnio}`) : ""}{log ? " · escala logarítmica" : ""}</p>
-      <Grafico rows={rows} series={sg} opts={opts} />
-      <Leyenda items={sg.map((s) => ({ color: s.color, n: s.name, dash: s.dash }))} />
+      <div className="ctx-titulo-graf">
+        <p className="note" style={{ margin: 0, flex: 1, minWidth: 0 }}>{unidadGraf}</p>
+        <BotonCompartir className="solo-icono" titulo="Primero los Datos: la Argentina y otros países" href={() => `${window.location.pathname}${window.location.search}#comparar`} crearVista={vistaLineas}
+          deshabilitado={rows.length < 2} aria-label="Compartir el gráfico como imagen" title="Compartir este gráfico como imagen"><IconoCompartir /></BotonCompartir>
+      </div>
+      <Grafico rows={rows} series={sg} opts={{ ...opts, resaltar: pais }} />
+      {/* R27: la leyenda es tocable; resalta la línea del país (otra vez la suelta) */}
+      <div className="pres-leyenda" role="group" aria-label="Resaltar un país">
+        {sg.map((s) => (
+          <button key={s.key} type="button" className="pres-leyenda-item" style={vcolor(s.color)} aria-pressed={pais === s.key}
+            onClick={() => set({ cpx: pais === s.key ? null : s.key })}>{s.name}</button>
+        ))}
+      </div>
       {sinColor > 0 && <p className="note" role="status">Se muestran con color los primeros {PALETA.length} países; sacá alguno en «Países» para ver el resto en el gráfico.</p>}
       <h3>Por presidente</h3>
       <div className="tablewrap fija"><table>

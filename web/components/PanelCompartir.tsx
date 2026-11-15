@@ -114,7 +114,7 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
       if (!pres && per && !periodoValido) { setEstado("sin-periodo"); return; }   // hasta terminar de dibujar no hay imagen nueva: no se ofrece la vieja
       try {
         datos = esVistaPres(vista)
-          ? armarImagenPres(motor, vista.tipo === "mandato" && resaltados ? { ...vista, resaltados } : vista, { formato, comentario: comentarioAplicado })
+          ? armarImagenPres(motor, (vista.tipo === "mandato" || vista.tipo === "ctx-lineas") && resaltados ? { ...vista, resaltados } : vista, { formato, comentario: comentarioAplicado })
           : armarImagen(motor, { ...vista, exprs: exprsUsadas(motor, vista), desde: per?.desde ?? vista.desde, hasta: per?.hasta ?? vista.hasta }, {
             formato, comentario: comentarioAplicado, personal: img, periodoEnTitulo,
             base: baseDeConfig(config, PRES_DEF.map((p) => p.id)), colPres: config.colPres,
@@ -156,7 +156,12 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
           <div className="controls"><label>Formato</label>
             <Seg valor={formato} opciones={FORMATOS_IMG} onElegir={(f) => cambiar({ formatoImagen: f as FormatoImg })} /></div>
           {vista && esVistaPres(vista) && vista.tipo === "mandato" && (
-            <ResaltarPres vista={vista} elegidos={resaltados ?? vista.resaltados ?? []} onCambiar={setResaltados} />
+            <ResaltarPres rotulo="Resaltar presidentes (ninguno = todos iguales)" onCambiar={setResaltados} elegidos={resaltados ?? vista.resaltados ?? []}
+              opciones={vista.presIds.flatMap((id) => { const p = PRES_DEF.find((x) => x.id === id); return p ? [[id, p.corto ?? p.n] as [string, string]] : []; })} />
+          )}
+          {vista && esVistaPres(vista) && vista.tipo === "ctx-lineas" && (
+            <ResaltarPres rotulo="Resaltar país (ninguno = todos iguales)" onCambiar={setResaltados} elegidos={resaltados ?? vista.resaltados ?? []}
+              opciones={vista.series.map((s) => [s.id, s.nombre] as [string, string])} />
           )}
           {!pres && disp.length > 0 && per && (
             <details className="comp-personalizar">
@@ -297,14 +302,13 @@ function Datos<T extends string>({ t, todos, elegidos, tope, f }: { t: string; t
   );
 }
 
-/** R12 (C2): elección múltiple "Resaltar" de la imagen de Meses de mandato, con los presidentes de la vista. Ninguno elegido = todos iguales. */
-function ResaltarPres({ vista, elegidos, onCambiar }: { vista: Extract<VistaPres, { tipo: "mandato" }>; elegidos: string[]; onCambiar: (l: string[]) => void }) {
-  const todos: [string, string][] = vista.presIds.flatMap((id) => { const p = PRES_DEF.find((x) => x.id === id); return p ? [[id, p.corto ?? p.n] as [string, string]] : []; });
+/** R12 (C2) y R27: elección múltiple "Resaltar" de la imagen de líneas (presidentes en Meses de mandato, países en Contexto). Ninguno elegido = todos iguales. */
+function ResaltarPres({ rotulo, opciones, elegidos, onCambiar }: { rotulo: string; opciones: [string, string][]; elegidos: string[]; onCambiar: (l: string[]) => void }) {
   const alternar = (id: string) => onCambiar(elegidos.includes(id) ? elegidos.filter((x) => x !== id) : [...elegidos, id]);
   return (
     <div className="comp-datos">
-      <span className="note" style={{ margin: 0 }}>Resaltar presidentes (ninguno = todos iguales)</span>
-      <Seg valor={new Set<string>(elegidos)} opciones={todos} onElegir={alternar} />
+      <span className="note" style={{ margin: 0 }}>{rotulo}</span>
+      <Seg valor={new Set<string>(elegidos)} opciones={opciones} onElegir={alternar} />
     </div>
   );
 }

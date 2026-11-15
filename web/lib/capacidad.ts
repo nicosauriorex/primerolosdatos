@@ -17,8 +17,8 @@ export interface DatosCap {
   fuentes: Record<"bancas" | "leyes" | "dnu" | "vetos", string[]>;
   notas: Record<string, string>;
 }
-export type Indicador = "bancas" | "leyes" | "dnu" | "vetos";
-export const INDICADORES: [Indicador, string][] = [["bancas", "Bancas"], ["leyes", "Leyes"], ["dnu", "DNU"], ["vetos", "Vetos"]];
+export type Indicador = "bancas" | "leyes" | "apoyo" | "dnu" | "vetos";
+export const INDICADORES: [Indicador, string][] = [["bancas", "Bancas"], ["leyes", "Leyes"], ["apoyo", "Leyes por apoyo"], ["dnu", "DNU"], ["vetos", "Vetos"]];
 export const CAMARAS: [Camara, string][] = [["dip", "Diputados"], ["sen", "Senado"]];
 
 /** Meses "AAAA-MM" entre dos fechas (inclusive el primero, sin el último). */
@@ -57,6 +57,17 @@ export function resumenLeyes(d: DatosCap, pres: string): ResLeyes | null {
   return l ? { ...l, pct: pct(l.aprobadas, l.enviadas) } : null;
 }
 
+export interface ResApoyo { pctLeyes: number; pctBancas: number; veces: number }
+/** Leyes por apoyo: % de leyes del Ejecutivo aprobadas ÷ % de bancas propias y aliadas en Diputados (promedio del mandato).
+ *  Las cuentas cierran: ambos porcentajes se redondean a enteros como se muestran y el cociente se redondea a un decimal. null = falta leyes o bancas. */
+export function resumenApoyo(d: DatosCap, pres: string): ResApoyo | null {
+  const l = resumenLeyes(d, pres), b = resumenBancas(d, pres, "dip");
+  if (!l || !ok(l.pct) || !ok(b.promedio)) return null;
+  const pctLeyes = Math.round(l.pct), pctBancas = Math.round(b.promedio);
+  if (pctBancas <= 0) return null;
+  return { pctLeyes, pctBancas, veces: r1(pctLeyes / pctBancas) };
+}
+
 export interface ResDnu { total: number; porAnio: number | null; anios: number }
 export function resumenDnu(d: DatosCap, pres: string, m: Mandato): ResDnu | null {
   const x = d.dnu[pres];
@@ -88,6 +99,10 @@ export function valorIndicador(d: DatosCap, pres: string, m: Mandato, ind: Indic
   if (ind === "leyes") {
     const r = resumenLeyes(d, pres);
     return r && ok(r.pct) ? { v: r.pct as number, txt: `${nf(r.aprobadas)} de ${nf(r.enviadas)} (${nf(r.pct as number)} %)` } : null;
+  }
+  if (ind === "apoyo") {
+    const r = resumenApoyo(d, pres);
+    return r ? { v: r.veces, txt: `${nf(r.veces, 1)} veces` } : null;
   }
   if (ind === "dnu") {
     const r = resumenDnu(d, pres, m);
@@ -130,7 +145,7 @@ export const primerIndicadorConDatos = (d: DatosCap, M: Mandato[]): Indicador =>
   INDICADORES.map((x) => x[0]).find((i) => indicadorTieneDatos(d, i, M)) ?? "bancas";
 /** "Qué hay cargado": una oración con los indicadores y presidentes que tienen datos. */
 export function queHayCargado(d: DatosCap, M: Mandato[]): string {
-  const nombres: Record<Indicador, string> = { bancas: "bancas", leyes: "leyes del Ejecutivo", dnu: "DNU", vetos: "vetos" };
+  const nombres: Record<Indicador, string> = { bancas: "bancas", leyes: "leyes del Ejecutivo", apoyo: "leyes por apoyo", dnu: "DNU", vetos: "vetos" };
   const con: string[] = [], sin: string[] = [];
   INDICADORES.forEach(([i]) => {
     const ps = presConDato(d, i, M);
@@ -182,6 +197,16 @@ export function fraseCapacidad(d: DatosCap, ind: Indicador, pres: Mandato, M: Ma
     return {
       titulo: "Leyes del Ejecutivo aprobadas", cifra: `${nf(Math.round(l.pct))} %`, fecha: per,
       frase: `${pres.n}: ${nf(l.aprobadas)} de las ${nf(l.enviadas)} leyes que envió el Ejecutivo se aprobaron (${nf(Math.round(l.pct))} %). Entre los ${todos.length} gobiernos con dato, puesto ${k} de mayor a menor porcentaje.`,
+    };
+  }
+  if (ind === "apoyo") {
+    const a = resumenApoyo(d, pres.id);
+    if (!a) return null;
+    const todos = M.map((m) => resumenApoyo(d, m.id)?.veces).filter(ok);
+    const k = puestoDe(todos, a.veces);
+    return {
+      titulo: "Leyes por apoyo", cifra: nf1.format(a.veces), unidad: "veces", fecha: per,
+      frase: `${pres.n}: se aprobó el ${nf(a.pctLeyes)} % de las leyes del Ejecutivo con un ${nf(a.pctBancas)} % de bancas propias y aliadas en Diputados (promedio del mandato), ${nf1.format(a.veces)} veces. Entre los ${todos.length} gobiernos con dato, puesto ${k} de mayor a menor.`,
     };
   }
   if (ind === "dnu") {

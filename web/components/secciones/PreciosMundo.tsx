@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePreciosMundo } from "../usePreciosMundo";
 import { Cargando, Seg } from "../ui";
 import { Grafico, type OpcionesG, type SerieG } from "../Grafico";
-import { PALETA } from "../util";
+import { PALETA, vcolor } from "../util";
 import { Capitulo } from "../sistema/Capitulo";
 import { FilaChips } from "../sistema/FilaChips";
 import { GraficoBarrasH, type BarraH } from "../sistema/GraficoBarrasH";
@@ -376,6 +376,18 @@ function Detalle({ d, rid, dolar, arg, ref0, contra, p, set }: { d: DatosPM; rid
   const sinEst = Object.keys(d.paises).filter((c) => c !== ARG && !paisesConEstimado(d, nvTodos).includes(c));
   const textoPaises = elegidos.length === 0 ? "Solo los de arriba" : elegidos.length <= 2 ? elegidos.map((c) => d.paises[c]).join(", ") : `${elegidos.length} países`;
   const nuevoRubro = (v: string) => set({ pvr: v === rid ? null : v });
+  // R27: país resaltado (`pmx`); inválido o fuera del gráfico = ninguno. Resalta su línea estimada (los puntos medidos de Grafico quedan tenues: solo admite una clave).
+  const pmx = p.get("pmx");
+  const pais = ents.includes(pmx ?? "") ? pmx : null;
+  const vistaLineas = (): VistaCtx | null => {
+    const x = d.fechas.map((f) => { const [a, mm] = f.split("-"); return Number(a) * 12 + Number(mm) - 1; });
+    const series = ents.map((c) => ({ id: c, nombre: d.paises[c], color: Math.max(0, PALETA.indexOf(colorDe(c))), v: rows.map((f) => (f[c] as number | null) ?? null) }));
+    if (x.length < 2 || !series.some((s) => s.v.some((n) => n != null))) return null;
+    return {
+      tipo: "ctx-lineas", titulo: `${r.n}: ¿cómo viene el nivel de precios?`, frase: `Nivel de precios en dólares, estimado mes a mes (mundo = 100). La Argentina, con el dólar ${dolar}.`,
+      x, series, ...(pais ? { resaltados: [pais] } : {}), unidad: `${r.n}: nivel de precios en dólares, mundo = 100 (la línea de 100 es el promedio del mundo)`, fuente: `Fuente: ${d.fuente}`, decimales: 0, refLinea: 100,
+    };
+  };
   return (
     <>
       <div className="ctx-titulo-graf">
@@ -386,7 +398,12 @@ function Detalle({ d, rid, dolar, arg, ref0, contra, p, set }: { d: DatosPM; rid
           {hayGeneral && <p>EE.UU. no publica el IPC de este rubro en la base que usamos: el mundo se mueve con su IPC general.</p>}
           {faltaBlue && <p>Con el dólar blue faltan años medidos porque no hay cotización suficiente ese año.</p>}
           <p>Sin tocar, sigue al rubro y a los países de los gráficos de arriba.</p>
+          <p>Tocá un país de la lista para resaltar su línea; la imagen para compartir muestra solo lo estimado.</p>
         </InfoPunto>
+        <span style={{ marginLeft: "auto" }}>
+          <BotonCompartir className="solo-icono" titulo={`Primero los Datos: ${r.n}, ¿cómo viene?`} href={() => `${window.location.pathname}${window.location.search}#precios-mundo`} crearVista={vistaLineas}
+            aria-label="Compartir el gráfico ¿Cómo viene?" title="Compartir este gráfico como imagen"><IconoCompartir /></BotonCompartir>
+        </span>
       </div>
       <div className="ctxr-fila">
         <Pildora rotulo="Rubro" valor={r.n} onClick={() => setAbierta("rubro")} />
@@ -404,12 +421,14 @@ function Detalle({ d, rid, dolar, arg, ref0, contra, p, set }: { d: DatosPM; rid
         )}
       </HojaListo>
       <p className="note">{r.n}: nivel de precios en dólares, mundo = 100.</p>
-      <Grafico rows={rows} series={series} opts={opts} />
-      <ul className="pmc-leyenda" aria-label="Países del gráfico">
+      <Grafico rows={rows} series={series} opts={{ ...opts, resaltar: pais }} />
+      {/* R27: la leyenda es tocable; resalta la línea del país (otra vez la suelta) */}
+      <div className="pres-leyenda" role="group" aria-label="Resaltar un país">
         {ents.map((c) => (
-          <li key={c}><span className="pmc-clave" aria-hidden style={{ borderTopColor: `var(${colorDe(c)})` }} />{d.paises[c]}</li>
+          <button key={c} type="button" className="pres-leyenda-item" style={vcolor(colorDe(c))} aria-pressed={pais === c}
+            onClick={() => set({ pmx: pais === c ? null : c })}>{d.paises[c]}</button>
         ))}
-      </ul>
+      </div>
       <p className="note pmc-claves"><span className="pmc-clave" aria-hidden /> línea: estimado · <span className="pmc-punto" aria-hidden /> punto: medido</p>
       {sinEst.length > 0 && <p className="note">Sin estimado mes a mes para este rubro (solo se ven en las barras, como medidos): {sinEst.map((c) => d.paises[c]).join(", ")}.</p>}
     </>

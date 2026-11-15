@@ -207,7 +207,8 @@ function mismasOpciones(a: OpcionesG, b: OpcionesG): boolean {
   return ka.length === kb.length && ka.every((k) => (a as any)[k] === (b as any)[k]);
 }
 const ALFA_APAGADA = 0.25;
-const alfaDe = (key: string, res: string | null, keys: string[]) => (res && keys.includes(res) && key !== res ? ALFA_APAGADA : 1);
+// `<key>_m` (los puntos medidos de una línea estimada, «¿Cómo viene?») se resalta junto con su línea
+const alfaDe = (key: string, res: string | null, keys: string[]) => (res && keys.includes(res) && key !== res && key !== `${res}_m` ? ALFA_APAGADA : 1);
 /** Duración del dibujo de entrada (token `--d-dibujo` de globals.css, "900ms" o ".9s"). */
 function durDibujo(): number {
   const t = getComputedStyle(document.documentElement).getPropertyValue("--d-dibujo").trim();

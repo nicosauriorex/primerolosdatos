@@ -2502,3 +2502,27 @@ nav.tabs .con-menu { align-self: stretch; align-items: center; }
 .cabdato-mas-d .btn.drop:hover { background: var(--relleno-hover); border-color: var(--border-fuerte); }
 .cabdato-mas-d .panel { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; margin: 0; width: max-content; max-width: min(30rem, calc(100vw - 32px));
   box-shadow: 0 12px 32px rgb(0 0 0 / .35); }
+
+/* Congreso: columnas por gobierno (R26, ColumnasGobiernos.tsx) */
+.cgc { width: 100%; position: relative; }
+.cgc-svg { display: block; max-width: 100%; touch-action: pan-y; }
+.cgc-svg:focus { outline: none; }
+.cgc-svg:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.cgc-grilla { stroke: var(--border); stroke-width: 1; shape-rendering: crispEdges; }
+.cgc-base { stroke: var(--axis); stroke-width: 1.5; shape-rendering: crispEdges; }
+.cgc-eje { fill: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.cgc-mayoria { stroke: var(--text-secondary); stroke-width: 1.5; stroke-dasharray: 6 4; shape-rendering: crispEdges; }
+.cgc-mayoria-txt { fill: var(--text-secondary); font-size: 11px; font-weight: 700; paint-order: stroke; stroke: var(--surface-1); stroke-width: 3px; }
+.cgc-col { fill: var(--neutral); opacity: .5; }
+.cgc-col.cgc-marca { opacity: .9; }
+.cgc-col.cgc-sel { fill: var(--acento); opacity: 1; }
+.cgc-valor { fill: var(--text-primary); font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.cgc-sd { fill: var(--text-muted); font-size: 12px; font-style: italic; }
+.cgc-nombre { fill: var(--text-secondary); font-size: 11.5px; }
+.cgc-nombre-sel { fill: var(--text-primary); font-weight: 800; }
+.cgc-rotulo { fill: var(--text-primary); font-size: 12px; font-weight: 700; pointer-events: none; }
+.cgc-guia, .cgc-mayoria-txt { pointer-events: none; }
+.cgc-valor-sel { fill: var(--acento-texto); }
+.cgc-guia { stroke: var(--text-secondary); stroke-width: 1; stroke-dasharray: 1 3; stroke-linecap: round; }
+.cgc-kb { fill: none; stroke: var(--foco); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.cgc-hit { fill: transparent; cursor: pointer; }

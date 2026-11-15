@@ -372,3 +372,8 @@ Crítica final de Impeccable: 26/40 (antes 21/40). El usuario eligió arreglar l
 ## ~~Ajustes pedidos al recorrer la página, tanda 10 (2026-11-15)~~ ✅ 2026-11-15
 → spec: docs/specs/ajustes-tanda-10.md (bloque 5o).
 - ~~«hay datos que capaz están en herencia que no aparecen en la lupa. ponele deuda publica, deuda neta, etc.»~~ ✅ 2026-11-15 (deuda neta no existe en el sitio).
+
+## ~~Tanda 11: Congreso en columnas y resaltar un país (2026-11-15)~~ ✅ 2026-11-15
+→ spec: docs/specs/ajustes-tanda-11.md
+- ~~«En Cada gobierno frente al Congreso … que sea un gráfico de barras verticales con cada gobierno en el eje x», marcar el de más y el de menos apoyo, y un indicador de leyes según el apoyo que tenía cada gobierno.~~ ✅ 2026-11-15
+- ~~«que en El mundo y la Argentina se pueda resaltar a un pais como hacemos en meses de mandato (tambien para la imagen)».~~ ✅ 2026-11-15
