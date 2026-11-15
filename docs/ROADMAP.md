@@ -46,8 +46,9 @@ Del 1 al 5 no necesitan backend ni datos nuevos: se pueden ir publicando de a un
 | 11 | Herencia: recibido contra entregado | Sección en Presidentes: cómo estaba cada variable al asumir y al entregar; fase 1 con series oficiales, fase 2 con datos de informes cargados a mano, fase 3 estimaciones | No (2 series nuevas de datos.gob.ar) | Hecho (2026-11-12): series, datos de informes, reservas netas del FMI y estimación propia — [spec](specs/herencia.md) |
 | 12 | En qué gasta la Nación | Gasto nacional por finalidad, organismo, tipo de gasto y provincia, año por año; universidades con lo que hay | No (datos de Presupuesto Abierto, archivo aparte) | Hecho (fases 1 a 3, 2026-11-12 y 2026-11-13); la fase 4 (empresas públicas) queda sin fuente — [spec](specs/gasto-nacion.md) |
 | 13 | Provincias | La Nación en cada provincia (fase 1); cuentas de cada provincia y ranking (bloqueado: falta la fuente de la DNAP) | No | Fase 1 hecha (2026-11-13): `/provincias/`, gasto de la Nación en cada provincia por habitante; fase 2 hecha (2026-11-13): `/provincias/?vista=cuentas`, cuentas de cada provincia de la DNAP; fase 3 hecha (2026-11-13): alícuotas teóricas de Ingresos Brutos 2024-2025 en la misma vista; fase 4 hecha (2026-11-13): 2026 acumulado al último trimestre en la misma vista — [spec](specs/provincias.md) |
-| 8 | Cuentas y comunidad | Comunidad: posts, votos, comentarios, ratios, rankings, moderación | Sí | Sin spec |
-| 9 | Novedades, calendario y predicciones | Novedades, calendario y predicciones | Sí | Sin spec |
+| 9a | Contar los Compartir | Contar los Compartir y preguntar por qué: cuántas veces se comparte cada dato y vista, pregunta opcional de un toque después de compartir. Worker y D1 de Cloudflare (plan gratis), sin datos personales; si falla, la página sigue igual | Sí (mínimo) | Sin spec |
+| 9b | Novedades y calendario | Novedades, calendario y predicciones (primera parte): datos nuevos que van entrando y calendario de próximas publicaciones. Estático, sin backend | No | Sin spec |
+| 9c | Predicciones | Novedades, calendario y predicciones (segunda parte): predicción de la gente con la mediana, contra el REM y el dato real. Usa la base de 9a, con Turnstile contra bots | Sí | Sin spec |
 
 Después de la auditoría del 2026-11-10 ([informe](AUDITORIA-2026-11-10.md)) el bloque 7 pasó a ser la prioridad: es lo que convierte al sitio en una herramienta para responder en redes. El 6d se cargó el 2026-11-13 (faltan solo las leyes del Ejecutivo anteriores a dic-2011, sin fuente con aprobadas).
 
@@ -57,6 +58,7 @@ Quedan anotados para no olvidarlos, pero no entran en "¿Qué sigue?" ni se prop
 
 | # | Bloque | Ideas (secciones de IDEAS.md) | Backend | Estado |
 |---|---|---|---|---|
+| 8 | Cuentas y comunidad | Comunidad: posts, votos, comentarios, ratios, rankings, moderación. Sacado del plan el 2026-11-15: el debate ya se da en X, pide moderación diaria y choca con D-012 (sin veredicto). Retomar solo si 9a y 9c muestran que hay gente que vuelve | Sí | Sin spec |
 | 7c-3 | Relatos, posts y video | "Contestar un relato"; posts automáticos en X; video de la animación del mandato. Decisiones abiertas: sello verdadero/falso (choca con D-012), cuenta y clave de la API de X | A definir | Sin spec |
 
 ## Fase 1 en detalle

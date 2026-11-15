@@ -97,7 +97,13 @@ Uso central: alguien escribe en redes "Milei fundió la economía" y otra person
 - **Posts automáticos de datos fijos** (empezar por acá): el BCRA publica todos los días a la tarde compras de divisas, reservas y tasas. La página publica o responde con el dato verificado y su contexto histórico ("mayores compras desde…").
 - **Todo configurable**: elegir qué mostrar o no (evolución por meses de mandato, si es el mejor dato de tanto tiempo, comparación contra la proyección, etc.).
 
+## Contar los Compartir y preguntar por qué (2026-11-15)
+- Contar cada vez que alguien aprieta "Compartir" en un gráfico (qué dato, qué vista, qué período) para ver qué interesa.
+- Después de compartir, una pregunta opcional de un toque: por qué lo comparte (lo considero bueno, malo, que mejoró, que empeoró, curiosidad, neutral…).
+- Opinión de Claude (2026-11-15): es la forma más barata de tener backend (un Worker y una base D1 de Cloudflare, gratis) y deja armada la base para las predicciones del bloque 9. Orden sugerido: esto → novedades y calendario (estáticos) → predicciones → comunidad (bloque 8) solo si el sitio tiene tráfico.
+
 ## Comunidad
+(A futuro, sin recomendar: bloque 8 sacado del plan el 2026-11-15; el debate ya se da en X.)
 - Registro anónimo.
 - Posts con votos a favor y en contra (se ven las dos cantidades) y comentarios. Al publicar se marca si el dato es positivo, negativo o neutro.
   Ej.: alguien filtra el período de Milei, muestra cómo evolucionó el dólar y comenta.
