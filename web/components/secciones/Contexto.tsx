@@ -1,10 +1,8 @@
 "use client";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSeccion } from "../useSeccion";
 import { useContexto } from "../useContexto";
-import { usePreciosMundo } from "../usePreciosMundo";
 import { Cargando, Seg, Selector, alternar } from "../ui";
-import { IconoDerecha } from "../Iconos";
 import { Capitulo } from "../sistema/Capitulo";
 import { FilaChips } from "../sistema/FilaChips";
 import { Hoja } from "../sistema/Hoja";
@@ -20,13 +18,12 @@ import { nf0, nf1, ok, r1 } from "@/lib/formato";
 import { PRES_DEF, crearPres, franjasPres, nombreCorto, type Pres } from "@/lib/estadisticas";
 import {
   ARG, COMPARAR, ESPERADO, GRUPOS_CMP, GRUPOS_EXTRA, MARCA_TXT, PAISES, VEC, VECINOS, VIENTOS,
-  aniosDe, crecimientoIndice, filasEsperado, fraseComparar, fraseEsperado, fraseRubroMundo, fraseViento, hrefBloque, nombreEnt, presParaViento, promedioAnios, serieAnual, serieComparar, sorpresaPres, textoAnios, ultimoCerrado, vientosPres,
+  aniosDe, crecimientoIndice, filasEsperado, fraseComparar, fraseEsperado, fraseViento, hrefBloque, nombreEnt, presParaViento, promedioAnios, serieAnual, serieComparar, sorpresaPres, textoAnios, ultimoCerrado, vientosPres,
   type DatosContexto, type DefInd, type DefViento, type Marca,
 } from "@/lib/contexto";
 import { lista, unoDe, useParams } from "@/lib/url";
-import { IDS_PM, IDS_PREGUNTA, argDesdeMotor, type Dolar } from "@/lib/preciosMundo";
+import { IDS_PM } from "@/lib/preciosMundo";
 import { PreciosMundo } from "./PreciosMundo";
-import { PreguntaPrecios } from "./PreguntaPrecios";
 import { BarraResumen, Pildoras } from "./Ranking";
 
 const f1 = (v: number | null | undefined) => (ok(v) ? nf1.format(v) : "—");
@@ -39,69 +36,122 @@ const resaltar = (on: boolean) => (on ? { background: "color-mix(in srgb, var(--
 const tonoSig = (v: number | null | undefined, dir: number) => (ok(v) && dir && v * dir !== 0 ? (v * dir > 0 ? "bueno" : "malo") as "bueno" | "malo" : null);
 const nDe = (p: { n: number; de: number }) => (p.n < p.de ? <small>{p.n} de {p.de} años</small> : null);
 
-export function Contexto() {
+/** Link viejo de /contexto/ -> la subpestaña que corresponde (misma consulta), o null si se queda. Los links viejos eran un solo capítulo largo. */
+function destinoViejo(hash: string, search: string): string | null {
+  const h = hash.replace(/^#/, "");
+  const q = new URLSearchParams(search);
+  const hacia = (r: string) => `/contexto/${r}/${search}`;
+  if (h === "comparar") return hacia("paises");
+  if (h === "esperado") return hacia("esperado");
+  if (h === "viento") return hacia("viento");
+  if (h) return null;   // #precios-mundo, #pregunta y cualquier otra ancla se quedan en Precios
+  if ([...q.keys()].some((k) => k.startsWith("pq") || k.startsWith("pm"))) return null;
+  if (["cpd", "cpb", "cpp"].some((k) => q.has(k))) return hacia("paises");
+  if (q.has("cg") || q.has("cd")) return hacia("esperado");
+  if (q.has("cpr")) return hacia("paises");
+  return null;
+}
+
+/** Un link con ancla va al bloque una vez que llegaron los datos (los bloques no existen antes). */
+function useIrAlAncla(listo: boolean) {
+  useEffect(() => {
+    const h = window.location.hash.slice(1);
+    if (listo && h) document.getElementById(h)?.scrollIntoView();
+  }, [listo]);
+}
+
+function PieFMI({ datos }: { datos: DatosContexto }) {
+  const hasta = ultimoCerrado(datos);
+  return (
+    <div className="ctx-pie">
+      <details className="ctx-mas">
+        <summary>Cómo se mide</summary>
+        <p className="note"><b>Cómo se asignan los años:</b> cada año calendario es del presidente que gobernó 6 meses o más de ese año (2003 es de Néstor Kirchner; 2015, de CFK 2; 2023, de Alberto Fernández; si son 6 y 6, como 1995, va para el que ya estaba al empezar el año).
+        Si un presidente no tiene ningún año así, figura &quot;sin años completos&quot;. Los gráficos y los promedios usan los años cerrados (hasta {hasta}); los años siguientes son proyecciones del FMI y no se muestran.</p>
+        <p className="note">«Vecinos» es el promedio simple de Brasil, Chile, Uruguay, Paraguay y Bolivia.</p>
+      </details>
+      <p className="note">Fuente: {datos.fuente}.</p>
+    </div>
+  );
+}
+
+const resaltaDe = (p: URLSearchParams) => (PRES_DEF.some((x) => x.id === p.get("cpr")) ? p.get("cpr") : null);
+
+/** /contexto/: precios contra el mundo. */
+export function ContextoPrecios() {
   const [p, set, montado] = useParams();
-  const sec = useSeccion(["ctx_soja", "ctx_maiz", "ctx_trigo", "ctx_petroleo", "ctx_fed", "ctx_terminos", ...IDS_PM, ...IDS_PREGUNTA]);
-  const { datos, error } = useContexto();
-  const pm = usePreciosMundo();
+  const [decidido, setDecidido] = useState(false);   // antes de dibujar nada: un link viejo se manda a su subpestaña sin parpadeo
+  useEffect(() => {
+    const d = destinoViejo(window.location.hash, window.location.search);
+    if (d) window.location.replace(d); else setDecidido(true);
+  }, []);
+  const sec = useSeccion(IDS_PM);
   const m = sec.motor;
   const PRES = useMemo(() => (m ? crearPres(m.F) : []), [m]);
-  const dolar = unoDe<Dolar>(p.get("pmd"), ["oficial", "blue"], "oficial");
-  const fraseMundo = useMemo(() => (m && pm.datos ? fraseRubroMundo(pm.datos, argDesdeMotor(m, pm.datos), "total", dolar) : null),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [m, pm.datos, dolar, sec.version, sec.ocupado]);   // el motor es el mismo objeto: se recalcula cuando llegan las series
-  const listo = !!m && !sec.ocupado && !!datos;
-  const pmListo = !!pm.datos || !!pm.error;
-  useEffect(() => {   // los bloques existen recién cuando llegan los datos (y los de precios, que están más arriba y cambian el alto): un link con ancla va al bloque una vez
-    const h = window.location.hash.slice(1);
-    if (listo && pmListo && h) document.getElementById(h)?.scrollIntoView();
-  }, [listo, pmListo]);
+  const yaDibujado = useRef(false);
+  if (!decidido) return <Cargando />;
+  if (sec.errorGeneral) return <p className="error" role="alert">{sec.errorGeneral}</p>;
+  // Solo la primera vez: si después vuelve a cargar (otro rubro, otro período) la página queda dibujada; si no, se achica y el navegador sube arriba de todo
+  if (!m || !montado || (sec.ocupado && !yaDibujado.current)) return <Cargando />;
+  yaDibujado.current = true;
+  return (
+    <section>
+      <p className="sub">Cuánto cuestan los precios de la Argentina contra los del mundo, por rubro, por región y por presidente.</p>
+      <PreciosMundo m={m} PRES={PRES} p={p} set={set} />
+    </section>
+  );
+}
 
+/** /contexto/paises/: la Argentina contra otros países. */
+export function ContextoPaises() {
+  const [p, set, montado] = useParams();
+  const { datos, error } = useContexto();
+  useIrAlAncla(!!datos && montado);
+  if (error) return <p className="error" role="alert">{error}</p>;
+  if (!montado || !datos) return <Cargando />;
+  return (
+    <section>
+      <p className="sub">Cómo le fue a la Argentina contra otros países en cada mandato: crecimiento, inflación, desempleo y más.</p>
+      <Comparar datos={datos} p={p} set={set} resalta={resaltaDe(p)} />
+      <PieFMI datos={datos} />
+    </section>
+  );
+}
+
+/** /contexto/esperado/: lo que el FMI esperaba y lo que pasó. */
+export function ContextoEsperado() {
+  const [p, set, montado] = useParams();
+  const { datos, error } = useContexto();
+  useIrAlAncla(!!datos && montado);
+  if (error) return <p className="error" role="alert">{error}</p>;
+  if (!montado || !datos) return <Cargando />;
+  const grupoId = unoDe(p.get("cg"), GRUPOS_CMP.map((g) => g[0]), "mundo");
+  const grupo = GRUPOS_CMP.find((g) => g[0] === grupoId) as [string, string, string];
+  return (
+    <section>
+      <p className="sub">Lo que el FMI esperaba cada abril y lo que terminó pasando, para la Argentina y para el resto, por presidente.</p>
+      <Esperado datos={datos} grupoId={grupoId} grupo={grupo[2]} nombreGrupo={grupo[1]} p={p} set={set} resalta={resaltaDe(p)} />
+      <PieFMI datos={datos} />
+    </section>
+  );
+}
+
+/** /contexto/viento/: viento de cola o de frente. */
+export function ContextoViento() {
+  const [p, , montado] = useParams();
+  const sec = useSeccion(["ctx_soja", "ctx_maiz", "ctx_trigo", "ctx_petroleo", "ctx_fed", "ctx_terminos"]);
+  const { datos, error } = useContexto();
+  const m = sec.motor;
+  const PRES = useMemo(() => (m ? crearPres(m.F) : []), [m]);
+  useIrAlAncla(!!m && !sec.ocupado && !!datos && montado);
   if (sec.errorGeneral) return <p className="error" role="alert">{sec.errorGeneral}</p>;
   if (error) return <p className="error" role="alert">{error}</p>;
   if (!m || !montado || sec.ocupado || !datos) return <Cargando />;
-
-  const grupoId = unoDe(p.get("cg"), GRUPOS_CMP.map((g) => g[0]), "mundo");
-  const grupo = GRUPOS_CMP.find((g) => g[0] === grupoId) as [string, string, string];
-  const resalta = PRES_DEF.some((x) => x.id === p.get("cpr")) ? p.get("cpr") : null;
-  const hasta = ultimoCerrado(datos);
-  // Una frase-respuesta por bloque: el índice y la apertura de cada bloque usan la misma
-  const indice = [
-    { id: "precios-mundo", n: "Precios en el mundo", f: fraseMundo },
-    { id: "comparar", n: "La Argentina y otros países", f: fraseComparar(datos) },
-    { id: "esperado", n: "Lo esperado y lo que pasó", f: fraseEsperado(datos, grupo[2], (ESPERADO.find((x) => x.id === p.get("cd")) ?? ESPERADO[0]).origen) },
-    { id: "viento", n: "Viento de cola o de frente", f: fraseViento(m, datos, presParaViento(m, datos, PRES)) },
-  ];
-
   return (
     <section>
-      <p className="sub">Qué pasaba en el mundo mientras gobernaba cada presidente: precios, otros países, lo esperado y el viento de afuera. La misma vara para todos.</p>
-      <PreguntaPrecios m={m} p={p} set={set} />
-      <nav className="ctx-indice" aria-label="Los cuatro contextos">
-        <ul>
-          {indice.map((x) => (
-            <li key={x.id}>
-              <a href={`#${x.id}`} className="ctx-indice-fila">
-                <span className="ctx-indice-textos"><b>{x.n}</b>{x.f ? <small>{x.f}</small> : null}</span>
-                <IconoDerecha />
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <PreciosMundo m={m} p={p} set={set} />
-      <Comparar datos={datos} p={p} set={set} resalta={resalta} />
-      <Esperado datos={datos} grupoId={grupoId} grupo={grupo[2]} nombreGrupo={grupo[1]} p={p} set={set} resalta={resalta} />
-      <Viento m={m} datos={datos} PRES={PRES} resalta={resalta} p={p} />
-      <div className="ctx-pie">
-        <details className="ctx-mas">
-          <summary>Cómo se mide</summary>
-          <p className="note"><b>Cómo se asignan los años:</b> cada año calendario es del presidente que gobernó 6 meses o más de ese año (2003 es de Néstor Kirchner; 2015, de CFK 2; 2023, de Alberto Fernández; si son 6 y 6, como 1995, va para el que ya estaba al empezar el año).
-          Si un presidente no tiene ningún año así, figura &quot;sin años completos&quot;. Los gráficos y los promedios usan los años cerrados (hasta {hasta}); los años siguientes son proyecciones del FMI y no se muestran.</p>
-          <p className="note">«Vecinos» es el promedio simple de Brasil, Chile, Uruguay, Paraguay y Bolivia.</p>
-        </details>
-        <p className="note">Fuente: {datos.fuente}.</p>
-      </div>
+      <p className="sub">Lo que pasaba afuera mientras gobernaba cada presidente: precios de lo que exporta la Argentina, tasas de EE.UU. y crecimiento de Brasil y China.</p>
+      <Viento m={m} datos={datos} PRES={PRES} resalta={resaltaDe(p)} p={p} />
+      <PieFMI datos={datos} />
     </section>
   );
 }
@@ -233,7 +283,8 @@ function Comparar({ datos, p, set, resalta }: { datos: DatosContexto; p: URLSear
   const series = useMemo(() => Object.fromEntries(ents.map((e) => [e, serieComparar(datos, def, e, base)])), [datos, def, ents.join(","), base]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const rows = datos.anios.map((y, i) => y > hasta ? null : ({ fecha: `${y}-01`, per: String(y), ...Object.fromEntries(ents.map((e) => [e, series[e][i]])) })).filter((r): r is NonNullable<typeof r> => r != null);
-  const sg: SerieG[] = ents.map((e, k) => ({ key: e, name: nombreEnt(datos, e), color: e === ARG ? "--series-1" : PALETA[(k % (PALETA.length - 1)) + 1], dash: e !== ARG && (k > 7) }));
+  const sinColor = Math.max(0, ents.length - PALETA.length);   // un color por país: si no alcanzan los de la paleta no se reciclan, se muestran solo los primeros
+  const sg: SerieG[] = ents.slice(0, PALETA.length).map((e, k) => ({ key: e, name: nombreEnt(datos, e), color: PALETA[k] }));
   const valoresPos = rows.flatMap((r) => ents.map((e) => (r as Record<string, unknown>)[e] as number | null)).filter((v): v is number => ok(v) && v > 0).sort((a, b) => a - b);
   const mediana = valoresPos.length ? valoresPos[Math.floor(valoresPos.length / 2)] : 0;
   const todosPos = rows.every((r) => ents.every((e) => { const v = (r as Record<string, unknown>)[e] as number | null; return !ok(v) || v > 0; }));
@@ -312,6 +363,7 @@ function Comparar({ datos, p, set, resalta }: { datos: DatosContexto; p: URLSear
       <p className="note">{def.u}{esIdx ? (baseAnio == null ? ` · 100 = ${datos.anios[0]}` : ` · 100 = ${baseAnio}`) : ""}{log ? " · escala logarítmica" : ""}</p>
       <Grafico rows={rows} series={sg} opts={opts} />
       <Leyenda items={sg.map((s) => ({ color: s.color, n: s.name, dash: s.dash }))} />
+      {sinColor > 0 && <p className="note" role="status">Se muestran con color los primeros {PALETA.length} países; sacá alguno en «Países» para ver el resto en el gráfico.</p>}
       <h3>Por presidente</h3>
       <div className="tablewrap fija"><table>
         <thead><tr><th>Presidente</th>{ents.map((e) => <th key={e}>{nombreEnt(datos, e)}</th>)}<th>Puesto de la Argentina</th>{def.id === "pibpc" && <th>Arg. como % del promedio (inicio → fin)</th>}</tr></thead>

@@ -18,6 +18,7 @@ import { GRILLA_DATOS, grillaPresidentes } from "./presidentes";
 import { datoFijoPorSlug } from "./datos-fijos";
 import { idsHerencia } from "./herencia";
 import { armarImagenElec, esVistaElec, type VistaElec } from "./imagen-elecciones";
+import { armarImagenCtx, esVistaCtx, type VistaCtx } from "./imagen-contexto";
 
 /** Lo que muestra una sección de presidentes y, por lo tanto, lo que lleva la imagen. Todo viene tal como está en pantalla. */
 export type VistaPres =
@@ -31,13 +32,14 @@ export type VistaPres =
   | { tipo: "herencia"; presId: string; ids: string[]; base: BaseCfg; informes?: DatoInforme[]; rn?: ReservasNetas | null } // ids: series de la tabla que están en el catálogo (base fija T-1); informes: datos cargados a mano (fase 2)
   | { tipo: "grilla"; calor: boolean; base: BaseCfg }   // "Todos los presidentes, de un vistazo": una fila por presidente, una columna por dato clave
   | { tipo: "meses"; expr: Expr; desde: number; hasta: number }   // el mismo mes en cada año, de `desde` a `hasta` (años); no es de presidentes, pero se arma igual
-  | VistaElec;   // Elecciones (V7): llevan los números ya calculados por la página; ver imagen-elecciones.ts
+  | VistaElec   // Elecciones (V7): llevan los números ya calculados por la página; ver imagen-elecciones.ts
+  | VistaCtx;   // Contexto (precios contra el mundo): idem; ver imagen-contexto.ts
 export interface OpcionesPres { formato: FormatoImg; comentario: string }
 
 export const esVistaPres = (v: unknown): v is VistaPres => !!v && typeof v === "object" && "tipo" in v;
 /** Ids de series que hay que tener cargadas para armar la imagen. */
 export const idsDeVistaPres = (v: VistaPres): string[] =>
-  esVistaElec(v) ? []
+  esVistaElec(v) || esVistaCtx(v) ? []
   : v.tipo === "grilla" ? [...new Set(GRILLA_DATOS.flatMap((d) => { const f = datoFijoPorSlug(d.slug); return f ? (f.e.rel ? [f.e.id, f.e.rel] : [f.e.id]) : []; }))]
   : v.tipo === "barras" || v.tipo === "velas" || v.tipo === "mandato" || v.tipo === "meses" ? (v.expr.rel ? [v.expr.id, v.expr.rel] : [v.expr.id])
     : v.tipo === "variables" ? v.exprs.flatMap((e) => (e.rel ? [e.id, e.rel] : [e.id]))
@@ -69,6 +71,7 @@ function esqueleto(m: Motor, o: OpcionesPres, base: BaseCfg | null, titulo: stri
 /** Datos de la imagen. Null si faltan datos cargados o no hay nada que dibujar. */
 export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosImagen | null {
   if (esVistaElec(v)) return armarImagenElec(v, o);
+  if (esVistaCtx(v)) return armarImagenCtx(v, o);
   if (idsDeVistaPres(v).some((id) => !m.SER[id])) return null;
   if (v.tipo === "meses") return imagenMeses(m, v, o);
   if (v.tipo === "grilla") return imagenGrilla(m, v, o);

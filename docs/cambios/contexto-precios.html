@@ -1,0 +1,148 @@
+<title>Precios contra el mundo: dónde verlo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@700&display=swap">
+<style>
+/* Lista de control: una columna, secciones en el orden del menú del sitio, cada cambio con su link directo */
+:root {
+  --bg: #f3f5fb; --sup: #ffffff; --tinta: #0b1230; --sec: #4a5478; --borde: #d9deee;
+  --acento: #1f6fd1; --sobre-acento: #ffffff; --accion: #f5b81c; --sobre-accion: #0b1230; --hecho: #1d8a55; --propio: #9a5400;
+  --f-txt: "Archivo", system-ui, sans-serif; --f-tit: "Archivo Narrow", "Archivo", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--tinta); font-family: var(--f-txt); font-size: 15px; line-height: 1.5; margin: 0 }
+.envoltura { max-width: 760px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+h1 { font-family: var(--f-tit); font-size: 30px; text-transform: uppercase; letter-spacing: .01em; margin: 0 0 6px; text-wrap: balance }
+.bajada { color: var(--sec); margin: 0 0 18px; max-width: 62ch }
+.barra { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--borde); margin-bottom: 8px }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.riel { display: inline-flex; background: var(--sup); border-radius: 999px; padding: 4px; gap: 2px }
+.riel button { border: 0; background: transparent; color: var(--tinta); font: 600 14px var(--f-txt); padding: 8px 14px; border-radius: 999px; cursor: pointer }
+.riel button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento) }
+.progreso { color: var(--sec); font-size: 14px; font-variant-numeric: tabular-nums; margin-left: auto }
+.aviso { font-size: 13px; color: var(--sec); margin: 6px 0 0; width: 100% }
+.aviso code { background: var(--sup); padding: 1px 6px; border-radius: 6px; font-size: 12px; user-select: all }
+section { padding-top: 22px }
+h2 { font-family: var(--f-tit); font-size: 19px; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline }
+h2 .n { color: var(--acento); font-variant-numeric: tabular-nums; min-width: 1.6em }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px }
+li { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; background: var(--sup); border-radius: 12px; padding: 10px 12px }
+li.visto { opacity: .55 }
+li.visto .que { text-decoration: line-through; text-decoration-color: var(--sec) }
+input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--hecho); margin: 0 }
+.que { min-width: 0 }
+.num { font-weight: 800; color: var(--acento); font-variant-numeric: tabular-nums; margin-right: 4px }
+.origen { display: block; font-size: 13px; margin-top: 2px; color: var(--sec) }
+.origen.propio { color: var(--propio) }
+.que small { display: block; color: var(--sec); font-size: 12.5px; word-break: break-all }
+a.ir { background: var(--accion); color: var(--sobre-accion); text-decoration: none; font-weight: 800; font-size: 13px; padding: 8px 12px; border-radius: 999px; white-space: nowrap }
+a.ir:focus-visible, .riel button:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px }
+.fuera { margin-top: 28px; padding: 14px; border: 1px dashed var(--borde); border-radius: 12px; color: var(--sec); font-size: 14px }
+@media (max-width: 480px) { li { grid-template-columns: 24px 1fr; } a.ir { grid-column: 2; justify-self: start } }
+</style>
+
+<div class="envoltura">
+  <h1>Precios contra el mundo: dónde verlo</h1>
+  <p class="bajada">Cada renglón abre la página justo donde está el cambio. Para comentar uno, citá su número (por ejemplo 4.2). Debajo de cada cambio: lo que pediste, con tus palabras, o por qué lo agregué yo. Marcá la casilla cuando lo revisaste.</p>
+
+  <div class="barra">
+    <div class="riel" role="group" aria-label="Dónde abrir">
+      <button type="button" id="b-local" aria-pressed="true">En mi máquina</button>
+      <button type="button" id="b-sitio" aria-pressed="false">Sitio publicado</button>
+    </div>
+    <span class="progreso" id="progreso">0 de 0 vistos</span>
+    <p class="aviso" id="aviso"></p>
+  </div>
+
+  <div id="lista"></div>
+
+  <div class="fuera"><b>Fuera de esta tanda:</b> imagen al compartir en "La Argentina y otros países", "Lo esperado" y "Viento" (siguen con link y texto). Quedó anotado en IDEAS.</div>
+</div>
+
+<script>
+// Cada cambio: [qué cambió, ruta, origen]. Origen: P("palabras del pedido") = lo pediste vos; Y("por qué") = lo agregué yo (regla general o barrido).
+const P = (t) => ({ tipo: "pedido", t }), Y = (t) => ({ tipo: "propio", t });
+const SECCIONES = [
+  ["Menús", [
+    ["“El mundo” en el menú de arriba (con desplegable de sus cuatro pestañas) y en la barra de abajo del celular", "/contexto/", P("pasar a Argentina y el mundo a una sección como las de inicio / histórico / por presidentes… que siga el formato de presidentes")],
+    ["Buscar pasa a una lupa al lado de Configurar (también en el celular; la tecla “/” sigue)", "/", P("lo de buscar pasarlo arriba al lado de la configuración y solo con la lupa")],
+    ["Las subpestañas de El mundo se ven como las de Presidentes: en la computadora en el desplegable, en el celular en la fila de arriba", "/contexto/paises/", P("las subpestañas quedan abajo desalineadas")],
+    ["La sección se llama “El mundo y la Argentina” (la dirección /contexto/ no cambia)", "/contexto/", Y("decisión B que aprobaste: el título había quedado pendiente de la remodelación")],
+  ]],
+  ["El mundo y la Argentina", [
+    ["Un solo capítulo “Precios contra el mundo” en lugar de dos bloques de precios", "/contexto/#precios-mundo", P("los links “Ver la evolución de este rubro” parecen llevar a otra página… que sea limpia como la ficha")],
+    ["Barras con el país a la izquierda, verde o rojo, y “más caro / más barato” debajo de la cifra", "/contexto/#precios-mundo", P("más caro / más barato debajo de la variación… barras con los países en el eje vertical verdes o rojas")],
+    ["Sin el renglón “Argentina 95,0 · Bolivia 76,6 (mundo = 100)”; la fecha solo donde es distinta", "/contexto/#precios-mundo", P("sin el renglón «Argentina 95,0 · Bolivia 76,6 (mundo = 100)»")],
+    ["Período: hoy, un año o el promedio de Macri, Alberto Fernández o Milei", "/contexto/?pqa=p-af#precios-mundo", P("filtro de año o promedio de cada presidencia")],
+    ["“Comparar desde”: cualquier país contra los demás (la Argentina pasa a ser una fila)", "/contexto/?pqd=BRA#precios-mundo", P("comparar países contra la Argentina y países entre sí")],
+    ["Compartir con imagen de las barras, como se ven", "/contexto/?pqr=03#precios-mundo", P("imagen al compartir")],
+    ["Sin “Con un salario mediano se compran…”", "/contexto/#precios-mundo", P("sacar el «Con un salario mediano se compran…» de esa parte")],
+    ["“¿Cómo viene?” debajo de las barras, con el mismo rubro: un color por país, leyenda una sola vez", "/contexto/#precios-mundo", P("algunos países solo con puntos y leyendas redundantes")],
+    ["Por rubro: tocar uno cambia el de arriba sin mover la página (reemplazó a “Todos los rubros”)", "/contexto/?pqv=rubro", P("los links… cortan la navegación")],
+    ["Frase del período de un presidente desde el mes en que asumió (“dic-23 a nov-26”)", "/contexto/?pqa=p-milei#precios-mundo", Y("contaba desde el mes antes de asumir, como las tablas de mandatos; para un promedio de precios confundía")],
+    ["“La Argentina y otros países”: un color por país, sin líneas punteadas", "/contexto/paises/", Y("barrido de las leyendas redundantes: ese gráfico punteaba desde el noveno país")],
+  ]],
+  ["El mundo y la Argentina, tercera vuelta", [
+    ["Filtros más chicos: chips de una línea con borde fino; Ajustes con ícono", "/contexto/", P("hay muchos botones y filtros grandes que ocupan mucho tamaño… que visualmente no ocupen tanto")],
+    ["Tocar de nuevo la barra elegida saca el filtro (país, rubro o presidente)", "/contexto/?pqc=BRA", P("apreto Brasil para filtrar; si lo aprieto de vuelta debería sacar el filtro")],
+    ["Orden: Por rubro, Por país, Por presidente", "/contexto/", P("poner el por rubro primero que es el más largo, luego por país y luego por presidente")],
+    ["Los tres gráficos arrancan a la misma altura (las píldoras de cada uno en su renglón)", "/contexto/", Y("al verlo, Por presidente quedaba más abajo que los otros dos")],
+  ]],
+  ["El mundo y la Argentina, segunda vuelta", [
+    ["Subpestañas con íconos: Precios, Otros países, Lo esperado y Viento", "/contexto/", P("dividiría la sección… en distintas subpestañas tipo lo de presidente… y sus íconos")],
+    ["Tres gráficos de barras (por país, por rubro, por presidente), uno al lado del otro en la computadora; tocar una barra cambia los otros", "/contexto/", P("el gráfico de barra por rubro… otro al lado por región y otro al lado por presidente… tipo gráficos interactivos")],
+    ["En el celular: un gráfico con los botones Por país · Por rubro · Por presidente", "/contexto/?pqv=rubro", P("en celu fijate cómo armarlo")],
+    ["Cada gráfico muestra solo los filtros que tienen sentido (Por rubro no tiene filtro de rubro)", "/contexto/?pqv=pres", P("si estoy viendo por rubro no tiene sentido un filtro de rubro")],
+    ["Barras con nombre a la izquierda, rejilla y eje abajo; cifra y “más barato/más caro” alineadas a la derecha", "/contexto/", P("cuando decía gráfico de barra me refería a algo así")],
+    ["“¿Cómo viene?” con Rubro y Países propios, que siguen a lo de arriba", "/contexto/?pqr=03#precios-mundo", P("que también ofrezca el filtro pero que se ajuste a lo que se apretó arriba")],
+    ["Tocar un presidente en “Por presidente” elige su período para los otros dos gráficos", "/contexto/?pqv=pres", Y("cruce de filtros, igual que con rubro y país; se puede sacar")],
+    ["Compartir de cada gráfico, con la imagen de ese gráfico", "/contexto/?pqv=pres", Y("regla: lo que se ve se comparte como se ve")],
+    ["Los links viejos a “Otros países”, “Lo esperado” y “Viento” llevan a su subpestaña", "/contexto/#comparar", Y("los links compartidos tienen que seguir mostrando lo mismo")],
+  ]],
+  ["Por presidente", [
+    ["“Contexto del mandato”: el link dice “Ver precios contra el mundo”", "/presidentes/#pres-uno", Y("el capítulo cambió de nombre; “Ver el contexto completo” lleva a Otros países")],
+  ]],
+  ["Gráficos listos", [
+    ["La lámina de precios contra el mundo abre el capítulo nuevo con su rubro", "/plantillas/", Y("su link usaba el parámetro viejo")],
+  ]],
+];
+const BASES = { local: "http://localhost:3100", sitio: "https://primerolosdatos.com.ar" };
+const leer = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
+const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} };
+let base = leer("ctxp-base", "local"), vistos = leer("ctxp-vistos", {});
+
+function dibujar() {
+  const cont = document.getElementById("lista"); cont.innerHTML = "";
+  let total = 0, hechos = 0;
+  SECCIONES.forEach(([nombre, items], i) => {
+    const s = document.createElement("section");
+    s.innerHTML = `<h2><span class="n">${i + 1}</span>${nombre}</h2>`;
+    const ul = document.createElement("ul");
+    items.forEach(([que, ruta, origen], j) => {
+      const id = `${i}-${j}`, url = BASES[base] + ruta, ok = !!vistos[id];
+      total++; if (ok) hechos++;
+      const li = document.createElement("li"); if (ok) li.className = "visto";
+      li.innerHTML = `<input type="checkbox" id="c${id}" ${ok ? "checked" : ""} aria-label="Visto">
+        <label class="que" for="c${id}"><span class="num">${i + 1}.${j + 1}</span> ${que}<span class="origen ${origen.tipo}">${origen.tipo === "pedido" ? "Pediste: «" + origen.t + "»" : "Agregado por mí: " + origen.t}</span><small>${ruta}</small></label>
+        <a class="ir" href="${url}" target="_blank" rel="noopener">Ver →</a>`;
+      li.querySelector("input").addEventListener("change", (e) => { vistos[id] = e.target.checked; guardar("ctxp-vistos", vistos); dibujar(); });
+      ul.appendChild(li);
+    });
+    s.appendChild(ul); cont.appendChild(s);
+  });
+  document.getElementById("progreso").textContent = `${hechos} de ${total} vistos`;
+  document.getElementById("b-local").setAttribute("aria-pressed", base === "local");
+  document.getElementById("b-sitio").setAttribute("aria-pressed", base === "sitio");
+  document.getElementById("aviso").innerHTML = base === "local"
+    ? 'Necesita la vista local andando. Si no abre, corré en la carpeta del proyecto: <code>python -m http.server 3100 --directory web/out</code>'
+    : "Solo muestra los cambios después del commit, el push y la corrida en verde (alrededor de un minuto).";
+}
+document.getElementById("b-local").onclick = () => { base = "local"; guardar("ctxp-base", base); dibujar(); };
+document.getElementById("b-sitio").onclick = () => { base = "sitio"; guardar("ctxp-base", base); dibujar(); };
+dibujar();
+</script>

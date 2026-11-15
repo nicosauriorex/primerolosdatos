@@ -36,12 +36,12 @@ export function ContextoMandato({ m, pres }: { m: Motor; pres: Pres }) {
           <li>Crecimiento promedio: Argentina {ok(r.crecArg.v) ? `${nf1.format(r.crecArg.v)} %` : "—"}; {grupo[1]} {ok(r.crecGrp.v) ? `${nf1.format(r.crecGrp.v)} %` : "—"}.</li>
           {ok(s.sArg) && ok(s.sGrp) && ok(s.dif) &&
             <li>Contra lo que proyectaba el FMI en abril: la Argentina {signo(s.sArg)} puntos por año; {grupo[1]}, {signo(s.sGrp)}. Diferencia: {signo(r1(r1(s.sArg) - r1(s.sGrp)))} puntos.</li>}
-          {ext && <li>Rubro más caro contra el mundo (dólar oficial, estimado): {ext.caro.n} ({nf0.format(ext.caro.nivel)}, {fmtMes(ext.caro.fecha)}); más barato: {ext.barato.n} ({nf0.format(ext.barato.nivel)}, {fmtMes(ext.barato.fecha)}). Mundo = 100. <Link href="/contexto/#precios-mundo" prefetch={false}>Ver precios en el mundo</Link></li>}
+          {ext && <li>Rubro más caro contra el mundo (dólar oficial, estimado): {ext.caro.n} ({nf0.format(ext.caro.nivel)}, {fmtMes(ext.caro.fecha)}); más barato: {ext.barato.n} ({nf0.format(ext.barato.nivel)}, {fmtMes(ext.barato.fecha)}). Mundo = 100. <Link href="/contexto/#precios-mundo" prefetch={false}>Ver precios contra el mundo</Link></li>}
           {congreso && <li>{congreso} <Link href={`/congreso/?cgp=${pres.id}`} prefetch={false}>Ver gobierno y Congreso</Link></li>}
           {r.hayViento && <li>Viento externo: {r.favor} a favor, {r.neutro} neutros y {r.contra} en contra.</li>}
         </ul>
       )}
-      <p><Link href={`/contexto/?cpr=${pres.id}`} prefetch={false}>Ver el contexto completo</Link></p>
+      <p><Link href={`/contexto/paises/?cpr=${pres.id}`} prefetch={false}>Ver el contexto completo</Link></p>
     </Plegable>
   );
 }

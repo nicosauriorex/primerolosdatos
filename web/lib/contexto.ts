@@ -1,8 +1,7 @@
 // Contexto internacional (bloque 6b, D-008): cálculos de la sección Contexto y del recuadro "Contexto del mandato".
 // Una sola fuente de verdad: la sección y el recuadro usan estas funciones.
 // Datos: web/public/datos/contexto.json (FMI, anual) + series mensuales del catálogo (viento de cola o de frente).
-import { fmtMes, nf0, nf1, ok, r1 } from "./formato";
-import { ultimoArg, type ArgPM, type DatosPM, type Dolar } from "./preciosMundo";
+import { nf0, nf1, ok, r1 } from "./formato";
 import { PRES_DEF, type Pres } from "./estadisticas";
 import type { Motor } from "./motor";
 
@@ -282,18 +281,6 @@ export function fraseViento(m: Motor, d: DatosContexto, pres: Pres | null): stri
   return `Con ${pres.corto}, ${favor} de los ${v.length} indicadores de afuera estuvieron ${MARCA_TXT.favor} y ${contra} ${MARCA_TXT.contra} (contra el promedio de toda la serie).`;
 }
 
-/** "En oct-2026, el consumo de los hogares en la Argentina estaba N % más barato que el promedio del mundo (estimado, dólar oficial)."
- *  N sale del nivel como se muestra (entero): 100 − 62 = 38. */
-export function fraseRubroMundo(d: DatosPM, arg: ArgPM, rid: string, dolar: Dolar): string | null {
-  const u = ultimoArg(d, rid, arg, dolar);
-  if (!u) return null;
-  const nivel = Math.round(u.nivel), dif = Math.abs(100 - nivel);
-  const cuando = u.modo === "estimado" ? fmtMes(u.fecha) : u.fecha;
-  const que = rid === "total" ? "el consumo de los hogares" : `el nivel de precios de ${d.rubros[rid].n.toLowerCase()}`;
-  const como = `${u.modo === "estimado" ? "estimado" : "medido"}, dólar ${dolar === "blue" ? "blue" : "oficial"}`;
-  const comp = dif === 0 ? "al mismo nivel que el promedio del mundo" : `${nf0.format(dif)} % más ${nivel < 100 ? "barato" : "caro"} que el promedio del mundo`;
-  return `En ${cuando}, ${que} en la Argentina estaba ${comp} (${como}).`;
-}
 
 /** Link a un bloque de /contexto/ con los parámetros de la vista actual y su ancla. */
-export const hrefBloque = (p: URLSearchParams, id: string): string => { const q = p.toString(); return `/contexto/${q ? `?${q}` : ""}#${id}`; };
+export const hrefBloque = (p: URLSearchParams, id: string): string => { const q = p.toString(); const ruta = id === "comparar" ? "paises/" : id === "esperado" ? "esperado/" : id === "viento" ? "viento/" : ""; return `/contexto/${ruta}${q ? `?${q}` : ""}#${id}`; };

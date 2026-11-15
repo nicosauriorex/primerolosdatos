@@ -1,11 +1,12 @@
 "use client";
-// Barra fina de todas las páginas (logo, el mismo menú de 5 opciones que la barra de abajo del celular, y configuración), subsecciones de Presidentes y cabecera de página con "Volver".
+// Barra fina de todas las páginas (logo, el mismo menú de 5 opciones que la barra de abajo del celular, lupa de Buscar y configuración), subsecciones de Presidentes y de El mundo (mismo formato: menú desplegable en la computadora, fila en el celular), y cabecera de página con "Volver".
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BotonConfig } from "./ConfigProvider";
 import { useDeslizable } from "./Movimiento";
 import { IconoAbajo, IconoVolver } from "./Iconos";
+import { IconoBuscar } from "./sistema/iconos";
 import { BarraInferior, ITEMS_MENU } from "./sistema/BarraInferior";
 import { BuscadorGlobal } from "./sistema/BuscadorGlobal";
 import { Hoja } from "./sistema/Hoja";
@@ -20,9 +21,15 @@ const SUBSECCIONES: [string, string, string][] = [
 ];
 // Curiosidades ya no está en el menú, pero la página sigue en la misma URL y cuenta como parte de Presidentes.
 const GRUPO_PRES = new Set([...SUBSECCIONES.map((s) => s[0]), "curiosidades"]);
+/** Subsecciones de "El mundo y la Argentina": [ruta, clave del ícono, nombre]. Rutas de segundo nivel; la sección sigue siendo una sola (`contexto`). */
+const SUB_CONTEXTO: [string, string, string][] = [
+  ["/contexto/", "contexto-precios", "Precios"], ["/contexto/paises/", "contexto-paises", "Otros países"],
+  ["/contexto/esperado/", "contexto-esperado", "Lo esperado"], ["/contexto/viento/", "contexto-viento", "Viento"],
+];
+const conBarra = (ruta: string) => (ruta.endsWith("/") ? ruta : ruta + "/");
 const TITULOS: Record<string, string> = {
   historico: "Histórico", presidentes: "Por presidente", ranking: "Ranking de presidentes", mandato: "Meses de mandato", herencia: "Herencia",
-  curiosidades: "Curiosidades", congreso: "Gobierno y Congreso", elecciones: "Elecciones", contexto: "Contexto internacional", bcra: "Parte del Banco Central", semaforo: "Semáforo de actividad", gasto: "En qué gasta la Nación", universidades: "Cuánto reciben las universidades", provincias: "Las provincias", plantillas: "Gráficos listos", fuentes: "Fuentes",
+  curiosidades: "Curiosidades", congreso: "Gobierno y Congreso", elecciones: "Elecciones", contexto: "El mundo y la Argentina", bcra: "Parte del Banco Central", semaforo: "Semáforo de actividad", gasto: "En qué gasta la Nación", universidades: "Cuánto reciben las universidades", provincias: "Las provincias", plantillas: "Gráficos listos", fuentes: "Fuentes",
 };
 /** Páginas donde aparece "Volver" si se llegó desde otra página del sitio. */
 /** Páginas cuyo título de sección no es el h1: lo es el nombre del dato que muestran (la página pone su propio h1). */
@@ -54,14 +61,26 @@ function LinksPresidentes({ carpeta, ancla, onIr }: { carpeta: string; ancla: st
   );
 }
 
+function LinksContexto({ ruta }: { ruta: string }) {
+  const r = conBarra(ruta);
+  return (
+    <>
+      {SUB_CONTEXTO.map(([href, ico, n]) => (
+        <Link key={href} prefetch={false} href={href} aria-current={r === href ? "page" : undefined}><span className="nav-sec-ico"><IconoSeccion carpeta={ico} /></span>{n}</Link>
+      ))}
+    </>
+  );
+}
+
 export function Barra() {
   const ruta = usePathname() || "/";
   const carpeta = carpetaDe(ruta);
   const enPres = GRUPO_PRES.has(carpeta);
+  const enCtx = carpeta === "contexto";
   const [ancla, setAncla] = useAncla(ruta);
   const [cerrado, setCerrado] = useState(false);   // el menú desplegable se cierra al elegir y vuelve a estar disponible al sacar el mouse
   const fila = useRef<HTMLElement>(null);
-  useDeslizable(fila, false, enPres);
+  useDeslizable(fila, false, enPres ? 1 : enCtx ? 2 : 0);
   const actual = actualInferior(ruta);
   return (
     <header className="barra">
@@ -71,33 +90,34 @@ export function Barra() {
         <nav className="tabs" aria-label="Secciones">
           {ITEMS_MENU.map((it) => {
             const Ico = it.icono;
-            const contenido = <><Ico className="tab-ico" /><span>{it.texto}</span>{it.id === "presidentes" && <IconoAbajo />}</>;
+            const conSub = it.id === "presidentes" || it.id === "mundo";
+            const contenido = <><Ico className="tab-ico" /><span>{it.texto}</span>{conSub && <IconoAbajo />}</>;
             if (!it.href) {
-              return <button key={it.id} type="button" className="tab-btn" aria-haspopup="dialog" aria-keyshortcuts={it.id === "buscar" ? "/" : undefined}
-                onClick={it.id === "buscar" ? abrirBuscador : abrirMas}>{contenido}</button>;
+              return <button key={it.id} type="button" className="tab-btn" aria-haspopup="dialog" onClick={abrirMas}>{contenido}</button>;
             }
             const activo = actual === it.id;
             const link = (
-              <Link key={it.id} prefetch={false} href={it.href} aria-current={activo ? "page" : undefined} aria-haspopup={it.id === "presidentes" ? "true" : undefined}
+              <Link key={it.id} prefetch={false} href={it.href} aria-current={activo ? "page" : undefined} aria-haspopup={conSub ? "true" : undefined}
                 onClick={() => { if (it.id === "presidentes") setAncla(""); }}>{contenido}</Link>
             );
-            if (it.id !== "presidentes") return link;
+            if (!conSub) return link;
             return (
               <div key={it.id} className={`con-menu${cerrado ? " cerrado" : ""}`} onMouseLeave={() => setCerrado(false)} onFocus={() => setCerrado(false)}
                 onKeyDown={(ev) => { if (ev.key === "Escape") (document.activeElement as HTMLElement | null)?.blur(); }}>
                 {link}
                 <div className="submenu" onClick={() => { setCerrado(true); (document.activeElement as HTMLElement | null)?.blur(); }}>
-                  <LinksPresidentes carpeta={carpeta} ancla={ancla} onIr={setAncla} />
+                  {it.id === "presidentes" ? <LinksPresidentes carpeta={carpeta} ancla={ancla} onIr={setAncla} /> : <LinksContexto ruta={ruta} />}
                 </div>
               </div>
             );
           })}
         </nav>
+        <button type="button" className="lupa-btn" aria-label="Buscar" aria-keyshortcuts="/" aria-haspopup="dialog" onClick={abrirBuscador}><IconoBuscar /></button>
         <BotonConfig />
       </div>
-      {enPres && (
-        <nav className="subtabs" aria-label="Presidentes" ref={fila}>
-          <LinksPresidentes carpeta={carpeta} ancla={ancla} onIr={setAncla} />
+      {(enPres || enCtx) && (
+        <nav className="subtabs" aria-label={enPres ? "Presidentes" : "El mundo y la Argentina"} ref={fila}>
+          {enPres ? <LinksPresidentes carpeta={carpeta} ancla={ancla} onIr={setAncla} /> : <LinksContexto ruta={ruta} />}
         </nav>
       )}
     </header>
@@ -117,6 +137,7 @@ function actualInferior(ruta: string): string {
   if (ruta === "/" || c === "tema") return "inicio";
   if (c === "historico" || c === "dato") return "historico";
   if (GRUPO_PRES.has(c)) return "presidentes";
+  if (c === "contexto") return "mundo";   // /contexto/ y sus tres subrutas
   return "otra";
 }
 
@@ -165,7 +186,7 @@ export function NavegacionGlobal() {
   }, []);
   return (
     <>
-      <BarraInferior actual={actualInferior(ruta)} onBuscar={() => setBuscar(true)} onMas={abrirMas} />
+      <BarraInferior actual={actualInferior(ruta)} onMas={abrirMas} />
       <BuscadorGlobal abierto={buscar} onCerrar={() => setBuscar(false)} />
       <Hoja titulo="Más secciones" abierta={mas} onCerrar={() => setMas(false)}><MenuMas actual={carpetaDe(ruta)} /></Hoja>
     </>

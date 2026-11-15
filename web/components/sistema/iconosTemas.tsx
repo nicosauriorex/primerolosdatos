@@ -39,6 +39,11 @@ const SECCIONES_ICONO: Record<string, ReactNode> = {
   elecciones: <><path d="M3 10h14v7H3zM8 13.5h4M6.5 7.5V3h7v4.5" /></>,
   congreso: <><path d="M2 17.5h16M3 10.5h14M5.5 10.5v7M10 10.5v7M14.5 10.5v7M6.5 10.5a3.5 3.5 0 0 1 7 0M10 7V4" /></>,
   contexto: <><circle cx="10" cy="10" r="8" /><path d="M2 10h16M10 2c-3 3-3 13 0 16M10 2c3 3 3 13 0 16" /></>,
+  // subpestañas de "El mundo y la Argentina": precios = etiqueta de precio, otros países = globo, lo esperado = diana, viento = líneas de viento
+  "contexto-precios": TEMAS_ICONO.precios,
+  "contexto-paises": <><circle cx="10" cy="10" r="8" /><path d="M2 10h16M10 2c-3 3-3 13 0 16M10 2c3 3 3 13 0 16" /></>,
+  "contexto-esperado": <><circle cx="10" cy="10" r="8" /><circle cx="10" cy="10" r="4.5" /><circle cx="10" cy="10" r="1" /></>,
+  "contexto-viento": <><path d="M2 7h9.5a2.5 2.5 0 1 0-2.5-2.5M2 11.5h13a2.5 2.5 0 1 1-2.5 2.5M2 15.5h6" /></>,
   gasto: <><circle cx="10" cy="10" r="8" /><circle cx="10" cy="10" r="3.5" /><path d="M10 2v4.5M16.9 14l-3.9-2.25M3.1 14l3.9-2.25" /></>,
   provincias: <><path d="M10 18s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10z" /><circle cx="10" cy="8" r="2" /></>,
   universidades: <><path d="M1 8l9-4 9 4-9 4z" /><path d="M5 10v4c2 2 8 2 10 0v-4M18 8v5" /></>,

@@ -115,7 +115,7 @@ export function crearPlantillas(metas: SerieMeta[]): Plantilla[] {
   PM_RUBROS.forEach(([rid, nombre]) => out.push({
     id: "pm-" + rid, titulo: `${nombre}: Argentina contra el mundo, en dólares`, desc: "Nivel de precios contra el promedio del mundo (= 100), medido y estimado",
     grupo: "En el mundo", etiquetas: ["mundo", "afuera", "dolares", "precios", "exterior", "caro", "barato", "icp"], vista: {}, e: null, ids: [], curada: true,
-    href: `/contexto/?pmr=${rid}#precios-mundo`,
+    href: `/contexto/?pqr=${rid}#precios-mundo`,
   }));
   // ---- Gobierno y Congreso (bloque 6d): una por indicador, abre la sección en Presidentes
   ([

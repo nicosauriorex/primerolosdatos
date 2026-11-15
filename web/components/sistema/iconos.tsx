@@ -15,6 +15,7 @@ export const IconoInicio = ({ className }: P) => <Icono className={className}><p
 export const IconoBuscar = ({ className }: P) => <Icono className={className}><circle cx="8.5" cy="8.5" r="5.5" /><path d="m12.5 12.5 4.5 4.5" /></Icono>;
 export const IconoHistorico = ({ className }: P) => <Icono className={className}><path d="M3 15l4-5 3 3 7-8" /></Icono>;
 export const IconoPresidentes = ({ className }: P) => <Icono className={className}><path d="M2 17h16M5 17v-6h3v6M8.5 17V4h3v13M12 17V9h3v8" /></Icono>;
+export const IconoMundo = ({ className }: P) => <Icono className={className}><circle cx="10" cy="10" r="7.5" /><path d="M2.5 10h15M10 2.5c-3 3-3 12 0 15M10 2.5c3 3 3 12 0 15" /></Icono>;
 export const IconoMas = ({ className }: P) => <Icono className={className}><path d="M3 5h14M3 10h14M3 15h14" /></Icono>;
 export const IconoInfo = ({ className }: P) => <Icono className={className}><circle cx="10" cy="10" r="8" /><path d="M10 9v5.5M10 5.8v.2" /></Icono>;
 export const IconoSube = ({ className }: P) => <Icono className={className}><path d="M10 17V4M4.5 9.5 10 4l5.5 5.5" /></Icono>;

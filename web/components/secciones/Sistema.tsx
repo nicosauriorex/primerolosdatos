@@ -174,10 +174,10 @@ export function Sistema() {
         <p className="note">Cifras de ejemplo, solo para mostrar los cuatro casos.</p>
       </Capitulo>
 
-      <Capitulo titulo="Navegación en el celular" bajada="Barra para el pulgar. Buscar y Más abren capas; arriba queda solo la marca.">
+      <Capitulo titulo="Navegación en el celular" bajada="Barra para el pulgar con las cinco secciones; Más abre una capa. Arriba quedan la marca, la lupa del buscador y Configurar.">
         <div className="sistema-telefono">
           <div className="sistema-pantalla"><p>{aviso || "Contenido de la página."}</p></div>
-          <BarraInferior actual="presidentes" fijo={false} onBuscar={() => setAviso("Acá se abre el buscador a pantalla completa (etapa 3.1).")} onMas={() => setMas(true)} />
+          <BarraInferior actual="presidentes" fijo={false} onMas={() => setMas(true)} />
         </div>
         <Hoja titulo="Más secciones" abierta={mas} onCerrar={() => setMas(false)}>
           <MenuMas />

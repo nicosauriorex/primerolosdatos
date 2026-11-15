@@ -138,7 +138,7 @@ nav.tabs a .icono { display: none; width: 14px; height: 14px; }
 /* Con mouse y pantalla ancha, las subsecciones de Presidentes van en un menú desplegable; si no, en una segunda fila. */
 @media (hover: hover) and (min-width: 768px) {
   nav.tabs a .icono { display: block; }
-  .subtabs { display: none; }
+  .subtabs { display: none; }   /* las de Presidentes y El mundo van en el menú desplegable */
   .con-menu:hover .submenu, .con-menu:focus-within .submenu { display: flex; }
   .con-menu.cerrado .submenu { display: none; }
   .submenu { position: absolute; top: 100%; left: 0; z-index: 31; flex-direction: column; min-width: 220px; padding: var(--e-2) 0; background: var(--barra);
@@ -1612,16 +1612,15 @@ h4.her-cita-t { margin: var(--e-4) 0 var(--e-1); font-size: var(--t-md); }
 
 /* ================================================================== Etapa 3.1 (docs/specs/remodelacion-inicio-buscador.md): navegación, buscador, portada y "Preguntale" */
 /* Etapa 3.1, R3: en el celular la barra de arriba queda con la marca y la configuración; las secciones van en la barra inferior. */
-.buscar-btn { display: none; }
+/* T4 (tercera vuelta): Buscar es una lupa solo con ícono al lado de Configurar, en la computadora y en el celular. */
+.lupa-btn { position: relative; margin-left: auto; display: inline-flex; align-items: center; justify-content: center; flex: none; width: var(--alto-toque); height: 32px; padding: 0;
+  color: var(--sobre-barra); border: 0; border-radius: var(--r-pleno); cursor: pointer; background: color-mix(in srgb, var(--sobre-barra) 14%, transparent); transition: background var(--d-1); }
+.lupa-btn:hover { background: color-mix(in srgb, var(--sobre-barra) 24%, transparent); }
+.lupa-btn .icono { width: 18px; height: 18px; }
+.lupa-btn::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: var(--alto-toque); transform: translateY(-50%); }   /* toque de 44 px */
+.lupa-btn + .config-btn { margin-left: var(--e-2); }
 @media (max-width: 767.98px) {
   nav.tabs { display: none; }
-}
-@media (min-width: 768px) {
-  .buscar-btn { margin-left: auto; display: inline-flex; align-items: center; gap: var(--e-2); height: 32px; padding: 0 var(--e-3); background: none;
-    color: var(--sobre-barra); border: 1px solid var(--barra-borde); border-radius: var(--r-2); font-size: var(--t-sm); font-weight: 600; cursor: pointer; white-space: nowrap; }
-  .buscar-btn:hover { border-color: var(--sobre-barra-2); }
-  .buscar-btn .icono { width: 16px; height: 16px; }
-  .buscar-btn + .config-btn { margin-left: var(--e-2); }
 }
 /* Buscador (portada y capa global). Prefijos: busq (campo, resultados, chips) y busqg (capa global). */
 .busq { position: relative; width: 100%; }
@@ -1929,41 +1928,13 @@ a.zocalo:focus-visible { outline: var(--linea) solid var(--foco); outline-offset
 .pres-nota { margin: var(--e-3) 0 0; font-size: var(--v-rotulo); color: var(--text-secondary); line-height: 1.4; }
 
 /* ==== Remodelación 3.4: Contexto ==== */
-/* La pregunta de Contexto (PreguntaPrecios.tsx). */
-.pq { min-width: 0; }
-.pq-espera { min-height: 360px; }
-.pq-titulo { line-height: 1.5; }
-.pq-titulo .hueco-menu { font-size: var(--t-base); font-weight: 400; font-stretch: normal; line-height: 1.4; text-transform: none; }
-.pq-cuerpo { min-height: 320px; }
-.pq .preg-resp { min-height: 0; border-top: 0; padding-top: 0; }
-.pq .preg-cifra { font-size: var(--v-titular); }
+/* Lo único que queda de la pregunta de Contexto: la fila de cifra con info de Oraciones.tsx. */
 .pq-cifra-fila { display: flex; align-items: center; flex-wrap: wrap; gap: var(--e-2); }
-.pq-sub-lista { margin: var(--e-4) 0 var(--e-1); font-size: var(--v-rotulo); color: var(--text-muted); }
-.pq-otros { margin-top: var(--e-3); }
-.pq-otros > summary { display: flex; align-items: center; min-height: var(--toque); cursor: pointer; font-weight: 700; color: var(--acento-texto); }
-.pq-otros > summary:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
-.pq-kilos { margin: var(--e-4) 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-1) var(--e-2); line-height: 1.5; overflow-wrap: anywhere; }
-.pq-ver { margin: var(--e-2) 0 0; }
-.pq-link { display: inline-flex; align-items: center; min-height: var(--toque); padding: 0; background: none; border: 0; font: inherit; font-weight: 700; color: var(--acento-texto); text-decoration: none; cursor: pointer; }
-.pq-link:hover { text-decoration: underline; }
-.pq-link:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
 
 /* Página de Contexto (prefijo ctx-) */
 
 /* Frase-respuesta con la que abre cada bloque */
 .ctx-respuesta { margin: 0 0 var(--e-3); font-size: var(--t-md); font-weight: 700; line-height: 1.35; color: var(--text-primary); overflow-wrap: anywhere; }
-
-/* Índice de los cuatro contextos: filas enteras tocables, dos columnas desde 900 px (mismo aspecto que .indice-fila de la portada) */
-.ctx-indice { margin-top: var(--e-6); }
-.ctx-indice ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 0 var(--e-6); }
-@media (min-width: 900px) { .ctx-indice ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.ctx-indice-fila { display: flex; align-items: center; gap: var(--e-3); min-height: var(--alto-toque); padding: var(--e-3) 0; border-bottom: 1px solid var(--border); color: inherit; text-decoration: none; }
-.ctx-indice-fila:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: -2px; }
-.ctx-indice-textos { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.ctx-indice-textos b { font-size: 1rem; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
-.ctx-indice-textos small { font-size: var(--t-sm); color: var(--text-muted); line-height: 1.35; overflow-wrap: anywhere; }
-.ctx-indice-fila .icono { flex: none; color: var(--acento-texto); }
-.ctx-indice-fila:hover b { color: var(--acento-texto); }
 
 /* Controles en fila de chips, con su rótulo */
 .ctx-fila { display: flex; align-items: center; gap: var(--e-3); min-width: 0; margin-bottom: var(--e-2); }
@@ -2475,3 +2446,36 @@ nav.tabs > a .icono, nav.tabs .con-menu > a .icono, nav.tabs .tab-btn .icono { d
 nav.tabs .con-menu { align-self: stretch; align-items: center; }
 @media (min-width: 768px) { nav.tabs > a, nav.tabs .con-menu > a, nav.tabs .tab-btn { padding: 0 var(--e-3); font-size: var(--t-sm); } }
 .compartir.solo-icono { width: 32px; padding: 0; }
+
+/* Gráfico de barras horizontales (contexto, segunda vuelta) */
+.gbh { width: 100%; min-width: 0; --gbh-nom: 32%; --gbh-val: 78px; }
+.gbh-escala { display: flex; justify-content: space-between; gap: var(--e-2); margin: 0 0 var(--e-1); font-size: var(--v-rotulo); color: var(--text-muted); line-height: 1.3; }
+.gbh-lista { list-style: none; margin: 0; padding: 0; }
+.gbh-item { border-top: 1px solid var(--border); }
+.gbh-item:first-child { border-top: 0; }
+.gbh-fila { display: grid; grid-template-columns: var(--gbh-nom) minmax(0, 1fr) var(--gbh-val); align-items: center; column-gap: 0; width: 100%; min-height: var(--toque); margin: 0; padding: var(--e-1) 0; background: none; border: 0; color: inherit; font: inherit; text-align: left; }
+.gbh-toca { cursor: pointer; }
+.gbh-toca:hover .gbh-n { color: var(--acento-texto); }
+.gbh-toca:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: -2px; }
+.gbh-res { background: var(--acento-suave); }
+.gbh-nombre { display: flex; flex-direction: column; min-width: 0; padding-right: var(--e-2); }
+.gbh-n { font-size: var(--t-sm); font-weight: 600; line-height: 1.25; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; }
+.gbh-sub { font-size: var(--v-rotulo); color: var(--text-muted); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gbh-zona { position: relative; display: block; height: 28px; min-width: 0; }
+.gbh-pista { position: absolute; inset: 0; display: block; pointer-events: none; }
+.gbh-marca { position: absolute; top: 0; bottom: 0; width: 1px; margin-left: -.5px; background: var(--grid); }
+.gbh-cero { position: absolute; top: -4px; bottom: -4px; width: 1px; margin-left: -.5px; background: var(--cero); }
+.gbh-barra { position: absolute; top: 5px; bottom: 5px; border-radius: 0 2px 2px 0; transform-origin: left center;
+  background: linear-gradient(to right, color-mix(in srgb, var(--c, var(--acento)) 35%, transparent), var(--c, var(--acento)));
+  transition: transform var(--d-dibujo) var(--curva); transition-delay: calc(var(--i, 0) * var(--d-barras)); }
+.gbh-barra.gbh-neg { border-radius: 2px 0 0 2px; transform-origin: right center; background: linear-gradient(to left, color-mix(in srgb, var(--c, var(--acento)) 35%, transparent), var(--c, var(--acento))); }
+.gbh-valor { display: flex; flex-direction: column; align-items: flex-end; min-width: 0; padding-left: var(--e-2); text-align: right; }
+.gbh-cifra { white-space: nowrap; font-size: var(--t-sm); font-weight: 800; font-stretch: var(--ancho-semi); font-variant-numeric: tabular-nums; line-height: 1.2; }
+.gbh-nota { font-size: var(--v-rotulo); color: var(--text-muted); line-height: 1.2; white-space: nowrap; }
+.gbh-nota2 { color: var(--text-primary); font-weight: 600; }
+.gbh[data-aparece="espera"] .gbh-barra { transform: scaleX(0); transition: none; }
+.gbh[data-aparece="vista"] .gbh-barra { transform: scaleX(1); }
+.gbh-eje { display: grid; grid-template-columns: var(--gbh-nom) minmax(0, 1fr) var(--gbh-val); border-top: 1px solid var(--axis); }
+.gbh-eje-zona { position: relative; display: block; height: 20px; }
+.gbh-eje-num { position: absolute; top: 3px; transform: translateX(-50%); font-size: var(--v-rotulo); color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .gbh-barra { transition: none; } }
