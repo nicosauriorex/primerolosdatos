@@ -1,15 +1,15 @@
 "use client";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useSeccion } from "../useSeccion";
 import { createPortal } from "react-dom";
 import { Cargando, alternar } from "../ui";
+import { IconoAjustes } from "../Iconos";
 import { FilaVariable } from "../Variables";
 import { ContextoMandato } from "./ContextoMandato";
 import { PanelCompartir } from "../PanelCompartir";
 import { Capitulo } from "../sistema/Capitulo";
 import { CabeceraDato } from "../sistema/CabeceraDato";
-import { BarraVista } from "../sistema/BarraVista";
 import { Hoja } from "../sistema/Hoja";
 import { InfoPunto } from "../sistema/InfoPunto";
 import { CompartirHoja } from "../sistema/CompartirHoja";
@@ -101,6 +101,8 @@ export function Ranking() {
   const info = useBase(p, set, montado), b = info.b;
   const [puntajeAbierto, setPuntajeAbierto] = useState(true);   // la tabla de puntajes arranca desplegada; si se pliega, queda plegada
   const [hoja, setHoja] = useState(false);
+  const [hojaGrupos, setHojaGrupos] = useState(false);
+  const [hojaVars, setHojaVars] = useState(false);
   const [imagen, setImagen] = useState(false);
   const { motor: m, version } = sec;
   const PRES = useMemo(() => (m ? crearPres(m.F) : []), [m]);
@@ -136,11 +138,7 @@ export function Ranking() {
 
   const rta = valido ? fraseRanking(tablasComp, PRES, crit, inds.length) : null;
   const CRIT_NOM: Record<CritRk, string> = { mejora: "Mejora", nivel: "Nivel promedio", ambos: "Ambos" };
-  const chips = [
-    { clave: "modo", texto: usaVars ? "Elegir variables" : "Por grupos" },
-    { clave: "criterio", texto: CRIT_NOM[crit] },
-    { clave: "que", texto: usaVars ? `${vars.length} variables` : `${grupos.size} de ${I.GRUPOS_IND.length} grupos` },
-  ];
+  const resumen = [usaVars ? "Elegir variables" : "Por grupos", CRIT_NOM[crit], usaVars ? `${vars.length} variables` : `${grupos.size} de ${I.GRUPOS_IND.length} grupos`].join(" · ");
   const textoCompartir = rta ? `${rta.frase} Fuente: Primero los Datos.` : undefined;
 
   return (
@@ -148,28 +146,37 @@ export function Ranking() {
       {rta ? <CabeceraDato nivel={2} titulo={rta.titulo} cifra={rta.cifra} unidad={rta.unidad} fecha={rta.fecha} deltas={[]} frase={rta.frase} />
         : <p className="note rk-sin">{valido ? "No hay indicadores con datos de al menos dos presidentes para comparar." : `Con al menos ${MIN_V} variables se arma la comparación.`}</p>}
 
-      <BarraVista items={chips} onAbrir={() => setHoja(true)} />
+      <BarraResumen resumen={resumen} onAjustes={() => setHoja(true)}
+        extras={usaVars
+          ? <button type="button" className="vistabar-ajustes" aria-haspopup="dialog" onClick={() => setHojaVars(true)}>Elegir variable</button>
+          : <button type="button" className="vistabar-ajustes" aria-haspopup="dialog" onClick={() => setHojaGrupos(true)}>Filtrar grupos</button>} />
       <HojaListo titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
-        {(cerrar) => (
+        {() => (
           <div className="rk-hoja">
             <Grupo titulo="Qué entra" forma="lista" valor={usaVars ? "vars" : "grupos"} onElegir={cambiarModo} opciones={[["grupos", "Por grupos"], ["vars", "Elegir variables"]]} />
             <Grupo titulo="Criterio" forma="lista" valor={crit} onElegir={(v) => set({ rkc: v === "mejora" ? null : v })} opciones={[["mejora", "Mejora"], ["nivel", "Nivel promedio"], ["ambos", "Ambos"]]} />
-            {usaVars
-              ? <p className="note">Las variables se eligen en &quot;Variables elegidas&quot;, debajo de esta hoja.</p>
-              : <Grupo titulo="Grupos de indicadores" forma="chips" valor={grupos} onElegir={(v) => set({ rk: [...alternar(grupos, v)].join(",") })} opciones={I.GRUPOS_IND.map((g) => [g, g] as [string, string])} />}
+          </div>
+        )}
+      </HojaListo>
+      <HojaListo titulo="Filtrar grupos" abierta={hojaGrupos && !usaVars} onCerrar={() => setHojaGrupos(false)}>
+        {() => (
+          <div className="rk-hoja">
+            <Pildoras titulo="Grupos de indicadores" valor={grupos} onElegir={(v) => set({ rk: [...alternar(grupos, v)].join(",") })} opciones={I.GRUPOS_IND.map((g) => [g, g] as [string, string])} />
+          </div>
+        )}
+      </HojaListo>
+      <HojaListo titulo="Elegir variable" abierta={hojaVars && usaVars} onCerrar={() => setHojaVars(false)}>
+        {() => (
+          <div className="rk-hoja">
+            <p className="note">{vars.length} de {MAX_V}; hacen falta al menos {MIN_V}. Cada una cuenta como su propio grupo.</p>
+            {vars.map((e, k) => (
+              <FilaVariable key={k + e.id} e={e} sinRel quitable onChange={(ne) => setVars(ne ? vars.map((x, j) => (j === k ? ne : x)) : vars.filter((_, j) => j !== k))} />
+            ))}
+            {vars.length < MAX_V && <FilaVariable e={null} agregable textoAgregar="+ Agregar variable" onChange={agregar} />}
           </div>
         )}
       </HojaListo>
       <LineaInicio info={info} F={F} />
-
-      {usaVars && (
-        <Capitulo id="rk-variables" titulo="Variables elegidas" bajada={`${vars.length} de ${MAX_V}; hacen falta al menos ${MIN_V}. Cada una cuenta como su propio grupo.`}>
-          {vars.map((e, k) => (
-            <FilaVariable key={k + e.id} e={e} sinRel quitable onChange={(ne) => setVars(ne ? vars.map((x, j) => (j === k ? ne : x)) : vars.filter((_, j) => j !== k))} />
-          ))}
-          {vars.length < MAX_V && <FilaVariable e={null} agregable textoAgregar="+ Agregar variable" onChange={agregar} />}
-        </Capitulo>
-      )}
 
       <Capitulo id="rk-comparacion" titulo="Indicador por indicador"
         bajada="Quién quedó mejor y quién peor en cada indicador, con los mismos indicadores y el mismo criterio para todos."
@@ -247,6 +254,38 @@ function Grupo({ titulo, opciones, valor, onElegir, forma }: {
       <span className="rk-rotulo">{titulo}</span>
       <div className="rk-opcs" data-forma={forma}>
         {opciones.map(([v, t]) => <button key={v} type="button" className="rk-opc" aria-pressed={activo(v)} onClick={() => onElegir(v)}>{t}</button>)}
+      </div>
+    </div>
+  );
+}
+
+/** Renglón de resumen de la vista ("Por grupos · Mejora · 7 de 7 grupos") con el único botón general, Ajustes, y los botones propios de lo que se usa seguido (R14). */
+export function BarraResumen({ resumen, onAjustes, extras }: { resumen: string; onAjustes: () => void; extras?: ReactNode }) {
+  return (
+    <div className="vistabar resbar">
+      <p className="resbar-texto">{resumen}</p>
+      {extras}
+      <button type="button" className="vistabar-ajustes" aria-haspopup="dialog" onClick={onAjustes}>
+        <IconoAjustes /><span>Ajustes</span>
+      </button>
+    </div>
+  );
+}
+
+/** Elección múltiple (R12): píldoras sueltas separadas; la elegida va rellena con un ✓ a la izquierda. */
+export function Pildoras({ titulo, opciones, valor, onElegir, bloqueadas }: {
+  titulo: string; opciones: [string, string][]; valor: Set<string>; onElegir: (v: string) => void;
+  /** Opciones que no se pueden elegir, con el motivo. */ bloqueadas?: Record<string, string>;
+}) {
+  return (
+    <div className="rk-grupo" role="group" aria-label={titulo}>
+      <span className="rk-rotulo">{titulo}</span>
+      <div className="resbar-pildoras">
+        {opciones.map(([v, t]) => (
+          <button key={v} type="button" className="resbar-pil" aria-pressed={valor.has(v)} disabled={!!bloqueadas?.[v]} title={bloqueadas?.[v]} onClick={() => onElegir(v)}>
+            {valor.has(v) && <span className="resbar-tilde" aria-hidden="true">✓</span>}{t}{bloqueadas?.[v] ? <small> (sin datos por rubro)</small> : null}
+          </button>
+        ))}
       </div>
     </div>
   );

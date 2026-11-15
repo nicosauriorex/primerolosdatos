@@ -1,22 +1,17 @@
 "use client";
-// Barra fina de todas las páginas (logo, menú de 5 secciones y configuración), subsecciones de Presidentes y cabecera de página con "Volver".
+// Barra fina de todas las páginas (logo, el mismo menú de 5 opciones que la barra de abajo del celular, y configuración), subsecciones de Presidentes y cabecera de página con "Volver".
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BotonConfig } from "./ConfigProvider";
 import { useDeslizable } from "./Movimiento";
 import { IconoAbajo, IconoVolver } from "./Iconos";
-import { IconoBuscar } from "./sistema/iconos";
-import { BarraInferior } from "./sistema/BarraInferior";
+import { BarraInferior, ITEMS_MENU } from "./sistema/BarraInferior";
 import { BuscadorGlobal } from "./sistema/BuscadorGlobal";
 import { Hoja } from "./sistema/Hoja";
 import { MenuMas } from "./sistema/MenuMas";
 import { ORGANISMOS } from "@/lib/fuentes";
 
-/** Las 5 secciones del menú: [carpeta, nombre]. */
-export const SECCIONES: [string, string][] = [
-  ["", "Inicio"], ["historico", "Histórico"], ["presidentes", "Presidentes"], ["contexto", "Contexto"], ["plantillas", "Gráficos listos"],
-];
 /** Subsecciones de Presidentes: [carpeta, ancla, nombre]. Las URLs son las de siempre. */
 const SUBSECCIONES: [string, string, string][] = [
   ["presidentes", "", "Por presidente"], ["mandato", "", "Meses de mandato"], ["herencia", "", "Herencia"], ["ranking", "", "Ranking"],
@@ -66,23 +61,28 @@ export function Barra() {
   const [cerrado, setCerrado] = useState(false);   // el menú desplegable se cierra al elegir y vuelve a estar disponible al sacar el mouse
   const fila = useRef<HTMLElement>(null);
   useDeslizable(fila, false, enPres);
-  const actualDe = (id: string) => (id === "presidentes" ? enPres : id === "" ? ruta === "/" || carpeta === "tema" : carpeta === id);
+  const actual = actualInferior(ruta);
   return (
     <header className="barra">
       <div className="barra-fila">
         <Link href="/" prefetch={false} className="marca">Primero los Datos</Link>
+        {/* R9 (tanda 8): las mismas opciones, nombres, íconos y orden que la barra de abajo del celular (`ITEMS_MENU`). */}
         <nav className="tabs" aria-label="Secciones">
-          {SECCIONES.map(([id, t]) => {
-            const actual = actualDe(id);
+          {ITEMS_MENU.map((it) => {
+            const Ico = it.icono;
+            const contenido = <><Ico className="tab-ico" /><span>{it.texto}</span>{it.id === "presidentes" && <IconoAbajo />}</>;
+            if (!it.href) {
+              return <button key={it.id} type="button" className="tab-btn" aria-haspopup="dialog" aria-keyshortcuts={it.id === "buscar" ? "/" : undefined}
+                onClick={it.id === "buscar" ? abrirBuscador : abrirMas}>{contenido}</button>;
+            }
+            const activo = actual === it.id;
             const link = (
-              <Link key={id || "inicio"} prefetch={false} href={id ? `/${id}/` : "/"} aria-current={actual ? "page" : undefined} aria-haspopup={id === "presidentes" ? "true" : undefined}
-                onClick={() => { if (id === "presidentes") setAncla(""); }}>
-                {t}{id === "presidentes" && <IconoAbajo />}
-              </Link>
+              <Link key={it.id} prefetch={false} href={it.href} aria-current={activo ? "page" : undefined} aria-haspopup={it.id === "presidentes" ? "true" : undefined}
+                onClick={() => { if (it.id === "presidentes") setAncla(""); }}>{contenido}</Link>
             );
-            if (id !== "presidentes") return link;
+            if (it.id !== "presidentes") return link;
             return (
-              <div key={id} className={`con-menu${cerrado ? " cerrado" : ""}`} onMouseLeave={() => setCerrado(false)} onFocus={() => setCerrado(false)}
+              <div key={it.id} className={`con-menu${cerrado ? " cerrado" : ""}`} onMouseLeave={() => setCerrado(false)} onFocus={() => setCerrado(false)}
                 onKeyDown={(ev) => { if (ev.key === "Escape") (document.activeElement as HTMLElement | null)?.blur(); }}>
                 {link}
                 <div className="submenu" onClick={() => { setCerrado(true); (document.activeElement as HTMLElement | null)?.blur(); }}>
@@ -92,7 +92,6 @@ export function Barra() {
             );
           })}
         </nav>
-        <button type="button" className="buscar-btn" aria-haspopup="dialog" aria-keyshortcuts="/" onClick={abrirBuscador}><IconoBuscar /><span>Buscar</span></button>
         <BotonConfig />
       </div>
       {enPres && (
@@ -107,6 +106,9 @@ export function Barra() {
 /** El buscador global se abre desde la barra de arriba (computadora), la barra de abajo (celular) o la tecla "/": un evento lo avisa. */
 const EVENTO_BUSCAR = "pld:buscar";
 const abrirBuscador = () => window.dispatchEvent(new Event(EVENTO_BUSCAR));
+/** "Más" (la hoja con todas las secciones) se abre igual desde la barra de arriba y la de abajo. */
+const EVENTO_MAS = "pld:mas";
+const abrirMas = () => window.dispatchEvent(new Event(EVENTO_MAS));
 
 /** Qué marca la barra inferior: Inicio en la portada y los temas, Histórico en el Histórico y las fichas, Presidentes en todo su grupo. */
 function actualInferior(ruta: string): string {
@@ -154,13 +156,15 @@ export function NavegacionGlobal() {
       if (document.querySelector('[role="dialog"]')) return;   // con una ventana abierta, no se abre otra encima
       ev.preventDefault(); abrir();
     };
+    const abrirLaHoja = () => { setBuscar(false); setMas(true); };
     window.addEventListener(EVENTO_BUSCAR, abrir);
+    window.addEventListener(EVENTO_MAS, abrirLaHoja);
     document.addEventListener("keydown", tecla);
-    return () => { window.removeEventListener(EVENTO_BUSCAR, abrir); document.removeEventListener("keydown", tecla); };
+    return () => { window.removeEventListener(EVENTO_BUSCAR, abrir); window.removeEventListener(EVENTO_MAS, abrirLaHoja); document.removeEventListener("keydown", tecla); };
   }, []);
   return (
     <>
-      <BarraInferior actual={actualInferior(ruta)} onBuscar={() => setBuscar(true)} onMas={() => setMas(true)} />
+      <BarraInferior actual={actualInferior(ruta)} onBuscar={() => setBuscar(true)} onMas={abrirMas} />
       <BuscadorGlobal abierto={buscar} onCerrar={() => setBuscar(false)} />
       <Hoja titulo="Más secciones" abierta={mas} onCerrar={() => setMas(false)}><MenuMas actual={carpetaDe(ruta)} /></Hoja>
     </>

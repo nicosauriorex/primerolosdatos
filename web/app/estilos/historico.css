@@ -2,16 +2,37 @@
 
 /* ---- Cabecera de Histórico: "Cambiar dato" arriba a la derecha y "Cómo verlo" debajo de la cifra (reemplaza el botón .cambiar-dato junto a las variaciones) ---- */
 .hi-cab { position: relative; min-width: 0; }
-.hi-cambiar { position: absolute; top: 0; right: 0; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2); min-height: var(--toque); padding: 0; width: var(--toque); }
+/* Arriba a la derecha de la cabecera: Compartir (píldora amarilla, R11) y "Cambiar dato" */
+.hi-cab-acc { position: absolute; top: 0; right: 0; z-index: 1; display: flex; align-items: center; gap: var(--e-2); }
+.hi-cab-acc .compartir { display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2); min-height: var(--toque); min-width: var(--toque); }
+.hi-comp-txt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.hi-cambiar { display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2); min-height: var(--toque); padding: 0; width: var(--toque); }
 .hi-cambiar svg { width: 1.15em; height: 1.15em; flex: none; }
 /* en el celular el botón es solo la lupa (el nombre accesible sigue en el texto oculto) y el título le deja lugar */
 .hi-cambiar-txt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.hi-cab .cabdato-titulo { padding-right: calc(var(--toque) + var(--e-2)); }
-@media (min-width: 480px) {
+.hi-cab .cabdato-titulo { padding-right: calc(2 * var(--toque) + 2 * var(--e-2)); }
+@media (min-width: 640px) {
   .hi-cambiar { width: auto; padding: 0 var(--e-4); }
   .hi-cambiar-txt { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: nowrap; }
-  .hi-cab .cabdato-titulo { padding-right: 11rem; }
+  .hi-comp-txt { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+  .hi-cab .cabdato-titulo { padding-right: 17rem; }
 }
+/* Desde 900 px la cabecera tiene dos columnas: los botones van arriba de la columna derecha (las variaciones bajan un renglón)
+   y el título usa todo su ancho, sin partir palabras. */
+@media (min-width: 900px) {
+  .hi-cab .cabdato-titulo { padding-right: 0; }
+  .hi-cab .cabdato-lado { padding-top: calc(var(--toque) + var(--e-4)); }
+  .hi-cab .cabdato { grid-template-columns: minmax(0, 1fr) minmax(max-content, auto); }
+}
+
+/* Fila de controles de arriba del gráfico: período, frecuencia, Ajustes y, a la derecha, pantalla completa (44 px) */
+.hi-controles { display: flex; align-items: center; gap: var(--e-2); min-width: 0; }
+.hi-controles > .vistabar { flex: 1 1 auto; min-width: 0; }
+.hi-expandir { flex: none; width: var(--toque); min-height: var(--toque); padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.hi-nota { width: 100%; }
+/* Debajo del gráfico solo queda "Presidentes", chico y a la izquierda */
+.hi-acciones { justify-content: flex-start; }
+.hi-acciones .btn { flex: none; }
 .hi-comoverlo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2) var(--e-3); min-width: 0; }
 .hi-comoverlo-rot { font-size: var(--t-sm); font-weight: 700; color: var(--text-secondary); }
 .hi-comoverlo .seg { max-width: 100%; min-width: 0; }

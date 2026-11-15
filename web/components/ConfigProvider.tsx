@@ -1,7 +1,7 @@
 "use client";
 // Contexto de la configuración global + panel (botón ⚙ y ventana). Ver docs/specs/configuracion-global.md.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Modal, Selector, useCerrarModal } from "./ui";
+import { Modal, Selector, Seg, useCerrarModal } from "./ui";
 import { IconoAjustes } from "./Iconos";
 import { PRES_DEF } from "@/lib/estadisticas";
 import {
@@ -85,11 +85,8 @@ function SelectT({ valor, onElegir, etiqueta, igual }: { valor: number | undefin
   );
 }
 function Opciones<T extends string>({ etiqueta, valor, opciones, onElegir }: { etiqueta: string; valor: T; opciones: [T, string][]; onElegir: (v: T) => void }) {
-  return (
-    <div className="seg" role="group" aria-label={etiqueta}>
-      {opciones.map(([v, t]) => <button key={v} type="button" aria-pressed={valor === v} onClick={() => onElegir(v)}>{t}</button>)}
-    </div>
-  );
+  // `Seg` (R12): riel para una opción; si no entra en el renglón (Período por defecto, 7 opciones) pasa solo a píldoras sueltas
+  return <Seg etiqueta={etiqueta} valor={valor} opciones={opciones} onElegir={(v) => onElegir(v as T)} />;
 }
 
 /** Una fila de ajuste (R4): rótulo arriba en el celular, a la izquierda en una columna de ancho fijo desde 600 px; el control y su aclaración al lado. */

@@ -1,0 +1,30 @@
+/* Tanda 8: estilos de la parte que corresponde (ver docs/specs/ajustes-tanda-8.md). */
+
+/* ---- Por presidente: resumen del grupo plegado y estrella de Mis variables */
+.pres-res { margin-left: var(--e-2); font-weight: 600; font-size: var(--t-xs); text-transform: none; letter-spacing: 0; }
+.pres-res-bueno { color: var(--bueno); }
+.pres-res-malo { color: var(--malo); }
+.pres-res-neutro { color: var(--text-muted); }
+.pres-estrella-celda { width: 52px; text-align: center; vertical-align: middle; }
+.pres-estrella { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; background: none; border: 0; border-radius: 50%; color: var(--text-muted); cursor: pointer; }
+.pres-estrella:hover:not(:disabled) { color: var(--acento); background: var(--surface-2); }
+.pres-estrella[aria-pressed="true"] { color: var(--acento); }
+.pres-estrella:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ---- Meses de mandato: leyenda tocable de presidentes */
+.pres-leyenda { display: flex; flex-wrap: wrap; gap: var(--e-2); margin: var(--e-2) 0; }
+.pres-leyenda-item { display: inline-flex; align-items: center; gap: var(--e-2); min-height: 44px; padding: 0 var(--e-3); background: var(--surface-2); border: 1px solid transparent; border-radius: 999px; color: var(--text-secondary); font: inherit; font-size: var(--t-sm); cursor: pointer; }
+.pres-leyenda-item::before { content: ""; flex: none; width: 14px; height: 3px; background: var(--c); }
+.pres-leyenda-item[aria-pressed="true"] { color: var(--text-primary); font-weight: 700; border-color: var(--c); }
+
+/* ---- Resumen por hitos: barras agrupadas y mapa de calor */
+.pres-barras-marco { overflow-x: auto; margin-top: var(--e-2); }
+.pres-barras { display: flex; gap: var(--e-3); min-width: 520px; }
+.pres-barras-grupo { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: var(--e-1); }
+.pres-barras-area { position: relative; display: flex; gap: 2px; height: 200px; border-bottom: 1px solid var(--border-fuerte); }
+.pres-barra { position: relative; flex: 1 1 0; min-width: 0; background: var(--c); border-radius: 2px 2px 0 0; }
+.pres-barras-rot { text-align: center; font-size: var(--t-xs); color: var(--text-muted); }
+.pres-barras-ref { display: flex; flex-wrap: wrap; gap: var(--e-1) var(--e-4); margin-top: var(--e-2); font-size: var(--t-sm); color: var(--text-secondary); }
+.pres-barras-ref span::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: middle; background: var(--c); border-radius: 2px; }
+.pres-hm { text-align: right; font-variant-numeric: tabular-nums; }
+.pres-hm small { display: block; color: var(--text-muted); }

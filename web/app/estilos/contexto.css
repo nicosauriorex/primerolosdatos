@@ -1,0 +1,19 @@
+/* Tanda 8: estilos de la parte que corresponde (ver docs/specs/ajustes-tanda-8.md). */
+
+/* G2: precios contra el mundo (arriba de /contexto/): píldora del rubro, lista con buscador y escala de las barras */
+.ctxr-fila { display: flex; align-items: center; gap: var(--e-2); flex-wrap: wrap; margin-bottom: var(--e-3); }
+.ctxr-pildora { display: inline-flex; align-items: center; gap: var(--e-2); min-height: var(--toque); max-width: 100%; padding: 0 var(--e-4); border: 0; border-radius: var(--r-pleno);
+  background: var(--acento); color: var(--sobre-acento); font: inherit; cursor: pointer; }
+.ctxr-pildora b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ctxr-pildora:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.ctxr-rotulo { font-size: var(--t-xs); opacity: .85; }
+.ctxr-hoja { display: grid; gap: var(--e-3); min-width: 0; }
+.ctxr-buscar { width: 100%; box-sizing: border-box; min-height: var(--toque); }
+.ctxr-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e-1); }
+.ctxr-opcion { width: 100%; min-height: var(--toque); padding: 0 var(--e-4); border: 0; border-radius: var(--r-pleno); background: var(--surface-2); color: var(--text-primary);
+  font: inherit; text-align: left; cursor: pointer; }
+.ctxr-opcion:hover { background: var(--relleno-hover); }
+.ctxr-opcion[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento); font-weight: 700; }
+.ctxr-opcion:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.ctxr-escala { display: flex; justify-content: space-between; gap: var(--e-2); margin: var(--e-2) 0 var(--e-1); font-size: var(--t-xs); color: var(--text-muted); }
+.ctxr-escala span:nth-child(2) { text-align: center; }

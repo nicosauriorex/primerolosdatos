@@ -7,9 +7,9 @@ import { InfoPunto } from "./InfoPunto";
 /** `secundarias`: otras medidas del mismo dato (por ejemplo, el interanual de la inflación mensual), como cifras chicas con su rótulo.
  *  `fuente`: la fuente pública del dato (la misma que imprime la imagen); sale en un renglón chico debajo de la cifra y de las secundarias.
  *  `mesDato`: el mes del último dato; con `fuente` completa el renglón ("Fuente: INDEC · dato de oct-26").
- *  `accion`: botón junto a la cifra (por ejemplo, Compartir).
+ *  `accion`: ya no se dibuja (R11, tanda 8): el Compartir va en el capítulo del gráfico (prop `acciones` de `Capitulo`). Queda por compatibilidad.
  *  `nivel`: el del título (h1 en la página de un dato, h2 dentro de un tema). `tituloRef`/`tituloId`: para llevar el foco al título. */
-export function CabeceraDato({ titulo, cifra, unidad, fecha, deltas, secundarias = [], frase, fuente, mesDato, accion, info, nivel = 1, tituloRef, tituloId, children }: {
+export function CabeceraDato({ titulo, cifra, unidad, fecha, deltas, secundarias = [], frase, fuente, mesDato, info, nivel = 1, tituloRef, tituloId, children }: {
   titulo: string; cifra: string; unidad?: string; fecha: string; deltas: DeltaProps[]; secundarias?: { rotulo: string; valor: string }[]; frase?: string;
   fuente?: string; mesDato?: string; accion?: ReactNode; info?: ReactNode;
   nivel?: 1 | 2; tituloRef?: Ref<HTMLHeadingElement>; tituloId?: string; children?: ReactNode;
@@ -33,14 +33,11 @@ export function CabeceraDato({ titulo, cifra, unidad, fecha, deltas, secundarias
         {fuente ? <p className="cabdato-fuente">Fuente: {fuente}{mesDato ? ` · dato de ${mesDato}` : ""}</p> : null}
         {frase ? <p className="cabdato-frase">{frase}</p> : null}
       </div>
-      {(deltas.length > 0 || accion) && (
+      {deltas.length > 0 && (
         <div className="cabdato-lado">
-          {deltas.length > 0 && (
-            <ul className="cabdato-deltas" aria-label="Cambios">
-              {deltas.slice(0, 3).map((d, i) => <li key={i}><Delta {...d} /></li>)}
-            </ul>
-          )}
-          {accion ? <div className="cabdato-accion">{accion}</div> : null}
+          <ul className="cabdato-deltas" aria-label="Cambios">
+            {deltas.slice(0, 3).map((d, i) => <li key={i}><Delta {...d} /></li>)}
+          </ul>
         </div>
       )}
       {children ? <div className="cabdato-grafico">{children}</div> : null}

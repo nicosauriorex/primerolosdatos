@@ -13,6 +13,7 @@ import { Buscador } from "../sistema/Buscador";
 import { Capitulo } from "../sistema/Capitulo";
 import { Delta } from "../sistema/Delta";
 import { Lamina, Laminas } from "../sistema/Lamina";
+import { IconoSeccion, IconoTema } from "../sistema/iconosTemas";
 import { nf1 } from "@/lib/formato";
 import type { Comparacion, Comparaciones } from "@/lib/plantillas";
 import { ORGANISMOS } from "@/lib/fuentes";
@@ -40,7 +41,7 @@ interface DefCifra {
 const CIFRAS: DefCifra[] = [
   { titulo: "Inflación del último mes", e: PLACAS.inflacion, sinCurio: true, fuente: "INDEC",
     contexto: (m) => { const t = interanualTxt(m); return t ? { texto: `Interanual: ${t}`, cls: null } : null; } },
-  { titulo: "Salario mediano, en pesos de hoy", e: PLACAS.salario, sinCurio: true, fuente: "Secretaría de Trabajo (SIPA)",
+  { titulo: "Salario mediano, en pesos de hoy", e: PLACAS.salario, sinCurio: true, fuente: "Secretaría de Trabajo",
     contexto: (m, p) => {
       const dif = p.e && !p.def ? distanciaRecord(m, p.e) : null;      // el dato curioso ya trae su propio texto
       return dif == null ? null : { texto: dif > -0.005 ? "En su récord histórico" : `${nf1.format(-dif * 100)} % por debajo de su récord`, cls: null };
@@ -214,7 +215,7 @@ function Carrusel({ plantillas }: { plantillas: Plantilla[] }) {
                   <span aria-hidden="true">{abreviarCifra(ev.val).corto}</span>
                   <span className="pt-solo-lectura">{ev.val}</span>
                 </div>
-                {extra && <p className="placa-ctx">{extra.texto}</p>}
+                {extra ? <p className="placa-ctx">{extra.texto}</p> : <p className="placa-ctx" aria-hidden="true" />}
                 {comp && (
                   <ul className="placa-comps">
                     {comp.anterior && <FilaComp c={comp.anterior} />}
@@ -260,11 +261,15 @@ function FilaTema({ t, S }: { t: Tema; S: Record<string, SerieMeta> }) {
   const desde = motor ? motor.idxDe("2003-01") : 0;
   return (
     <Link prefetch={false} href={`/tema/${t.slug}/`} className="fila-tema" ref={ref} aria-label={`Ir al tema: ${t.nombre}`}>
+      <span className="tema-icono" aria-hidden="true"><IconoTema slug={t.slug} /></span>
       <span className="fila-tema-textos">
         <span className="nombre-tema">{t.nombre}</span>
         <span className="corto-tema">{t.corto}</span>
       </span>
-      <span className="dato-tema">{ev && primero ? <><b>{ev.val}{unidadCorta(ev) && <span className="tema-un"> {unidadCorta(ev)}</span>}</b><small>{primero.corto}{expr && expr !== primero && expr.med !== primero.med && expr.med === "via" ? ", interanual" : ""} · {ev.fecha}</small></> : null}</span>
+      <span className="dato-tema">{ev && primero ? <>
+        <span className="tema-cifra"><b>{ev.val}</b>{unidadCorta(ev) && <span className="tema-un">{unidadCorta(ev)}</span>}</span>
+        <small>{primero.corto}{expr && expr !== primero && expr.med !== primero.med && expr.med === "via" ? ", interanual" : ""} · {ev.fecha}</small>
+      </> : null}</span>
       <span className="mini-tema" aria-hidden="true">{ev ? <Sparkline v={ev.v} desde={desde} /> : null}</span>
       <IconoDerecha />
     </Link>
@@ -355,12 +360,13 @@ export function Inicio() {
               return (
                 <section key={g.id} className="indice-grupo" aria-labelledby={`ind-${g.id}`}>
                   <h3 id={`ind-${g.id}`}>{g.titulo}</h3>
-                  <ul>
+                  <ul className="sec-mosaico">
                     {filas.map((s) => (
                       <li key={s.carpeta}>
-                        <Link prefetch={false} href={`/${s.carpeta}/`} className="indice-fila">
-                          <span className="indice-textos"><b>{s.nombre}</b><small>{s.para}</small></span>
-                          <IconoDerecha />
+                        <Link prefetch={false} href={`/${s.carpeta}/`} className="sec-tarjeta">
+                          <span className="sec-icono" aria-hidden="true"><IconoSeccion carpeta={s.carpeta} /></span>
+                          <b className="sec-nombre">{s.nombre}</b>
+                          <span className="sec-para">{s.corto ?? s.para}</span>
                         </Link>
                       </li>
                     ))}

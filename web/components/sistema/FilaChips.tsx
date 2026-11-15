@@ -23,7 +23,7 @@ export function FilaChips({ opciones, valor, onElegir, etiqueta }: {
   };
 
   return (
-    <div ref={fila} className="chips" role="group" aria-label={etiqueta}>
+    <div ref={fila} className="chips" data-multi={valor instanceof Set ? "true" : undefined} role="group" aria-label={etiqueta}>
       {opciones.map(([v, t]) => (
         <button key={v} type="button" aria-pressed={activo(v)} onClick={(e) => { traer(e.currentTarget); onElegir(v); }}>
           <span className="chips-cuerpo">{t}</span>

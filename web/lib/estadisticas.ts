@@ -482,3 +482,36 @@ export function calcularMandato(m: Motor, PRES: Pres[], PRES_T0: Pres[], q: Para
 export const TITULOS_MANDATO: Record<ModoMandato, string> = { teorico: "mismo punto de partida", var: "variación % desde el mes 0", valor: "valor" };
 /** Nombre abreviado de un presidente para espacios chicos ("Néstor Kirchner" → "Néstor K.", "Alberto Fernández" → "Alberto F."): el `corto` de `PRES_DEF`. */
 export const nombreCorto = (n: string): string => (PRES_DEF.find((p) => p.n === n) as { corto?: string } | undefined)?.corto ?? n;
+
+// ---------------------------------------------------------------- Tanda 8 (E2): resúmenes de Por presidente y Meses de mandato
+export type ClaseMandato = "bueno" | "malo" | "sin-cambio" | "sin-calificar";
+/** Cómo le fue a una variable en el mandato, de inicio a cierre según el tono bueno/malo de la variable (no según subió o bajó).
+ *  Sin dato o sin tono (`dir` 0) = "sin-calificar"; con tono pero sin cambio = "sin-cambio". */
+export function claseMandato(dir: number | null | undefined, pct: boolean, st: StatsM): ClaseMandato {
+  if (!st.n || !dir) return "sin-calificar";
+  const t = claseVariacion(dir, pct, st.ini, st.fin);
+  return t === "bueno" ? "bueno" : t === "malo" ? "malo" : "sin-cambio";
+}
+/** Texto del resumen de un grupo plegado: "7 mejoraron · 4 empeoraron · 1 sin cambio" (solo las partes que tienen algo; las neutras, "sin calificar"). */
+export function resumenClases(clases: ClaseMandato[]): { bueno: number; malo: number; sinCambio: number; sinCalificar: number } {
+  const r = { bueno: 0, malo: 0, sinCambio: 0, sinCalificar: 0 };
+  clases.forEach((c) => { if (c === "bueno") r.bueno++; else if (c === "malo") r.malo++; else if (c === "sin-cambio") r.sinCambio++; else r.sinCalificar++; });
+  return r;
+}
+
+/** Resumen por hitos de Meses de mandato: por presidente y por hito, el valor mostrado, el cambio desde el mes 0 y su tono (para el mapa de calor).
+ *  `frac` (0 a 1) = tamaño del cambio relativo al mayor de ese hito entre presidentes. Usa los mismos valores que el gráfico (`todas`). */
+export interface CeldaHito { t: number; valor: number | null; cambio: number | null; tono: "bueno" | "malo" | null; frac: number }
+export function celdasHitos(todas: Fila[], pres: Pres[], fines: number[], hitos: number[], c: { dir?: number | null; pct: boolean }): CeldaHito[][] {
+  const ts = (k: number) => [0, ...hitos.filter((h) => h <= fines[k]), fines[k]].filter((t, i, a) => a.indexOf(t) === i);
+  const brutas = pres.map((x, k) => ts(k).map((t) => {
+    const v = todas[t]?.[x.id], v0 = todas[0]?.[x.id];
+    const cambio = !ok(v) || !ok(v0) ? null : c.pct ? v - v0 : v0 === 0 ? null : (v / v0 - 1) * 100;
+    const tono = c.dir && ok(v) && ok(v0) ? (claseVariacion(c.dir, c.pct, v0, v) === "bueno" ? "bueno" as const : claseVariacion(c.dir, c.pct, v0, v) === "malo" ? "malo" as const : null) : null;
+    return { t, valor: ok(v) ? (v as number) : null, cambio, tono, frac: 0 };
+  }));
+  const maxPorT = new Map<number, number>();
+  brutas.forEach((fila) => fila.forEach((ce) => { if (ce.cambio != null) maxPorT.set(ce.t, Math.max(maxPorT.get(ce.t) ?? 0, Math.abs(ce.cambio))); }));
+  brutas.forEach((fila) => fila.forEach((ce) => { const mx = maxPorT.get(ce.t) ?? 0; ce.frac = ce.cambio != null && mx > 0 ? Math.abs(ce.cambio) / mx : 0; }));
+  return brutas;
+}

@@ -11,9 +11,37 @@
 .parte-cerrar { align-self: flex-start; border: 0; border-radius: var(--r-pleno); background: var(--surface-2); }
 .parte-v-extra { font-size: var(--t-xs); color: var(--text-secondary); overflow-wrap: anywhere; }
 /* Resumen de ruedas del período: cifras chicas con rótulo; 2 columnas en el celular, 5 desde 700 px */
-.bcra-ruedas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); margin: 0; }
+.bcra-ruedas { padding: var(--e-3); border-radius: var(--r-2); background: var(--surface-1); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); margin: 0; }
 .bcra-ruedas dt { font-size: var(--t-xs); color: var(--text-muted); }
 .bcra-ruedas dd { margin: 0; font-weight: 700; font-size: var(--t-sm); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .bcra-ruedas dd small { display: block; font-weight: 400; font-size: var(--t-xs); color: var(--text-muted); }
 @media (min-width: 700px) { .bcra-ruedas { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 @media (prefers-reduced-motion: reduce) { .bcra-panel { transition: none; } }
+
+/* Tanda 8, parte F (docs/specs/ajustes-tanda-8.md): filas del parte menos cargadas */
+/* La fila: texto a la izquierda (nombre, cifra, fecha, variaciones en un renglón chico) y minigráfico a la derecha, del alto de la fila, también en el celular */
+.parte-v { grid-template-columns: minmax(0, 1fr) clamp(72px, 24vw, 120px); align-items: center; }
+.parte-v-txt { gap: 2px; }
+.parte-v .parte-v-cambios { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px var(--e-3); margin-top: 2px; font-size: var(--t-xs); }
+.parte-v .parte-v-cambios .delta { font-size: var(--t-xs); gap: 4px; }
+.parte-v .parte-v-cambios .delta-marca { width: 12px; height: 12px; }
+.parte-v .parte-v-spark { align-self: center; display: block; min-width: 0; }
+/* alto fijo: el minigráfico conserva su proporción y ocupa todo el ancho de la columna (estirado en alto se angostaba) */
+.parte-v .parte-v-spark svg.mini { display: block; width: 100%; height: 48px; }
+.parte-v .parte-v-etq { font-size: var(--t-lg); font-weight: 800; text-transform: none; line-height: 1.2; }
+@media (max-width: 420px) {
+  .parte-v { grid-template-columns: minmax(0, 1fr) clamp(72px, 24vw, 120px); }
+}
+
+/* Período: atajos y "Elegir fechas" en la misma fila (el botón baja de renglón si no entra) */
+.bcra-periodo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); min-width: 0; }
+.bcra-periodo .chips { flex: 0 1 auto; min-width: 0; }
+.bcra-fechas { flex: none; min-height: var(--alto-toque); padding: 0 var(--e-4); border: 0; border-radius: var(--r-pleno); background: var(--surface-2); color: inherit; font: inherit; font-size: .875rem; cursor: pointer; }
+.bcra-fechas:hover { background: var(--acento-suave); }
+.bcra-fechas[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento); font-weight: 700; }
+.bcra-fechas:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.bcra-form-fechas { display: flex; flex-direction: column; gap: var(--e-3); }
+.bcra-form-fechas label { display: flex; flex-direction: column; gap: var(--e-1); font-weight: 700; font-size: var(--t-sm); }
+.bcra-form-fechas input[type="date"] { min-height: var(--alto-toque); padding: 0 var(--e-3); font: inherit; color: inherit; background: var(--surface-2); border: var(--linea) solid var(--border-fuerte); border-radius: var(--r-2); }
+.bcra-form-fechas .note { margin: 0; }
+.bcra-form-fechas .btn { align-self: flex-start; }

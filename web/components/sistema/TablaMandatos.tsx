@@ -5,7 +5,8 @@ import { FilaChips } from "./FilaChips";
 import { Hoja } from "./Hoja";
 
 export type CeldaMandato = { texto: string; valor?: number | null; tono?: "bueno" | "malo" | null };
-export type FilaMandato = { id: string; nombre: string; periodo: string; color: string; celdas: Record<string, CeldaMandato> };
+/** `cuenta`: solo si a este presidente se le cuenta el inicio distinto que al resto ("Cuenta desde ene-24 (mes después de asumir)"): se dibuja bajo el período, con alerta. */
+export type FilaMandato = { id: string; nombre: string; periodo: string; cuenta?: string; color: string; celdas: Record<string, CeldaMandato> };
 export type ColumnaMandato = { clave: string; titulo: string; principal?: boolean };
 export type TablaMandatosProps = {
   filas: FilaMandato[]; columnas: ColumnaMandato[]; visibles: string[]; extras?: string[]; resaltar?: string; etiqueta: string;
@@ -14,6 +15,16 @@ export type TablaMandatosProps = {
   /** Una línea bajo la tabla. */
   nota?: ReactNode;
 };
+
+/** Qué se cuenta de un mandato que no arranca donde el resto: ícono de alerta y texto en ámbar (no el rojo de "peor"). */
+const AvisoCuenta = ({ texto }: { texto: string }) => (
+  <span className="tmand-cuenta">
+    <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true" focusable="false">
+      <path d="M10 3 18 17H2z" /><path d="M10 8v4M10 14.5v.5" />
+    </svg>
+    <span>{texto}</span>
+  </span>
+);
 
 const tonoVar = (t?: "bueno" | "malo" | null) => (t === "bueno" ? "var(--bueno)" : t === "malo" ? "var(--malo)" : "var(--text-primary)");
 
@@ -97,6 +108,7 @@ export function TablaMandatos({ filas, columnas, visibles, resaltar, etiqueta, e
               <span className="tmand-quien">
                 <span className="tmand-nombre">{f.nombre}</span>
                 <span className="tmand-periodo">{f.periodo}</span>
+                {f.cuenta && <AvisoCuenta texto={f.cuenta} />}
               </span>
               <span className="tmand-prin" style={{ color: tonoVar(p?.tono) }}>
                 {p && p.valor != null ? p.texto : "—"}
@@ -141,6 +153,7 @@ export function TablaMandatos({ filas, columnas, visibles, resaltar, etiqueta, e
                 <span className="tmand-quien">
                   <span className="tmand-nombre">{f.nombre}</span>
                   <span className="tmand-periodo">{f.periodo}</span>
+                  {f.cuenta && <AvisoCuenta texto={f.cuenta} />}
                 </span>
               </th>
               {mostradas.map((c) => {

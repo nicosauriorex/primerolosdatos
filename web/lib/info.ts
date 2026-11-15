@@ -1,26 +1,58 @@
 // GENERADO a partir de src/app.js (textos de ayuda por categoría). Editar acá desde ahora.
+// Marcado (R16): lo que tiene varias entradas va como lista de definiciones <dl><dt>nombre</dt><dd>explicación</dd></dl>; el resto, párrafos.
 export const INFO_CAT: Record<string, string> = {
-  "Salarios": `<b>¿Qué salario mirar?</b><ul>
-    <li><b>Salario mediano (trabajadores registrados)</b>: el sueldo bruto del asalariado registrado del sector privado (sistema SIPA) que está justo en el medio (la mitad gana menos). <b>Es el más representativo del trabajador formal típico</b>, porque los sueldos muy altos no lo inflan.</li>
-    <li><b>Salario promedio (trabajadores registrados)</b>: el mismo universo, pero promedio; los sueldos altos lo tiran para arriba (suele ser ~30% más que la mediana). Incluye horas extra, premios y aguinaldo (acá repartido en el semestre).</li>
-    <li><b>Salario promedio de empleos estables (RIPTE)</b>: promedio de la remuneración imponible de trabajadores estables. Se usa para actualizar cosas por ley (riesgos del trabajo, antes jubilaciones). Tiene tope imponible, así que recorta los sueldos más altos. Sin aguinaldo en la fuente (acá × 13/12).</li>
-    <li><b>Índice de salarios (todos los trabajadores) e Índice de salarios informales</b>: no es un monto sino un índice. Es el único que cubre también al <b>sector público</b> y a los <b>no registrados (informales)</b>; el informal sale con 5 meses de rezago. Sirve para comparar evolución, no niveles.</li>
-    <li><b>Salario mínimo (vital y móvil)</b>: es un piso legal, no lo que cobra la gente (casi ningún convenio formal está tan abajo). Sirve como referencia legal: seguro de desempleo, planes sociales, embargos, montos de multas. No sirve para saber cuánto se gana.</li>
-    <li><b>Jubilación mínima</b> y <b>Jubilación mínima con bono</b>: haber mínimo de ANSES (lo cobra cerca de la mitad de los jubilados). "Con bono" suma el refuerzo que paga el Gobierno aparte, que desde mar-2024 está fijo en $70.000 y no se actualiza.</li></ul>
-    Todos son brutos (antes de descuentos), salvo jubilaciones.`,
-  "Precios": `<b>Inflación</b>: el IPC de largo plazo, mensual, interanual o como promedio de 12 meses. <b>IPC INDEC</b>: índices por rubro (base dic-2016 = 100); cada rubro se lista una vez y la <b>región</b> se elige en "Configurar variable". Además del índice tal cual, cada rubro se puede ver como <b>inflación</b> (variación mensual, interanual o promedio de 12 meses) o como <b>precio relativo</b> (cuánto subió contra la inflación general). Para saber si se encarecieron más los bienes o los servicios: elegí "IPC Bienes (Nacional)" y "IPC Servicios (Nacional)" con "Variación interanual", o comparalos en base 100. <b>Precios promedio</b>: el precio en pesos de productos concretos (kg de asado, litro de leche), que sí se pueden poner "en términos de" un salario o del dólar. La <b>inflación de largo plazo</b> empalma el IPC con fuentes alternativas para 2007-2016, cuando el INDEC estuvo intervenido.`,
-  "IPC por rubros": `Índices de precios al consumidor del INDEC. Nacional: nivel general y 12 divisiones; las regiones agregan grupos y clases (carnes, alquiler, combustibles, etc.). Un índice no tiene unidad: 250 quiere decir que los precios son 2,5 veces los de dic-2016. Cada rubro se puede ver como variación mensual, interanual o promedio de 12 meses (su propia inflación) o como índice. En cualquiera de las cuatro formas se puede ver nominal o real (contra la inflación general): el índice real es el precio relativo; por encima de 100 de su base, subió más que el IPC general.`,
-  "Opinión pública (UTDT)": `Encuestas mensuales de la Universidad Di Tella. <b>Confianza del consumidor (ICC)</b>: de 0 a 100, cómo ve la gente su situación, la del país y si es momento de comprar durables o inmuebles. <b>Confianza en el gobierno (ICG)</b>: de 0 a 5, evalúa al gobierno nacional en evaluación general, interés general, eficiencia, honestidad y capacidad. Suele caer fuerte en las crisis y subir en el primer año de cada gobierno.`,
-  "Precios promedio por producto (INDEC)": `Precio promedio en pesos que releva el INDEC para el IPC (desde 2016). Cada producto se lista una vez (GBA tiene ~60 productos; las otras regiones, unos 14) y la región se elige en "Configurar variable". Se puede ver en pesos reales, en dólares o "en términos de" un salario: cuántos kg compra un sueldo.`,
-  "Dólar y tipo de cambio": `<b>Oficial (A3500)</b>: mayorista de referencia del BCRA. <b>Minorista</b>: el de las ventanillas de bancos. <b>Blue</b>: mercado informal. <b>MEP</b> y <b>CCL</b>: dólar comprado con bonos o acciones, legal; el CCL deja el dinero afuera. <b>Brecha</b>: cuánto más caro está un dólar que el oficial. <b>Tipo de cambio real multilateral</b>: compara el peso con las monedas de los socios comerciales ajustando por inflación de cada país; más alto = Argentina más barata (dólar "alto").`,
-  "Tasas de interés": `Tasas nominales anuales (TNA). Con inflación alta la TNA engaña: se puede ver la <b>tasa real</b> (descontada la inflación). Real anual: la TEA contra la inflación de los 12 meses previos. Real mensual: la tasa del mes contra la inflación de ese mes. Positiva = el plazo fijo le ganó a la inflación.`,
-  "Dinero y bancos (BCRA)": `<b>Base monetaria</b>: billetes en circulación más encajes de los bancos en el BCRA. <b>Depósitos y préstamos</b>: totales del sistema. <b>Reservas</b>: brutas (incluyen encajes en dólares, swap con China y préstamos; las netas son bastante menos). Los montos agregados se pueden ver por habitante o como % del PIB.`,
-  "Actividad": `<b>EMAE</b>: estimador mensual de la actividad (anticipa el PIB). <b>PIB</b>: trimestral, a precios de 2004 (ya es real). <b>ISAC</b>: construcción. Son índices o cantidades: no se pasan a dólares ni a pesos reales.`,
-  "Empleo, pobreza e ingresos": `<b>Desocupación, empleo e informalidad</b>: EPH, trimestral, 31 aglomerados urbanos. <b>Trabajadores registrados</b>: registro de aportes (SIPA), mensual (personas con aportes). <b>Pobreza e indigencia</b>: EPH, semestral (se ubica en enero y julio). <b>Canastas</b>: lo que una familia necesita para no ser pobre (CBT) o indigente (CBA).`,
-  "Sector externo": `Exportaciones e importaciones de bienes (INDEC, en dólares), saldo comercial, términos del intercambio (precio de lo que vendemos vs. lo que compramos) y soja.`,
-  "Fiscal": `Sector público nacional, base caja. <b>Resultado primario</b>: ingresos menos gastos sin contar intereses de la deuda. <b>Resultado financiero</b>: después de pagar intereses. Las cifras mensuales son muy estacionales: conviene verlas como % del PIB (suma de 12 meses) o por año.`,
-  "Contexto internacional": `Lo que pasa afuera y la Argentina no controla. <b>Precios de la soja, el maíz, el trigo y el petróleo</b> (Banco Mundial vía FRED, en dólares): se pueden ver en dólares de hoy. <b>Términos de intercambio</b> (INDEC): precio de lo que exportamos contra el de lo que importamos. <b>Tasa de la Fed</b>: lo que rinden los bonos del Tesoro de EE.UU. a muy corto plazo; si sube, el crédito para países como el nuestro se encarece. La comparación con otros países está en la sección Contexto.`,
-  "Mercados": `<b>Riesgo país</b>: cuánta tasa extra paga Argentina sobre los bonos de EEUU (en puntos básicos: 100 = 1%). Más bajo = el mundo confía más.`,
+  "Salarios": `<p><b>¿Qué salario mirar?</b></p><dl>
+    <dt>Salario mediano (trabajadores registrados)</dt><dd>El sueldo bruto del asalariado registrado del sector privado (sistema SIPA) que está justo en el medio (la mitad gana menos). <b>Es el más representativo del trabajador formal típico</b>, porque los sueldos muy altos no lo inflan.</dd>
+    <dt>Salario promedio (trabajadores registrados)</dt><dd>El mismo universo, pero promedio; los sueldos altos lo tiran para arriba (suele ser ~30% más que la mediana). Incluye horas extra, premios y aguinaldo (acá repartido en el semestre).</dd>
+    <dt>Salario promedio de empleos estables (RIPTE)</dt><dd>Promedio de la remuneración imponible de trabajadores estables. Se usa para actualizar cosas por ley (riesgos del trabajo, antes jubilaciones). Tiene tope imponible, así que recorta los sueldos más altos. Sin aguinaldo en la fuente (acá × 13/12).</dd>
+    <dt>Índice de salarios (todos los trabajadores) e Índice de salarios informales</dt><dd>No es un monto sino un índice. Es el único que cubre también al <b>sector público</b> y a los <b>no registrados (informales)</b>; el informal sale con 5 meses de rezago. Sirve para comparar evolución, no niveles.</dd>
+    <dt>Salario mínimo (vital y móvil)</dt><dd>Es un piso legal, no lo que cobra la gente (casi ningún convenio formal está tan abajo). Sirve como referencia legal: seguro de desempleo, planes sociales, embargos, montos de multas. No sirve para saber cuánto se gana.</dd>
+    <dt>Jubilación mínima y Jubilación mínima con bono</dt><dd>Haber mínimo de ANSES (lo cobra cerca de la mitad de los jubilados). "Con bono" suma el refuerzo que paga el Gobierno aparte, que desde mar-2024 está fijo en $70.000 y no se actualiza.</dd></dl>
+    <p>Todos son brutos (antes de descuentos), salvo jubilaciones.</p>`,
+  "Precios": `<dl>
+    <dt>Inflación</dt><dd>El IPC de largo plazo, mensual, interanual o como promedio de 12 meses.</dd>
+    <dt>IPC INDEC</dt><dd>Índices por rubro (base dic-2016 = 100); cada rubro se lista una vez y la <b>región</b> se elige en "Configurar variable". Además del índice tal cual, cada rubro se puede ver como <b>inflación</b> (variación mensual, interanual o promedio de 12 meses) o como <b>precio relativo</b> (cuánto subió contra la inflación general). Para saber si se encarecieron más los bienes o los servicios: elegí "IPC Bienes (Nacional)" y "IPC Servicios (Nacional)" con "Variación interanual", o comparalos en base 100.</dd>
+    <dt>Precios promedio</dt><dd>El precio en pesos de productos concretos (kg de asado, litro de leche), que sí se pueden poner "en términos de" un salario o del dólar.</dd></dl>
+    <p>La <b>inflación de largo plazo</b> empalma el IPC con fuentes alternativas para 2007-2016, cuando el INDEC estuvo intervenido.</p>`,
+  "IPC por rubros": `<p>Índices de precios al consumidor del INDEC. Nacional: nivel general y 12 divisiones; las regiones agregan grupos y clases (carnes, alquiler, combustibles, etc.). Un índice no tiene unidad: 250 quiere decir que los precios son 2,5 veces los de dic-2016. Cada rubro se puede ver como variación mensual, interanual o promedio de 12 meses (su propia inflación) o como índice. En cualquiera de las cuatro formas se puede ver nominal o real (contra la inflación general): el índice real es el precio relativo; por encima de 100 de su base, subió más que el IPC general.</p>`,
+  "Opinión pública (UTDT)": `<p>Encuestas mensuales de la Universidad Di Tella.</p><dl>
+    <dt>Confianza del consumidor (ICC)</dt><dd>De 0 a 100, cómo ve la gente su situación, la del país y si es momento de comprar durables o inmuebles.</dd>
+    <dt>Confianza en el gobierno (ICG)</dt><dd>De 0 a 5, evalúa al gobierno nacional en evaluación general, interés general, eficiencia, honestidad y capacidad. Suele caer fuerte en las crisis y subir en el primer año de cada gobierno.</dd></dl>`,
+  "Precios promedio por producto (INDEC)": `<p>Precio promedio en pesos que releva el INDEC para el IPC (desde 2016). Cada producto se lista una vez (GBA tiene ~60 productos; las otras regiones, unos 14) y la región se elige en "Configurar variable". Se puede ver en pesos reales, en dólares o "en términos de" un salario: cuántos kg compra un sueldo.</p>`,
+  "Dólar y tipo de cambio": `<dl>
+    <dt>Oficial (A3500)</dt><dd>Mayorista de referencia del BCRA.</dd>
+    <dt>Minorista</dt><dd>El de las ventanillas de bancos.</dd>
+    <dt>Blue</dt><dd>Mercado informal.</dd>
+    <dt>MEP y CCL</dt><dd>Dólar comprado con bonos o acciones, legal; el CCL deja el dinero afuera.</dd>
+    <dt>Brecha</dt><dd>Cuánto más caro está un dólar que el oficial.</dd>
+    <dt>Tipo de cambio real multilateral</dt><dd>Compara el peso con las monedas de los socios comerciales ajustando por inflación de cada país; más alto = Argentina más barata (dólar "alto").</dd></dl>`,
+  "Tasas de interés": `<p>Tasas nominales anuales (TNA). Con inflación alta la TNA engaña: se puede ver la <b>tasa real</b> (descontada la inflación). Real anual: la TEA contra la inflación de los 12 meses previos. Real mensual: la tasa del mes contra la inflación de ese mes. Positiva = el plazo fijo le ganó a la inflación.</p>`,
+  "Dinero y bancos (BCRA)": `<dl>
+    <dt>Base monetaria</dt><dd>Billetes en circulación más encajes de los bancos en el BCRA.</dd>
+    <dt>Depósitos y préstamos</dt><dd>Totales del sistema.</dd>
+    <dt>Reservas</dt><dd>Brutas (incluyen encajes en dólares, swap con China y préstamos; las netas son bastante menos).</dd></dl>
+    <p>Los montos agregados se pueden ver por habitante o como % del PIB.</p>`,
+  "Actividad": `<dl>
+    <dt>EMAE</dt><dd>Estimador mensual de la actividad (anticipa el PIB).</dd>
+    <dt>PIB</dt><dd>Trimestral, a precios de 2004 (ya es real).</dd>
+    <dt>ISAC</dt><dd>Construcción.</dd></dl>
+    <p>Son índices o cantidades: no se pasan a dólares ni a pesos reales.</p>`,
+  "Empleo, pobreza e ingresos": `<dl>
+    <dt>Desocupación, empleo e informalidad</dt><dd>EPH, trimestral, 31 aglomerados urbanos.</dd>
+    <dt>Trabajadores registrados</dt><dd>Registro de aportes (SIPA), mensual (personas con aportes).</dd>
+    <dt>Pobreza e indigencia</dt><dd>EPH, semestral (se ubica en enero y julio).</dd>
+    <dt>Canastas</dt><dd>Lo que una familia necesita para no ser pobre (CBT) o indigente (CBA).</dd></dl>`,
+  "Sector externo": `<p>Exportaciones e importaciones de bienes (INDEC, en dólares), saldo comercial, términos del intercambio (precio de lo que vendemos vs. lo que compramos) y soja.</p>`,
+  "Fiscal": `<p>Sector público nacional, base caja.</p><dl>
+    <dt>Resultado primario</dt><dd>Ingresos menos gastos sin contar intereses de la deuda.</dd>
+    <dt>Resultado financiero</dt><dd>Después de pagar intereses.</dd></dl>
+    <p>Las cifras mensuales son muy estacionales: conviene verlas como % del PIB (suma de 12 meses) o por año.</p>`,
+  "Contexto internacional": `<p>Lo que pasa afuera y la Argentina no controla.</p><dl>
+    <dt>Precios de la soja, el maíz, el trigo y el petróleo</dt><dd>Banco Mundial vía FRED, en dólares: se pueden ver en dólares de hoy.</dd>
+    <dt>Términos de intercambio</dt><dd>INDEC: precio de lo que exportamos contra el de lo que importamos.</dd>
+    <dt>Tasa de la Fed</dt><dd>Lo que rinden los bonos del Tesoro de EE.UU. a muy corto plazo; si sube, el crédito para países como el nuestro se encarece.</dd></dl>
+    <p>La comparación con otros países está en la sección Contexto.</p>`,
+  "Mercados": `<dl><dt>Riesgo país</dt><dd>Cuánta tasa extra paga Argentina sobre los bonos de EEUU (en puntos básicos: 100 = 1%). Más bajo = el mundo confía más.</dd></dl>`,
 };
 
 /** Explicación corta (1 o 2 líneas) de cada categoría de primer nivel y la variable que se recomienda mirar primero.

@@ -179,11 +179,20 @@ nav.tabs a .icono { display: none; width: 14px; height: 14px; }
 .controls label, .lbl { color: var(--text-secondary); font-size: var(--t-sm); }
 /* Tanda 7 (R1): botones, selectores y chips son píldoras rellenas, sin borde. Fondo --relleno (un tono sobre --surface-1 y --surface-0), hover --relleno-hover,
    elegido --acento, principal --accion. El riel `.seg` lleva las opciones adentro; la elegida es una píldora celeste. Todas del mismo alto. */
-.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border: 0; border-radius: var(--r-pleno); background: var(--surface-2); max-width: 100%; }
+.seg { display: inline-flex; flex-wrap: nowrap; gap: 2px; padding: 3px; border: 0; border-radius: var(--r-pleno); background: var(--surface-2); max-width: 100%; min-width: 0; }
 .seg button { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0 14px; border: 0; border-radius: var(--r-pleno); background: none;
   color: var(--text-secondary); font-size: var(--t-sm); font-weight: 600; cursor: pointer; white-space: nowrap; transition: background var(--d-1), color var(--d-1); }
 .seg button:hover { color: var(--text-primary); background: color-mix(in srgb, var(--acento) 24%, transparent); }
 .seg button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento); font-weight: 700; }
+/* R12 (tanda 8): sin riel. `.seg-suelto` = píldoras separadas por --e-2 que bajan de renglón (elección múltiple, o un riel que no entra en el renglón).
+   `.seg-multi` además marca la elegida con un ✓ a la izquierda. Dos elegidas juntas nunca se funden en una mancha. */
+.seg.seg-suelto { flex-wrap: wrap; gap: var(--e-2); padding: 0; background: none; border-radius: 0; }
+.seg.seg-suelto button { background: var(--surface-2); white-space: normal; text-align: left; max-width: 100%; }
+.seg.seg-suelto button:hover { background: color-mix(in srgb, var(--acento) 24%, var(--surface-2)); }
+.seg.seg-suelto button[aria-pressed="true"] { background: var(--acento); }
+.seg.seg-multi button[aria-pressed="true"]::before, .chips[data-multi="true"] > button[aria-pressed="true"] .chips-cuerpo::before {
+  content: "\2713"; display: inline-block; margin-right: var(--e-1); font-weight: 900; }
+.chips[data-multi="true"] { gap: var(--e-2); }
 select, .btn, input[type=search], input[type=month] { font: inherit; font-size: var(--t-sm); padding: 5px 10px; border: 0;
   border-radius: var(--r-pleno); background: var(--relleno); color: var(--text-primary); max-width: 100%; }
 select { padding-inline: var(--e-3); }
@@ -572,8 +581,9 @@ th small { display: block; font-size: var(--t-micro); font-weight: 400; color: v
 .cruz-capa:hover { background: var(--acento-suave); color: var(--text-primary); }
 .modal { position: relative; }
 .modal[tabindex="-1"]:focus { outline: none; }   /* R12: en táctil el foco inicial va a la ventana, sin recuadro */
-.modal-cruz { position: absolute; top: 0; right: 0; z-index: 2; }
-.modal > .modal-cruz + * { padding-right: 48px; }
+/* Cabecera fija de la ventana (tanda 8, A1): la cruz vive en su propia franja arriba y la zona que se desliza empieza debajo: la barra de desplazamiento nunca pasa por la cruz. */
+.modal-cab { flex: none; display: flex; justify-content: flex-end; height: var(--toque); }
+.modal-cruz { position: static; flex: none; }
 .panel-cruz { display: flex; justify-content: flex-end; margin: calc(-1 * var(--e-2)) calc(-1 * var(--e-2)) calc(-1 * var(--e-2)) 0; }
 
 /* Textos largos dentro de ventanas y menús: bajan de renglón (R5, 360 px) */
@@ -613,7 +623,20 @@ th small { display: block; font-size: var(--t-micro); font-weight: 400; color: v
 .plantilla .d { font-size: var(--t-xs); color: var(--text-muted); line-height: 1.4; }
 .plantilla .d.var-bueno { color: var(--bueno); } .plantilla .d.var-malo { color: var(--malo); }
 .plantilla svg.mini { margin-top: 6px; height: 36px; width: 100%; }
-.plantilla .comp { position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; padding: 0; justify-content: center; color: var(--text-secondary); }
+.plantilla .comp { position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; padding: 0; justify-content: center; }
+/* R11 (tanda 8): el único botón Compartir del sitio: píldora chica amarilla con el ícono, arriba a la derecha del capítulo. Nunca grande ni a lo ancho. */
+.compartir { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--e-1); flex: none; width: auto; height: 32px; min-height: 32px; padding: 0 var(--e-3);
+  border: 0; border-radius: var(--r-pleno); background: var(--accion); color: var(--sobre-accion); font: inherit; font-size: var(--t-sm); font-weight: 800; line-height: 1; white-space: nowrap; cursor: pointer;
+  transition: background var(--d-1); }
+.compartir::after { content: ""; position: absolute; inset: -6px -4px; }   /* área tocable de 44 px sin agrandar la píldora */
+.compartir:hover:not(:disabled) { background: color-mix(in srgb, var(--accion) 86%, var(--text-primary)); }
+.compartir:disabled { opacity: .5; cursor: not-allowed; }
+.compartir:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+.compartir .icono { width: 16px; height: 16px; }
+@media (max-width: 339.98px) {   /* renglón sin lugar: solo el ícono (el `aria-label` dice "Compartir") */
+  .compartir { width: 32px; padding: 0; }
+  .compartir-txt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
 .acciones-plantilla { display: flex; gap: var(--e-3); padding: 0 14px var(--e-2); font-size: var(--t-xs); }
 .encabezado-plantilla { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-2); padding: var(--e-2) var(--e-3); margin-bottom: 10px; font-size: var(--t-sm); }
 .encabezado-plantilla p { margin: 2px 0; } .encabezado-plantilla .titulo-pl { font-weight: 700; font-size: var(--t-base); }
@@ -667,7 +690,6 @@ th small { display: block; font-size: var(--t-micro); font-weight: 400; color: v
 .modal, .modal-fondo { max-width: 100%; }
 .modal-fondo { padding-left: var(--e-2); padding-right: var(--e-2); }
 .modal .seg, .desplegable .panel .seg { max-width: 100%; }
-.modal .seg button, .desplegable .panel .seg button { white-space: normal; text-align: left; }
 .modal .controls, .modal .acciones-vista { min-width: 0; }
 .modal .config-cuerpo, .vp-cuerpo { overflow-x: hidden; overflow-y: auto; }
 .vp-cab h2 { margin: 0; font-size: var(--t-lg); font-weight: 800; }
@@ -994,9 +1016,9 @@ tr.nota-grupo td { background: var(--surface-0); color: var(--text-secondary); t
 .fi .cabdato h2 { margin: 0; font-size: var(--v-capitulo); font-weight: 900; font-stretch: var(--ancho-cond); text-transform: uppercase; line-height: 1; overflow-wrap: anywhere; min-width: 0; text-wrap: balance; }
 .fi .cabdato :is(h1, h2):focus { outline: none; }
 .fi .cabdato :is(h1, h2):focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 4px; }
-/* Capítulos de la ficha: con poco ancho, Compartir y "Abrir completo" bajan debajo del título en vez de apretarlo */
-.fi .capitulo-cab { flex-wrap: wrap; }
-.fi .capitulo-textos { flex: 1 1 15rem; }
+/* Capítulos de la ficha (R11, tanda 8): el título se parte, el botón de arriba a la derecha no baja */
+.fi .capitulo-cab { flex-wrap: nowrap; }
+.fi .capitulo-textos { flex: 1 1 0; }
 .fi .capitulo-acciones { flex-wrap: wrap; }
 .fi .capitulo-cuerpo { display: flex; flex-direction: column; gap: var(--e-3); }
 .fi-abrir { min-height: var(--toque); color: var(--text-primary); }
@@ -1371,7 +1393,7 @@ h4.her-cita-t { margin: var(--e-4) 0 var(--e-1); font-size: var(--t-md); }
 .hoja-velo { position: fixed; inset: 0; z-index: 70; display: flex; align-items: flex-end; justify-content: center; background: var(--velo);
   animation: hoja-velo var(--d-2) var(--curva); }
 .hoja { position: relative; display: flex; flex-direction: column; width: 100%; max-height: 85dvh; min-height: 0;
-  background: var(--surface-1); color: var(--text-primary); border-radius: var(--e-4) var(--e-4) 0 0; box-shadow: var(--sombra-2); outline: none;
+  background: var(--surface-1); color: var(--text-primary); border-radius: var(--e-4) var(--e-4) 0 0; box-shadow: var(--sombra-2); outline: none; overflow: hidden;
   animation: hoja-sube var(--d-2) var(--curva); }
 .hoja-manija { flex: none; align-self: center; width: 36px; height: 4px; margin-top: var(--e-2); border-radius: var(--r-pleno); background: var(--border-fuerte); }
 .hoja-cab { flex: none; display: flex; align-items: center; justify-content: space-between; gap: var(--e-3); padding: 0 var(--e-2) 0 var(--e-4); border-bottom: 1px solid var(--border); }
@@ -1379,6 +1401,7 @@ h4.her-cita-t { margin: var(--e-4) 0 var(--e-1); font-size: var(--t-md); }
 .hoja-cruz { flex: none; display: inline-flex; align-items: center; justify-content: center; width: var(--toque); height: var(--toque); padding: 0; border: 0;
   border-radius: var(--r-pleno); background: none; color: var(--text-secondary); cursor: pointer; }
 .hoja-cruz:hover { background: var(--acento-suave); color: var(--text-primary); }
+.hoja-cruz, .busqg-cruz, .cruz-capa { transform: none; }   /* al pasar el mouse la cruz no crece: nunca pasa del borde de la capa */
 .hoja-cuerpo { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: var(--e-4) var(--e-4) calc(var(--e-4) + env(safe-area-inset-bottom)); }
 .hoja-pie { flex: none; display: flex; flex-wrap: wrap; gap: var(--e-2); justify-content: stretch; padding: var(--e-3) var(--e-4) calc(var(--e-3) + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); background: inherit; }
 /* R3: en el celular el botón principal del pie ocupa todo el ancho; desde 900 px va a la derecha con ancho propio */
@@ -1637,19 +1660,26 @@ h4.her-cita-t { margin: var(--e-4) 0 var(--e-1); font-size: var(--t-md); }
 .busq-sin { margin-top: var(--e-2); }
 
 /* Capa global: pantalla completa en el celular, 640 px centrada desde 768 px */
-.busqg-velo { position: fixed; inset: 0; z-index: 70; display: flex; background: var(--velo); }
-.busqg { display: flex; flex-direction: column; width: 100%; height: 100dvh; background: var(--surface-0); color: var(--text-primary); }
-.busqg-cab { flex: none; display: flex; align-items: center; justify-content: space-between; padding: var(--e-2) var(--e-2) var(--e-2) var(--e-4); }
+/* Tanda 8 (A4): fondo translúcido con desenfoque, así se ve la página detrás; con respaldo opaco si el navegador no sabe desenfocar. */
+.busqg-velo { position: fixed; inset: 0; z-index: 70; display: flex; background: var(--surface-0); }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .busqg-velo { background: color-mix(in srgb, var(--surface-0) 70%, transparent); -webkit-backdrop-filter: blur(14px) saturate(1.1); backdrop-filter: blur(14px) saturate(1.1); }
+}
+.busqg { display: flex; flex-direction: column; width: 100%; height: 100%; background: transparent; color: var(--text-primary); }
+.busqg-cab { flex: none; position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; padding: var(--e-2) var(--e-2) var(--e-2) var(--e-4); }
 .busqg-cab h2 { margin: 0; font-size: var(--v-capitulo); }
 .busqg-cruz { flex: none; display: inline-flex; align-items: center; justify-content: center; width: var(--toque); height: var(--toque); padding: 0; border: 0; border-radius: var(--r-2);
   background: none; color: var(--text-secondary); cursor: pointer; }
 .busqg-cruz:hover { background: var(--acento-suave); color: var(--text-primary); }
 .busqg-cruz:focus-visible { outline: 2px solid var(--foco); outline-offset: -2px; }
 .busqg-cruz svg { width: 20px; height: 20px; }
-.busqg-cuerpo { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 var(--e-4) var(--e-5); }
+.busqg-cuerpo { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: var(--e-1) var(--e-4) var(--e-5); scroll-padding-top: var(--e-3); }
 @media (min-width: 768px) {
   .busqg-velo { align-items: flex-start; justify-content: center; padding-top: 12vh; }
-  .busqg { width: 640px; max-width: calc(100% - 2 * var(--e-4)); height: auto; max-height: 76dvh; border: 1px solid var(--border); border-radius: var(--r-2); box-shadow: var(--sombra-2); }
+  .busqg { width: 640px; max-width: calc(100% - 2 * var(--e-4)); height: auto; max-height: 76dvh; border: 1px solid var(--border); border-radius: var(--r-2); box-shadow: var(--sombra-2); background: var(--surface-0); }
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .busqg { background: color-mix(in srgb, var(--surface-0) 88%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  }
 }
 @media (prefers-reduced-motion: no-preference) {
   .busqg { animation: busqg-entra var(--d-2) var(--curva) both; }
@@ -2428,3 +2458,16 @@ button.info-btn { background: none; padding: 0; }
 }
 .modal footer.cfgg-pie { justify-content: space-between; }
 @media (max-width: 599px) { .modal footer.cfgg-pie > button { flex: 1 1 0; min-height: var(--toque); justify-content: center; text-align: center; white-space: normal; } }
+
+/* ================================================================== Tanda 8 (Parte A)
+   R9: la barra de arriba (computadora) usa el mismo menú que la de abajo del celular, con el lenguaje de píldoras de la tanda 7 (elegida = celeste). */
+nav.tabs { align-items: center; gap: var(--e-1); }
+nav.tabs > a, nav.tabs .con-menu > a, nav.tabs .tab-btn { display: inline-flex; align-items: center; gap: var(--e-2); height: 32px; padding: 0 var(--e-3); border: 0; border-radius: var(--r-pleno);
+  background: none; color: var(--sobre-barra-2); font: inherit; font-size: var(--t-sm); font-weight: 600; font-stretch: var(--ancho-semi); text-decoration: none; white-space: nowrap; cursor: pointer;
+  box-shadow: none; transition: background var(--d-1), color var(--d-1); }
+nav.tabs > a:hover, nav.tabs .con-menu > a:hover, nav.tabs .tab-btn:hover { background: color-mix(in srgb, var(--sobre-barra) 14%, transparent); color: var(--sobre-barra); }
+nav.tabs > a[aria-current="page"], nav.tabs .con-menu > a[aria-current="page"] { background: var(--acento); color: var(--sobre-acento); font-weight: 800; box-shadow: none; }
+nav.tabs > a .icono, nav.tabs .con-menu > a .icono, nav.tabs .tab-btn .icono { display: block; width: 16px; height: 16px; }
+nav.tabs .con-menu { align-self: stretch; align-items: center; }
+@media (min-width: 768px) { nav.tabs > a, nav.tabs .con-menu > a, nav.tabs .tab-btn { padding: 0 var(--e-3); font-size: var(--t-sm); } }
+.compartir.solo-icono { width: 32px; padding: 0; }

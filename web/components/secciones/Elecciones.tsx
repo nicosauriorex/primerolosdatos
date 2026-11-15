@@ -3,11 +3,11 @@ import { useMemo, useState } from "react";
 import { useSeccion } from "../useSeccion";
 import { Cargando, alternar } from "../ui";
 import { Capitulo } from "../sistema/Capitulo";
-import { BarraVista } from "../sistema/BarraVista";
 import { Hoja } from "../sistema/Hoja";
 import { InfoPunto } from "../sistema/InfoPunto";
 import { BotonInfo } from "../Variables";
 import { CeldaVar, LineaInicio, Valor, useBase, HojaListo } from "./comunes";
+import { BarraResumen, Pildoras } from "./Ranking";
 import { PALETA } from "../util";
 import { fmtMes, fmtNum, nf0, nf1, nf2, norm, ok } from "@/lib/formato";
 import { CORTES_R, crearElec, crearPres, estimarVoto, METRICA_E, pearson, ultimoGlobalDe, valorElec, valorHoy } from "@/lib/estadisticas";
@@ -30,14 +30,74 @@ function niceTicks(min: number, max: number, n: number): number[] {
 interface Corr { s: Serie; ind: Expr; c: Calculo; pts: { e: ReturnType<typeof crearElec>[number]; x: number }[]; r: number; b: number; a: number; n: number }
 
 interface Hoy { x: number; est: number; fuera: boolean }
+interface Caja { x0: number; y0: number; x1: number; y1: number }
+const choca = (a: Caja, b: Caja) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+/** Etiqueta ya ubicada: líneas de texto, su caja, hacia dónde se alinea el texto y, si no hubo lugar libre, de dónde sale la línea de puntos. */
+interface Ubicada { lineas: string[]; caja: Caja; ancla: "start" | "middle" | "end"; guia?: { x: number; y: number } }
+
+/** R15: prueba derecha (arriba), derecha, arriba, izquierda y abajo del punto y elige la primera caja libre (sin tapar puntos, la recta ni otras etiquetas);
+ *  si ninguna está libre, la lleva al borde superior unida al punto con una línea fina de puntos. */
+function ubicar(ax: number, ay: number, lineas: string[], ancho: number, area: Caja, ocupado: Caja[]): Ubicada {
+  const w = ancho, h = lineas.length * 10;
+  const cands: [Caja, Ubicada["ancla"]][] = [
+    [{ x0: ax + 6, y0: ay - 3 - h, x1: ax + 6 + w, y1: ay - 3 }, "start"],
+    [{ x0: ax + 7, y0: ay - h / 2, x1: ax + 7 + w, y1: ay + h / 2 }, "start"],
+    [{ x0: ax - w / 2, y0: ay - 7 - h, x1: ax + w / 2, y1: ay - 7 }, "middle"],
+    [{ x0: ax - 7 - w, y0: ay - h / 2, x1: ax - 7, y1: ay + h / 2 }, "end"],
+    [{ x0: ax - w / 2, y0: ay + 7, x1: ax + w / 2, y1: ay + 7 + h }, "middle"],
+  ];
+  for (const [c, ancla] of cands) {
+    if (c.x0 < area.x0 || c.x1 > area.x1 || c.y0 < area.y0 || c.y1 > area.y1) continue;
+    if (!ocupado.some((o) => choca(c, o))) return { lineas, caja: c, ancla };
+  }
+  // sin lugar libre: borde superior, corriendo hacia la derecha hasta encontrar hueco
+  let x0 = Math.max(area.x0, Math.min(ax - w / 2, area.x1 - w));
+  const y0 = area.y0 - 4;
+  let caja: Caja = { x0, y0, x1: x0 + w, y1: y0 + h };
+  for (let k = 0; k < 40 && ocupado.some((o) => choca(caja, o)) && caja.x1 + 4 <= area.x1; k++) { x0 += 4; caja = { x0, y0, x1: x0 + w, y1: y0 + h }; }
+  return { lineas, caja, ancla: "middle", guia: { x: ax, y: ay } };
+}
+
 function Dispersion({ o, color, metrica, hoy }: { o: Corr; color: string; metrica: string; hoy: Hoy | null }) {
-  const W = 260, H = 170, mg = { l: 34, r: 8, t: 8, b: 22 };
+  const W = 260, H = 170, mg = { l: 34, r: 8, t: 12, b: 22 };
   const xs = o.pts.map((q) => q.x), ys = o.pts.map((q) => q.e.v);
   let x0 = Math.min(...xs), x1 = Math.max(...xs);
   const px = (x1 - x0) * 0.08 || 1; x0 -= px; x1 += px;
   if (hoy) { x0 = Math.min(x0, hoy.x - px); x1 = Math.max(x1, hoy.x + px); }
   const y0 = Math.max(0, Math.min(...ys, hoy ? hoy.est : Infinity) - 4), y1 = Math.max(...ys, hoy ? hoy.est : -Infinity) + 4;
   const X = (v: number) => mg.l + (v - x0) / (x1 - x0) * (W - mg.l - mg.r), Y = (v: number) => H - mg.b - (v - y0) / (y1 - y0) * (H - mg.t - mg.b);
+
+  // Etiquetas (R15): primero lo que ya ocupa lugar (puntos, recta, marcador de hoy), después "Hoy" y por último el año de cada elección
+  const area: Caja = { x0: mg.l, y0: mg.t, x1: W - 2, y1: H - mg.b };
+  const ocupado: Caja[] = o.pts.map((q) => ({ x0: X(q.x) - 4.5, y0: Y(q.e.v) - 4.5, x1: X(q.x) + 4.5, y1: Y(q.e.v) + 4.5 }));
+  for (let k = 0; k <= 40; k++) {   // la recta de ajuste, en tramos chicos
+    const xv = x0 + (x1 - x0) * k / 40, cx = X(xv), cy = Y(o.a + o.b * xv);
+    ocupado.push({ x0: cx - 2, y0: cy - 2, x1: cx + 2, y1: cy + 2 });
+  }
+  let etHoy: Ubicada | null = null;
+  if (hoy) {
+    const hx = X(hoy.x), hy = Y(hoy.est);
+    ocupado.push({ x0: hx - 6, y0: hy - 7, x1: hx + 6, y1: hy + 7 }, { x0: mg.l, y0: hy - 1.5, x1: hx, y1: hy + 1.5 });
+    const lineas = hoy.fuera ? [`Hoy ${nf0.format(hoy.est)} %`, "extrapolado"] : [`Hoy ${nf0.format(hoy.est)} %`];
+    etHoy = ubicar(hx, hy, lineas, Math.max(...lineas.map((l) => l.length)) * 5.4, area, ocupado);
+    ocupado.push(etHoy.caja);
+  }
+  const etAnio = o.pts.map((q) => {
+    const u = ubicar(X(q.x), Y(q.e.v), [q.e.anio.slice(2)], 11, area, ocupado);
+    ocupado.push(u.caja);
+    return u;
+  });
+  const texto = (u: Ubicada, estilo: React.CSSProperties) => {
+    const tx = u.ancla === "start" ? u.caja.x0 : u.ancla === "end" ? u.caja.x1 : (u.caja.x0 + u.caja.x1) / 2;
+    return (
+      <>
+        {u.guia && <line x1={u.guia.x} y1={u.guia.y} x2={(u.caja.x0 + u.caja.x1) / 2} y2={u.caja.y1} stroke="var(--text-muted)" strokeWidth="1" strokeDasharray="1 2" />}
+        <text textAnchor={u.ancla} style={estilo}>
+          {u.lineas.map((l, i) => <tspan key={i} x={tx} y={u.caja.y0 + 7.5 + i * 10}>{l}</tspan>)}
+        </text>
+      </>
+    );
+  };
   return (
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Dispersión: ${o.s.n}`}>
       {niceTicks(y0, y1, 3).filter((v) => v >= y0 && v <= y1).map((v) => (
@@ -47,24 +107,24 @@ function Dispersion({ o, color, metrica, hoy }: { o: Corr; color: string; metric
         <text key={"x" + v} x={X(v)} y={H - 8} textAnchor="middle" style={{ fontSize: 9 }}>{o.c.pct || metrica !== "nivel" ? nf0.format(v) : fmtNum(v)}</text>
       ))}
       <line x1={X(x0)} x2={X(x1)} y1={Y(o.a + o.b * x0)} y2={Y(o.a + o.b * x1)} stroke={`var(${color})`} strokeOpacity=".55" strokeDasharray="4 3" />
-      {hoy && (
+      {hoy && etHoy && (
         <g>
           <line x1={mg.l} x2={X(hoy.x)} y1={Y(hoy.est)} y2={Y(hoy.est)} stroke="var(--series-2)" strokeWidth="1" strokeDasharray="2 2" />
           <path d={`M${mg.l - 4},${Y(hoy.est)} l5,-3.5 v7 z`} fill="var(--series-2)"><title>{`Valor estimado hoy: ${nf1.format(hoy.est)}%`}</title></path>
           <path d={`M${X(hoy.x)},${Y(hoy.est) - 6} l5.5,6 l-5.5,6 l-5.5,-6 z`} fill="var(--series-2)" stroke="var(--surface-1)" strokeWidth="1">
             <title>{`Hoy: ${o.s.n} ${nf1.format(hoy.x)} → ${nf1.format(hoy.est)}% estimado por la recta${hoy.fuera ? " (fuera de lo visto antes)" : ""}`}</title>
           </path>
-          <text x={X(hoy.x) > W / 2 ? X(hoy.x) - 8 : X(hoy.x) + 8} y={Y(hoy.est) + 3} textAnchor={X(hoy.x) > W / 2 ? "end" : "start"} style={{ fontSize: 9, fontWeight: 700, fill: "var(--text-primary)" }}>Hoy {nf0.format(hoy.est)}%{hoy.fuera ? " (extrapolado)" : ""}</text>
+          {texto(etHoy, { fontSize: 9, fontWeight: 700, fill: "var(--text-primary)" })}
         </g>
       )}
-      {o.pts.map((q) => {
+      {o.pts.map((q, k) => {
         const cx = X(q.x), cy = Y(q.e.v);
         return (
           <g key={q.e.f}>
             <circle cx={cx} cy={cy} r="3.5" fill={q.e.tipo === "pres" ? `var(${color})` : "var(--surface-1)"} stroke={`var(${color})`} strokeWidth="1.5">
               <title>{`${q.e.anio} ${q.e.tipo === "pres" ? "presidencial" : "legislativa"}: ${q.e.of} ${nf1.format(q.e.v)}% · ${o.s.n}: ${nf1.format(q.x)}`}</title>
             </circle>
-            <text x={cx + 5} y={cy - 4} style={{ fontSize: 9, fill: "var(--text-secondary)" }}>{q.e.anio.slice(2)}</text>
+            {texto(etAnio[k], { fontSize: 9, fill: "var(--text-secondary)" })}
           </g>
         );
       })}
@@ -81,6 +141,8 @@ export function Elecciones() {
   const [buscar, setBuscar] = useState("");
   const [sel, setSel] = useState<string[]>([]);
   const [hoja, setHoja] = useState(false);
+  const [hojaTipos, setHojaTipos] = useState(false);
+  const [hojaMedir, setHojaMedir] = useState(false);
   const PRES = useMemo(() => (m ? crearPres(m.F) : []), [m]);
   const ELEC = useMemo(() => (m ? crearElec(m.F) : []), [m]);
   const tipos = new Set(lista(p.has("et") ? p.get("et") : "pres,leg").filter((t) => t === "pres" || t === "leg"));
@@ -138,13 +200,8 @@ export function Elecciones() {
   const textoRel = (o: Corr) => `Cuanto ${metrica === "nivel" ? "más alto" : "más subió"} → ${o.r > 0 ? "más" : "menos"} votos al oficialismo`;
 
   const rta = voto ? fraseVoto(voto, corte) : null;
-  const chips = [
-    { clave: "tipos", texto: tipos.size === 2 ? "Presidenciales y legislativas" : tipos.has("pres") ? "Presidenciales" : tipos.has("leg") ? "Legislativas" : "Ninguna elección" },
-    { clave: "metrica", texto: `Medir: ${METRICA_E[metrica][0].toLowerCase()}` },
-    { clave: "corte", texto: `r ≥ ${nf1.format(corte)}` },
-    { clave: "vars", texto: `${filas.length} variables · mín. ${minN} elecciones` },
-    { clave: "detalle", texto: conIpc === "si" ? "Con detalle regional" : "Sin detalle regional" },
-  ];
+  const tiposTxt = tipos.size === 2 ? "Presidenciales y legislativas" : tipos.has("pres") ? "Presidenciales" : tipos.has("leg") ? "Legislativas" : "Ninguna elección";
+  const resumen = [tiposTxt, `Medir: ${METRICA_E[metrica][0].toLowerCase()}`, `|r| ≥ ${nf1.format(corte)}`, `${filas.length} variables · mín. ${minN} elecciones`, conIpc === "si" ? "Con detalle regional" : "Sin detalle regional"].join(" · ");
 
   return (
     <section>
@@ -169,15 +226,31 @@ export function Elecciones() {
             <p>Lo que dice el resultado <b>no es una encuesta ni un pronóstico</b>: son cuentas simples con pocas elecciones, que muestran qué pasó en el pasado cuando la economía estaba como hoy, no qué va a pasar. Una relación fuerte puede ser casualidad.</p>
           </InfoPunto>
         </p>
-        <BarraVista items={chips} onAbrir={() => setHoja(true)} />
-        <HojaListo titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
-          {(cerrar) => (
+        <BarraResumen resumen={resumen} onAjustes={() => setHoja(true)}
+          extras={<>
+            <button type="button" className="vistabar-ajustes" aria-haspopup="dialog" onClick={() => setHojaTipos(true)}>Elecciones</button>
+            <button type="button" className="vistabar-ajustes" aria-haspopup="dialog" onClick={() => setHojaMedir(true)}>Medir</button>
+          </>} />
+        <HojaListo titulo="Elecciones" abierta={hojaTipos} onCerrar={() => setHojaTipos(false)}>
+          {() => (
             <div className="elec-hoja">
-              <Opciones titulo="Elecciones" forma="dos" valor={tipos} onElegir={(v) => set({ et: [...alternar(tipos, v)].join(",") })}
+              <Pildoras titulo="Elecciones" valor={tipos} onElegir={(v) => set({ et: [...alternar(tipos, v)].join(",") })}
                 opciones={[["pres", "Presidenciales"], ["leg", "Legislativas"]]} />
+            </div>
+          )}
+        </HojaListo>
+        <HojaListo titulo="Medir" abierta={hojaMedir} onCerrar={() => setHojaMedir(false)}>
+          {() => (
+            <div className="elec-hoja">
               <Opciones titulo="Medir" forma="lista" valor={metrica} onElegir={(v) => set({ em: v === "var12" ? null : v })}
                 opciones={Object.entries(METRICA_E).map(([k, v]) => [k, v[0]] as [string, string])} />
               {metrica === "mandato" && <LineaInicio info={info} F={m.F} />}
+            </div>
+          )}
+        </HojaListo>
+        <HojaListo titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
+          {() => (
+            <div className="elec-hoja">
               <Opciones titulo="Relación mínima (|r|)" forma="seis" valor={String(corte)} onElegir={(v) => set({ elr: v === "0.6" ? null : v })}
                 opciones={CORTES_R.map((r) => [String(r), nf1.format(r)] as [string, string])} />
               <div className="elec-grupo">
@@ -231,20 +304,21 @@ export function Elecciones() {
       <Capitulo id="elec-correlacion" titulo="Correlación de cada variable con el voto al oficialismo"
         bajada={`${filas.length} variables${filas.length > 300 ? " (se muestran las primeras 300)" : ""}. Tocá un encabezado para ordenar.`}>
         <input type="search" className="elec-buscar" aria-label="Buscar variable" placeholder="Buscar variable: salario, inflación, dólar…" value={buscar} onChange={(ev) => setBuscar(ev.target.value)} />
-        <div className="tablewrap alto fija"><table>
-          <thead><tr><th>Variable</th>{th("r", "r")}{th("abs", "Fuerza |r|")}{th("n", "Elecciones")}<th style={{ textAlign: "left" }}>Qué dice</th><th>Gráfico</th></tr></thead>
+        <div className="tablewrap alto fija elec-corr"><table>
+          <thead><tr><th>Variable</th>{th("r", "r")}{th("abs", "Fuerza |r|")}{th("n", "Elecciones")}<th style={{ textAlign: "left" }}>Qué dice</th><th>Gráfico</th><th><span className="sr-solo">Qué es la variable</span></th></tr></thead>
           <tbody>
             {filas.slice(0, 300).map((o) => {
               const on = sel.includes(o.s.id);
               return (
-                <tr key={o.s.id}><CeldaVar nombre={o.s.n} unidad={`${o.s.cat.slice(0, 2).join(" › ")} · ${o.c.unidad}`} info={<BotonInfo id={o.s.id} />} />
+                <tr key={o.s.id}><CeldaVar nombre={o.s.n} />
                   <Valor tono={null}>{fmtR(o.r)}</Valor>
                   <td><span className="barrita" style={{ ["--w" as string]: `${Math.round(Math.abs(o.r) * 100)}%` }} />{nf0.format(o.r * o.r * 100)} %<small>r²</small></td>
                   <td>{o.n}</td><td className="unidad">{textoRel(o)}</td>
-                  <td><button type="button" className={`btn elec-graficar${on ? " on" : ""}`} aria-pressed={on} onClick={() => setSel(on ? sel.filter((x) => x !== o.s.id) : [...sel, o.s.id])}>{on ? "✓ en gráficos" : "+ graficar"}</button></td></tr>
+                  <td><button type="button" className={`btn elec-graficar${on ? " on" : ""}`} aria-pressed={on} onClick={() => setSel(on ? sel.filter((x) => x !== o.s.id) : [...sel, o.s.id])}>{on ? "✓ en gráficos" : "+ graficar"}</button></td>
+                  <td className="elec-info-col"><BotonInfo id={o.s.id} /></td></tr>
               );
             })}
-            {!filas.length && <tr><td colSpan={6} style={{ textAlign: "center", color: "var(--text-muted)" }}>Nada para mostrar.</td></tr>}
+            {!filas.length && <tr><td colSpan={7} style={{ textAlign: "center", color: "var(--text-muted)" }}>Nada para mostrar.</td></tr>}
           </tbody>
         </table></div>
       </Capitulo>

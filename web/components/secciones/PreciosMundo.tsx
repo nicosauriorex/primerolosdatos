@@ -7,7 +7,7 @@ import { Cargando, Selector, Seg } from "../ui";
 import { Grafico, type OpcionesG, type SerieG } from "../Grafico";
 import { PALETA } from "../util";
 import { Capitulo } from "../sistema/Capitulo";
-import { BarraVista } from "../sistema/BarraVista";
+import { BarraResumen, Pildoras } from "./Ranking";
 import { Hoja } from "../sistema/Hoja";
 import { InfoPunto } from "../sistema/InfoPunto";
 import { CompartirHoja } from "../sistema/CompartirHoja";
@@ -87,6 +87,7 @@ function Filas({ titulo, filas, rid, set }: { titulo: string; filas: ResumenRubr
 
 function Detalle({ d, rid, dolar, arg, p, set }: { d: DatosPM; rid: string; dolar: Dolar; arg: ReturnType<typeof argDesdeMotor>; p: URLSearchParams; set: Setter }) {
   const [hoja, setHoja] = useState(false);
+  const [hojaPaises, setHojaPaises] = useState(false);
   const r = d.rubros[rid];
   const disponibles = Object.keys(d.paises).filter((c) => c !== ARG);
   const habilitado = (c: string) => !d.sin_datos[c];
@@ -116,16 +117,13 @@ function Detalle({ d, rid, dolar, arg, p, set }: { d: DatosPM; rid: string; dola
   const hayGeneral = nv[ARG].mundoGeneral;
   const faltaBlue = Object.keys(nv[ARG].med).length < anios.length && dolar === "blue";
   const leyenda = series.filter((s) => s.key !== "mundo");
-  const chips = [
-    { clave: "rubro", texto: `Rubro: ${r.n}` },
-    { clave: "dolar", texto: `Dólar ${dolar === "blue" ? "blue" : "oficial"}` },
-    { clave: "paises", texto: elegidos.length === 1 ? "1 país" : `${elegidos.length} países` },
-  ];
+  const resumen = [`Rubro: ${r.n}`, `Dólar ${dolar === "blue" ? "blue" : "oficial"}`, elegidos.length === 1 ? "1 país" : `${elegidos.length} países`].join(" · ");
   return (
     <>
-      <BarraVista items={chips} onAbrir={() => setHoja(true)} />
+      <BarraResumen resumen={resumen} onAjustes={() => setHoja(true)}
+        extras={<button type="button" className="vistabar-ajustes" aria-haspopup="dialog" onClick={() => setHojaPaises(true)}>Países</button>} />
       <HojaListo titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
-        {(cerrar) => (
+        {() => (
           <div className="ctx-hoja">
             <FilaAjuste rotulo="Rubro">
               <Selector etiqueta="Rubro" valor={rid} opciones={Object.keys(d.rubros).map((k) => [k, d.rubros[k].n] as [string, string])} onElegir={(v) => set({ pmr: v === "total" ? null : v })} />
@@ -133,14 +131,15 @@ function Detalle({ d, rid, dolar, arg, p, set }: { d: DatosPM; rid: string; dola
             <FilaAjuste rotulo="Dólar" ayuda="Para convertir los precios argentinos.">
               <Seg valor={dolar} opciones={DOLARES} onElegir={(v) => set({ pmd: v === "oficial" ? null : v })} />
             </FilaAjuste>
-            <FilaAjuste rotulo="Países">
-              <div className="seg" role="group" aria-label="Países para comparar">
-                {disponibles.map((c) => (
-                  <button key={c} type="button" aria-pressed={elegidos.includes(c)} disabled={!habilitado(c)} title={habilitado(c) ? undefined : `Sin datos por rubro: ${d.sin_datos[c]}`}
-                    onClick={() => alternar(c)}>{d.paises[c]}{!habilitado(c) ? <small> (sin datos por rubro)</small> : null}</button>
-                ))}
-              </div>
-            </FilaAjuste>
+          </div>
+        )}
+      </HojaListo>
+      <HojaListo titulo="Países" abierta={hojaPaises} onCerrar={() => setHojaPaises(false)}>
+        {() => (
+          <div className="ctx-hoja">
+            <Pildoras titulo="Países para comparar" valor={new Set(elegidos)} onElegir={alternar}
+              opciones={disponibles.map((c) => [c, d.paises[c]] as [string, string])}
+              bloqueadas={Object.fromEntries(disponibles.filter((c) => !habilitado(c)).map((c) => [c, `Sin datos por rubro: ${d.sin_datos[c]}`]))} />
           </div>
         )}
       </HojaListo>

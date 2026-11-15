@@ -317,10 +317,46 @@ export const PERIODO_DEFECTO: PeriodoDiario = "3m";
 const MESES_DE: Record<PeriodoDiario, number> = { "1m": 1, "3m": 3, "1a": 12, "5a": 60, todo: 0 };
 export const esPeriodoDiario = (s: string | null | undefined): s is PeriodoDiario => !!s && s in MESES_DE;
 
+/** Un rango de fechas elegido a mano (parámetros `pd` y `ph` de la URL): días enteros desde 1970; `hasta` null = hasta el último dato. */
+export interface RangoDiario { desde: number; hasta: number | null }
+/** El período del gráfico: un atajo ("3m") o un rango de fechas. */
+export type PeriodoElegido = PeriodoDiario | RangoDiario;
+/** Texto estable de un período, para usar como dependencia de efectos y memos. */
+export const claveDePeriodo = (per: PeriodoElegido): string => (typeof per === "string" ? per : `${per.desde}_${per.hasta ?? ""}`);
+/** "2026-11-05" válido → día entero; cualquier otra cosa (formato roto, 31-feb) → null. */
+export function diaDeIso(s: string | null | undefined): number | null {
+  if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const d = diaDe(s);
+  return Number.isFinite(d) && isoDeDia(d) === s ? d : null;
+}
+/** El rango de la URL: `pd` manda sobre `per`; sin `pd`, `ph` solo no alcanza (null). Si vienen al revés se ordenan. */
+export function rangoDeUrl(pd: string | null | undefined, ph: string | null | undefined): RangoDiario | null {
+  const a = diaDeIso(pd);
+  if (a === null) return null;
+  const b = diaDeIso(ph);
+  return b !== null && b < a ? { desde: b, hasta: a } : { desde: a, hasta: b };
+}
+/** Primer y último día con dato de una serie (para limitar los campos de fecha). */
+export const limitesSerie = (s: SerieDiaria): { min: number; max: number } => ({ min: s.dias[0], max: s.dias[s.dias.length - 1] });
+/** "05-nov-26 – 12-nov-26" */
+export function rangoTxt(r: RangoDiario, s: SerieDiaria): string {
+  const { min, max } = limitesSerie(s);
+  const a = Math.max(min, Math.min(max, r.desde)), b = Math.max(min, Math.min(max, r.hasta ?? max));
+  return `${fmtDia(a, true)} – ${fmtDia(b, true)}`;
+}
+
 export interface Tramo { dias: number[]; v: number[] }
-/** Los datos del período, contado hacia atrás desde el último dato de la serie; los valores ya en la escala de la tarjeta (billones). */
-export function recorte(clave: ClaveDiario, s: SerieDiaria, per: PeriodoDiario): Tramo {
+/** Los datos del período, contado hacia atrás desde el último dato de la serie (o el rango de fechas elegido, recortado a las fechas con datos);
+ *  los valores ya en la escala de la tarjeta (billones). Siempre al menos dos puntos. */
+export function recorte(clave: ClaveDiario, s: SerieDiaria, per: PeriodoElegido): Tramo {
   const esc = DEFS[clave].esc, n = s.v.length;
+  if (typeof per !== "string") {
+    let i1 = idxHasta(s.dias, per.hasta ?? s.dias[n - 1]);               // último dato en o antes de `hasta`
+    if (i1 < 1) i1 = Math.min(1, n - 1);
+    let i0 = idxHasta(s.dias, per.desde - 1) + 1;                         // primer dato en o después de `desde`
+    if (i1 - i0 < 1) i0 = Math.max(0, i1 - 1);
+    return { dias: s.dias.slice(i0, i1 + 1), v: s.v.slice(i0, i1 + 1).map((x) => x / esc) };
+  }
   const desde = per === "todo" ? s.dias[0] : restarMeses(s.dias[n - 1], MESES_DE[per]);
   let i0 = per === "todo" ? 0 : idxHasta(s.dias, desde - 1) + 1;
   if (n - i0 < 2) i0 = Math.max(0, n - 2);          // siempre al menos dos puntos
@@ -392,7 +428,7 @@ export interface ResumenRuedas {
   neto: number;                                 // compras − ventas
   promedio: number | null;                      // neto / ruedas, redondeado a entero; null sin ruedas
 }
-export function resumenRuedas(s: SerieDiaria, per: PeriodoDiario): ResumenRuedas {
+export function resumenRuedas(s: SerieDiaria, per: PeriodoElegido): ResumenRuedas {
   const t = recorte("compras", s, per), def = DEFS.compras;
   let nC = 0, tC = 0, nV = 0, tV = 0, n0 = 0;
   for (const x of t.v) {
@@ -405,13 +441,17 @@ export function resumenRuedas(s: SerieDiaria, per: PeriodoDiario): ResumenRuedas
 /** Texto con signo y sin unidad ("+1.234", "−56", "0"). */
 export const netoTxt = (x: number): string => (x === 0 ? "0" : `${signo(x)}${nf0.format(Math.abs(x))}`);
 
-/** Una línea para la fila de compras: rueda anterior, acumulados y racha, sin repetir lo que ya está en la cifra principal. */
+/** Una línea para la fila de compras: "Acumulado nov-26: +51 · 2026: +16.037 · 2 ruedas seguidas comprando". La rueda anterior y lo demás
+ *  quedan en el detalle (filas y frases al abrir la fila). Sin unidad: la cifra principal ya dice "US$ … millones". */
 export function lineaCompras(v: ResumenVariable): string {
   const partes: string[] = [];
-  if (v.destacado) partes.push(v.destacado.charAt(0).toUpperCase() + v.destacado.slice(1));     // "La mayor compra desde el 22-oct-26"
-  partes.push(...v.filas.map((f) => `${f.rotulo}: ${f.valor}`));
+  for (const f of v.filas) {
+    const m = /^Acumulado de (.+)$/.exec(f.rotulo);
+    if (!m) continue;
+    partes.push(/^\d{4}$/.test(m[1]) ? `${m[1]}: ${f.valor}` : `Acumulado ${m[1]}: ${f.valor}`);
+  }
   const racha = v.frases.find((x) => /ruedas seguidas/.test(x));
-  if (racha) partes.push(racha.toLowerCase());
+  if (racha) partes.push(racha.charAt(0).toLowerCase() + racha.slice(1));
   return partes.join(" · ");
 }
 
@@ -423,19 +463,25 @@ export function extremosTramo(clave: ClaveDiario, t: Tramo): { alto: { fecha: st
 }
 
 // ---------------------------------------------------------------- cambios para mostrar con Delta (etapa 3.5)
-export interface CambioParte { texto: string; tono: ClsDiario; dir: 1 | -1 | 0; contra: string }
+export interface CambioParte { texto: string; tono: ClsDiario; dir: 1 | -1 | 0; contra: string; etiqueta: string }
 const dirDeTexto = (t: string): 1 | -1 | 0 => (t.startsWith("+") ? 1 : /^[-−]/.test(t) ? -1 : 0);
 
 /** Los cambios de una variable de nivel o tasa contra el día anterior y contra un mes atrás, tal como ya los calcula el parte
- *  (con los valores mostrados). Las compras (un flujo) no se comparan con el día anterior: sin cambios. */
-export function cambiosDe(v: ResumenVariable): CambioParte[] {
+ *  (con los valores mostrados). Las compras (un flujo) no se comparan con el día anterior: sin cambios.
+ *  `compacto` (filas de la lista): sin "US$ … millones" ni "$ " (la cifra de la fila ya dice la unidad) y con el rótulo corto ("día ant.", "mes"). */
+export function cambiosDe(v: ResumenVariable, compacto = false): CambioParte[] {
   const r: CambioParte[] = [];
   // con su unidad: "−US$ 851 millones", "+$ 5,20", "+0,25 p.p." (una diferencia de tasas va en puntos)
   const def = DEFS[v.clave];
   // (la diferencia de una tasa ya viene en "puntos": se dice una sola vez, "+0,31 p.p.", nunca "puntos p.p.")
-  const conUnidad = (t: string) => /%|p\.p\./.test(t) ? t : def.tipo === "tasa" ? `${t.replace(/\s*puntos$/, "")} p.p.` : t.replace(/^([+−-]?)/, `$1${def.pref}`) + def.suf;
-  if (v.difAnterior) r.push({ texto: conUnidad(v.difAnterior), tono: v.clsAnterior, dir: dirDeTexto(v.difAnterior), contra: "vs día anterior" });
+  const conUnidad = (t: string) => /%|p\.p\./.test(t) ? t : def.tipo === "tasa" ? `${t.replace(/\s*puntos$/, "")} p.p.` : compacto ? t : t.replace(/^([+−-]?)/, `$1${def.pref}`) + def.suf;
+  const arma = (t: string, tono: ClsDiario, largo: string, corto: string): CambioParte => {
+    const texto = conUnidad(t), dir = dirDeTexto(t);
+    const sinSigno = texto.replace(/^[+−-]/, "");
+    return { texto, tono, dir, contra: compacto ? corto : largo, etiqueta: dir === 0 ? `Sin cambios ${largo.replace(/^vs\s+/, "contra ")}` : `${dir > 0 ? "Sube" : "Baja"} ${sinSigno}${compacto && def.tipo !== "tasa" ? ` ${def.unidad}` : ""} ${largo.replace(/^vs\s+/, "contra ")}` };
+  };
+  if (v.difAnterior) r.push(arma(v.difAnterior, v.clsAnterior, "vs día anterior", "día ant."));
   const mes = v.tipo === "flujo" ? null : v.filas.find((f) => f.rotulo === "Hace un mes");
-  if (mes) r.push({ texto: conUnidad(mes.valor), tono: mes.cls, dir: dirDeTexto(mes.valor), contra: "vs hace un mes" });
+  if (mes) r.push(arma(mes.valor, mes.cls, "vs hace un mes", "mes"));
   return r;
 }

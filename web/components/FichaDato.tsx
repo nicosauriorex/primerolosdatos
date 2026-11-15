@@ -2,18 +2,18 @@
 // Ficha del dato: una variable contada en capítulos cortos, cada uno con su pregunta (docs/specs/remodelacion-fichas.md):
 // Ahora (cifra y cambios), ¿Cómo viene? (el gráfico con su período), ¿Cómo fue <mes> en otros años?,
 // ¿Cómo le fue con cada presidente? (tabla o velas), Mes a mes desde que asumió, Gráficos listos y, plegado al final, Cómo se mide.
-// Cada capítulo tiene su Compartir (imagen, link y texto) y, si corresponde, "Abrir completo" con la variable ya cargada en esa sección.
+// Cada capítulo tiene su Compartir (imagen, link y texto) arriba a la derecha de su título, siempre el último botón (R11) y, si corresponde, "Abrir completo" con la variable ya cargada en esa sección.
 // La usan la página de cada tema y la ruta /dato/.
-import { useEffect, useMemo, useState, type ReactNode, type Ref } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode, type Ref } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useSeccion } from "./useSeccion";
 import { useConfig } from "./ConfigProvider";
-import { Cargando } from "./ui";
+import { Cargando, Seg } from "./ui";
 import { Grafico, type Fila, type OpcionesG, type SerieG } from "./Grafico";
 import { Velas } from "./Velas";
 import { PanelCompartir, type VistaCompartir } from "./PanelCompartir";
-import { IconoIr } from "./Iconos";
+import { IconoIr, IconoPausa, IconoSeguir } from "./Iconos";
 import { PALETA, vcolor } from "./util";
 import { LineaInicio, type InicioMandato } from "./secciones/comunes";
 import { CabeceraDato } from "./sistema/CabeceraDato";
@@ -95,7 +95,7 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [m, version, kE, b, pd, PRES]);
   const fuente = fuentePublica(c.serie.fuente);
-  const V = useViene(m, e, version, p);   // el período del gráfico: lo usan el capítulo "¿Cómo viene?" y el Compartir de la cabecera
+  const V = useViene(m, e, version, p);   // el período del gráfico: lo usan el capítulo "¿Cómo viene?" y su Compartir
   const hrefV = hrefHistorico(e, V.per ? { d: V.D.E.desde, h: V.D.E.hasta } : {});
   const textoV = cab ? `${nombre}: ${cab.cifra} en ${cab.fecha}. Fuente: ${fuente}.` : undefined;
 
@@ -105,12 +105,12 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
         cifra={cab?.cifra ?? "–"} fecha={cab ? `${cab.fecha}${cab.ultimoDisponible ? " · Último dato disponible" : ""}` : ""}
         deltas={cab?.deltas ?? []} secundarias={cab?.secundarias} frase={cab?.frase}
         fuente={fuente} mesDato={cab?.fecha}
-        accion={<Compartir variante="principal" titulo={nombre} href={linkCompartir(e, hrefV, V.per ? { fper: V.per } : {})} texto={textoV}
+        info={<>{c.serie.desc ? <p>{c.serie.desc}</p> : null}<p>Fuente: {fuente}.</p></>} />
+      <CapViene m={m} e={e} nivel={nivel} set={set} V={V}
+        compartir={<Compartir titulo={nombre} href={linkCompartir(e, hrefV, V.per ? { fper: V.per } : {})} texto={textoV}
           vista={() => ({ exprs: [e], modo: "valor", eje: "propia", desde: V.D.E.desde, hasta: V.D.E.hasta, meses: V.D.E.meses, freq: "M", ag: "promedio",
             // la imagen lleva las mismas frases de contexto que la cabecera (F4): la que se ve, o ninguna si la cabecera no muestra
-            frases: cab?.fraseClave ? [cab.fraseClave] : [], fraseFija: cab?.frase })} />}
-        info={<>{c.serie.desc ? <p>{c.serie.desc}</p> : null}<p>Fuente: {fuente}.</p></>} />
-      <CapViene m={m} e={e} nivel={nivel} set={set} V={V} />
+            frases: cab?.fraseClave ? [cab.fraseClave] : [], fraseFija: cab?.frase })} />} />
       <CapMeses key={kE} m={m} e={e} version={version} nivel={nivel} nombre={nombre} />
       <CapPresidentes m={m} e={e} info={info} nivel={nivel} pd={pd} inicio={inicio} nombre={nombre}
         velas={unoDe(p.get("pvista"), ["tabla", "velas"] as const, "tabla") === "velas"} onVista={(v) => set({ pvista: v ? "velas" : null })} />
@@ -129,23 +129,23 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
   );
 }
 
-/** Compartir: la hoja con imagen (si hay `vista`), link y texto; la imagen abre el panel de siempre. Principal (cabecera del dato, con texto) o de ícono (capítulos). */
-function Compartir({ href, titulo, texto, vista, variante = "icono" }: {
-  href: string; titulo: string; texto?: string; vista?: () => VistaCompartir | null; variante?: "icono" | "principal";
-}) {
+/** Compartir: la hoja con imagen (si hay `vista`), link y texto; la imagen abre el panel de siempre. Es el mismo botón en todos los capítulos (R11). */
+function Compartir({ href, titulo, texto, vista }: { href: string; titulo: string; texto?: string; vista?: () => VistaCompartir | null }) {
   const [abierto, setAbierto] = useState<VistaCompartir | null>(null);
   return (
     <>
-      <CompartirHoja variante={variante} href={href} titulo={titulo} texto={texto} onImagen={vista ? () => { const v = vista(); if (v) setAbierto(v); } : undefined} />
+      <CompartirHoja href={href} titulo={titulo} texto={texto} onImagen={vista ? () => { const v = vista(); if (v) setAbierto(v); } : undefined} />
       {abierto && createPortal(<PanelCompartir vista={abierto} href={absoluto(href)} titulo={titulo} onCerrar={() => setAbierto(null)} />, document.body)}
     </>
   );
 }
-function Acciones({ compartir, href, donde }: { compartir: ReactNode; href?: string; donde: string }) {
+/** Botones de la barra de un capítulo, siempre en el mismo orden: lo propio del capítulo (`extra`), "Abrir completo" y, último a la derecha, Compartir. */
+function Acciones({ compartir, extra, href, donde }: { compartir?: ReactNode; extra?: ReactNode; href?: string; donde?: string }) {
   return (
     <>
-      {compartir}
+      {extra}
       {href && <Link prefetch={false} className="btn fi-abrir" href={href} aria-label={`Abrir completo en ${donde}`}>Abrir completo<IconoIr /></Link>}
+      {compartir}
     </>
   );
 }
@@ -174,7 +174,7 @@ function useViene(m: Motor, e: Expr, version: number, p: URLSearchParams) {
 }
 type Viene = ReturnType<typeof useViene>;
 
-function CapViene({ m, e, nivel, set, V }: { m: Motor; e: Expr; nivel: Nivel; set: SetFn; V: Viene }) {
+function CapViene({ m, e, nivel, set, V, compartir }: { m: Motor; e: Expr; nivel: Nivel; set: SetFn; V: Viene; compartir: ReactNode }) {
   const { config } = useConfig();
   const { opciones, per, D } = V;
   const franjas = useMemo(() => (config.franjas ? franjasPres(m.F, baseDeConfig(config, PRES_DEF.map((x) => x.id))) : undefined),
@@ -183,9 +183,8 @@ function CapViene({ m, e, nivel, set, V }: { m: Motor; e: Expr; nivel: Nivel; se
   const opts = useMemo(() => (franjas ? { ...D.opts, franjas } : D.opts), [D.opts, franjas]);
   const { c, E } = D;
   const href = hrefHistorico(e, per ? { d: E.desde, h: E.hasta } : {});
-  // El Compartir de este capítulo está en la cabecera del dato (junto a la cifra): acá solo "Abrir completo"
   return (
-    <Capitulo id="fi-viene" nivel={nivel} titulo="¿Cómo viene?" acciones={<Acciones donde="Histórico" href={href} compartir={null} />}>
+    <Capitulo id="fi-viene" nivel={nivel} titulo="¿Cómo viene?" acciones={<Acciones donde="Histórico" href={href} compartir={compartir} />}>
       {opciones.length > 1 && <FilaChips etiqueta="Período" opciones={opciones} valor={per} onElegir={(v) => set({ fper: v || null })} />}
       <div className="fi-grafico"><Grafico rows={D.rows} series={D.series} opts={opts} /></div>
       <p className="fi-nota">{D.temporal.replace(/\.?$/, ".")} Unidad: {c.unidad}.</p>
@@ -258,14 +257,14 @@ function CapPresidentes({ m, e, info, nivel, pd, inicio, velas: enVelas, onVista
   const bajada = bajadaTablaMandatos(T.tasa);
   return (
     <Capitulo id="fi-pres" nivel={nivel} titulo={titulo} bajada={bajada} acciones={
-      <Acciones donde="Por presidente" href={href} compartir={<>
-        <AjustesTabla vista={enVelas ? "velas" : "tabla"} onVista={(v) => onVista(v === "velas")} columnas={T.columnas} extras={T.extras ?? []}
-          elegidas={sumadas} onElegidas={setSumadas} />
-        <Compartir titulo={`${c.corto} por presidente${enVelas ? " (velas)" : ""}`}
+      <Acciones donde="Por presidente" href={href}
+        extra={<AjustesTabla vista={enVelas ? "velas" : "tabla"} onVista={(v) => onVista(v === "velas")} columnas={T.columnas} extras={T.extras ?? []}
+          elegidas={sumadas} onElegidas={setSumadas} />}
+        compartir={<Compartir titulo={`${c.corto} por presidente${enVelas ? " (velas)" : ""}`}
           href={linkCompartir(e, href, { ...inicio, ...(enVelas ? { pvista: "velas" } : {}), ...(pd ? { pd } : {}) })}
           vista={sinVelas ? undefined : () => (enVelas
             ? { tipo: "velas", expr: e, presIds: ids, base: info.b }
-            : { tipo: "barras", expr: e, presIds: ids, base: info.b, ...(T.tasa ? { metrica: "var" as const } : {}) })} /></>} />}>
+            : { tipo: "barras", expr: e, presIds: ids, base: info.b, ...(T.tasa ? { metrica: "var" as const } : {}) })} />} />}>
       <LineaInicio info={info} F={F} />
       <div className="fi-pres-cuerpo">
         {!enVelas ? (
@@ -278,6 +277,59 @@ function CapPresidentes({ m, e, info, nivel, pd, inicio, velas: enVelas, onVista
       </div>
       <p className="fi-nota">Unidad: {c.unidad}.</p>
     </Capitulo>
+  );
+}
+
+// ------------------------------------------------------------ Mes a mes: el dibujo mes por mes (E1.2)
+const MS_POR_MES = 120;   // a velocidad normal
+const VELOCIDADES: [string, string][] = [["0.5", "Lenta 0,5×"], ["1", "Normal 1×"], ["2", "Rápida 2×"]];
+/** Estado del dibujo mes por mes: espera a que el gráfico esté a la vista (y quieto el resto), se pausa al tocarlo y, con "reducir movimiento"
+ *  (o sin IntersectionObserver), no anima: `n` = null (todo a la vista) y sin controles. `n` = cantidad de meses ya dibujados. */
+function useAnimMeses(total: number) {
+  const [quieto] = useState(() => typeof window === "undefined" || typeof IntersectionObserver === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const [n, setN] = useState<number | null>(quieto ? null : 0);
+  const [visto, setVisto] = useState(false);
+  const [marcha, setMarcha] = useState(true);
+  const [vel, setVel] = useState("1");
+  const caja = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = caja.current;
+    if (quieto || !el) return;
+    const io = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { setVisto(true); io.disconnect(); } }, { threshold: 0.4 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [quieto, total]);
+  useEffect(() => {
+    if (n == null || !visto || !marcha || n >= total) return;
+    const t = window.setTimeout(() => setN(n + 1), MS_POR_MES / Number(vel));
+    return () => window.clearTimeout(t);
+  }, [n, visto, marcha, vel, total]);
+  const termino = n != null && n >= total;
+  return {
+    n, caja, vel, marcha, termino, controles: !quieto,
+    tocar: () => { if (!quieto && marcha && !termino) setMarcha(false); },
+    repetir: () => { setN(0); setMarcha(true); setVisto(true); },
+    alternar: () => setMarcha((x) => !x),
+    velocidad: setVel,
+  };
+}
+type AnimMeses = ReturnType<typeof useAnimMeses>;
+const IconoRepetir = () => (
+  <svg className="icono" viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true" focusable="false">
+    <path d="M4 10a6 6 0 1 0 2-4.5M4 3v4h4" />
+  </svg>
+);
+/** Controles chicos debajo del gráfico: Repetir, Pausa/Seguir y Velocidad. */
+function ControlesMeses({ a }: { a: AnimMeses }) {
+  return (
+    <div className="fi-anim" role="group" aria-label="Animación mes a mes">
+      <button type="button" className="fi-anim-btn" onClick={a.repetir} aria-label="Repetir la animación"><IconoRepetir /><span>Repetir</span></button>
+      <button type="button" className="fi-anim-btn" onClick={a.alternar} disabled={a.termino} aria-pressed={!a.marcha}
+        aria-label={a.marcha ? "Pausar la animación" : "Seguir la animación"}>
+        {a.marcha ? <><IconoPausa /><span>Pausa</span></> : <><IconoSeguir /><span>Seguir</span></>}
+      </button>
+      <Seg opciones={VELOCIDADES} valor={a.vel} onElegir={a.velocidad} etiqueta="Velocidad" />
+    </div>
   );
 }
 
@@ -296,8 +348,10 @@ function CapMandato({ m, e, D, nivel, pd, inicio, b }: { m: Motor; e: Expr; D: D
     };
     return { series, opts };
   }, [D]);
-  // líneas suavizadas y, si se tocó un presidente en la leyenda, solo él opaco y grueso (las demás al 25 %)
-  const opts = useMemo(() => (G ? { ...G.opts, suave: true, resaltar: res } : null), [G, res]);
+  const N = D?.rows.length ?? 0;
+  const anim = useAnimMeses(N);
+  // líneas suavizadas y, si se tocó un presidente en la leyenda, solo él opaco y grueso (las demás al 25 %); `revelar`: los meses que ya se dibujaron
+  const opts = useMemo(() => (G ? { ...G.opts, suave: true, resaltar: res, revelar: anim.n } : null), [G, res, anim.n]);
   const titulo = "Mes a mes, desde que asumió";
   if (!D || !G || !opts) {
     const c = m.calc(e);
@@ -317,7 +371,8 @@ function CapMandato({ m, e, D, nivel, pd, inicio, b }: { m: Motor; e: Expr; D: D
           <button key={x.id} type="button" style={vcolor(x.color)} aria-pressed={res === x.id} onClick={() => setRes(res === x.id ? null : x.id)}>{x.n}</button>
         ))}
       </div>
-      <div className="fi-grafico"><Grafico rows={D.rows} series={G.series} opts={opts} /></div>
+      <div className="fi-grafico" ref={anim.caja} onPointerDown={anim.tocar}><Grafico rows={D.rows} series={G.series} opts={opts} /></div>
+      {anim.controles && <ControlesMeses a={anim} />}
       {D.modo !== "teorico" && <p className="fi-nota">Unidad: {D.c.unidad}.</p>}
     </Capitulo>
   );

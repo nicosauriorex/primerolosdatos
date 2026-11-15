@@ -19,8 +19,8 @@ function Accion({ icono, titulo, desc, onClick }: { icono: ReactNode; titulo: st
   );
 }
 
-/** `variante`: "texto" (por defecto) = ícono con la palabra "Compartir"; "icono" = solo el ícono, de 44 px, con `aria-label` "Compartir <titulo>" (aspecto secundario, para los capítulos);
- *  "principal" = ícono con la palabra, más grande, para la cabecera del dato. */
+/** R11 (tanda 8): una sola variante visual, la píldora chica amarilla `compartir` (ícono y palabra; solo el ícono si no hay lugar o con `variante="icono"`).
+ *  `variante="principal"` se mantiene por compatibilidad y se ve igual. */
 export function CompartirHoja({ href, titulo, onImagen, texto, variante = "texto", etiqueta }: {
   href: string; titulo: string; onImagen?: () => void; texto?: string; variante?: "texto" | "icono" | "principal"; etiqueta?: string;
 }) {
@@ -41,12 +41,12 @@ export function CompartirHoja({ href, titulo, onImagen, texto, variante = "texto
   return (
     <>
       {variante === "icono" ? (
-        <button type="button" className="comphoja-boton comphoja-icono" aria-haspopup="dialog" aria-label={`Compartir ${etiqueta ?? titulo}`} title="Compartir" onClick={() => setAbierta(true)}>
+        <button type="button" className="compartir solo-icono" aria-haspopup="dialog" aria-label={`Compartir ${etiqueta ?? titulo}`} title="Compartir" onClick={() => setAbierta(true)}>
           <IconoCompartir />
         </button>
       ) : (
-        <button type="button" className={`comphoja-boton${variante === "principal" ? " comphoja-principal" : ""}`} aria-haspopup="dialog" onClick={() => setAbierta(true)}>
-          <IconoCompartir /><span>Compartir</span>
+        <button type="button" className="compartir" aria-haspopup="dialog" aria-label={`Compartir ${etiqueta ?? titulo}`} onClick={() => setAbierta(true)}>
+          <IconoCompartir /><span className="compartir-txt">Compartir</span>
         </button>
       )}
       <Hoja titulo={`Compartir: ${titulo}`} abierta={abierta} onCerrar={() => setAbierta(false)}>

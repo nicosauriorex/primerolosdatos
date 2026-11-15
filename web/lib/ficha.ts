@@ -2,7 +2,7 @@
 // Una variable (`Expr`, la misma de la URL del Histórico) contada en capítulos: ahora, cómo viene, el mismo mes en otros años,
 // cada presidente y mes a mes desde que asumió. Funciones puras (sin React): la ficha y las imágenes usan las mismas.
 // Ver docs/specs/ajustes-tanda-5.md y docs/specs/remodelacion-fichas.md.
-import { calcularMandato, claseVariacion, crearPres, filasGrafico, statsMandato, varNum, type BaseCfg, type Fila, type ModoMandato, type Pres, type StatsM } from "./estadisticas";
+import { baseIdx, calcularMandato, claseVariacion, crearPres, filasGrafico, mesInicioTxt, statsMandato, varNum, type BaseCfg, type Fila, type ModoMandato, type Pres, type StatsM } from "./estadisticas";
 import { fmtMes, lastIdx, mesNum, nf1, ok, redondeadoComo, r1 } from "./formato";
 import { frecuenciaOrigen, leerComun, type Comun, type FrecOrigen } from "./historico";
 import type { ClaveFrase, DesdePref } from "./config";
@@ -231,6 +231,17 @@ export function mesesIguales(m: Motor, e: Expr, rango?: { desde: number; hasta: 
 
 // ------------------------------------------------------------ Capítulo "¿Cómo le fue con cada presidente?"
 export interface TablaFicha { filas: FilaMandato[]; columnas: ColumnaMandato[]; visibles: string[]; extras: string[]; tasa: boolean }
+/** Qué se cuenta de un presidente cuando su inicio no es el que se aplica al resto (E1.4): con otro corrimiento ("Cuenta desde ene-24 (mes después de asumir)")
+ *  o porque los datos empiezan después ("Cuenta desde ene-95 (inicio de los datos)"). Sin diferencia, undefined. */
+export function cuentaDesde(F: string[], arr: ArrayLike<number | null | undefined>, x: Pres, b: BaseCfg, st: StatsM): string | undefined {
+  if (st.iniI == null) return undefined;
+  const comun = baseIdx(F, x, { t0: b.t0, t0p: {} });   // dónde arrancaría con la regla general
+  if (st.iniI === comun) return undefined;
+  const propia = baseIdx(F, x, b);
+  const desde = fmtMes(F[st.iniI]);
+  if (st.iniI === propia && ok(arr[propia])) return `Cuenta desde ${desde} (${mesInicioTxt(b.t0p[x.id] ?? b.t0).replace(/^el /, "")})`;
+  return `Cuenta desde ${desde} (inicio de los datos)`;
+}
 /** Filas y columnas de `TablaMandatos` de la ficha: una fila por presidente con datos.
  *  Tasa (pedido 15, tanda 7): Inicio, Cierre y Variación (principal, cierre − inicio en p.p., con tono según `dir`); aparte Promedio, Mediana, Mínimo,
  *  Máximo, Acumulada (si es variación mensual) y los promedios de los 6 y 12 meses antes del mes 0 y de los últimos 6 y 12 meses del mandato.
@@ -250,7 +261,6 @@ export function filasMandatosFicha(m: Motor, e: Expr, b: BaseCfg): TablaFicha {
   for (const x of crearPres(F)) {
     const st = statsMandato(F, c.v, x, b);
     if (!st.n) continue;
-    const desde = datosDesde(F, c.v, x);
     const cls = claseVariacion(c.dir, c.pct, st.ini, st.fin);
     const celdas: FilaMandato["celdas"] = {
       ini: { texto: t(st.ini), valor: st.ini ?? null }, fin: { texto: t(st.fin), valor: st.fin ?? null },
@@ -266,7 +276,7 @@ export function filasMandatosFicha(m: Motor, e: Expr, b: BaseCfg): TablaFicha {
       celdas.u6 = st.finI == null ? sin : promedio(st.finI - 5, 6);
       celdas.u12 = st.finI == null ? sin : promedio(st.finI - 11, 12);
     }
-    filas.push({ id: x.id, nombre: x.corto, periodo: periodoMandato(F, x) + (desde ? ` (${desde})` : ""), color: x.color, celdas });
+    filas.push({ id: x.id, nombre: x.corto, periodo: periodoMandato(F, x), cuenta: cuentaDesde(F, c.v, x, b, st), color: x.color, celdas });
   }
   const base: ColumnaMandato[] = [{ clave: "ini", titulo: "Inicio" }, { clave: "fin", titulo: "Cierre" }, { clave: "var", titulo: "Variación", principal: true }];
   if (tasa) {

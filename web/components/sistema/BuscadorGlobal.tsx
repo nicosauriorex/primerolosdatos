@@ -13,6 +13,7 @@ export function BuscadorGlobal({ abierto, onCerrar }: { abierto: boolean; onCerr
   const [montado, setMontado] = useState(false);
   useEffect(() => setMontado(true), []);
   const panel = useRef<HTMLDivElement>(null);
+  const velo = useRef<HTMLDivElement>(null);
   const abiertoRef = useRef(abierto);
   abiertoRef.current = abierto;
   const alCerrar = useRef(onCerrar);
@@ -36,6 +37,17 @@ export function BuscadorGlobal({ abierto, onCerrar }: { abierto: boolean; onCerr
     };
   }, [abierto, esLaDeArriba]);
 
+  /** Con el teclado del celular abierto, la capa mide lo que realmente se ve (`visualViewport`): el título y la caja de búsqueda no quedan tapados ni fuera de pantalla. */
+  useEffect(() => {
+    const vv = window.visualViewport;
+    const v = velo.current;
+    if (!abierto || !vv || !v) return;
+    const ajustar = () => { v.style.top = `${vv.offsetTop}px`; v.style.height = `${vv.height}px`; v.style.bottom = "auto"; };
+    ajustar();
+    vv.addEventListener("resize", ajustar); vv.addEventListener("scroll", ajustar);
+    return () => { vv.removeEventListener("resize", ajustar); vv.removeEventListener("scroll", ajustar); };
+  }, [abierto, montado]);
+
   /** Un link con capas abiertas ya cierra la capa (`ui.tsx`). Si no lo hizo (el destino es la página donde ya está), se cierra acá. */
   const alElegir = () => { window.setTimeout(() => { if (abiertoRef.current) cerrarRef.current(); }, 300); };
 
@@ -51,7 +63,7 @@ export function BuscadorGlobal({ abierto, onCerrar }: { abierto: boolean; onCerr
 
   if (!abierto || !montado) return null;
   return createPortal(
-    <div className="busqg-velo" onMouseDown={(ev) => { if (ev.target === ev.currentTarget) cerrarAtras(); }} onKeyDown={atrapar}>
+    <div className="busqg-velo" ref={velo} onMouseDown={(ev) => { if (ev.target === ev.currentTarget) cerrarAtras(); }} onKeyDown={atrapar}>
       <div className="busqg" ref={panel} role="dialog" aria-modal="true" aria-label="Buscar">
         <header className="busqg-cab">
           <h2>Buscar</h2>

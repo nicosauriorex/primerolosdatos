@@ -116,6 +116,30 @@ Uso central: alguien escribe en redes "Milei fundió la economía" y otra person
   (→ spec: docs/specs/plantillas-y-vistas.md, como plantillas "cuánto compra un salario"; los índices del IPC medidos en salarios quedan pendientes.)
 - Galería pública de plantillas hechas por la gente (cuando haya cuentas).
 
+## ~~Ajustes pedidos al recorrer la página, tanda 8 (2026-11-14)~~ ✅ 2026-11-15
+→ spec: docs/specs/ajustes-tanda-8.md
+- Placas de la portada con variaciones, fecha y fuente a la misma altura entre placas; "¿Qué datos te interesan?" con la cifra alineada aunque lleve unidad, e íconos por tema; "Todas las secciones" menos aburrida (mosaico con íconos y explicación).
+- Ícono del sitio nuevo (con propuestas).
+- Buscador de variables: ⓘ que se sigue viendo mal; explicaciones de categoría ("Sobre Salarios") apretadas en columnas.
+- La cruz de las ventanas tapa la barra de desplazamiento al pasar el mouse.
+- Menú de arriba en la computadora con otro formato y otras opciones que el de abajo en el celular.
+- Configuración: píldoras dentro de una píldora grande que se rompe al bajar de renglón; varias píldoras elegidas juntas se ven feas (rediseñar las de elección múltiple).
+- Buscar: fondo transparente y la caja de búsqueda tapada por el título.
+- Mes a mes desde que asumió: dibujarse más despacio, mes por mes, con repetir y velocidad.
+- Parte del Banco Central: rótulos principales muy cargados; el resumen de ruedas abajo del gráfico; elegir una fecha además de 1 mes, 3 meses…
+- Histórico: "Gráficos listos" con un link a la misma página no hace nada; "Expandir" como ícono en el gráfico; sin filtro de fecha en Ajustes (ya está en la píldora del período).
+- Compartir: sacar el grande amarillo de la ficha; todos en el mismo lugar (y probar amarillo para encontrarlo).
+- ¿Cómo fue <mes> en otros años?: rótulo de la barra elegida arriba con línea de puntos; los fijos (último, extremos) también arriba con línea de su color.
+- Una variable, todos los presidentes: marcar en la tabla a quien se le cuenta distinto el inicio (inicio de mandato vs inicio de datos).
+- Un presidente, todas las variables: minigráfico, estrella para agregar o sacar de Mis variables, y en los grupos plegados cuántas mejoraron y empeoraron.
+- Meses de mandato: resaltar un presidente; por defecto dólar blue, pesos corrientes, mismo punto de partida, Milei; Resumen por hitos con gráfico o tabla con colores.
+- Herencia: déficit fiscal del año cerrado; resultado fiscal + cuasifiscal; deuda neta consolidada (Tesoro + Banco Central) si se puede; en el celular el cambio al lado del Hoy y variables más grandes.
+- Ranking y Elecciones: solo "Ajustes" se toca (los demás como texto), "Filtrar grupos" y "Elegir variable" como botones; etiquetas de la dispersión que no tapen puntos; correlación con el nombre solo.
+- Contexto: precios contra el mundo como barras directas (sin la pregunta) y selector más lindo.
+- Deuda neta consolidada (Tesoro + Banco Central), para la herencia y el Histórico: no está en el catálogo. Método a investigar (estimación propia, como las reservas netas, D-021): deuda bruta de la Administración Central − tenencias intra sector público (Banco Central, FGS, Banco Nación) + pasivos del Banco Central con privados (pasivos remunerados, deuda externa propia) − activos externos del Banco Central, todo en dólares. Fuentes: informe trimestral de deuda de la Secretaría de Finanzas (tenedores) y balance semanal del Banco Central. Antes: agente `investigador-datos` para confirmar series y frecuencia.
+- Fase siguiente: control de cada variable del Histórico (que no ofrezca opciones sin sentido, como inflación ajustada por inflación, y que se vea bien).
+- Regla: cada pedido vale para todo el sitio (barrido).
+
 ## ~~Ajustes pedidos al recorrer la portada y sus atajos (2026-11-14)~~ ✅ 2026-11-14
 → spec: docs/specs/ajustes-tanda-7.md
 - Botones y selectores sin caja de borde fino en todo el sitio (elegida: píldora rellena).

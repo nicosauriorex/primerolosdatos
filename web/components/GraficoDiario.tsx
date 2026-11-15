@@ -3,11 +3,11 @@
 // meses y no admite días, así que para esta página se dibuja uno aparte: línea (o barras en las compras de dólares), eje con marcas
 // redondas, y el valor del punto elegido en un renglón arriba (nada tapa el gráfico). Se elige un punto tocando, arrastrando o con las flechas.
 import { useEffect, useMemo, useRef, useState } from "react";
-import { fmtEjeY, marcasX, marcasY, masCercano, puntoTxt, recorte, reducir, tipoDiario, type ClaveDiario, type PeriodoDiario, type SerieDiaria } from "@/lib/diario";
+import { claveDePeriodo, fmtEjeY, marcasX, marcasY, masCercano, puntoTxt, recorte, reducir, tipoDiario, type ClaveDiario, type PeriodoElegido, type SerieDiaria } from "@/lib/diario";
 
 const ALTO = 280, M = { t: 10, r: 12, b: 26 };
 
-export function GraficoDiario({ clave, serie, periodo, etiqueta }: { clave: ClaveDiario; serie: SerieDiaria; periodo: PeriodoDiario; etiqueta: string }) {
+export function GraficoDiario({ clave, serie, periodo, etiqueta }: { clave: ClaveDiario; serie: SerieDiaria; periodo: PeriodoElegido; etiqueta: string }) {
   const caja = useRef<HTMLDivElement>(null);
   const [ancho, setAncho] = useState(0);
   const [sel, setSel] = useState<number | null>(null);    // índice en el tramo completo; null = el último dato
@@ -21,9 +21,10 @@ export function GraficoDiario({ clave, serie, periodo, etiqueta }: { clave: Clav
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  useEffect(() => setSel(null), [clave, periodo]);
+  const clavePeriodo = claveDePeriodo(periodo);
+  useEffect(() => setSel(null), [clave, clavePeriodo]);
 
-  const tramo = useMemo(() => recorte(clave, serie, periodo), [clave, serie, periodo]);
+  const tramo = useMemo(() => recorte(clave, serie, periodo), [clave, serie, clavePeriodo]);
   const barras = tipoDiario(clave) === "flujo";
   const g = useMemo(() => {
     const t = ancho > 0 ? reducir(tramo, Math.max(60, Math.round(ancho))) : tramo;

@@ -7,7 +7,6 @@ import { Cargando, Seg, Selector, alternar } from "../ui";
 import { IconoDerecha } from "../Iconos";
 import { Capitulo } from "../sistema/Capitulo";
 import { FilaChips } from "../sistema/FilaChips";
-import { BarraVista } from "../sistema/BarraVista";
 import { Hoja } from "../sistema/Hoja";
 import { InfoPunto } from "../sistema/InfoPunto";
 import { CompartirHoja } from "../sistema/CompartirHoja";
@@ -28,6 +27,7 @@ import { lista, unoDe, useParams } from "@/lib/url";
 import { IDS_PM, IDS_PREGUNTA, argDesdeMotor, type Dolar } from "@/lib/preciosMundo";
 import { PreciosMundo } from "./PreciosMundo";
 import { PreguntaPrecios } from "./PreguntaPrecios";
+import { BarraResumen, Pildoras } from "./Ranking";
 
 const f1 = (v: number | null | undefined) => (ok(v) ? nf1.format(v) : "—");
 const signo = (v: number) => { const r = Math.round(v * 10) / 10; return (r > 0 ? "+" : r < 0 ? "−" : "") + nf1.format(Math.abs(r)); };
@@ -259,19 +259,25 @@ function Comparar({ datos, p, set, resalta }: { datos: DatosContexto; p: URLSear
   });
   const tonoPuesto = (pu: number | null, de: number) => { if (!pu || de < 2) return null; const sc = 1 - (2 * (pu - 1)) / (de - 1); return sc > 0 ? "bueno" as const : sc < 0 ? "malo" as const : null; };
   const [hoja, setHoja] = useState(false);
+  const [hojaPaises, setHojaPaises] = useState(false);
   const resp = fraseComparar(datos);
-  const chips = [
-    { clave: "dato", texto: def.n },
-    ...(esIdx ? [{ clave: "base", texto: baseAnio == null ? "Valor" : `Base 100 desde ${baseAnio}` }] : []),
-    { clave: "paises", texto: `Argentina y ${sel.length} más` },
-  ];
+  const resumen = [def.n, ...(esIdx ? [baseAnio == null ? "Valor" : `Base 100 desde ${baseAnio}`] : []), `Argentina y ${sel.length} más`].join(" · ");
   const sufijo = esIdx ? "Crecimiento acumulado en el mandato (%)" : `Promedio del mandato (${def.u})`;
 
   return (
     <Capitulo id="comparar" titulo="La Argentina y otros países"
       acciones={<CompartirHoja href={hrefBloque(p, "comparar")} titulo="La Argentina y otros países" texto={resp ? `${resp} Fuente: ${datos.fuente}.` : undefined} />}>
       {resp && <p className="ctx-respuesta">{resp}</p>}
-      <BarraVista items={chips} onAbrir={() => setHoja(true)} />
+      <BarraResumen resumen={resumen} onAjustes={() => setHoja(true)}
+        extras={<button type="button" className="vistabar-ajustes" aria-haspopup="dialog" onClick={() => setHojaPaises(true)}>Países</button>} />
+      <HojaListo titulo="Países" abierta={hojaPaises} onCerrar={() => setHojaPaises(false)}>
+        {() => (
+          <div className="ctx-hoja">
+            <Pildoras titulo="Países para comparar" valor={new Set(sel)} opciones={[...PAISES.filter((e) => validas.has(e)), VEC, ...grupos.filter((g) => g !== VEC)].map((e) => [e, nombreEnt(datos, e)] as [string, string])}
+              onElegir={(v) => set({ cpp: [...alternar(new Set(sel), v, true)].join(",") || "-" })} />
+          </div>
+        )}
+      </HojaListo>
       <HojaListo titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
         {(cerrar) => (
           <div className="ctx-hoja">
@@ -288,10 +294,6 @@ function Comparar({ datos, p, set, resalta }: { datos: DatosContexto; p: URLSear
                 <Selector etiqueta="Año base" valor={String(baseAnio)} opciones={datos.anios.filter((y) => y <= hasta).map((y) => [String(y), `desde ${y}`] as [string, string])} onElegir={(v) => set({ cpb: v === "2000" ? null : v })} />
               </FilaAjuste>
             )}
-            <FilaAjuste rotulo="Países">
-              <Seg valor={new Set(sel)} opciones={[...PAISES.filter((e) => validas.has(e)), VEC, ...grupos.filter((g) => g !== VEC)].map((e) => [e, nombreEnt(datos, e)] as [string, string])}
-                onElegir={(v) => set({ cpp: [...alternar(new Set(sel), v, true)].join(",") || "-" })} />
-            </FilaAjuste>
           </div>
         )}
       </HojaListo>

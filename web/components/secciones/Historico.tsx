@@ -188,7 +188,7 @@ function BloqueGrafico({ i, total, compacto, g, E, m, set, version, onQuitar, on
     <div className="cab-graf">
       {total > 1 ? <h3>Gráfico {i + 1}</h3> : <span />}
       {g && (
-        <BotonCompartir className="btn" titulo={`Primero los Datos: ${total > 1 ? `gráfico ${i + 1}` : "Histórico"}`} href={() => window.location.href}
+        <BotonCompartir className="compartir" titulo={`Primero los Datos: ${total > 1 ? `gráfico ${i + 1}` : "Histórico"}`} href={() => window.location.href}
           deshabilitado={disp.length === 0} title="Armar una imagen de este gráfico para compartir" aria-label={`Compartir como imagen: gráfico ${i + 1}`}
           crearVista={() => vistaImg(E, g, disp)}><IconoCompartir />Compartir</BotonCompartir>
       )}
@@ -352,8 +352,8 @@ function SeccionPers({ titulo, abiertaInicial = false, children }: { titulo: str
   return <Plegable resumen={titulo} inicial={abiertaInicial} nivel="renglon" className="hi-sec">{children}</Plegable>;
 }
 
-/** Sección de la hoja de ajustes que se abre sola: la del chip que se tocó ("Ajustes" abre la de la variable, o las fechas si hay una sola). */
-type SecPers = "variable" | "fechas" | "opciones";
+/** Sección de la hoja de ajustes que se abre sola: la del chip que se tocó ("Ajustes" abre la de la variable). Las fechas tienen su propia ventana (la píldora del período). */
+type SecPers = "variable" | "opciones";
 
 /** Contenido de la hoja de ajustes: variables, fechas, opciones del gráfico y guardar, plegables. "Volver a lo de fábrica" y "Listo" van en el pie de la `Hoja`. */
 function ContenidoPers({ simple, opciones, tituloOpciones, abrir, cerrar }: {
@@ -365,7 +365,6 @@ function ContenidoPers({ simple, opciones, tituloOpciones, abrir, cerrar }: {
       {simple.unaSola
         ? <SeccionPers titulo="Más variables" abiertaInicial={abrir === "variable"}>{simple.masVariables}{simple.agregar(alIr)}</SeccionPers>
         : <SeccionPers titulo="Variables" abiertaInicial={abrir === "variable"}>{simple.variables}{simple.agregar(alIr)}</SeccionPers>}
-      <SeccionPers titulo="Fechas" abiertaInicial={abrir === "fechas"}>{simple.fecha}</SeccionPers>
       <SeccionPers titulo={tituloOpciones} abiertaInicial={abrir === "opciones"}>{opciones}</SeccionPers>
       <SeccionPers titulo="Guardar y gráficos listos">{simple.acciones(alIr)}</SeccionPers>
     </div>
@@ -374,8 +373,13 @@ function ContenidoPers({ simple, opciones, tituloOpciones, abrir, cerrar }: {
 
 // ------------------------------------------------------------ tarjeta de gráfico: barra (Gráfico / Tabla, Configurar, expandir), gráfico o tabla
 type Vista = "grafico" | "tabla";
-function CardGrafico({ titulo, temporal, nota, leyenda, visibles, config, rows, series, opts, unidades, vista: vistaProp, onVista, simple, presidentes }: {
-  titulo: string; temporal?: string; nota?: ReactNode; leyenda?: ReactNode; visibles?: ReactNode; presidentes?: ReactNode; config?: { cuenta: number; children: ReactNode }; simple?: boolean;
+/** Flechas hacia las esquinas: pantalla completa. Mismo trazo que los demás íconos del sitio. */
+const IconoExpandir = () => (
+  <svg className="icono" viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true" focusable="false">
+    <path d="M12 3h5v5M17 3l-5.5 5.5M8 17H3v-5M3 17l5.5-5.5" /></svg>
+);
+function CardGrafico({ titulo, temporal, nota, leyenda, visibles, config, rows, series, opts, unidades, vista: vistaProp, onVista, simple, presidentes, controles }: {
+  titulo: string; temporal?: string; nota?: ReactNode; leyenda?: ReactNode; controles?: ReactNode; visibles?: ReactNode; presidentes?: ReactNode; config?: { cuenta: number; children: ReactNode }; simple?: boolean;
   rows: Fila[]; series: SerieG[]; opts: OpcionesG; unidades?: Record<string, string>; vista?: Vista; onVista?: (v: Vista) => void;
 }) {
   const [vistaL, setVistaL] = useState<Vista>("grafico");
@@ -390,6 +394,10 @@ function CardGrafico({ titulo, temporal, nota, leyenda, visibles, config, rows, 
     const r = await copiarTexto(tablaATexto(cols, filasDeTabla(rows, cols), window.location.href));
     setAvisoT(avisoTabla(r)); setTimeout(() => setAvisoT(null), 4000);
   };
+  const botonExpandir = (
+    <button type="button" className="btn hi-expandir" onClick={() => setExp(true)} aria-label="Ver el gráfico a pantalla completa" title="Ver el gráfico a pantalla completa">
+      <IconoExpandir /></button>
+  );
   const tabla = vista === "tabla"
     ? (rows.length && hay ? (<>
       <div className="tabla-acciones">
@@ -405,15 +413,17 @@ function CardGrafico({ titulo, temporal, nota, leyenda, visibles, config, rows, 
     ) : <p className="note">Sin datos para esta selección.</p>)
     : null;
   if (simple) {
-    // Vista simple: el gráfico suelto y debajo la unidad, la fuente y Expandir (los controles están en la hoja de ajustes).
+    // Vista simple: arriba la fila de controles (período, frecuencia, Ajustes) con el botón de pantalla completa a la derecha;
+    // el gráfico y, debajo y a todo el ancho, la unidad y la fuente.
     return (
       <div className="hi-grafico">
+        <div className="hi-controles">
+          {controles}
+          {vista === "grafico" && hay && botonExpandir}
+        </div>
         {cab}
         {tabla ?? <Grafico rows={rows} series={series} opts={opts} expandir={{ titulo, leyenda: cab, abierto: exp, onCerrar: () => setExp(false) }} />}
-        <div className="pie-graf">
-          {nota && <p className="note">{nota}</p>}
-          {vista === "grafico" && hay && <button type="button" className="btn expandir" onClick={() => setExp(true)} aria-label="Expandir el gráfico a pantalla completa">Expandir</button>}
-        </div>
+        {nota && <p className="note hi-nota">{nota}</p>}
       </div>
     );
   }
@@ -427,7 +437,7 @@ function CardGrafico({ titulo, temporal, nota, leyenda, visibles, config, rows, 
           <Desplegable etiqueta={config.cuenta ? `Opciones del gráfico (${config.cuenta})` : "Opciones del gráfico"}>{config.children}</Desplegable>
         )}
         <span className="esp" />
-        {vista === "grafico" && hay && <button type="button" className="btn expandir" onClick={() => setExp(true)} aria-label="Expandir el gráfico a pantalla completa">Expandir</button>}
+        {vista === "grafico" && hay && botonExpandir}
       </div>
       {cab}
       {tabla ?? <Grafico rows={rows} series={series} opts={opts} expandir={{ titulo, leyenda: cab, abierto: exp, onCerrar: () => setExp(false) }} />}
@@ -455,6 +465,8 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
   const { metas } = useSeccion([]);
   const [personalizando, setPersonalizando] = useState<SecPers | null>(null); // hoja de ajustes abierta, con la sección que se despliega
   const [cambiando, setCambiando] = useState(false);   // el elegidor de variable abierto desde el botón "Cambiar dato" de la cabecera
+  const [periodoAbierto, setPeriodoAbierto] = useState(false);   // ventana del período (Desde, Hasta, atajos y meses del año)
+  const cerrarPeriodo = useRef<CerrarHoja | null>(null);
   const cerrarHoja = useRef<CerrarHoja | null>(null);   // "Listo" vive en el pie de la hoja, fuera de su cuerpo: cierra por el mismo camino que la cruz
   const b100 = E.modo === "b100";
   const conFranjas = E.pf === "1" ? true : E.pf === "0" ? false : cfg.franjas;
@@ -622,7 +634,8 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
       ...(b100 ? [{ clave: "b100", texto: "Base 100" }] : []),
       ...(puedeLog && E.escala === "log" ? [{ clave: "escala", texto: "Escala log." }] : []),
     ];
-    const abrirHoja = (clave?: string) => setPersonalizando(clave === "periodo" ? "fechas" : clave ? "opciones" : simple.unaSola ? "fechas" : "variable");
+    // La píldora del período abre su propia ventana con las fechas; las demás y "Ajustes" abren la hoja de ajustes (sin fechas)
+    const abrirHoja = (clave?: string) => { if (clave === "periodo") setPeriodoAbierto(true); else setPersonalizando(clave ? "opciones" : "variable"); };
     // "Cómo verlo": las medidas con sentido de la primera variable (solo con una variable y sin base 100)
     const metaE0 = metas.find((x) => x.id === E.exprs[0].id);
     const medE = E.exprs[0].med || (metaE0 ? m.medDefault(metaE0) : "");
@@ -630,8 +643,13 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     return (
       <>
         <div className="hi-cab">
-        <button type="button" className="btn hi-cambiar" aria-haspopup="dialog" onClick={() => setCambiando(true)}>
-          <IconoBuscar /><span className="hi-cambiar-txt">Cambiar dato</span></button>
+        <div className="hi-cab-acc">
+          <BotonCompartir className="compartir" titulo={nombre} href={() => window.location.href} crearVista={() => vista}
+            title="Armar una imagen de este gráfico para compartir" aria-label={`Compartir como imagen: ${nombre}`}>
+            <IconoCompartir /><span className="hi-comp-txt">Compartir</span></BotonCompartir>
+          <button type="button" className="btn hi-cambiar" aria-haspopup="dialog" onClick={() => setCambiando(true)}>
+            <IconoBuscar /><span className="hi-cambiar-txt">Cambiar dato</span></button>
+        </div>
         <CabeceraDato titulo={nombre} nivel={1} cifra={cifra} fecha={fechaCifra}
           deltas={deltas} frase={frase} fuente={fuente} mesDato={cifra ? (ctx ? ctx.mes : String(s0?.ult[1] ?? "")) || undefined : undefined}
           info={o0.c.serie.desc ? <p>{o0.c.serie.desc}</p> : undefined}>
@@ -675,13 +693,13 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
             },
           }} />
         )}
-        <BarraVista items={chips} onAbrir={abrirHoja} />
-        <CardGrafico simple titulo={titulo} nota={nota} leyenda={leyenda} rows={rows} series={series} opts={opts} unidades={unidades} vista={E.tabla} onVista={onVista} />
-        <div className="hi-acciones">
-          {botonPresidentes}
-          <BotonCompartir className="btn primario" titulo={nombre} href={() => window.location.href} crearVista={() => vista}>
-            <IconoCompartir />Compartir</BotonCompartir>
-        </div>
+        <CardGrafico simple titulo={titulo} nota={nota} leyenda={leyenda} rows={rows} series={series} opts={opts} unidades={unidades} vista={E.tabla} onVista={onVista}
+          controles={<BarraVista items={chips} onAbrir={abrirHoja} />} />
+        <div className="hi-acciones">{botonPresidentes}</div>
+        <Hoja titulo="Período" abierta={periodoAbierto} onCerrar={() => setPeriodoAbierto(false)}
+          pie={<button type="button" className="btn primario" onClick={() => (cerrarPeriodo.current ? cerrarPeriodo.current() : setPeriodoAbierto(false))}>Listo</button>}>
+          {(cerrar) => { cerrarPeriodo.current = cerrar; return <div className="hi-pers">{simple.fecha}</div>; }}
+        </Hoja>
         <Hoja titulo="Ajustes" abierta={personalizando !== null} onCerrar={() => setPersonalizando(null)}
           pie={(
             <>

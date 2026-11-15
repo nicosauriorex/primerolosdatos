@@ -1,15 +1,17 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useSeccion } from "../useSeccion";
 import { Cargando, Selector, Seg, alternar } from "../ui";
 import { FilaVariable } from "../Variables";
 import { VentanaConfig } from "./VentanaConfig";
 import { BotonCompartir } from "../PanelCompartir";
 import { IconoCompartir } from "../Iconos";
+import { Capitulo } from "../sistema/Capitulo";
+import { CompartirHoja } from "../sistema/CompartirHoja";
 import { Grafico, type Fila, type SerieG } from "../Grafico";
 import { CeldaPresMandato, LineaInicio, useBase } from "./comunes";
 import { fmtMes } from "@/lib/formato";
-import { baseIdx, calcularMandato, crearPres, nombreCorto, TITULOS_MANDATO as TITULOS, type ModoMandato } from "@/lib/estadisticas";
+import { baseIdx, calcularMandato, celdasHitos, crearPres, nombreCorto, TITULOS_MANDATO as TITULOS, type CeldaHito, type ModoMandato } from "@/lib/estadisticas";
 import type { Expr } from "@/lib/motor";
 import { MODO_MANDATO_DEF, PRES_MANDATO_DEF } from "@/lib/ficha";
 import { decExpr, enteroEn, encExpr, lista, unoDe, useParams } from "@/lib/url";
@@ -23,15 +25,25 @@ const AYUDA: Record<string, string> = {
   valor: "El dato tal cual, sin transformar.",
 };
 const DEF_PRES = PRES_MANDATO_DEF.join(",");
+/** Valor por defecto de la página sin parámetros (E2.3): dólar blue en pesos corrientes. Un link con parámetros sigue mostrando lo mismo que antes (dólar oficial). */
+const E_BLUE: Expr = { id: "fx_blue", med: "corr", rel: null, modo: "compra" };
+const CLAVES_VISTA = ["mv", "mmo", "mp", "anc", "md", "mh", "mbd"];
+const HITOS = [6, 12, 24, 36, 48];
 
 export function Mandato() {
-  const [p, set, montado] = useParams();
-  const info = useBase(p, set, montado), b = info.b;
+  const [p, set0, montado] = useParams();
+  // ¿La página se abrió sin parámetros? Se fija una sola vez: después, cualquier cambio escribe también la variable en la URL, así el link compartido muestra lo mismo.
+  const sinParams = useRef<boolean | null>(null);
+  if (montado && sinParams.current === null) sinParams.current = !CLAVES_VISTA.some((k) => p.has(k));
+  const defecto = sinParams.current ?? true;
+  const set = (c: Record<string, string | null | undefined>) => set0(defecto && !p.has("mv") && !("mv" in c) ? { mv: encExpr(E_BLUE), ...c } : c);
+  const [resSel, setResSel] = useState<string | null | undefined>(undefined);   // undefined = el de por defecto (Milei, solo sin parámetros)
+  const info = useBase(p, set0, montado), b = info.b;
   const e0 = decExprSeguro(p.get("mv"));
-  const sec = useSeccion(e0 ? [e0.id, ...(e0.rel ? [e0.rel] : [])] : ["fx_oficial"]);
+  const sec = useSeccion(e0 ? [e0.id, ...(e0.rel ? [e0.rel] : [])] : [defecto ? E_BLUE.id : "fx_oficial"]);
   const { motor: m, metas, version } = sec;
   const eExiste = (id: string) => metas.some((x) => x.id === id);
-  const eB: Expr = (montado && decExpr(p.get("mv"), eExiste)) || { id: "fx_oficial", med: "corr", rel: null, modo: "compra" };
+  const eB: Expr = (montado && decExpr(p.get("mv"), eExiste)) || (defecto ? E_BLUE : { id: "fx_oficial", med: "corr", rel: null, modo: "compra" });
   const PRES = useMemo(() => (m ? crearPres(m.F) : []), [m]);
   const PRES_T0 = useMemo(() => (m ? PRES.filter((x) => m.idxDe(x.ini) > 0) : []), [m, PRES]);
 
@@ -45,6 +57,7 @@ export function Mandato() {
   const modo: ModoMandato = modoUrl === "indice" ? "var" : modoUrl;
   const selIds = new Set(lista(p.has("mp") ? p.get("mp") : DEF_PRES).filter((id) => PRES_T0.some((x) => x.id === id)));
   const banda = unoDe(p.get("mbd"), ["no", "si"] as const, "no");
+  const hitosVista = unoDe(p.get("mhv"), ["barras", "tabla"] as const, "barras");
 
   const D = useMemo(() => {
     if (!m || sec.ocupado) return null;
@@ -85,8 +98,9 @@ export function Mandato() {
   if (sec.errorGeneral) return <p className="error" role="alert">{sec.errorGeneral}</p>;
   if (!m || !montado) return <Cargando />;
   const errs = Object.values(sec.errores);
-  const HITOS = [6, 12, 24, 36, 48];
-
+  const resEf = D && (resSel === undefined ? (defecto && selIds.has("milei") ? "milei" : null) : resSel);
+  const resaltar = D && resEf && D.pres.some((x) => x.id === resEf) ? resEf : null;
+  const hitosDe = D ? celdasHitos(D.todas, D.pres, D.pres.map((x) => x.i1 - baseIdx(m.F, x, b)), HITOS, D.c) : [];
 
   return (
     <section>
@@ -118,21 +132,26 @@ export function Mandato() {
       </div>
       {!D ? (errs.length ? null : <Cargando />) : (
         <>
-          <div className="card mand-grafico">
-            <h2>{D.c.corto}: {TITULOS[modoEf]} por mes de mandato</h2>
+          <Capitulo id="mand-grafico" titulo={`${D.c.corto}: ${TITULOS[modoEf]} por mes de mandato`}
+            acciones={<BotonCompartir className="compartir" titulo={`Primero los Datos: ${D.c.corto} por mes de mandato`} href={() => window.location.href} deshabilitado={D.pres.length === 0}
+              title="Armar una imagen de este gráfico para compartir" aria-label="Compartir como imagen: meses de mandato"
+              crearVista={() => ({ tipo: "mandato", expr: eB, modo: modoEf, presIds: D.pres.map((x) => x.id), anc: p.get("anc"), md: p.get("md"), mh: p.get("mh"), valorFinal, base: b })}><IconoCompartir />Compartir</BotonCompartir>}>
             <div className="anim-barra">
               {!anim ? <button type="button" className="btn" onClick={animar}>▶ Animar</button>
                 : anim.play ? <button type="button" className="btn" onClick={() => setAnim({ ...anim, play: false })}>⏸ Pausa</button>
                 : <><button type="button" className="btn" onClick={() => setAnim(cuadro >= maxAnim ? { t: 0, play: true } : { t: cuadro, play: true })}>▶ Seguir</button>
                   <button type="button" className="btn" onClick={() => setAnim({ t: 0, play: true })}>↺ Reiniciar</button></>}
               {anim && <span className="lbl" role="status">Mes {D.rows[cuadro]?.t as number}</span>}
-              <BotonCompartir className="btn" titulo={`Primero los Datos: ${D.c.corto} por mes de mandato`} href={() => window.location.href} deshabilitado={D.pres.length === 0}
-                title="Armar una imagen de este gráfico para compartir" aria-label="Compartir como imagen: meses de mandato"
-                crearVista={() => ({ tipo: "mandato", expr: eB, modo: modoEf, presIds: D.pres.map((x) => x.id), anc: p.get("anc"), md: p.get("md"), mh: p.get("mh"), valorFinal, base: b })}><IconoCompartir />Compartir</BotonCompartir>
             </div>
-            <div className="legend">{D.pres.map((x) => <span key={x.id} style={vcolor(x.color)}>{x.n}</span>)}</div>
+            {/* la leyenda es tocable: resalta la línea del presidente (y la vuelve a sacar al tocarla de nuevo) */}
+            <div className="pres-leyenda" role="group" aria-label="Resaltar un presidente">
+              {D.pres.map((x) => (
+                <button key={x.id} type="button" className="pres-leyenda-item" style={vcolor(x.color)} aria-pressed={resaltar === x.id}
+                  onClick={() => setResSel(resaltar === x.id ? null : x.id)}>{x.n}</button>
+              ))}
+            </div>
             {/* tocar el gráfico pausa la animación */}
-            <div onPointerDown={() => { if (play) setAnim((a) => (a ? { ...a, play: false } : a)); }}><Grafico rows={rowsVista || D.rows} series={D.series} opts={D.opts} /></div>
+            <div onPointerDown={() => { if (play) setAnim((a) => (a ? { ...a, play: false } : a)); }}><Grafico rows={rowsVista || D.rows} series={D.series} opts={{ ...D.opts, resaltar }} /></div>
             <div className="controls mand-meses">
               <label>Meses</label><label htmlFor="mm_desde">desde</label>
               <input type="range" id="mm_desde" min={0} max={D.maxMes - 1} step={1} value={D.desde} onChange={(ev) => { const d = +ev.target.value; set({ md: d ? String(d) : null, mh: d >= D.hasta ? String(d + 1) : undefined }); }} />
@@ -145,20 +164,75 @@ export function Mandato() {
               <summary>Cómo se calcula</summary>
               <p className="note">{D.nota}</p>
             </details>
-          </div>
-          <div className="card">
-            <h2>Resumen por hitos</h2><p className="note">Mismo cálculo que el gráfico ({TITULOS[modoEf]}) en meses clave y al final de cada mandato.</p>
-            <div className="tablewrap fija"><table>
-              <thead><tr><th>Presidente</th><th>Mes 0</th>{HITOS.map((x) => <th key={x}>Mes {x}</th>)}<th>Final</th></tr></thead>
-              <tbody>{D.pres.map((x) => {
-                const fin = x.i1 - baseIdx(m.F, x, b);
-                return <tr key={x.id}><CeldaPresMandato x={x} F={m.F} /><td>{D.cel(x, 0)}</td>{HITOS.map((h) => <td key={h}>{h <= fin ? D.cel(x, h) : ""}</td>)}<td>{D.cel(x, fin)}<small>mes {fin}</small></td></tr>;
-              })}</tbody>
-            </table></div>
-          </div>
+          </Capitulo>
+          <Capitulo id="mand-hitos" titulo="Resumen por hitos" bajada={`Mismo cálculo que el gráfico (${TITULOS[modoEf]}) en meses clave y al final de cada mandato.`}
+            acciones={<CompartirHoja href={window.location.pathname + window.location.search} titulo="Resumen por hitos"
+              texto={`${D.c.corto}: resumen por hitos de cada mandato, en ${hitosVista === "tabla" ? "tabla" : "barras"}.`} />}>
+            <div className="controls">
+              <Seg valor={hitosVista} opciones={[["barras", "Barras"], ["tabla", "Tabla"]]} onElegir={(v) => set({ mhv: v === "barras" ? null : v })} />
+            </div>
+            {hitosVista === "barras" ? <BarrasHitos D={D} hitosDe={hitosDe} /> : (
+              <>
+                <div className="tablewrap fija"><table className="pres-hm-tabla">
+                  <thead><tr><th>Presidente</th><th>Mes 0</th>{HITOS.map((x) => <th key={x}>Mes {x}</th>)}<th>Final</th></tr></thead>
+                  <tbody>{D.pres.map((x, k) => {
+                    const fin = x.i1 - baseIdx(m.F, x, b), fila = hitosDe[k];
+                    const celda = (t: number, extra?: React.ReactNode) => <CeldaMapa ce={fila.find((q) => q.t === t)} txt={D.cel(x, t)} extra={extra} />;
+                    return <tr key={x.id}><CeldaPresMandato x={x} F={m.F} />{celda(0)}{HITOS.map((h) => h <= fin ? <Fragment key={h}>{celda(h)}</Fragment> : <td key={h} />)}{celda(fin, <small>mes {fin}</small>)}</tr>;
+                  })}</tbody>
+                </table></div>
+                <p className="note">{D.c.dir ? "Color: cómo cambió desde el mes 0. Verde = mejoró y rojo = empeoró (también está escrito); más intenso = el cambio más grande de ese hito entre presidentes." : "Sin verde ni rojo: subir o bajar no es ni bueno ni malo en sí mismo. Más intenso = el cambio más grande de ese hito."}</p>
+              </>
+            )}
+          </Capitulo>
         </>
       )}
     </section>
   );
   function decExprSeguro(s: string | null): Expr | null { return decExpr(s, () => true); }
+}
+
+/** Celda del mapa de calor: la cifra escrita sobre un fondo verde (mejoró) o rojo (empeoró) más o menos intenso; sin tono, sin color. */
+function CeldaMapa({ ce, txt, extra }: { ce: CeldaHito | undefined; txt: string; extra?: React.ReactNode }) {
+  const tono = ce?.tono ?? null, pct = Math.round(10 + 50 * (ce?.frac ?? 0));
+  const fondo = tono ? `color-mix(in srgb, var(${tono === "bueno" ? "--bueno" : "--malo"}) ${pct}%, transparent)` : undefined;
+  return (
+    <td className={`pres-hm${tono ? ` pres-hm-${tono}` : ""}`} style={fondo ? { background: fondo } : undefined}>
+      {txt}{extra}{tono ? <span className="sr-solo"> ({tono === "bueno" ? "mejoró" : "empeoró"} desde el mes 0)</span> : null}
+    </td>
+  );
+}
+
+/** Barras agrupadas por hito, un color por presidente. Misma escala para todos; logarítmica si el gráfico la usa. */
+function BarrasHitos({ D, hitosDe }: { D: { pres: { id: string; n: string; color: string }[]; usarLog: boolean; fmtTip: (v: number) => string; c: { corto: string } }; hitosDe: CeldaHito[][] }) {
+  const ts = [0, ...HITOS, -1];   // -1 = el final de cada mandato
+  const vals = hitosDe.flat().map((q) => q.valor).filter((v): v is number => v != null);
+  if (!vals.length) return <p className="note">No hay datos para dibujar las barras.</p>;
+  const log = D.usarLog && vals.every((v) => v > 0);
+  const f = (v: number) => (log ? Math.log(v) : v);
+  const fs = vals.map(f), lo = Math.min(...fs), hi = Math.max(...fs);
+  const base = log ? lo - 0.15 * (hi - lo || 1) : Math.min(0, lo), tope = log ? hi : Math.max(0, hi);
+  const rango = tope - base || 1, y = (v: number) => ((tope - v) / rango) * 100;
+  const grupos = ts.map((t) => ({
+    t, rot: t === 0 ? "Mes 0" : t < 0 ? "Final" : `Mes ${t}`,
+    barras: D.pres.map((x, k) => ({ x, ce: t < 0 ? hitosDe[k][hitosDe[k].length - 1] : hitosDe[k].find((q) => q.t === t) })).filter((q) => q.ce && q.ce.valor != null),
+  })).filter((g) => g.barras.length);
+  return (
+    <div className="pres-barras-marco">
+      <div className="pres-barras" role="img" aria-label={`${D.c.corto}: barras por hito de cada mandato. Las cifras están en la vista Tabla.`}>
+        {grupos.map((g) => (
+          <div key={g.t} className="pres-barras-grupo">
+            <div className="pres-barras-area">
+              {g.barras.map(({ x, ce }) => {
+                const v = (ce as CeldaHito).valor as number, arriba = log ? y(f(v)) : y(Math.max(v, 0)), abajo = log ? 100 : y(Math.min(v, 0));
+                return <span key={x.id} className="pres-barra" style={{ ...vcolor(x.color), top: `${arriba}%`, height: `max(2px, ${abajo - arriba}%)` }} title={`${x.n}, ${g.rot.toLowerCase()}: ${D.fmtTip(v)}`} />;
+              })}
+            </div>
+            <span className="pres-barras-rot">{g.rot}</span>
+          </div>
+        ))}
+      </div>
+      <div className="pres-barras-ref" aria-hidden="true">{D.pres.map((x) => <span key={x.id} style={vcolor(x.color)}>{x.n}</span>)}</div>
+    </div>
+  );
 }

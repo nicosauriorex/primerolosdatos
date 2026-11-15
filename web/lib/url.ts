@@ -34,6 +34,19 @@ export const enteroEn = (s: string | null | undefined, min: number, max: number,
 export const unoDe = <T extends string>(s: string | null | undefined, validos: readonly T[], def: T): T =>
   s != null && (validos as readonly string[]).includes(s) ? (s as T) : def;   // sin el parámetro, siempre `def` (antes devolvía null si "" era válido)
 
+const EVENTO_PUSH = "pd-pushstate";
+/** Avisa (una sola vez por página) cada vez que alguien hace `history.pushState`, como hace el `Link` de Next al navegar. */
+function ponerEscuchaPush() {
+  const h = window.history as History & { __pdAviso?: boolean };
+  if (h.__pdAviso) return;
+  h.__pdAviso = true;
+  const original = h.pushState.bind(h);
+  h.pushState = (...args: Parameters<History["pushState"]>) => {
+    original(...args);
+    window.dispatchEvent(new Event(EVENTO_PUSH));
+  };
+}
+
 /** Devuelve [params, escribir, montado]. `montado` es false hasta leer la URL real (evita desajustes de hidratación). */
 export function useParams(): [URLSearchParams, (cambios: Record<string, string | null | undefined>) => void, boolean] {
   const [params, setParams] = useState(() => new URLSearchParams(""));
@@ -42,6 +55,21 @@ export function useParams(): [URLSearchParams, (cambios: Record<string, string |
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     actual.current = p; setParams(p); setMontado(true);
+    // Un link a la misma ruta con otro query string (navegación del cliente de Next, o Atrás/Adelante) no remonta la página:
+    // se vuelve a leer la URL cuando cambia, y un link nuevo (pushState) deja la página arriba de todo.
+    const ruta = window.location.pathname;
+    const releer = (nuevo: boolean) => {
+      if (window.location.pathname !== ruta) return;   // un link a otra ruta: esta página se va, no relee el query ajeno
+      const np = new URLSearchParams(window.location.search);
+      if (np.toString() === actual.current.toString()) return;   // sin cambios (p. ej. la hoja que apila su propio estado)
+      actual.current = np; setParams(np);
+      if (nuevo) window.scrollTo(0, 0);
+    };
+    const alPush = () => releer(true), alPop = () => releer(false);
+    ponerEscuchaPush();
+    window.addEventListener(EVENTO_PUSH, alPush);
+    window.addEventListener("popstate", alPop);
+    return () => { window.removeEventListener(EVENTO_PUSH, alPush); window.removeEventListener("popstate", alPop); };
   }, []);
   const escribir = useCallback((cambios: Record<string, string | null | undefined>) => {
     const p = new URLSearchParams(actual.current);

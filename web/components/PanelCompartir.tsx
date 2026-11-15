@@ -1,7 +1,7 @@
 "use client";
 // Panel de compartir: vista previa de la imagen, formato, "Personalizar imagen" (período, líneas, presidentes, tarjetas), comentario y acciones.
 // Ver docs/specs/responder-con-imagen.md y docs/specs/personalizar-imagen.md.
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Children, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Modal, Selector, Seg, useAtras, useCapa } from "./ui";
 import { useConfig } from "./ConfigProvider";
@@ -235,7 +235,9 @@ export function VistaCompleta({ archivo, titulo, onCerrar }: { archivo: File; ti
     </div>, document.body);
 }
 
-/** Botón que abre el panel de compartir. `crearVista` y `href` se evalúan al abrir (así sirven también donde los datos se cargan recién ahí). */
+/** Botón que abre el panel de compartir. `crearVista` y `href` se evalúan al abrir (así sirven también donde los datos se cargan recién ahí).
+ *  R11 (tanda 8): una sola variante, la clase `compartir` (píldora chica amarilla con el ícono), pensada para ir arriba a la derecha del capítulo (`acciones` de `Capitulo`).
+ *  `className` solo agrega clases propias de quien lo usa: `btn` y `primario` se descartan. La palabra "Compartir" queda en un `<span>` que se oculta en un renglón angosto. */
 export function BotonCompartir({ crearVista, href, titulo, className, children, deshabilitado, ...resto }: {
   crearVista: () => VistaCompartir | null; href: string | (() => string); titulo: string; className?: string; children: ReactNode; deshabilitado?: boolean; title?: string; "aria-label"?: string;
 }) {
@@ -244,9 +246,11 @@ export function BotonCompartir({ crearVista, href, titulo, className, children, 
     const vista = crearVista();
     if (vista) setAbierto({ vista, href: typeof href === "function" ? href() : href });
   };
+  const extra = (className ?? "").split(/\s+/).filter((c) => c && c !== "btn" && c !== "primario").join(" ");
+  const contenido = Children.map(children, (h) => (typeof h === "string" && h.trim() ? <span className="compartir-txt">{h.trim()}</span> : h));
   return (
     <>
-      <button type="button" className={className} disabled={deshabilitado} {...resto} onClick={abrir}>{children}</button>
+      <button type="button" aria-label={resto["aria-label"] ?? "Compartir"} className={`compartir${extra ? " " + extra : ""}`} disabled={deshabilitado} {...resto} onClick={abrir}>{contenido}</button>
       {abierto && createPortal(<PanelCompartir vista={abierto.vista} href={abierto.href} titulo={titulo} onCerrar={() => setAbierto(null)} />, document.body)}
     </>
   );

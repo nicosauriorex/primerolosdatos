@@ -34,7 +34,7 @@ const VISTAS: [string, string][] = [["uno", "Un presidente"], ["traspasos", "Tod
 
 /** Celda de un dato: el valor y su mes; si no hay, "sin dato" y por qué. */
 function CeldaDato({ p, motivo, rotulo }: { p: Punto | null; motivo: string; rotulo?: string }) {
-  if (p) return <td data-rotulo={rotulo}>{p.txt}<small>{p.mes}</small></td>;
+  if (p) return <td data-rotulo={rotulo} title={p.nota}>{p.txt}<small>{p.mes}</small>{p.nota ? <span className="sr-solo">. {p.nota}</span> : null}</td>;
   return <td className="her-sin" data-rotulo={rotulo}>sin dato<small>{motivo}</small></td>;
 }
 
@@ -144,7 +144,7 @@ function FilaTabla({ f, fin }: { f: FilaHerencia; fin: string }) {
   const nombre = f.href ? <Link prefetch={false} href={f.href} title="Ver la ficha de este dato">{f.nombre}</Link> : f.nombre;
   return (
     <tr>
-      <CeldaVar nombre={nombre} unidad={f.unidad || undefined} info={f.c && !f.def.cociente ? <BotonInfo id={f.def.id} /> : null} />
+      <CeldaVar nombre={nombre} unidad={f.unidad || undefined} info={f.c && !f.def.cociente && !f.def.menos ? <BotonInfo id={f.def.id} /> : null} />
       <CeldaDato p={f.recibio} motivo={f.sinRecibio} rotulo="Recibió" />
       <CeldaDato p={f.entrego} motivo={f.sinEntrego} rotulo={fin} />
       <Valor tono={f.cls === "neutro" ? null : f.cls} data-rotulo="Cambio" sub={f.cambioAbs ? <small>{f.cambioAbs}</small> : null}>{f.cambio}</Valor>
@@ -222,6 +222,7 @@ export function Herencia() {
       <summary>Cómo se calcula</summary>
       <ul className="method">
         <li>Acá el inicio es siempre el mes anterior a asumir (T-1), sin importar la configuración de inicio de mandato: la herencia es el dato al traspaso.</li>
+        <li>Cuentas públicas en % del PIB (resultado primario, financiero y cuasifiscal): “Recibió” es el año calendario cerrado del traspaso (para quien asume en diciembre, el año que termina ese diciembre; si no, el último año completo antes de asumir), no los 12 meses a T-1. Si ese año no tiene los 12 meses publicados, se usan los 12 meses a T-1 y se avisa. “{colFin}” sigue con los últimos 12 meses.</li>
         <li>En series trimestrales o semestrales (pobreza, cuenta corriente, subsidios) se usa el último dato publicado hasta ese mes, que puede ser de varios meses antes; por eso cada valor lleva su mes. Un dato con más de {MAX_ATRASO} meses de antigüedad no cuenta: la celda dice “sin dato” y por qué.</li>
         {vista === "uno" && <li>Cambio: en puntos (p.p.) si el dato es un porcentaje; si no, en %, con la diferencia debajo. Se calcula con los valores tal como se ven.</li>}
         {vista === "uno" && <li>Verde y rojo siguen la dirección de cada dato en el resto del sitio (más reservas o salario, en verde; más inflación, pobreza o riesgo país, en rojo); el signo siempre está escrito. Sin color: datos en los que subir o bajar no se califica (pasivos remunerados, tipo de cambio real, precios regulados, subsidios).</li>}
@@ -281,7 +282,7 @@ export function Herencia() {
             <details className="her-plegado">
               <summary>Notas de cada dato</summary>
               <ul className="method">
-                {tabla.filas.filter((f) => f.def.nota).map((f) => <li key={f.def.clave}><b>{f.nombre}</b>: {f.def.nota}</li>)}
+                {tabla.filas.filter((f) => f.def.nota || f.notaRecibio).map((f) => <li key={f.def.clave}><b>{f.nombre}</b>: {[f.def.nota, f.notaRecibio ? `Recibió, ${f.recibio?.mes}: ${f.notaRecibio}` : ""].filter(Boolean).join(" ")}</li>)}
                 {filasInf.filter((f) => f.def.nota).map((f) => <li key={f.def.clave}><b>{f.def.nombre}</b>: {f.def.nota}</li>)}
               </ul>
             </details>

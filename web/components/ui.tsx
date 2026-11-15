@@ -2,13 +2,45 @@
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { IconoAbajo } from "./Iconos";
 
-/** Grupo de botones. `valor` es un string (selección única) o un Set (múltiple). */
-export function Seg({ opciones, valor, onElegir, id }: {
-  opciones: [string, string][]; valor: string | Set<string>; onElegir: (v: string) => void; id?: string;
+/** Grupo de botones. `valor` es un string (selección única) o un Set (múltiple).
+ *  R12 (tanda 8): una sola opción = riel con la elegida en celeste; elección múltiple = píldoras sueltas separadas, la elegida con un ✓.
+ *  Un riel que no entra en su renglón no se parte en dos: pasa solo a píldoras sueltas que bajan de renglón (y vuelve al riel si hay lugar). */
+export function Seg({ opciones, valor, onElegir, id, etiqueta }: {
+  opciones: [string, string][]; valor: string | Set<string>; onElegir: (v: string) => void; id?: string; etiqueta?: string;
 }) {
+  const multiple = valor instanceof Set;
   const activo = (v: string) => (valor instanceof Set ? valor.has(v) : valor === v);
+  const riel = useRef<HTMLDivElement>(null);
+  const [suelto, setSuelto] = useState(false);
+  const natural = useRef(0);   // ancho del riel cuando se lo midió sin lugar: con el contenedor más ancho que esto, vuelve a riel
+  const sueltoRef = useRef(false);
+  sueltoRef.current = suelto;
+  const clave = opciones.map((o) => o[1]).join("|");
+  useEffect(() => {
+    const el = riel.current;
+    if (multiple || !el) return;
+    natural.current = 0;
+    const revisar = () => {
+      if (!sueltoRef.current) {
+        // no entra si se desborda o si el riel bajó de renglón (con flex-wrap no se desborda: crece en alto)
+        const alto1 = (el.firstElementChild as HTMLElement | null)?.offsetHeight ?? 0;
+        const partido = alto1 > 0 && el.clientHeight > alto1 * 1.6;
+        if (el.scrollWidth > el.clientWidth + 1 || partido) {
+          const suma = Array.from(el.children).reduce((s, c) => s + (c as HTMLElement).offsetWidth, 0) + 12;
+          natural.current = Math.max(el.scrollWidth, suma); setSuelto(true);
+        }
+      } else if (natural.current > 0 && (el.parentElement?.clientWidth ?? 0) >= natural.current) setSuelto(false);
+    };
+    sueltoRef.current = false; setSuelto(false);
+    revisar();
+    const ro = new ResizeObserver(revisar);
+    ro.observe(el);
+    if (el.parentElement) ro.observe(el.parentElement);
+    return () => ro.disconnect();
+  }, [multiple, clave]);
+  const clases = `seg${multiple || suelto ? " seg-suelto" : ""}${multiple ? " seg-multi" : ""}`;
   return (
-    <div className="seg" id={id} role="group">
+    <div ref={riel} className={clases} id={id} role="group" aria-label={etiqueta}>
       {opciones.map(([v, t]) => (
         <button key={v} type="button" aria-pressed={activo(v)} onClick={() => onElegir(v)}>{t}</button>
       ))}
@@ -204,7 +236,7 @@ export function Modal({ titulo, onCerrar, children, ancho }: { titulo: string; o
   return (
     <div className="modal-fondo" onMouseDown={(ev) => { if (ev.target === ev.currentTarget) cerrar(); }}>
       <div className="modal" role="dialog" aria-modal="true" aria-label={titulo} style={{ maxWidth: "100%", ...(ancho ? { width: "min(760px,100%)" } : null) }}>
-        <button type="button" className="cruz-capa modal-cruz" aria-label="Cerrar" onClick={() => cerrar()}><IconoCruz /></button>
+        <div className="modal-cab"><button type="button" className="cruz-capa modal-cruz" aria-label="Cerrar" onClick={() => cerrar()}><IconoCruz /></button></div>
         <CerrarModalCtx.Provider value={cerrar}>{children}</CerrarModalCtx.Provider>
       </div>
     </div>

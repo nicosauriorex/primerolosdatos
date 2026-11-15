@@ -31,6 +31,9 @@ export interface OpcionesG {
   sinBarra?: boolean;   // no mostrar la barra de zoom bajo el gráfico
   suave?: boolean;      // líneas suavizadas (spline monótona): solo el dibujo; valores, globo y marcadores no cambian
   resaltar?: string | null;   // `key` de la serie destacada: opaca y 1 px más gruesa; las demás al 25 % (líneas, puntos y etiquetas finales)
+  /** Dibujo por pasos (E1.2): cuántas filas se ven, contadas desde la primera; el resto no se dibuja ni aparece en el globo. `null`/ausente = todas.
+   *  Solo recorta lo visible: valores, escala (la del gráfico completo desde el primer cuadro) y eje no cambian. Cambiarlo no rehace el gráfico. */
+  revelar?: number | null;
 }
 
 // ------------------------------------------------------------ escalas
@@ -195,10 +198,10 @@ function Expandido({ expandir, ayuda, children }: { expandir: Expandir; ayuda: s
   );
 }
 
-/** Mismas opciones salvo `resaltar`: cambiar la serie resaltada no rehace el gráfico (se redibuja leyendo un ref). */
+/** Mismas opciones salvo `resaltar` y `revelar`: cambiarlas no rehace el gráfico (se redibuja leyendo un ref). */
 function mismasOpciones(a: OpcionesG, b: OpcionesG): boolean {
   if (a === b) return true;
-  const ka = Object.keys(a).filter((k) => k !== "resaltar"), kb = Object.keys(b).filter((k) => k !== "resaltar");
+  const ka = Object.keys(a).filter((k) => k !== "resaltar" && k !== "revelar"), kb = Object.keys(b).filter((k) => k !== "resaltar" && k !== "revelar");
   return ka.length === kb.length && ka.every((k) => (a as any)[k] === (b as any)[k]);
 }
 const ALFA_APAGADA = 0.25;
@@ -219,6 +222,10 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
   resaltarRef.current = optsIn.resaltar ?? null;
   const aplicarResaltar = useRef<() => void>(() => {});
   useEffect(() => { aplicarResaltar.current(); }, [optsIn.resaltar]);
+  const revelarRef = useRef<number | null>(optsIn.revelar ?? null);
+  revelarRef.current = optsIn.revelar ?? null;
+  const aplicarRevelar = useRef<() => void>(() => {});
+  useEffect(() => { aplicarRevelar.current(); }, [optsIn.revelar]);
   // Dibujo de entrada (pedido 16): solo la primera vez que el gráfico aparece en pantalla; no al cambiar datos, período ni zoom.
   const yaDibujado = useRef(false);
   const cont = useRef<HTMLDivElement>(null);
@@ -330,8 +337,10 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
       const r = ejeX(mn, mx, anchoPlot(uu), estrecho); xFmt = r.fmt; return r.splits;
     };
     let hoverRef: Ref | null = null, tol = TOL_REF_MOUSE, destruido = false;
+    const nVisibles = () => { const r = revelarRef.current; return r == null ? rows.length : Math.max(0, Math.min(rows.length, Math.floor(r))); };
+    let visN = rows.length;   // filas que se dibujan (todas salvo con `revelar`)
     // Dibujo de entrada: sin movimiento reducido, sin IntersectionObserver, en la vista ampliada o si ya se dibujó una vez, todo a la vista.
-    const animar = !yaDibujado.current && !lleno && typeof IntersectionObserver !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const animar = !yaDibujado.current && !lleno && revelarRef.current == null && typeof IntersectionObserver !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let revelado = animar ? 0 : 1, recortado = false, raf = 0, io: IntersectionObserver | null = null;
     let lineas: { rf: Ref; v: number; tramo: string; y: number; yd: number }[] = [];
     const tip = document.createElement("div");
@@ -442,7 +451,7 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
           // último dato de cada serie
           series.forEach((se) => {
             const ax = se.axis || 0;
-            for (let i = rows.length - 1; i >= 0; i--) if (okv(rows[i][se.key], ax)) {
+            for (let i = visN - 1; i >= 0; i--) if (okv(rows[i][se.key], ax)) {
               const cx = xOf(i), cy = yOf(rows[i][se.key], ax);
               if (cx < L - 1 || cx > L + W + 1) break; // el último dato quedó fuera de la ventana acercada
               ctx.globalAlpha = alfaDe(se.key, resaltarRef.current, keys);
@@ -492,7 +501,7 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
           // Etiquetas al final de cada línea
           if (opts.endLabels && !dual) {
             const lab = series.map((se) => {
-              for (let i = rows.length - 1; i >= 0; i--) if (okv(rows[i][se.key], 0)) return { se, i, y: yOf(rows[i][se.key], 0) };
+              for (let i = visN - 1; i >= 0; i--) if (okv(rows[i][se.key], 0)) return { se, i, y: yOf(rows[i][se.key], 0) };
               return null;
             }).filter(Boolean).sort((a, b) => a!.y - b!.y) as { se: SerieG; i: number; y: number }[];
             for (let k = 1; k < lab.length; k++) if (lab[k].y - lab[k - 1].y < 14 * d) lab[k].y = lab[k - 1].y + 14 * d;
@@ -533,7 +542,7 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
             requestAnimationFrame(() => { if (!destruido) u.redraw(false, false); });
           }
           const i = uu.cursor.idx;
-          if (sobre || i == null || uu.cursor.left == null || uu.cursor.left < 0) { tip.style.display = "none"; return; }
+          if (sobre || i == null || i >= visN || uu.cursor.left == null || uu.cursor.left < 0) { tip.style.display = "none"; return; }
           const r = rows[i];
           let html = `<b>${esc(opts.tipTitle ? opts.tipTitle(r, i) : fmtMes(r.fecha))}</b>`;
           series.forEach((se) => {
@@ -565,6 +574,16 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
       });
       u.redraw(false, false);
     };
+    // Dibujo por pasos: se vacía lo que está después de la fila `revelar` y se redibuja con las mismas escalas (setData sin reiniciarlas)
+    const vacio = (arr: (number | null)[], n: number) => arr.map((v, i) => (i < n ? v : null));
+    aplicarRevelar.current = () => {
+      const n = nVisibles();
+      if (n === visN) return;
+      visN = n;
+      u.setData(data.map((arr, k) => (k === 0 ? arr : vacio(arr, n))) as uPlot.AlignedData, false);
+      u.redraw(false, false);
+    };
+    aplicarRevelar.current();   // el estado actual de `revelar` (con el gráfico recién hecho todavía se ve entero)
     if (animar) {
       io = new IntersectionObserver((es) => {
         if (!es.some((x) => x.isIntersecting) || yaDibujado.current) return;
@@ -647,7 +666,7 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
     ro.observe(el);
     return () => {
       destruido = true; cancelAnimationFrame(raf); io?.disconnect();
-      aplicarResaltar.current = () => {};
+      aplicarResaltar.current = () => {}; aplicarRevelar.current = () => {};
       document.removeEventListener("pointerdown", fuera); ro.disconnect(); u.destroy(); el.innerHTML = "";
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

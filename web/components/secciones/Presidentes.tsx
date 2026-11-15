@@ -21,7 +21,7 @@ import { AjustesTabla, TablaMandatos } from "../sistema/TablaMandatos";
 import { GrillaPresidentes } from "../sistema/GrillaPresidentes";
 import { grillaPresidentes, tablaPresidentes } from "@/lib/presidentes";
 import { fmtMes } from "@/lib/formato";
-import { baseIdx, crearPres, type BaseCfg, nivelComparable, ordenar, statsMandato, type Pres } from "@/lib/estadisticas";
+import { baseIdx, claseMandato, crearPres, resumenClases, type BaseCfg, type ClaseMandato, nivelComparable, ordenar, statsMandato, type Pres } from "@/lib/estadisticas";
 import { bajadaTablaMandatos, velasDe } from "@/lib/ficha";
 import { grupoDe, ordenarGrupos, textoBusqueda } from "@/lib/catalogo";
 import { monedaEnSerie } from "@/lib/monedas";
@@ -36,6 +36,30 @@ function inicioCorto(b: BaseCfg): string {
   const k = b.t0;
   const gral = k === -1 ? "el mes antes de asumir" : k === 0 ? "el mes de asunción" : k > 0 ? `${k} ${k === 1 ? "mes" : "meses"} después de asumir` : `${-k} meses antes de asumir`;
   return Object.keys(b.t0p).length ? `${gral}, con excepciones` : gral;
+}
+
+/** Estrella de "Mis variables" (44 px): llena si la variable ya está en la lista, vacía si no. */
+function Estrella({ activa, nombre, onClick, deshabilitada }: { activa: boolean; nombre: string; onClick: () => void; deshabilitada?: boolean }) {
+  const acc = activa ? "Sacar de Mis variables" : "Agregar a Mis variables";
+  return (
+    <button type="button" className="pres-estrella" aria-pressed={activa} aria-label={`${acc}: ${nombre}`} title={deshabilitada ? "Mis variables ya tiene 10" : acc} disabled={deshabilitada} onClick={onClick}>
+      <svg viewBox="0 0 20 20" width="22" height="22" aria-hidden="true"><path d="m10 2.5 2.2 4.7 5.1.6-3.8 3.5 1 5.1-4.5-2.5-4.5 2.5 1-5.1L2.7 7.8l5.1-.6z" fill={activa ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" /></svg>
+    </button>
+  );
+}
+
+/** Cómo le fue a cada variable en el mandato (para el resumen del grupo plegado): se calcula una vez por motor, presidente, moneda e inicio de mandato. */
+const cacheClases = new WeakMap<object, Map<string, Map<string, ClaseMandato>>>();
+
+/** "7 mejoraron · 4 empeoraron · 1 sin cambio" con color y con texto (el color nunca va solo). */
+function ResumenGrupo({ clases }: { clases: ClaseMandato[] }) {
+  const r = resumenClases(clases);
+  const partes: [string, string, string][] = [];
+  if (r.bueno) partes.push(["bueno", `${r.bueno} ${r.bueno === 1 ? "mejoró" : "mejoraron"}`, "▲ "]);
+  if (r.malo) partes.push(["malo", `${r.malo} ${r.malo === 1 ? "empeoró" : "empeoraron"}`, "▼ "]);
+  if (r.sinCambio) partes.push(["neutro", `${r.sinCambio} sin cambio`, ""]);
+  if (r.sinCalificar) partes.push(["neutro", `${r.sinCalificar} sin calificar`, ""]);
+  return <span className="pres-res">{partes.map(([k, t, g], i) => <span key={t}>{i > 0 ? " · " : ""}<span className={`pres-res-${k}`}><span aria-hidden="true">{g}</span>{t}</span></span>)}</span>;
 }
 
 export function Presidentes() {
@@ -120,7 +144,24 @@ export function Presidentes() {
   const todasSer = Object.values(m.SER);
   const series = [...(listables(todasSer) as typeof todasSer).filter((s) => s.id !== "ipc_empalme"), ...todasSer.filter((s) => esOculta(s.id))];
   const GRUPOS = ordenarGrupos([...new Set(series.map(grupoDe))]);
-  const nc = cols.length + 1;
+  const nc = cols.length + 3;   // variable, estadísticas, minigráfico del mandato y estrella
+  const idsMis = new Set(mis.map((e) => e.id));
+  const mapaClases = (() => {
+    if (modoA !== "todas") return new Map<string, ClaseMandato>();
+    const clave = `${paPres.id}|${paMed}|${JSON.stringify(b)}|${sec.version}`;
+    let porM = cacheClases.get(m); if (!porM) { porM = new Map(); cacheClases.set(m, porM); }
+    let cl = porM.get(clave);
+    if (!cl) {
+      cl = new Map();
+      series.forEach((s) => { const mo = monedaEnSerie(s, paMed), cc = m.calc({ id: s.id, med: mo.med, rel: null }); cl!.set(s.id, claseMandato(cc.dir, cc.pct, statsMandato(F, cc.v, paPres, b))); });
+      porM.set(clave, cl);
+    }
+    return cl;
+  })();
+  const sacarOPoner = (e: Expr) => {
+    if (idsMis.has(e.id)) set({ pav: mis.filter((x) => x.id !== e.id).map((x) => encExpr(x)).join(",") || null });
+    else if (mis.length < 10) set({ pav: [...mis, e].map((x) => encExpr(x)).join(",") });
+  };
   const filasA: React.ReactNode[] = [];
   let total = 0;
   GRUPOS.forEach((g) => {
@@ -133,7 +174,7 @@ export function Presidentes() {
     filasA.push(
       <tr key={"g" + g} className={`grupo${ab ? " abierto" : ""}`} onClick={() => { if (toks.length) return; setAbiertos(alternar2(abiertos, g)); }}
         tabIndex={0} onKeyDown={(ev) => { if (ev.key === "Enter" && !toks.length) setAbiertos(alternar2(abiertos, g)); }}>
-        <td colSpan={nc}>{g} <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>({ss.length})</span></td>
+        <td colSpan={nc}>{g} <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>({ss.length})</span>{" "}<ResumenGrupo clases={ss.map((s) => mapaClases.get(s.id) ?? "sin-calificar")} /></td>
       </tr>,
     );
     if (!ab) return;
@@ -144,7 +185,10 @@ export function Presidentes() {
     if (grupoSinMoneda) filasA.push(<tr key={"n" + g} className="nota-grupo"><td colSpan={nc}><small className="c-per">La moneda elegida no cambia estas variables: se muestran tal cual.</small></td></tr>);
     items.forEach(({ s, c: cc, st, aplica }) => filasA.push(
       <tr key={s.id}><CeldaVar nombre={s.n} unidad={cc.unidad} info={<BotonInfo id={s.id} />}
-        extra={<>{rango(st)}{!aplica && !grupoSinMoneda && <small className="c-per">la moneda no aplica a esta variable</small>}</>} /><CeldasStats m={m} c={cc} st={st} cols={cols} /></tr>,
+        extra={<>{rango(st)}{!aplica && !grupoSinMoneda && <small className="c-per">la moneda no aplica a esta variable</small>}</>} /><CeldasStats m={m} c={cc} st={st} cols={cols} />
+        <td><div className="spark"><Sparkline v={cc.v.slice(0, paPres.i1 + 1)} color={paPres.color} desde={paBi} /></div></td>
+        <td className="pres-estrella-celda"><Estrella activa={idsMis.has(s.id)} nombre={s.n} deshabilitada={!idsMis.has(s.id) && mis.length >= 10}
+          onClick={() => sacarOPoner({ id: s.id, med: mo0(s, paMed), rel: null, modo: "compra", esc: "" })} /></td></tr>,
     ));
   });
 
@@ -225,7 +269,7 @@ export function Presidentes() {
           <>
             <p className="note">Hasta 10 variables de cualquier categoría. El minigráfico va desde el inicio del mandato de {paPres.n} ({fmtMes(F[paBi])}) hasta el cierre.{misPedidas.length ? "" : " Arrancás con las recomendadas de cada tema; cambialas, quitalas o agregá otras."}</p>
             <div className="tablewrap fija"><table>
-              <thead><tr><th>Variable</th>{!enEdicion && <Cabecera cols={cols} ord={{ k: null, d: -1 }} onOrden={() => {}} />}{!enEdicion && <th>Mandato</th>}</tr></thead>
+              <thead><tr><th>Variable</th>{!enEdicion && <Cabecera cols={cols} ord={{ k: null, d: -1 }} onOrden={() => {}} />}{!enEdicion && <th>Mandato</th>}{!enEdicion && <th><span className="sr-solo">Mis variables</span></th>}</tr></thead>
               <tbody>{mis.map((e, k) => {
                 const cc = m.calc(e), st = statsMandato(F, cc.v, paPres, b);
                 if (enEdicion) return (
@@ -241,6 +285,7 @@ export function Presidentes() {
                     <CeldaVar nombre={cc.corto} unidad={cc.unidad} info={<BotonInfo id={e.id} />} extra={rango(st)} />
                     <CeldasStats m={m} c={cc} st={st} cols={cols} />
                     <td><div className="spark"><Sparkline v={cc.v.slice(0, paPres.i1 + 1)} color={paPres.color} desde={paBi} /></div></td>
+                    <td className="pres-estrella-celda"><Estrella activa nombre={cc.corto} onClick={() => setMis(mis.filter((_, j) => j !== k))} /></td>
                   </tr>
                 );
               })}</tbody>
@@ -257,7 +302,7 @@ export function Presidentes() {
           </>
         ) : (
         <div className="tablewrap fija"><table>
-          <thead><tr><th>Variable</th><Cabecera cols={cols} ord={ordA} onOrden={(k) => setOrdA(siguienteOrden(ordA, k))} /></tr></thead>
+          <thead><tr><th>Variable</th><Cabecera cols={cols} ord={ordA} onOrden={(k) => setOrdA(siguienteOrden(ordA, k))} /><th>Mandato</th><th><span className="sr-solo">Mis variables</span></th></tr></thead>
           <tbody>
             {filasA}
             {!total && <tr><td colSpan={nc} style={{ textAlign: "center", color: "var(--text-muted)" }}>Ninguna variable coincide con &quot;{buscar}&quot;.</td></tr>}
@@ -269,5 +314,7 @@ export function Presidentes() {
     </section>
   );
 }
+/** Medida con que se calcula una serie en la tabla "Todas" (la elegida, o la que corresponde si la moneda no le aplica). */
+const mo0 = (s: Parameters<typeof monedaEnSerie>[0], med: string) => monedaEnSerie(s, med).med;
 function alternar2(s: Set<string>, g: string): Set<string> { const n = new Set(s); if (n.has(g)) n.delete(g); else n.add(g); return n; }
 void unoDe;

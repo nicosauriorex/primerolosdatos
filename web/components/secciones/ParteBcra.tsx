@@ -3,7 +3,7 @@
 // comparaciones y un gráfico chico; al tocarla se despliega el gráfico grande debajo de la fila. Compartir: imagen, texto para pegar en redes y link.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDiario } from "../useDiario";
-import { Cargando } from "../ui";
+import { Cargando, Modal } from "../ui";
 import { Capitulo } from "../sistema/Capitulo";
 import { CabeceraDato } from "../sistema/CabeceraDato";
 import { CompartirHoja } from "../sistema/CompartirHoja";
@@ -13,8 +13,8 @@ import { Sparkline } from "../Sparkline";
 import { GraficoDiario } from "../GraficoDiario";
 import { PanelParte } from "../PanelParte";
 import {
-  aclaracionFila, cambiosDe, esClaveDiario, esPeriodoDiario, extremosTramo, fmtDia, lineaCompras, netoTxt, PERIODO_DEFECTO, PERIODOS_DIARIO, recorte, resumenRuedas, textoParte, variableDe,
-  type ClaveDiario, type Diario, type Parte, type PeriodoDiario, type ResumenVariable, type SerieDiaria,
+  aclaracionFila, cambiosDe, claveDePeriodo, diaDeIso, esClaveDiario, esPeriodoDiario, extremosTramo, fmtDia, isoDeDia, limitesSerie, lineaCompras, netoTxt, PERIODO_DEFECTO, PERIODOS_DIARIO, rangoDeUrl, rangoTxt, recorte, resumenRuedas, textoParte, variableDe,
+  type ClaveDiario, type Diario, type Parte, type PeriodoDiario, type PeriodoElegido, type RangoDiario, type ResumenVariable, type SerieDiaria,
 } from "@/lib/diario";
 import { MESES, nf0 } from "@/lib/formato";
 import { useParams } from "@/lib/url";
@@ -39,6 +39,10 @@ function Cuerpo({ datos, parte }: { datos: Diario; parte: Parte }) {
   const [imagen, setImagen] = useState(false);
   const claveUrl = montado && esClaveDiario(p.get("v")) ? (p.get("v") as ClaveDiario) : null;
   const periodo = esPeriodoDiario(p.get("per")) ? (p.get("per") as PeriodoDiario) : PERIODO_DEFECTO;
+  // Rango de fechas elegido (`pd`, `ph`): si hay `pd`, gana sobre `per`.
+  const pd = montado ? p.get("pd") : null, ph = montado ? p.get("ph") : null;
+  const rango = useMemo(() => rangoDeUrl(pd, ph), [pd, ph]);
+  const elegido: PeriodoElegido = rango ?? periodo;
   const texto = useMemo(() => textoParte(parte), [parte]);
   const titulo = `Parte del Banco Central del ${parte.fechaTxt}`;
   const act = actualizadoTxt(parte.actualizado);
@@ -65,7 +69,7 @@ function Cuerpo({ datos, parte }: { datos: Diario; parte: Parte }) {
     llevada.current = true;
     document.getElementById(`parte-fila-${claveUrl}`)?.scrollIntoView({ block: "nearest", behavior: "auto" });
   }, [claveUrl, montada]);
-  const alternar = (c: ClaveDiario) => { llevada.current = true; set(claveUrl === c ? { v: null, per: null } : { v: c }); };
+  const alternar = (c: ClaveDiario) => { llevada.current = true; set(claveUrl === c ? { v: null, per: null, pd: null, ph: null } : { v: c }); };
 
   return (
     <section className="parte">
@@ -85,7 +89,10 @@ function Cuerpo({ datos, parte }: { datos: Diario; parte: Parte }) {
                 {esta && (
                   <div id={`parte-panel-${v.clave}`} className="bcra-panel" data-abierto={desplegada} role="region" aria-label={`Gráfico de ${v.nombre}`}>
                     <div className="bcra-panel-in">
-                      <Panel v={v} serie={serie!} periodo={periodo} onPeriodo={(x) => set({ per: x === PERIODO_DEFECTO ? null : x })} onCerrar={() => set({ v: null, per: null })} />
+                      <Panel v={v} serie={serie!} periodo={elegido} rango={rango}
+                        onPeriodo={(x) => set({ per: x === PERIODO_DEFECTO ? null : x, pd: null, ph: null })}
+                        onRango={(d, h) => set({ pd: d, ph: h, per: null })}
+                        onCerrar={() => set({ v: null, per: null, pd: null, ph: null })} />
                     </div>
                   </div>
                 )}
@@ -105,16 +112,25 @@ function Cuerpo({ datos, parte }: { datos: Diario; parte: Parte }) {
   );
 }
 
-/** Lo que se despliega debajo de una fila: (compras) resumen de ruedas, períodos, gráfico, extremos, comparaciones y frases. */
-function Panel({ v, serie, periodo, onPeriodo, onCerrar }: { v: ResumenVariable; serie: SerieDiaria; periodo: PeriodoDiario; onPeriodo: (p: string) => void; onCerrar: () => void }) {
+/** Lo que se despliega debajo de una fila: período (atajos o fechas elegidas), gráfico, (compras) resumen de ruedas debajo del gráfico, extremos, comparaciones y frases. */
+function Panel({ v, serie, periodo, rango, onPeriodo, onRango, onCerrar }: {
+  v: ResumenVariable; serie: SerieDiaria; periodo: PeriodoElegido; rango: RangoDiario | null;
+  onPeriodo: (p: string) => void; onRango: (desde: string, hasta: string) => void; onCerrar: () => void;
+}) {
+  const [fechas, setFechas] = useState(false);
   return (
     <div className="bcra-panel-cuerpo">
       <p className="bcra-que">{v.que}. En {v.unidad}, datos diarios.</p>
-      <FilaChips opciones={PERIODOS_DIARIO} valor={periodo} etiqueta="Período del gráfico" onElegir={onPeriodo} />
-      {v.clave === "compras" && <Ruedas serie={serie} periodo={periodo} />}
+      <div className="bcra-periodo">
+        <FilaChips opciones={PERIODOS_DIARIO} valor={rango ? "" : (periodo as PeriodoDiario)} etiqueta="Período del gráfico" onElegir={onPeriodo} />
+        <button type="button" className="bcra-fechas" aria-pressed={!!rango} aria-haspopup="dialog" onClick={() => setFechas(true)}>
+          {rango ? rangoTxt(rango, serie) : "Elegir fechas"}
+        </button>
+      </div>
       <GraficoDiario clave={v.clave} serie={serie} periodo={periodo} etiqueta={v.nombre} />
+      {v.clave === "compras" && <Ruedas serie={serie} periodo={periodo} />}
       <Extremos v={v} serie={serie} periodo={periodo} />
-      {v.filas.length > 0 && v.clave !== "compras" && (
+      {v.filas.length > 0 && (
         <ul className="parte-v-comp">
           {v.filas.map((f) => (
             <li key={f.rotulo} aria-label={`${f.rotulo}, ${f.nota}: ${f.valor}${f.sub ? ", " + f.sub : ""}`}>
@@ -126,13 +142,36 @@ function Panel({ v, serie, periodo, onPeriodo, onCerrar }: { v: ResumenVariable;
       )}
       {v.frases.length > 0 && <ul className="parte-v-frases">{v.frases.map((t) => <li key={t}>{t}</li>)}</ul>}
       <button type="button" className="parte-cerrar" onClick={onCerrar}>Cerrar el gráfico</button>
+      {fechas && <ModalFechas serie={serie} periodo={periodo} onCerrar={() => setFechas(false)} onAplicar={(d, h) => { setFechas(false); onRango(d, h); }} />}
     </div>
   );
 }
 
-/** Resumen de ruedas del período elegido (compras del Banco Central). */
-function Ruedas({ serie, periodo }: { serie: SerieDiaria; periodo: PeriodoDiario }) {
-  const r = useMemo(() => resumenRuedas(serie, periodo), [serie, periodo]);
+/** Ventana "Elegir fechas": Desde y Hasta (campos de fecha limitados a las fechas con datos de la variable). Arranca con el tramo que se ve. */
+function ModalFechas({ serie, periodo, onCerrar, onAplicar }: { serie: SerieDiaria; periodo: PeriodoElegido; onCerrar: () => void; onAplicar: (desde: string, hasta: string) => void }) {
+  const { min, max } = limitesSerie(serie);
+  const tramo = recorte(serie.clave, serie, periodo);
+  const [desde, setDesde] = useState(isoDeDia(tramo.dias[0]));
+  const [hasta, setHasta] = useState(isoDeDia(tramo.dias[tramo.dias.length - 1]));
+  const a = diaDeIso(desde), b = diaDeIso(hasta);
+  const datos = `Hay datos del ${fmtDia(min, true)} al ${fmtDia(max, true)}.`;
+  const error = a === null || b === null ? "Elegí las dos fechas." : a < min || b > max || a > max || b < min ? datos : a > b ? "Desde tiene que ser anterior o igual a Hasta." : "";
+  return (
+    <Modal titulo="Elegir fechas" onCerrar={onCerrar}>
+      <form className="bcra-form-fechas" onSubmit={(ev) => { ev.preventDefault(); if (!error) onAplicar(desde, hasta); }}>
+        <label>Desde<input type="date" value={desde} min={isoDeDia(min)} max={isoDeDia(max)} onChange={(e) => setDesde(e.target.value)} /></label>
+        <label>Hasta<input type="date" value={hasta} min={isoDeDia(min)} max={isoDeDia(max)} onChange={(e) => setHasta(e.target.value)} /></label>
+        <p className="note" role="status">{error || `${datos} El gráfico y el resumen siguen este rango.`}</p>
+        <button type="submit" className="btn" disabled={!!error}>Aplicar</button>
+      </form>
+    </Modal>
+  );
+}
+
+/** Resumen de ruedas del período elegido (compras del Banco Central), debajo del gráfico. */
+function Ruedas({ serie, periodo }: { serie: SerieDiaria; periodo: PeriodoElegido }) {
+  const k = claveDePeriodo(periodo);
+  const r = useMemo(() => resumenRuedas(serie, periodo), [serie, k]); // eslint-disable-line react-hooks/exhaustive-deps
   const celdas: [string, string, string | null, string?][] = [
     ["Ruedas compradoras", nf0.format(r.compra.n), r.compra.n ? `US$ ${nf0.format(r.compra.total)} millones` : null],
     ["Sin intervención", nf0.format(r.sinOperar), null],
@@ -150,8 +189,9 @@ function Ruedas({ serie, periodo }: { serie: SerieDiaria; periodo: PeriodoDiario
 }
 
 /** El valor más alto y el más bajo del período elegido. */
-function Extremos({ v, serie, periodo }: { v: ResumenVariable; serie: SerieDiaria; periodo: PeriodoDiario }) {
-  const e = useMemo(() => extremosTramo(v.clave, recorte(v.clave, serie, periodo)), [v.clave, serie, periodo]);
+function Extremos({ v, serie, periodo }: { v: ResumenVariable; serie: SerieDiaria; periodo: PeriodoElegido }) {
+  const k = claveDePeriodo(periodo);
+  const e = useMemo(() => extremosTramo(v.clave, recorte(v.clave, serie, periodo)), [v.clave, serie, k]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <dl className="parte-extremos">
       <div><dt>Más alto del período</dt><dd>{e.alto.valor}<small>{e.alto.fecha}</small></dd></div>
@@ -160,10 +200,11 @@ function Extremos({ v, serie, periodo }: { v: ResumenVariable; serie: SerieDiari
   );
 }
 
-/** Una variable: toda la fila se toca y despliega su gráfico debajo. Nombre, cifra y fecha a la izquierda; cambios y minigráfico a la derecha. */
+/** Una variable: toda la fila se toca y despliega su gráfico debajo. A la izquierda nombre, cifra grande, fecha y un renglón chico con las dos variaciones
+ *  (con flecha, sin repetir la unidad); a la derecha el minigráfico, del alto de la fila. */
 function Fila({ v, abierta, onAlternar }: { v: ResumenVariable; abierta: boolean; onAlternar: () => void }) {
   const colorValor = v.tipo === "flujo" && v.cls !== "neutro" ? ` var-${v.cls}` : "";
-  const cambios = cambiosDe(v);
+  const cambios = cambiosDe(v, true);
   const extra = v.clave === "compras" ? lineaCompras(v) : "";
   return (
     <button type="button" className="parte-v" aria-expanded={abierta} aria-controls={abierta ? `parte-panel-${v.clave}` : undefined} aria-label={`${abierta ? "Cerrar" : "Ver"} el gráfico de ${v.nombre}`} onClick={onAlternar}>
@@ -174,12 +215,10 @@ function Fila({ v, abierta, onAlternar }: { v: ResumenVariable; abierta: boolean
           <b className={`parte-v-valor${colorValor}`}>{v.valor}</b>
         </span>
         <span className="parte-v-fecha">{[aclaracionFila(v.clave), v.atrasada ? `último dato: ${v.fechaTxt}` : v.fechaTxt].filter(Boolean).join(" · ")}</span>
+        {cambios.length > 0 && <span className="parte-v-cambios">{cambios.map((c) => <Delta key={c.contra} texto={c.texto} tono={c.tono} dir={c.dir} contra={c.contra} etiqueta={c.etiqueta} />)}</span>}
         {extra && <span className="parte-v-extra">{extra}</span>}
       </span>
-      <span className="parte-v-der">
-        {cambios.length > 0 && <span className="parte-v-cambios">{cambios.map((c) => <Delta key={c.contra} texto={c.texto} tono={c.tono} dir={c.dir} contra={c.contra} />)}</span>}
-        <span className="parte-v-spark"><Sparkline v={v.spark} desde={0} /></span>
-      </span>
+      <span className="parte-v-spark"><Sparkline v={v.spark} desde={0} /></span>
     </button>
   );
 }

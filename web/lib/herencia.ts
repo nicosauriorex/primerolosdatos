@@ -31,6 +31,11 @@ export interface DefFila {
   neutra?: boolean; nota?: string;
   /** Llevar la serie a 100 en su primer mes con dato (para índices relativos, que en "real" quedan en puntos de hoy). */
   base100?: { unidad: string };
+  /** "Recibió" = el año calendario cerrado del traspaso (para quien asume en diciembre, el año que termina ese diciembre; si no, el último año completo
+   *  antes de asumir), en lugar de los 12 meses a T-1. Solo para flujos en % del PIB (suma de 12 meses). */
+  anioCerrado?: boolean;
+  /** La fila es `id` menos la serie `menos` (las dos en % del PIB, con los valores como se ven). */
+  menos?: { clave: string };
 }
 
 // Las expresiones son las de los datos fijos (lib/datos-fijos.ts) cuando el dato ya es fijo, para que coincidan con el resto del sitio.
@@ -44,7 +49,7 @@ export const FILAS_HERENCIA: DefFila[] = [
     cociente: { id: "bcra_15", nombre: "base monetaria", unidad: "% de la base monetaria" },
   },
   {
-    clave: "cuasifiscal", grupo: "Banco Central", id: "bcra_cuasifiscal", medidas: [{ med: "real", esc: "pib" }, { med: "real" }],
+    clave: "cuasifiscal", grupo: "Banco Central", id: "bcra_cuasifiscal", medidas: [{ med: "real", esc: "pib" }, { med: "real" }], anioCerrado: true,
     nota: "No incluye los intereses de las Lebac (2002 a 2017).",
   },
   // Dólar
@@ -52,8 +57,14 @@ export const FILAS_HERENCIA: DefFila[] = [
   { clave: "oficial", grupo: "Dólar", id: "fx_oficial", medidas: [{ med: "real" }] },
   { clave: "tcrm", grupo: "Dólar", id: "tcrm", medidas: [{ med: "asis" }], neutra: true },
   // Cuentas públicas
-  { clave: "primario", grupo: "Cuentas públicas", id: "dg_379_9_superavit_017_23_94", medidas: [{ med: "real", esc: "pib" }] },
-  { clave: "financiero", grupo: "Cuentas públicas", id: "dg_379_9_resultado_017_18_38", medidas: [{ med: "real", esc: "pib" }] },
+  { clave: "primario", grupo: "Cuentas públicas", id: "dg_379_9_superavit_017_23_94", medidas: [{ med: "real", esc: "pib" }], anioCerrado: true },
+  { clave: "financiero", grupo: "Cuentas públicas", id: "dg_379_9_resultado_017_18_38", medidas: [{ med: "real", esc: "pib" }], anioCerrado: true },
+  {
+    // resultado financiero (Tesoro) menos el déficit cuasifiscal (Banco Central, en positivo cuando es déficit): más alto = mejor
+    clave: "fiscal_cuasi", grupo: "Cuentas públicas", id: "dg_379_9_resultado_017_18_38", medidas: [{ med: "real", esc: "pib" }], anioCerrado: true,
+    nombre: "Resultado fiscal + cuasifiscal (Tesoro + Banco Central)", menos: { clave: "cuasifiscal" },
+    nota: "Resultado financiero del Tesoro menos el déficit cuasifiscal del Banco Central, los dos en % del PIB. No incluye los intereses de las Lebac (2002 a 2017).",
+  },
   { clave: "subsidios", grupo: "Cuentas públicas", id: "dg_452_2_energiagia_0_t_7_79", medidas: [{ med: "real", esc: "pib" }, { med: "real" }, { med: "usdr" }], nota: "Serie desde 2016." },
   // Precios
   { clave: "inflacion12", grupo: "Precios", id: "ipc_empalme", medidas: [{ med: "via" }], nombre: "Inflación de los últimos 12 meses" },
@@ -85,6 +96,8 @@ export const defPorClave = (clave: string | null | undefined): DefFila | null =>
 export function exprDe(m: Motor, d: DefFila): Expr | null {
   const s: SerieMeta | undefined = m.SER[d.id];
   if (!s || (d.cociente && !m.SER[d.cociente.id])) return null;
+  const rest = d.menos ? defPorClave(d.menos.clave) : null;
+  if (rest && !m.SER[rest.id]) return null;
   const meds = m.medidasDe(s), escs = m.escPermitidas(s);
   for (const x of d.medidas) {
     if (x.esc && !escs.some((o) => o[0] === x.esc)) continue;
@@ -102,6 +115,14 @@ export function calcDe(m: Motor, d: DefFila, e: Expr): Calculo {
     const v = c.v.map((x) => (ok(x) && ok(b0) && b0 !== 0 ? (x / b0) * 100 : null));
     return { ...c, v, lo: undefined, hi: undefined, unidad: d.base100.unidad };
   }
+  if (d.menos) {
+    const dr = defPorClave(d.menos.clave), er = dr ? exprDe(m, dr) : null;
+    if (!dr || !er) return c;
+    const b = m.calc(er).v;
+    // la cuenta se hace con los valores como se ven (un decimal): −3,5 y 1,2 dan −4,7
+    const v = c.v.map((x, i) => (ok(x) && ok(b[i]) ? r1(r1(x) - r1(b[i] as number)) : null));
+    return { ...c, v, lo: undefined, hi: undefined, nombre: d.nombre ?? c.nombre, corto: d.nombre ?? c.corto, dir: 1 };
+  }
   if (!d.cociente) return c;
   const a = m.nominalPesos(m.SER[d.id]), b = m.nominalPesos(m.SER[d.cociente.id]);
   const v = a.map((x, i) => (ok(x) && ok(b[i]) && b[i] !== 0 ? (x / (b[i] as number)) * 100 : null));
@@ -109,7 +130,7 @@ export function calcDe(m: Motor, d: DefFila, e: Expr): Calculo {
 }
 
 /** Un dato de la tabla: el valor tal como se muestra, su número redondeado como se ve y su mes. */
-export interface Punto { i: number; v: number; visto: number; txt: string; mes: string }
+export interface Punto { i: number; v: number; visto: number; txt: string; mes: string; nota?: string }
 const punto = (m: Motor, c: Calculo, v: number, i: number): Punto => {
   const txt = m.fmtC(c, v);
   return { i, v, visto: c.pct ? r1(v) : valorMostrado(txt) ?? v, txt, mes: fmtMes(m.F[i]) };
@@ -143,6 +164,25 @@ export function recibio(m: Motor, c: Calculo, PRES: Pres[], k: number): { p: Pun
   return { p: null, motivo: motivoSinDato(F, c.v, t - 1) };
 }
 
+/** Lo que recibió, en un flujo en % del PIB: el año calendario cerrado del traspaso (Milei: 2023 completo; Macri: 2015; Alberto F.: 2019). Para quien asume
+ *  en otro mes, el último año completo antes de asumir. Si ese año no tiene los 12 meses publicados, cae a los 12 meses a T-1 con una nota en el punto. */
+export function recibioCerrado(m: Motor, c: Calculo, PRES: Pres[], k: number): { p: Punto | null; motivo: string } {
+  const F = m.F, t = mesAsuncion(F, PRES[k]), base = recibio(m, c, PRES, k);
+  if (t <= 0 || !PRES[k - 1]) return base;
+  let i = F[t].endsWith("-12") ? t : -1;
+  if (i < 0) for (let j = t - 1; j >= 0; j--) if (F[j].endsWith("-12")) { i = j; break; }
+  if (i < 0) return base;
+  const anio = F[i].slice(0, 4), era = base.p ? `; a ${base.p.mes} (12 meses) era ${menos(base.p.txt)}` : "";
+  if (ok(c.v[i])) {
+    const nota = i === t ? `${fmtMes(F[t])} ya fue en parte del gobierno nuevo${era}.` : `Último año calendario completo antes de asumir${era}.`;
+    return { p: { ...punto(m, c, c.v[i] as number, i), mes: `año ${anio}`, nota }, motivo: "" };
+  }
+  return { p: base.p ? { ...base.p, nota: `El año ${anio} no tiene los 12 meses publicados: se muestra el dato de los 12 meses a ${base.p.mes}.` } : null, motivo: base.motivo };
+}
+
+/** Qué función arma "Recibió" de una fila: el año cerrado solo vale para flujos en % del PIB (si la serie no admite esa escala, 12 meses a T-1). */
+const recibioDe = (d: DefFila, c: Calculo) => (d.anioCerrado && /% del PIB/.test(c.unidad) ? recibioCerrado : recibio);
+
 /** Lo que entregó (o tiene hoy) el presidente `k`: el cierre de su mandato (último dato en o antes del último mes). */
 export function entrego(m: Motor, c: Calculo, PRES: Pres[], k: number): { p: Punto | null; motivo: string } {
   const F = m.F, p = PRES[k], st = statsMandato(F, c.v, p, BASE_HERENCIA);
@@ -162,7 +202,7 @@ export function cambio(m: Motor, c: Calculo, a: Punto | null, b: Punto | null, n
 /** Una fila armada para un presidente. */
 export interface FilaHerencia {
   def: DefFila; grupo: GrupoHerencia; nombre: string; unidad: string; expr: Expr | null; c: Calculo | null; href: string | null;
-  recibio: Punto | null; sinRecibio: string; entrego: Punto | null; sinEntrego: string;
+  recibio: Punto | null; sinRecibio: string; notaRecibio: string; entrego: Punto | null; sinEntrego: string;
   cambio: string; cambioAbs: string; cls: "bueno" | "malo" | "neutro";
 }
 export interface TablaHerencia { pres: Pres; k: number; enCurso: boolean; mesT1: string | null; filas: FilaHerencia[] }
@@ -177,11 +217,11 @@ export function tablaHerencia(m: Motor, presId: string): TablaHerencia | null {
   const p = PRES[k], t = mesAsuncion(m.F, p);
   const filas = FILAS_HERENCIA.map((d): FilaHerencia => {
     const e = exprDe(m, d);
-    if (!e) return { def: d, grupo: d.grupo, nombre: nombreSinSerie(d), unidad: "", expr: null, c: null, href: null, recibio: null, sinRecibio: "la serie todavía no está cargada", entrego: null, sinEntrego: "la serie todavía no está cargada", cambio: "–", cambioAbs: "", cls: "neutro" };
-    const c = calcDe(m, d, e), r = recibio(m, c, PRES, k), en = entrego(m, c, PRES, k), cb = cambio(m, c, r.p, en.p, !!d.neutra);
+    if (!e) return { def: d, grupo: d.grupo, nombre: nombreSinSerie(d), unidad: "", expr: null, c: null, href: null, recibio: null, sinRecibio: "la serie todavía no está cargada", notaRecibio: "", entrego: null, sinEntrego: "la serie todavía no está cargada", cambio: "–", cambioAbs: "", cls: "neutro" };
+    const c = calcDe(m, d, e), r = recibioDe(d, c)(m, c, PRES, k), en = entrego(m, c, PRES, k), cb = cambio(m, c, r.p, en.p, !!d.neutra);
     return {
-      def: d, grupo: d.grupo, nombre: d.nombre ?? c.corto, unidad: c.unidad, expr: e, c, href: d.cociente || d.base100 ? null : hrefDato(e, { pd: p.id }),
-      recibio: r.p, sinRecibio: r.motivo, entrego: en.p, sinEntrego: en.motivo, cambio: cb.txt, cambioAbs: cb.abs, cls: cb.cls,
+      def: d, grupo: d.grupo, nombre: d.nombre ?? c.corto, unidad: c.unidad, expr: e, c, href: d.cociente || d.base100 || d.menos ? null : hrefDato(e, { pd: p.id }),
+      recibio: r.p, sinRecibio: r.motivo, notaRecibio: r.p?.nota ?? "", entrego: en.p, sinEntrego: en.motivo, cambio: cb.txt, cambioAbs: cb.abs, cls: cb.cls,
     };
   });
   return { pres: p, k, enCurso: p.i1 >= m.F.length - 1, mesT1: t > 0 ? fmtMes(m.F[t - 1]) : null, filas };
@@ -205,11 +245,11 @@ export function traspasos(m: Motor, clave: string): VistaTraspasos | null {
   for (let k = 1; k < PRES.length; k++) {
     const t = mesAsuncion(m.F, PRES[k]);
     if (t <= 0) continue;
-    const r = recibio(m, c, PRES, k);
+    const r = recibioDe(d, c)(m, c, PRES, k);
     filas.push({ de: PRES[k - 1], a: PRES[k], mes: fmtMes(m.F[t]), dato: r.p, motivo: r.motivo });
   }
   const ult = PRES.length - 1, hoy = entrego(m, c, PRES, ult);
-  return { def: d, nombre: d.nombre ?? c.corto, unidad: c.unidad, expr: e, href: d.cociente || d.base100 ? null : hrefDato(e), filas, hoy: { p: PRES[ult], dato: hoy.p, motivo: hoy.motivo } };
+  return { def: d, nombre: d.nombre ?? c.corto, unidad: c.unidad, expr: e, href: d.cociente || d.base100 || d.menos ? null : hrefDato(e), filas, hoy: { p: PRES[ult], dato: hoy.p, motivo: hoy.motivo } };
 }
 
 // ---------------------------------------------------------------- la respuesta de arriba (remodelación 3.5, H1)

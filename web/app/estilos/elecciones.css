@@ -1,0 +1,19 @@
+/* Tanda 8: estilos de la parte que corresponde (ver docs/specs/ajustes-tanda-8.md). */
+
+/* G2: renglón de resumen de la vista (R14) y píldoras de elección múltiple (R12). Lo usan Ranking, Elecciones y Contexto. */
+.resbar { flex-wrap: wrap; row-gap: var(--e-1); }
+.resbar-texto { flex: 1 1 14rem; min-width: 0; margin: 0; font-size: var(--t-sm); color: var(--text-secondary); line-height: 1.4; overflow-wrap: break-word; }
+.resbar .vistabar-ajustes { flex: none; }
+.resbar-pildoras { display: flex; flex-wrap: wrap; gap: var(--e-2); min-width: 0; }
+.resbar-pil { display: inline-flex; align-items: center; gap: var(--e-1); min-height: var(--toque); padding: 0 var(--e-4); border: 0; border-radius: var(--r-pleno);
+  background: var(--surface-2); color: var(--text-primary); font: inherit; cursor: pointer; text-align: left; }
+.resbar-pil:hover:not(:disabled) { background: var(--relleno-hover); }
+.resbar-pil[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento); font-weight: 700; }
+.resbar-pil:disabled { opacity: .55; cursor: not-allowed; }
+.resbar-pil:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.resbar-tilde { font-weight: 800; }
+
+/* G2: correlación de cada variable con el voto: nombre solo, en un renglón si es una palabra, sin cortar palabras; el ⓘ al final de la fila */
+.elec-corr td.c-var { min-width: 11rem; max-width: 18rem; width: auto; }
+.elec-corr td.c-var .c-var-n { overflow-wrap: break-word; word-break: normal; hyphens: manual; }
+.elec-corr .elec-info-col { width: 56px; text-align: center; vertical-align: middle; }

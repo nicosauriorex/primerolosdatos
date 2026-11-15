@@ -3,14 +3,6 @@
 /* Texto solo para lectores de pantalla (la cifra abreviada de la placa lleva el valor completo así) */
 .pt-solo-lectura { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-/* Todas las secciones (pedido 23): desde 900 px columnas parejas que se llenan, alineadas arriba; ningún grupo se parte.
-   reemplaza .indice-secciones { display: grid; grid-template-columns: repeat(2, …) } de globals.css */
-@media (min-width: 900px) {
-  .inicio .indice-secciones { display: block; columns: 2; column-gap: var(--e-6); }
-  .inicio .indice-grupo { break-inside: avoid; margin: 0 0 var(--e-5); }
-  .inicio .indice-grupo:last-child { margin-bottom: 0; }
-}
-
 /* Preguntale (pedido 22): atajos "Desde" de "Qué subió más" */
 .preg-desde { display: grid; gap: var(--e-1); min-width: 0; }
 .preg-desde-rot { font-size: var(--t-sm); font-weight: 700; color: var(--text-muted); }
@@ -41,3 +33,56 @@
 .mg-leyenda i { flex: none; width: 14px; height: 3px; border-radius: 2px; }
 .mg-k1 { background: var(--series-1); }
 .mg-k2 { background: var(--series-2); }
+
+/* ================= Tanda 8, Parte B (docs/specs/ajustes-tanda-8.md) ================= */
+
+/* B1 (R13). Placas: cada bloque en su propia fila de una grilla compartida por las cuatro (subgrid): título, cifra, bajada, comparaciones, fecha y fuente, minigráfico.
+   La pista pasa de flex a grilla de una columna por placa (carrusel en el celular, cuatro columnas desde 1024 px). */
+/* Sin subgrid (se encimaba): cada bloque reserva un alto fijo, así arranca a la misma altura en las cuatro placas. */
+.inicio .pista > .placa { position: relative; height: auto; min-height: 400px; }
+.inicio .placa-link { display: flex; flex-direction: column; height: 100%; }
+.inicio .placa-link > .placa-titulo { min-height: 2.4em; white-space: normal; }
+.inicio .placa-link > .placa-ctx { min-height: 2.7em; }
+.inicio .placa-link > .placa-comps { min-height: 7.2em; align-content: start; }
+.inicio .placa-link > .placa-pie { margin-top: var(--e-3); min-height: 3.6em; justify-content: flex-start; }
+.inicio .placa-link > svg.mini { margin-top: auto; }
+/* la fuente se escribe entera (nombre público corto); si aun así no entra, baja de renglón en vez de cortarse */
+.inicio .placa-pie > .placa-fuente { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+
+/* B2/B3 (R13). ¿Qué datos te interesan?: ícono del tema a la izquierda y la cifra en una columna fija a la derecha, alineada entre filas;
+   la unidad va debajo de la cifra, en chico. En la computadora, el minigráfico va en su propia columna. */
+.inicio .fila-tema { grid-template-columns: 40px minmax(0, 1fr) 7rem 20px; align-items: start; column-gap: var(--e-3);
+  grid-template-areas: "icono nombre cifra flecha" "icono corto cifra flecha" "icono rotulo rotulo flecha"; }
+@media (min-width: 900px) {
+  .inicio .fila-tema { grid-template-columns: 40px minmax(0, 1fr) 7.5rem 64px 20px;
+    grid-template-areas: "icono nombre cifra mini flecha" "icono corto cifra mini flecha" "icono rotulo rotulo mini flecha"; }
+}
+.inicio .tema-icono { grid-area: icono; display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--r-2); background: var(--surface-2); color: var(--acento-texto); }
+.inicio .tema-icono .icono { width: 24px; height: 24px; }
+.inicio .tema-cifra { grid-area: cifra; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 0; text-align: right; }
+.inicio .tema-cifra b { max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
+.inicio .tema-cifra .tema-un { max-width: 100%; font-size: var(--t-xs); font-weight: 600; line-height: 1.25; color: var(--text-muted); white-space: normal; overflow-wrap: anywhere; }
+.inicio .dato-tema small { margin-top: 2px; }
+.inicio .fila-tema > .icono { align-self: center; }
+@media (min-width: 900px) { .inicio .mini-tema { align-self: center; } }
+
+/* B4. Todas las secciones como mosaico: una tarjeta por sección con ícono grande, nombre y una línea de qué se hace ahí.
+   Los grupos van uno debajo del otro; las tarjetas de una fila tienen el mismo alto. Distinto de la lista de temas de arriba. */
+.inicio .indice-secciones { display: flex; flex-direction: column; gap: var(--e-6); columns: auto; }
+.inicio .indice-grupo { margin: 0; }
+.inicio .indice-grupo h3 { margin-bottom: var(--e-3); }
+.sec-mosaico { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr)); gap: var(--e-3); align-items: stretch; margin: 0; padding: 0; list-style: none; }
+@media (min-width: 900px) { .sec-mosaico { grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr)); gap: var(--e-4); } }
+.sec-mosaico > li { display: flex; min-width: 0; }
+.sec-tarjeta { display: flex; flex-direction: column; align-items: flex-start; gap: var(--e-2); width: 100%; min-width: 0; padding: var(--e-4); background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-2);
+  color: inherit; text-decoration: none; transition: transform var(--d-2, 150ms) var(--curva, ease-out), box-shadow var(--d-2, 150ms) var(--curva, ease-out), border-color var(--d-2, 150ms) var(--curva, ease-out); }
+.sec-tarjeta:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.sec-icono { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: var(--e-1); border-radius: var(--r-2); background: var(--surface-2); color: var(--acento-texto); transition: background-color var(--d-2, 150ms), color var(--d-2, 150ms); }
+.sec-icono .icono { width: 28px; height: 28px; }
+.sec-nombre { font-size: 1rem; font-weight: 800; line-height: 1.25; overflow-wrap: anywhere; }
+.sec-para { font-size: var(--t-sm); line-height: 1.35; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+@media (hover: hover) {
+  .sec-tarjeta:hover { transform: translateY(-3px); border-color: var(--acento); box-shadow: var(--sombra-2, 0 6px 16px rgba(0, 0, 0, .18)); }
+  .sec-tarjeta:hover .sec-icono { background: var(--acento); color: var(--sobre-acento); }
+}
+@media (prefers-reduced-motion: reduce) { .sec-tarjeta, .sec-icono { transition: none; } .sec-tarjeta:hover { transform: none; } }
