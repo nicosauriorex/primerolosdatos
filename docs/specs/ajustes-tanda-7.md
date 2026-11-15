@@ -1,6 +1,6 @@
 # Ajustes, tanda 7: botones sin caja, portada, buscador de variables, ficha, Histórico y Banco Central
 
-Estado: implementada en local (2026-11-14), sin publicar
+Estado: implementada (2026-11-14), publicada en a346515
 
 Pedidos del usuario al recorrer la portada y sus atajos (2026-11-14, 25 puntos, anotados en `docs/IDEAS.md`). El punto 25 es obligatorio: cada pedido es una decisión de diseño para **todo** el sitio; cada parte de abajo aplica las reglas generales en sus archivos, no solo el caso señalado.
 

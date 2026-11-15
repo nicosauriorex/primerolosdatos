@@ -116,7 +116,7 @@ Uso central: alguien escribe en redes "Milei fundió la economía" y otra person
   (→ spec: docs/specs/plantillas-y-vistas.md, como plantillas "cuánto compra un salario"; los índices del IPC medidos en salarios quedan pendientes.)
 - Galería pública de plantillas hechas por la gente (cuando haya cuentas).
 
-## Ajustes pedidos al recorrer la portada y sus atajos (2026-11-14)
+## ~~Ajustes pedidos al recorrer la portada y sus atajos (2026-11-14)~~ ✅ 2026-11-14
 → spec: docs/specs/ajustes-tanda-7.md
 - Botones y selectores sin caja de borde fino en todo el sitio (elegida: píldora rellena).
 - Placas de la portada: cifra del mismo tamaño (salario abreviado "1,94 M"), subió/bajó como píldora con flecha y animación (no el cuadradito con triángulo); tocar la placa lleva a la ficha, no al Histórico.
