@@ -7,8 +7,8 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-15.
 ## Dónde estamos
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
-Últimos bloques (todos publicados, corrida en verde, salvo donde se dice):
-- Tanda 10: la lupa encuentra Herencia y el parte del Banco Central — 2026-11-15, **sin publicar** — [spec](specs/ajustes-tanda-10.md)
+Últimos bloques (todos publicados, corrida en verde):
+- Tanda 10: la lupa encuentra Herencia y el parte del Banco Central; selector de Herencia agrupado — 2026-11-15, b296c75 — [spec](specs/ajustes-tanda-10.md)
 - EE.UU. (BLS) y Chile (INE) en precios contra el mundo, productos de EE.UU. desde el BLS y aviso de presidente sin dato — 2026-11-15, 4078c3e — [spec](specs/precios-mundo-bls-ine.md)
 - Chips compactos en todo el sitio (R24) y cierre de Contexto — 2026-11-15, 63d1e40 — [spec](specs/chips-compactos.md)
 - Contexto: "El mundo y la Argentina" con subpestañas y barras — 2026-11-15 — [spec](specs/remodelacion-contexto-precios.md)

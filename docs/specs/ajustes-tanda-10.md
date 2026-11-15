@@ -1,6 +1,6 @@
 # Ajustes, tanda 10: la lupa encuentra los datos de Herencia y del parte del Banco Central
 
-Estado: implementada (2026-11-15), sin publicar
+Estado: implementada (2026-11-15), publicada en b296c75 (corrida en verde)
 
 Pedido del usuario (2026-11-15), con una captura de la lupa buscando «deuda publica»: «hay datos que capaz están en herencia que no aparecen en la lupa. ponele deuda publica, deuda neta, etc.»
 
