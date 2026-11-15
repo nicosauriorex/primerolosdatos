@@ -1,6 +1,6 @@
 # Ajustes, tanda 8: alineación, Compartir en un solo lugar, píldoras, ficha, presidentes, Banco Central y herencia
 
-Estado: implementada (2026-11-15)
+Estado: implementada (2026-11-15), publicada en 32e022b
 
 Pedidos del usuario al recorrer la página (2026-11-14, 28 puntos, anotados en `docs/IDEAS.md`). Como en las tandas anteriores, cada pedido es un caso de una regla general: cada parte aplica las reglas de abajo en **todos** sus archivos, no solo en el caso señalado, y lo informa.
 
