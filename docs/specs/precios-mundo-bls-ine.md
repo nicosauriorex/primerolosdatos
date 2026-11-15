@@ -1,6 +1,6 @@
 # EE.UU. (BLS) y Chile (INE) en precios contra el mundo
 
-Estado: implementada (2026-11-15), en local sin commit.
+Estado: implementada y publicada (2026-11-15, 4078c3e; corrida 43764957773 en verde).
 
 Origen: pedido del 2026-11-15: «sumá EE.UU. (BLS) y Chile (INE) a precios contra el mundo». Idea de `docs/IDEAS.md` ("EE.UU. y Chile cortados por rubro…").
 
@@ -53,7 +53,7 @@ Solo pipeline (`pipeline/precios_mundo.py`). Igual que con la zona euro: la seri
 - Control: un salto falso de +104 % en ropa de Chile deja esa división hasta dic-23 con un AVISO, sin cortar.
 - `--solo-json`, `npm run tipos` y `npm run build` sin errores. En la vista local: ropa contra EE.UU. "estimado oct-26"; salud contra Chile "estimado oct-26"; promedio de Milei contra EE.UU. "dic-23 a oct-26"; las dos notas en "Cómo se mide"; a 375 px sin desborde; consola sin errores.
 - Revisor en dos pasadas: la primera marcó que el control podía cortar toda la corrida diaria (corregido) y tres menores (corregidos); la segunda, sin bloqueantes.
-- Sin verificar: el aspecto en captura (el panel del navegador estaba oculto), tema claro, celular real, la corrida en GitHub.
+- Sin verificar: el aspecto en captura (el panel del navegador estaba oculto), tema claro, celular real. La corrida en GitHub terminó en verde (43764957773) y el sitio sirve los datos nuevos.
 
 ## Dónde ver los cambios
 Página: `docs/cambios/precios-mundo-bls-ine.html`. Local con la vista `web-out` (`http://localhost:3100<ruta>`); en el sitio (`https://primerolosdatos.com.ar<ruta>`) recién después del commit, el push y la corrida completa (toca `pipeline/`: unos 10 minutos).
