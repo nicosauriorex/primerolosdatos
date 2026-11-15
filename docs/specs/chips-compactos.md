@@ -1,6 +1,6 @@
 # Chips compactos en todo el sitio (y cierre de Contexto)
 
-Estado: implementada (2026-11-15), sin commit.
+Estado: implementada y publicada (2026-11-15, 63d1e40; corrida 43757615947 en verde).
 
 Origen: pedido del 2026-11-15 en la tercera vuelta de Contexto: «lo de los chips chicos está bueno también para toda la página» (anotado en `docs/IDEAS.md`). En la misma tanda: revisor sobre la cuarta vuelta de Contexto (`docs/specs/remodelacion-contexto-precios.md`) y el corte de la zona euro, Chile y EE.UU. en precios contra el mundo (IDEAS).
 
