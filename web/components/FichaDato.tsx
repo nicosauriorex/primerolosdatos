@@ -1,15 +1,14 @@
 "use client";
 // Ficha del dato: una variable contada en capítulos cortos, cada uno con su pregunta (docs/specs/remodelacion-fichas.md):
-// Ahora (cifra, cambios y "Ver también"), ¿Cómo viene? (el gráfico con su período), ¿Cómo fue <mes> en otros años?,
+// Ahora (cifra y cambios), ¿Cómo viene? (el gráfico con su período), ¿Cómo fue <mes> en otros años?,
 // ¿Cómo le fue con cada presidente? (tabla o velas), Mes a mes desde que asumió, Gráficos listos y, plegado al final, Cómo se mide.
 // Cada capítulo tiene su Compartir (imagen, link y texto) y, si corresponde, "Abrir completo" con la variable ya cargada en esa sección.
 // La usan la página de cada tema y la ruta /dato/.
-import { useMemo, useRef, useState, type ReactNode, type Ref } from "react";
+import { useEffect, useMemo, useState, type ReactNode, type Ref } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useSeccion } from "./useSeccion";
 import { useConfig } from "./ConfigProvider";
-import { useDeslizable } from "./Movimiento";
 import { Cargando } from "./ui";
 import { Grafico, type Fila, type OpcionesG, type SerieG } from "./Grafico";
 import { Velas } from "./Velas";
@@ -36,7 +35,7 @@ import type { Expr, Motor, SerieMeta } from "@/lib/motor";
 import { hrefDato, hrefHistorico, idsDe } from "@/lib/temas";
 import {
   cabeceraFicha, filasMandatosFicha, historicoFicha, hrefMandatoDe, hrefPresidentesDe, mandatoFicha, mesesIguales, paramsInicio, periodosFicha,
-  relacionadasDe, sinMandatoTxt, velasDe, type CabeceraFicha, type PeriodoFicha,
+  bajadaTablaMandatos, sinMandatoTxt, velasDe, type CabeceraFicha, type PeriodoFicha,
 } from "@/lib/ficha";
 
 type SetFn = (cambios: Record<string, string | null | undefined>) => void;
@@ -86,8 +85,6 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
   const nombre = titulo ?? tituloVariable(m, e, c);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const cab = useMemo(() => cabeceraFicha(m, e), [m, version, kE]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const rel = useMemo(() => relacionadasDe(e, S, nivel === 3), [kE, S, nivel]);
   const inicio = paramsInicio(p);
   const b = info.b;
   const PRES = useMemo(() => crearPres(m.F), [m]);
@@ -113,9 +110,8 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
             // la imagen lleva las mismas frases de contexto que la cabecera (F4): la que se ve, o ninguna si la cabecera no muestra
             frases: cab?.fraseClave ? [cab.fraseClave] : [], fraseFija: cab?.frase })} />}
         info={<>{c.serie.desc ? <p>{c.serie.desc}</p> : null}<p>Fuente: {fuente}.</p></>} />
-      {rel.length > 0 && <VerTambien rel={rel} />}
       <CapViene m={m} e={e} nivel={nivel} set={set} V={V} />
-      <CapMeses m={m} e={e} version={version} nivel={nivel} nombre={nombre} />
+      <CapMeses key={kE} m={m} e={e} version={version} nivel={nivel} nombre={nombre} />
       <CapPresidentes m={m} e={e} info={info} nivel={nivel} pd={pd} inicio={inicio} nombre={nombre}
         velas={unoDe(p.get("pvista"), ["tabla", "velas"] as const, "tabla") === "velas"} onVista={(v) => set({ pvista: v ? "velas" : null })} />
       <CapMandato m={m} e={e} D={mandato} nivel={nivel} pd={pd} inicio={inicio} b={b} />
@@ -129,20 +125,6 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
           {mandato && <p>Mes a mes desde que asumió: {mandato.nota.replace(`Mes 0 = ${baseTxt(b)}.`, "").trim()}</p>}
         </div>
       </details>
-    </div>
-  );
-}
-
-/** "Ver también": links a variables relacionadas, en una fila que se desliza de costado (como los chips). */
-function VerTambien({ rel }: { rel: { nombre: string; href: string }[] }) {
-  const fila = useRef<HTMLElement>(null);
-  useDeslizable(fila, false, rel.length);
-  return (
-    <div className="fi-ver">
-      <span className="fi-ver-rot" aria-hidden="true">Ver también</span>
-      <nav ref={fila} className="chips" aria-label="Ver también">
-        {rel.map((r) => <Link key={r.href} prefetch={false} href={r.href}><span className="chips-cuerpo">{r.nombre}</span></Link>)}
-      </nav>
     </div>
   );
 }
@@ -212,15 +194,45 @@ function CapViene({ m, e, nivel, set, V }: { m: Motor; e: Expr; nivel: Nivel; se
 }
 
 // ------------------------------------------------------------ ¿Cómo fue <mes> en otros años?
+/** Rango de años de dos puntas: dos controles `range` superpuestos (desde y hasta), cada uno con su nombre para lectores de pantalla y teclado.
+ *  Trabaja con posiciones en la lista de años (no con los años) y deja siempre al menos 3 años. */
+function RangoAnios({ anios, a, b, onCambio }: { anios: string[]; a: number; b: number; onCambio: (a: number, b: number) => void }) {
+  const N = anios.length, pct = (i: number) => (N > 1 ? (i / (N - 1)) * 100 : 0);
+  return (
+    <div className="e1-rango" role="group" aria-label="Años que se muestran">
+      <div className="e1-rango-txt"><span>Desde <b>{anios[a]}</b></span><span>hasta <b>{anios[b]}</b></span></div>
+      <div className="e1-rango-pista" style={{ "--a": `${pct(a)}%`, "--b": `${pct(b)}%` } as React.CSSProperties}>
+        <span className="e1-rango-riel" aria-hidden="true" />
+        <span className="e1-rango-tramo" aria-hidden="true" />
+        <input type="range" className="e1-rango-in" min={0} max={N - 1} step={1} value={a} aria-label="Primer año" aria-valuetext={anios[a]}
+          onChange={(ev) => onCambio(Math.min(Number(ev.target.value), b - 2), b)} />
+        <input type="range" className="e1-rango-in" min={0} max={N - 1} step={1} value={b} aria-label="Último año" aria-valuetext={anios[b]}
+          onChange={(ev) => onCambio(a, Math.max(Number(ev.target.value), a + 2))} />
+      </div>
+    </div>
+  );
+}
+
 function CapMeses({ m, e, version, nivel, nombre }: { m: Motor; e: Expr; version: number; nivel: Nivel; nombre: string }) {
   const kE = `${e.id}~${e.med}~${e.rel}~${e.modo}~${e.esc}`;
+  const [pos, setPos] = useState<[number, number] | null>(null);   // años elegidos (posiciones en la lista); null = todos. Solo de la vista
+  useEffect(() => setPos(null), [kE]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const mi = useMemo(() => mesesIguales(m, e), [m, version, kE]);
-  if (!mi) return null;
+  const todo = useMemo(() => mesesIguales(m, e), [m, version, kE]);
+  const anios = useMemo(() => (todo ? todo.filas.map((f) => f.anio) : []), [todo]);
+  const N = anios.length;
+  const a = pos ? Math.max(0, Math.min(pos[0], N - 3)) : 0, b = pos ? Math.max(a + 2, Math.min(pos[1], N - 1)) : N - 1;
+  const entero = a === 0 && b === N - 1;
+  const desde = Number(anios[a]), hasta = Number(anios[b]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const mi = useMemo(() => (!todo ? null : entero ? todo : mesesIguales(m, e, { desde, hasta })), [todo, entero, desde, hasta, m, version, kE]);
+  if (!todo || !mi) return null;
   return (
     <Capitulo id="fi-meses" nivel={nivel} titulo={`¿Cómo fue ${mi.mes} en otros años?`}
-      acciones={<Compartir titulo={`${nombre}: ${mi.mes} de cada año`} href={linkCompartir(e, hrefDato(e))} texto={`${nombre}. ${mi.frase}`} />}>
+      acciones={<Compartir titulo={`${nombre}: ${mi.mes} de cada año`} href={linkCompartir(e, hrefDato(e))} texto={`${nombre}. ${mi.frase}`}
+        vista={() => ({ tipo: "meses", expr: e, desde, hasta })} />}>
       <BarrasMes filas={mi.filas} etiqueta={`${nombre}: ${mi.mes} de cada año, de ${mi.filas[0].anio} a ${mi.filas[mi.filas.length - 1].anio}`} />
+      <RangoAnios anios={anios} a={a} b={b} onCambio={(x, y) => setPos([x, y])} />
       <p className="fi-frase">{mi.frase}</p>
     </Capitulo>
   );
@@ -243,7 +255,7 @@ function CapPresidentes({ m, e, info, nivel, pd, inicio, velas: enVelas, onVista
   const sinVelas = enVelas && (!niv || velas.length === 0);
   const href = hrefPresidentesDe(e, enVelas, inicio);
   const ids = T.filas.map((f) => f.id);
-  const bajada = T.tasa ? "Inicio y cierre de cada mandato y el promedio de todos sus meses." : "Del inicio al cierre de cada mandato.";
+  const bajada = bajadaTablaMandatos(T.tasa);
   return (
     <Capitulo id="fi-pres" nivel={nivel} titulo={titulo} bajada={bajada} acciones={
       <Acciones donde="Por presidente" href={href} compartir={<>
@@ -253,7 +265,7 @@ function CapPresidentes({ m, e, info, nivel, pd, inicio, velas: enVelas, onVista
           href={linkCompartir(e, href, { ...inicio, ...(enVelas ? { pvista: "velas" } : {}), ...(pd ? { pd } : {}) })}
           vista={sinVelas ? undefined : () => (enVelas
             ? { tipo: "velas", expr: e, presIds: ids, base: info.b }
-            : { tipo: "barras", expr: e, presIds: ids, base: info.b, ...(T.tasa ? { metrica: "prom" as const } : {}) })} /></>} />}>
+            : { tipo: "barras", expr: e, presIds: ids, base: info.b, ...(T.tasa ? { metrica: "var" as const } : {}) })} /></>} />}>
       <LineaInicio info={info} F={F} />
       <div className="fi-pres-cuerpo">
         {!enVelas ? (
@@ -272,6 +284,7 @@ function CapPresidentes({ m, e, info, nivel, pd, inicio, velas: enVelas, onVista
 // ------------------------------------------------------------ Mes a mes, desde que asumió (Meses de mandato con sus valores por defecto)
 type DatosMandato = NonNullable<ReturnType<typeof mandatoFicha>>;
 function CapMandato({ m, e, D, nivel, pd, inicio, b }: { m: Motor; e: Expr; D: DatosMandato | null; nivel: Nivel; pd: string | null; inicio: Record<string, string>; b: InicioMandato["b"] }) {
+  const [res, setRes] = useState<string | null>(null);   // presidente resaltado (solo de la vista)
   const G = useMemo(() => {
     if (!D) return null;
     const series: SerieG[] = D.pres.map((x) => ({ key: x.id, name: x.n, short: nombreCorto(x.n), color: x.color, dash: x.dash }));
@@ -283,8 +296,10 @@ function CapMandato({ m, e, D, nivel, pd, inicio, b }: { m: Motor; e: Expr; D: D
     };
     return { series, opts };
   }, [D]);
+  // líneas suavizadas y, si se tocó un presidente en la leyenda, solo él opaco y grueso (las demás al 25 %)
+  const opts = useMemo(() => (G ? { ...G.opts, suave: true, resaltar: res } : null), [G, res]);
   const titulo = "Mes a mes, desde que asumió";
-  if (!D || !G) {
+  if (!D || !G || !opts) {
     const c = m.calc(e);
     return <Capitulo id="fi-mandato" nivel={nivel} titulo={titulo}><p className="note">{sinMandatoTxt(m, c, frecuenciaOrigen(c.v))}</p></Capitulo>;
   }
@@ -297,8 +312,12 @@ function CapMandato({ m, e, D, nivel, pd, inicio, b }: { m: Motor; e: Expr; D: D
       <Acciones donde="Meses de mandato" href={href} compartir={
         <Compartir titulo={`${D.c.corto} por mes de mandato`} href={linkCompartir(e, href, { ...inicio, ...(pd ? { pd } : {}) })}
           vista={() => ({ tipo: "mandato", expr: e, modo: D.modo, presIds: D.pres.map((x) => x.id), anc: D.ancParam, md: null, mh: null, base: b })} />} />}>
-      <div className="legend">{D.pres.map((x) => <span key={x.id} style={vcolor(x.color)}>{x.n}</span>)}</div>
-      <div className="fi-grafico"><Grafico rows={D.rows} series={G.series} opts={G.opts} /></div>
+      <div className="legend e1-leyenda" role="group" aria-label="Presidentes: tocá uno para resaltarlo">
+        {D.pres.map((x) => (
+          <button key={x.id} type="button" style={vcolor(x.color)} aria-pressed={res === x.id} onClick={() => setRes(res === x.id ? null : x.id)}>{x.n}</button>
+        ))}
+      </div>
+      <div className="fi-grafico"><Grafico rows={D.rows} series={G.series} opts={opts} /></div>
       {D.modo !== "teorico" && <p className="fi-nota">Unidad: {D.c.unidad}.</p>}
     </Capitulo>
   );

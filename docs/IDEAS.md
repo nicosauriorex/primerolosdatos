@@ -116,6 +116,22 @@ Uso central: alguien escribe en redes "Milei fundió la economía" y otra person
   (→ spec: docs/specs/plantillas-y-vistas.md, como plantillas "cuánto compra un salario"; los índices del IPC medidos en salarios quedan pendientes.)
 - Galería pública de plantillas hechas por la gente (cuando haya cuentas).
 
+## Ajustes pedidos al recorrer la portada y sus atajos (2026-11-14)
+→ spec: docs/specs/ajustes-tanda-7.md
+- Botones y selectores sin caja de borde fino en todo el sitio (elegida: píldora rellena).
+- Placas de la portada: cifra del mismo tamaño (salario abreviado "1,94 M"), subió/bajó como píldora con flecha y animación (no el cuadradito con triángulo); tocar la placa lleva a la ficha, no al Histórico.
+- Selector de variables: ⓘ roto, X gigante en la información, tabla de información apretada; "ver más" al final del texto; recomendado tocable; flecha para volver; resultados de búsqueda sin la ruta; carpetas y variables mezcladas.
+- Histórico: "Más comparaciones" con animación y diferencia absoluta; hoja de Ajustes desprolija ("Mostrar" desparejo, "Guardar y compartir", "Listo" con franja oscura); "Cambiar" junto a las variaciones → "Cómo verlo" (medida) y "Cambiar dato" arriba, fuera de Ajustes; fila de variable que se sale.
+- Configurar variable: "Mensual" → "Var. mensual"; media móvil del valor; estética.
+- Gráficos: eje Y negativo estirado; dibujo continuo al aparecer; líneas suavizadas; leyenda que resalta un presidente; "Abrir completo" deja el título fuera de pantalla.
+- Compartir: hover desprolijo; Compartir principal pegado a las variaciones; capítulo de meses sin imagen y sin deslizador de años.
+- Tabla por presidente: "Listo" feo; con tasas, principal Variación (no Promedio) y promedios antes de asumir y al final; barra sin dato en la computadora.
+- Temas: "Todos los datos" arriba en pestañas (Principales / Todos los datos), Principales de precios con núcleo, regulados, bienes y servicios; sin "Ver también".
+- Banco Central: "Cómo se mide" sin caja; la variable se despliega debajo de su fila sin mover la página; "la mayor compra desde"; resumen de ruedas del período.
+- Preguntale: minigráfico con marcadores, globo y fechas; "Con cada presidente" filtra el período; listas resumidas en "En dólares" y "Qué subió más"; base 100 con atajos "Desde"; orden de chips.
+- Todas las secciones sin columnas vacías en la computadora; ventana Configurar con la estética nueva.
+- Regla: cada pedido vale para todo el sitio (barrido).
+
 ## Bugs conocidos
 - ~~Histórico: el filtro de fecha queda flotando y se superpone con el resto~~ (arreglado en la migración; ahora se pide que quede fijo arriba sin tapar nada, ver "Histórico: celular y gráficos").
 

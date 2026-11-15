@@ -12,10 +12,7 @@ import type { FilaMandato } from "@/components/sistema/TablaMandatos";
 const menos = (t: string) => t.replace(/^-/, "−");
 
 // ------------------------------------------------------------ Tabla "Una variable, todos los presidentes"
-/** Columnas que se pueden pedir por el link (`cl`): las claves de `COLS` (`var` en una tasa es "Cambio"). */
-export const CLAVES_COLUMNAS = ["ini", "fin", "var", "min", "max", "prom", "med", "n"] as const;
-
-/** Lo que necesita `TablaMandatos` para `/presidentes/`: las filas de la ficha filtradas a `presIds`, más Meses y (en una tasa) Cambio.
+/** Lo que necesita `TablaMandatos` para `/presidentes/`: las filas de la ficha filtradas a `presIds`, más Meses.
  *  `visibles` va vacío y `extras` trae todas las columnas que no son la principal: quien llama pasa `elegidas` (las del link `cl`, o `porDefecto`)
  *  y `TablaMandatos` las muestra, con los chips "Sumar columnas" para cambiarlas. `cl` null = las de la ficha. */
 export function tablaPresidentes(m: Motor, e: Expr, b: BaseCfg, o: { presIds: Set<string>; cl: string[] | null }):
@@ -26,14 +23,9 @@ export function tablaPresidentes(m: Motor, e: Expr, b: BaseCfg, o: { presIds: Se
   const filas = T.filas.filter((f) => o.presIds.has(f.id)).map((f) => {
     const x = pres.find((p) => p.id === f.id) as Pres, st = statsMandato(F, c.v, x, b);
     const celdas: FilaMandato["celdas"] = { ...f.celdas, n: { texto: String(st.n), valor: st.n } };
-    if (T.tasa) {
-      const d = varNum(c, st), cls = claseVariacion(c.dir, c.pct, st.ini, st.fin);
-      celdas.var = { texto: d == null ? "–" : menos(variacionMostrada(m, c, st.ini, st.fin)), valor: d, tono: cls === "neutro" ? null : cls };
-    }
     return { ...f, celdas };
   });
   const columnas = [...T.columnas];
-  if (T.tasa) columnas.splice(columnas.findIndex((x) => x.clave === "prom"), 0, { clave: "var", titulo: "Cambio" });
   columnas.push({ clave: "n", titulo: "Meses" });
   const principal = columnas.find((x) => x.principal)?.clave;
   const claves = columnas.map((x) => x.clave);

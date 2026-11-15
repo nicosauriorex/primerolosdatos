@@ -4,6 +4,7 @@
 // Todas las cuentas están en lib/gasto.ts; acá solo se dibuja. Estado en la URL: anio, med, etapa, forma, ruta (nombres separados por "~") y todas.
 // Con el archivo mensual (fase 2) se suma `vista=mes` ("Cómo viene el año"), que dibuja components/GastoMensual.tsx; sin el archivo, esa vista no existe.
 // Remodelación 3.5 (docs/specs/remodelacion-herramientas.md, G): respuesta arriba, ajustes en una hoja, sin cajas, una sola forma de compartir.
+import { HojaListo } from "./comunes";
 import { useCallback, useMemo, useState } from "react";
 import { useGastoAnios, useGastoIndice, useGastoMensual } from "../useGasto";
 import { useSeccion } from "../useSeccion";
@@ -131,16 +132,15 @@ function Cuerpo({ ix, deflactor, deflactorM }: { ix: IndiceGasto; deflactor: Def
         <div className="gas-barra-vista"><BarraVista items={chips} onAbrir={() => setAjustes(true)} /></div>
         <button type="button" className="gas-buscar-btn" aria-label="Buscar en el gasto" aria-haspopup="dialog" onClick={() => setBuscando(true)}><IconoBuscar /><span>Buscar</span></button>
       </div>
-      <Hoja titulo="Ajustes" abierta={ajustes} onCerrar={() => setAjustes(false)}>
+      <HojaListo titulo="Ajustes" abierta={ajustes} onCerrar={() => setAjustes(false)}>
         {(cerrar) => (
           <div className="gas-hoja">
             <GrupoAjuste rotulo="Año"><Opciones etiqueta="Año" valor={String(anio.anio)} opciones={opcionesAnio(ix)} onElegir={(a) => set({ anio: Number(a) === def.anio ? null : a })} /></GrupoAjuste>
             <GrupoAjuste rotulo="Medida"><Opciones etiqueta="Medida" valor={medida} opciones={MEDIDAS} onElegir={(v) => set({ med: v === MEDIDA_DEFECTO ? null : v })} /></GrupoAjuste>
             <GrupoAjuste rotulo="Etapa"><Opciones etiqueta="Etapa" valor={etapa} opciones={ETAPAS} onElegir={(v) => set({ etapa: v === ETAPA_DEFECTO ? null : v })} /></GrupoAjuste>
-            <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
           </div>
         )}
-      </Hoja>
+      </HojaListo>
       <Hoja titulo="Buscar en el gasto" abierta={buscando} onCerrar={() => setBuscando(false)}>
         {(cerrar) => (
           <Buscador ix={ix} onIr={(r) => cerrar(() => set({ forma: r.forma === FORMA_DEFECTO ? null : r.forma, ruta: escribirRuta(r.ruta), anio: r.anio === def.anio ? null : String(r.anio), todas: null }))} />

@@ -1,7 +1,7 @@
 "use client";
 // Contexto de la configuración global + panel (botón ⚙ y ventana). Ver docs/specs/configuracion-global.md.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Modal, Selector } from "./ui";
+import { Modal, Selector, useCerrarModal } from "./ui";
 import { IconoAjustes } from "./Iconos";
 import { PRES_DEF } from "@/lib/estadisticas";
 import {
@@ -92,6 +92,30 @@ function Opciones<T extends string>({ etiqueta, valor, opciones, onElegir }: { e
   );
 }
 
+/** Una fila de ajuste (R4): rótulo arriba en el celular, a la izquierda en una columna de ancho fijo desde 600 px; el control y su aclaración al lado. */
+function Fila({ rotulo, ayuda, children }: { rotulo: string; ayuda?: string; children: React.ReactNode }) {
+  return (
+    <div className="cfgg-fila">
+      <span className="cfgg-rot">{rotulo}</span>
+      <div className="cfgg-ctl">{children}{ayuda ? <p className="cfgg-ayuda">{ayuda}</p> : null}</div>
+    </div>
+  );
+}
+function Grupo({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+  return <section className="cfgg-grupo"><h3 className="cfgg-titulo">{titulo}</h3>{children}</section>;
+}
+
+/** Pie de la ventana (R3): "Listo" principal; cierra por el camino de Atrás. */
+function PieConfig({ reiniciar }: { reiniciar: () => void }) {
+  const cerrar = useCerrarModal();
+  return (
+    <footer className="config-pie cfgg-pie">
+      <button type="button" className="btn" onClick={reiniciar}>Volver a lo de fábrica</button>
+      <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
+    </footer>
+  );
+}
+
 function Panel({ onCerrar, guardado }: { onCerrar: () => void; guardado: boolean }) {
   const { config: c, cambiar, reiniciar } = useConfig();
   const setPres = (id: string, k: number | undefined) => {
@@ -101,55 +125,45 @@ function Panel({ onCerrar, guardado }: { onCerrar: () => void; guardado: boolean
   };
   return (
     <Modal titulo="Configuración" onCerrar={onCerrar}>
-      <div className="config-cuerpo">
+      <div className="config-cuerpo cfgg-cuerpo">
         <h2>Configuración</h2>
         {!guardado && <p className="error" role="alert">No se pudo guardar en este navegador: se va a perder al cerrar.</p>}
-        <section aria-labelledby="cfg-tema">
-          <h3 id="cfg-tema">Tema</h3>
-          <Opciones etiqueta="Tema" valor={c.tema} opciones={TEMAS} onElegir={(tema) => cambiar({ tema })} />
-        </section>
-        <section aria-labelledby="cfg-inicio">
-          <h3 id="cfg-inicio">Inicio del mandato</h3>
-          <p className="note">Desde qué mes se cuenta cada mandato (Por presidente, Meses de mandato, Curiosidades y Elecciones). T es el mes de asunción.</p>
-          <div className="controls"><label>Para todos</label>
-            <SelectT valor={c.t0} etiqueta="Inicio del mandato para todos" onElegir={(k) => cambiar({ t0: k ?? DEFECTO.t0 })} /></div>
-          <div className="cfg-pres">
-            {PRES_DEF.map((p) => (
-              <div key={p.id} className="controls"><label>{p.n}</label>
-                <SelectT valor={c.t0p[p.id]} etiqueta={`Inicio del mandato de ${p.n}`} igual="Igual que todos" onElegir={(k) => setPres(p.id, k)} /></div>
-            ))}
+        <Grupo titulo="Apariencia">
+          <Fila rotulo="Tema"><Opciones etiqueta="Tema" valor={c.tema} opciones={TEMAS} onElegir={(tema) => cambiar({ tema })} /></Fila>
+        </Grupo>
+        <Grupo titulo="Inicio del mandato">
+          <p className="cfgg-ayuda cfgg-intro">Desde qué mes se cuenta cada mandato (Por presidente, Meses de mandato, Curiosidades y Elecciones). T es el mes de asunción.</p>
+          <Fila rotulo="Para todos"><SelectT valor={c.t0} etiqueta="Inicio del mandato para todos" onElegir={(k) => cambiar({ t0: k ?? DEFECTO.t0 })} /></Fila>
+          {PRES_DEF.map((p) => (
+            <Fila key={p.id} rotulo={p.n}>
+              <SelectT valor={c.t0p[p.id]} etiqueta={`Inicio del mandato de ${p.n}`} igual="Igual que todos" onElegir={(k) => setPres(p.id, k)} />
+            </Fila>
+          ))}
+        </Grupo>
+        <Grupo titulo="Datos">
+          <Fila rotulo="Dólar preferido"><Opciones etiqueta="Dólar preferido" valor={c.dolar} opciones={DOLARES} onElegir={(dolar) => cambiar({ dolar })} /></Fila>
+          <Fila rotulo="Medida preferida" ayuda="Para los montos en pesos, al agregar o cambiar una variable. Los dólares usan el dólar preferido.">
+            <Opciones etiqueta="Medida preferida" valor={c.medida} opciones={MEDIDAS} onElegir={(medida) => cambiar({ medida })} />
+          </Fila>
+          <Fila rotulo="Período por defecto" ayuda={'El "Desde" de Histórico cuando el link no trae uno.'}>
+            <Opciones etiqueta="Período por defecto" valor={c.desde} opciones={DESDES} onElegir={(desde) => cambiar({ desde })} />
+          </Fila>
+        </Grupo>
+        <Grupo titulo="Presidentes en los gráficos">
+          <Fila rotulo="Mostrar" ayuda="Franjas de color detrás de las líneas, una por mandato. Se pueden prender o apagar en cada gráfico; acá se elige si arrancan prendidas. Los colores se usan en todo el sitio.">
+            <Opciones etiqueta="Mostrar presidentes en los gráficos" valor={c.franjas ? "si" : "no"} opciones={[["no", "No"], ["si", "Sí, en todos"]]} onElegir={(v) => cambiar({ franjas: v === "si" })} />
+          </Fila>
+          {PRES_DEF.map((p) => (
+            <Fila key={p.id} rotulo={p.n}>
+              <input type="color" className="cfgg-color" aria-label={`Color de ${p.n}`} value={c.colPres[p.id] ?? colorBase(p.color)} onChange={(ev) => cambiar({ colPres: { ...c.colPres, [p.id]: ev.target.value } })} />
+            </Fila>
+          ))}
+          <div className="cfgg-fila cfgg-fila-sola">
+            <button type="button" className="btn" disabled={!Object.keys(c.colPres).length} onClick={() => cambiar({ colPres: {} })}>Volver a los colores de fábrica</button>
           </div>
-        </section>
-        <section aria-labelledby="cfg-dolar">
-          <h3 id="cfg-dolar">Dólar preferido</h3>
-          <Opciones etiqueta="Dólar preferido" valor={c.dolar} opciones={DOLARES} onElegir={(dolar) => cambiar({ dolar })} />
-        </section>
-        <section aria-labelledby="cfg-medida">
-          <h3 id="cfg-medida">Medida preferida</h3>
-          <p className="note">Para los montos en pesos, al agregar o cambiar una variable. Los dólares usan el dólar preferido.</p>
-          <Opciones etiqueta="Medida preferida" valor={c.medida} opciones={MEDIDAS} onElegir={(medida) => cambiar({ medida })} />
-        </section>
-        <section aria-labelledby="cfg-desde">
-          <h3 id="cfg-desde">Período por defecto</h3>
-          <p className="note">El &quot;Desde&quot; de Histórico cuando el link no trae uno.</p>
-          <Opciones etiqueta="Período por defecto" valor={c.desde} opciones={DESDES} onElegir={(desde) => cambiar({ desde })} />
-        </section>
-        <section aria-labelledby="cfg-pres">
-          <h3 id="cfg-pres">Presidentes en los gráficos</h3>
-          <p className="note">Franjas de color detrás de las líneas, una por mandato. Se pueden prender o apagar en cada gráfico; acá se elige si arrancan prendidas. Los colores se usan en todo el sitio.</p>
-          <Opciones etiqueta="Mostrar presidentes en los gráficos" valor={c.franjas ? "si" : "no"} opciones={[["no", "No"], ["si", "Sí, en todos los gráficos"]]} onElegir={(v) => cambiar({ franjas: v === "si" })} />
-          <div className="cfg-pres">
-            {PRES_DEF.map((p) => (
-              <div key={p.id} className="controls"><label>{p.n}</label>
-                <input type="color" aria-label={`Color de ${p.n}`} value={c.colPres[p.id] ?? colorBase(p.color)} onChange={(ev) => cambiar({ colPres: { ...c.colPres, [p.id]: ev.target.value } })} /></div>
-            ))}
-          </div>
-          <button type="button" className="btn" disabled={!Object.keys(c.colPres).length} onClick={() => cambiar({ colPres: {} })}>Volver a los colores de fábrica</button>
-        </section>
+        </Grupo>
       </div>
-      <footer>
-        <button type="button" className="btn" onClick={reiniciar}>Volver a lo de fábrica</button>
-      </footer>
+      <PieConfig reiniciar={reiniciar} />
     </Modal>
   );
 }

@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSeccion } from "../useSeccion";
-import { Cargando } from "../ui";
+import { Cargando, Plegable } from "../ui";
 import { BotonInfo } from "../Variables";
 import { CardValor } from "../CardValor";
 import { FichaDato } from "../FichaDato";
@@ -16,8 +16,9 @@ import { medDefaultDe, type Expr, type SerieMeta } from "@/lib/motor";
 import { crearPlantillas, evaluar, plantillaSuelta, plantillasDeTema, type Evaluada } from "@/lib/plantillas";
 import { catListado, esNivelGeneralIpc, listables, ordenarListado } from "@/lib/regiones";
 import { hrefHistorico, idsDe, principalesDe, seriesDe, subgrupoDe, type Principal, type Tema } from "@/lib/temas";
-import { decExpr, encExpr, enteroEn, useParams } from "@/lib/url";
+import { decExpr, encExpr, enteroEn, unoDe, useParams } from "@/lib/url";
 
+const PESTANAS: ["principales" | "todos", string][] = [["principales", "Principales"], ["todos", "Todos los datos"]];
 const POR_NIVEL = 30;   // más series que esto en un bloque: se despliegan por niveles (región, rubro…)
 const MAX_PLANTILLAS = 8;
 /** Temas que enlazan al parte diario del Banco Central (/bcra/). */
@@ -29,15 +30,14 @@ function Texto({ t }: { t: Tema }) {
   const [largo, setLargo] = useState(false);
   return (
     <div className="texto-tema">
-      <p>{t.corto}</p>
-      <button type="button" className="ver-mas" aria-expanded={largo} onClick={() => setLargo(!largo)}>{largo ? "ver menos" : "ver más"}</button>
+      <p>{t.corto}{" "}<button type="button" className="ver-mas" aria-expanded={largo} onClick={() => setLargo(!largo)}>{largo ? "ver menos" : "ver más"}</button></p>
       {largo && <div className="info-larga" dangerouslySetInnerHTML={{ __html: t.largo }} />}
     </div>
   );
 }
 
 /** Lista de series; si son muchas, se abre por niveles según la categoría (sin el nivel de región). Los hijos se dibujan recién al abrir.
- *  Tocar una serie la pone en la ficha del dato (`onElegir`); la elegida queda marcada. */
+ *  Cada serie es un renglón tocable (nombre, unidad chica y ⓘ): tocarlo la pone en la ficha del dato (`onElegir`); la elegida queda marcada. */
 function Series({ series, nivel, onElegir, elegida, cat }: { series: SerieMeta[]; nivel: number; onElegir: (s: SerieMeta) => void; elegida: string | null; cat: (s: SerieMeta) => string[] }) {
   const grupos = useMemo(() => {
     const m = new Map<string, SerieMeta[]>(), sueltas: SerieMeta[] = [];
@@ -45,25 +45,30 @@ function Series({ series, nivel, onElegir, elegida, cat }: { series: SerieMeta[]
     return { m, sueltas: m.size ? sueltas : series };
   }, [series, nivel, cat]);
   return (
-    <ul className="lista-series">
-      {[...grupos.m].map(([k, ss]) => <Desplegado key={k} titulo={k} cuenta={ss.length}><Series series={ss} nivel={nivel + 1} onElegir={onElegir} elegida={elegida} cat={cat} /></Desplegado>)}
+    <ul className="lista-series e1-series">
+      {[...grupos.m].map(([k, ss]) => <Desplegado key={k} titulo={k} cuenta={ss.length} chico><Series series={ss} nivel={nivel + 1} onElegir={onElegir} elegida={elegida} cat={cat} /></Desplegado>)}
       {grupos.sueltas.map((s) => (
-        <li key={s.id}>
-          <button type="button" className="enlace ficha-serie" aria-pressed={s.id === elegida} onClick={() => onElegir(s)}>{s.n}</button>
-          {" "}<span className="unidad">{s.u}</span> <BotonInfo id={s.id} />
+        <li key={s.id} className="e1-serie">
+          <button type="button" className="e1-serie-btn" aria-pressed={s.id === elegida} onClick={() => onElegir(s)}>
+            <span className="e1-serie-nombre">{s.n}</span>
+            {s.u ? <small className="e1-serie-unidad">{s.u}</small> : null}
+          </button>
+          <BotonInfo id={s.id} />
         </li>
       ))}
     </ul>
   );
 }
-function Desplegado({ titulo, cuenta, children }: { titulo: string; cuenta: number; children: React.ReactNode }) {
+/** Bloque plegable sin caja (renglón con chevron, R1) que abre con animación (R2). Lo de adentro se dibuja la primera vez que se abre y queda. */
+function Desplegado({ titulo, cuenta, children, chico = false }: { titulo: string; cuenta: number; children: React.ReactNode; chico?: boolean }) {
   const [abierto, setAbierto] = useState(false);
+  const [visto, setVisto] = useState(false);
   return (
     <li className="subgrupo">
-      <button type="button" className={`cab-subgrupo${abierto ? " abierto" : ""}`} aria-expanded={abierto} onClick={() => setAbierto(!abierto)}>
-        <span>{titulo}</span><span className="cuenta">{cuenta} {cuenta === 1 ? "serie" : "series"}</span>
-      </button>
-      {abierto && children}
+      <Plegable nivel={chico ? "chico" : "renglon"} abierto={abierto} onCambiar={(a) => { setAbierto(a); if (a) setVisto(true); }}
+        resumen={<span className="e1-bloque-res"><span>{titulo}</span><span className="cuenta">{cuenta} {cuenta === 1 ? "serie" : "series"}</span></span>}>
+        {visto ? children : null}
+      </Plegable>
     </li>
   );
 }
@@ -130,6 +135,17 @@ export function TemaPagina({ t }: { t: Tema }) {
   const nombreFicha = !elegida ? "" : principalElegido ? principalElegido.nombre
     : m.SER[elegida.id] && (!elegida.rel || m.SER[elegida.rel]) ? tituloVariable(m, elegida, m.calc(elegida)) : metas.find((s) => s.id === elegida.id)?.n ?? "";
 
+  const vista = unoDe(p.get("tv"), ["principales", "todos"] as const, "principales");
+  const cambiarVista = (v: "principales" | "todos") => set({ tv: v === "todos" ? "todos" : null });
+  /** Flechas y Inicio/Fin entre pestañas; el foco acompaña a la elegida. */
+  const teclaPestanas = (ev: React.KeyboardEvent) => {
+    const k = ev.key, i = PESTANAS.findIndex(([x]) => x === vista);
+    const j = k === "ArrowRight" ? (i + 1) % PESTANAS.length : k === "ArrowLeft" ? (i + PESTANAS.length - 1) % PESTANAS.length : k === "Home" ? 0 : k === "End" ? PESTANAS.length - 1 : -1;
+    if (j < 0) return;
+    ev.preventDefault(); cambiarVista(PESTANAS[j][0]);
+    window.setTimeout(() => document.getElementById(`tema-tab-${PESTANAS[j][0]}`)?.focus(), 0);
+  };
+
   return (
     <section className="tema-pagina">
       <div className="cab-tema">
@@ -139,16 +155,37 @@ export function TemaPagina({ t }: { t: Tema }) {
         {TEMAS_CON_SEMAFORO.has(t.slug) && <Link prefetch={false} href="/semaforo/" className="enlace-parte">Semáforo de actividad: qué indicadores subieron cada mes</Link>}
       </div>
 
-      {tarjetas.length > 0 && (
-        <section aria-label="Principales">
-          <h2>Principales</h2>
-          {tarjetas.length > 1 && <p className="note">Tocá uno para verlo abajo: cómo viene, cómo le fue con cada presidente y mes a mes desde que asumió.</p>}
-          <div className="principales" style={{ ["--n" as string]: tarjetas.length, ["--c-med" as string]: columnasMedio(tarjetas.length), ["--c-ancho" as string]: columnasAncho(tarjetas.length) }}>
-            {tarjetas.map(({ pr, ev }) => (
-              <CardValor key={pr.nombre} titulo={pr.nombre} ev={ev} href={hrefHistorico(pr)} motor={m} onElegir={() => elegir(pr)} elegido={pr === principalElegido} />
+      <div className="e1-pestanas" role="tablist" aria-label={`Datos de ${t.nombre}`} onKeyDown={teclaPestanas}>
+        {PESTANAS.map(([k, txt]) => (
+          <button key={k} type="button" role="tab" id={`tema-tab-${k}`} aria-selected={vista === k} aria-controls={`tema-panel-${k}`} tabIndex={vista === k ? 0 : -1}
+            onClick={() => cambiarVista(k)}>{txt}</button>
+        ))}
+      </div>
+
+      {vista === "principales" ? (
+        <div role="tabpanel" id="tema-panel-principales" aria-labelledby="tema-tab-principales" className="e1-panel">
+          {tarjetas.length > 0 && (
+            <>
+              {tarjetas.length > 1 && <p className="note">Tocá uno para verlo abajo: cómo viene, cómo le fue con cada presidente y mes a mes desde que asumió.</p>}
+              <div className="principales" style={{ ["--n" as string]: tarjetas.length, ["--c-med" as string]: columnasMedio(tarjetas.length), ["--c-ancho" as string]: columnasAncho(tarjetas.length) }}>
+                {tarjetas.map(({ pr, ev }) => (
+                  <CardValor key={pr.nombre} titulo={pr.nombre} ev={ev} href={hrefHistorico(pr)} motor={m} onElegir={() => elegir(pr)} elegido={pr === principalElegido} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+        <div role="tabpanel" id="tema-panel-todos" aria-labelledby="tema-tab-todos" className="e1-panel">
+          <p className="note">{series.length} series. Abrí un bloque para ver sus series y tocá una para verla abajo, igual que los principales.</p>
+          <ul className="lista-series raiz e1-bloques">
+            {subgrupos.map(([nombre, ss]) => (
+              <Desplegado key={nombre} titulo={nombre} cuenta={ss.length}>
+                <Series series={ss} nivel={2} onElegir={(s) => elegir(exprSerie(s))} elegida={principalElegido ? null : elegida?.id ?? null} cat={catDe} />
+              </Desplegado>
             ))}
-          </div>
-        </section>
+          </ul>
+        </div>
       )}
 
       {elegida && (
@@ -156,18 +193,6 @@ export function TemaPagina({ t }: { t: Tema }) {
           <FichaDato e={elegida} info={info} p={p} set={set} nivel={3} titulo={nombreFicha} tituloRef={tituloFicha} tituloId="ficha-tema-titulo" />
         </section>
       )}
-
-      <section aria-label="Todos los datos">
-        <h2>Todos los datos</h2>
-        <p className="note">{series.length} series. Tocá un bloque para ver sus series, y una serie para verla arriba, igual que los principales.</p>
-        <ul className="lista-series raiz">
-          {subgrupos.map(([nombre, ss]) => (
-            <Desplegado key={nombre} titulo={nombre} cuenta={ss.length}>
-              <Series series={ss} nivel={2} onElegir={(s) => elegir(exprSerie(s))} elegida={principalElegido ? null : elegida?.id ?? null} cat={catDe} />
-            </Desplegado>
-          ))}
-        </ul>
-      </section>
 
       {delTema.length > 0 && (
         <section aria-label="Gráficos listos del tema">

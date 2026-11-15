@@ -4,30 +4,33 @@ import {
   baseIdx, baseTxt, oracionInicio, calcularMandato, claseVariacion, crearPres, rankingPresidentes, statsMandato, nivelComparable, TITULOS_MANDATO, nombreCorto, varNum,
   type BaseCfg, type CritRk, type IndRk, type ModoMandato,
 } from "./estadisticas";
-import type { DatosImagen, FilaBarra, FilaRank, FilaVariable, FilaVela } from "./imagen";
+import type { DatosImagen, FilaBarra, FilaMes, FilaRank, FilaVariable, FilaVela } from "./imagen";
 import type { FormatoImg } from "./config";
 import { fuenteLegible, fuentesTxt, limpiarComentario, notaInflacion, slug, tituloVariable } from "./imagen-datos";
-import { fmtMes, lastIdx, ok } from "./formato";
+import { fmtMes, lastIdx, ok, r1 } from "./formato";
 import type { Expr, Motor } from "./motor";
 import { grupoDe } from "./catalogo";
 import { datosDesde, variacionMostrada } from "./tablas";
 import { BASE_HERENCIA, GRUPOS_HERENCIA, tablaHerencia } from "./herencia";
 import { filasEstimaciones, filasInforme, type DatoInforme, type FilaInforme, type ReservasNetas } from "./herencia-informes";
+import { mesesIguales } from "./ficha";
 
 /** Lo que muestra una sección de presidentes y, por lo tanto, lo que lleva la imagen. Todo viene tal como está en pantalla. */
 export type VistaPres =
-  | { tipo: "barras"; expr: Expr; presIds: string[]; base: BaseCfg; metrica?: "prom" }                // presIds en el orden en que está la tabla
+  // presIds en el orden en que está la tabla. `metrica`: "prom" = promedio del mandato; "var" (o nada) = cierre − inicio (en p.p. si el dato es una tasa)
+  | { tipo: "barras"; expr: Expr; presIds: string[]; base: BaseCfg; metrica?: "prom" | "var" }
   | { tipo: "velas"; expr: Expr; presIds: string[]; base: BaseCfg }                   // las mismas velas que la pantalla
   | { tipo: "variables"; presId: string; exprs: Expr[]; base: BaseCfg }
   | { tipo: "mandato"; expr: Expr; modo: ModoMandato; presIds: string[]; anc: string | null; md: string | null; mh: string | null; valorFinal?: boolean; base: BaseCfg }
   | { tipo: "ranking"; crit: CritRk; inds: IndRk[]; usaVars: boolean; base: BaseCfg }
-  | { tipo: "herencia"; presId: string; ids: string[]; base: BaseCfg; informes?: DatoInforme[]; rn?: ReservasNetas | null }; // ids: series de la tabla que están en el catálogo (base fija T-1); informes: datos cargados a mano (fase 2)
+  | { tipo: "herencia"; presId: string; ids: string[]; base: BaseCfg; informes?: DatoInforme[]; rn?: ReservasNetas | null } // ids: series de la tabla que están en el catálogo (base fija T-1); informes: datos cargados a mano (fase 2)
+  | { tipo: "meses"; expr: Expr; desde: number; hasta: number };   // el mismo mes en cada año, de `desde` a `hasta` (años); no es de presidentes, pero se arma igual
 export interface OpcionesPres { formato: FormatoImg; comentario: string }
 
 export const esVistaPres = (v: unknown): v is VistaPres => !!v && typeof v === "object" && "tipo" in v;
 /** Ids de series que hay que tener cargadas para armar la imagen. */
 export const idsDeVistaPres = (v: VistaPres): string[] =>
-  v.tipo === "barras" || v.tipo === "velas" || v.tipo === "mandato" ? (v.expr.rel ? [v.expr.id, v.expr.rel] : [v.expr.id])
+  v.tipo === "barras" || v.tipo === "velas" || v.tipo === "mandato" || v.tipo === "meses" ? (v.expr.rel ? [v.expr.id, v.expr.rel] : [v.expr.id])
     : v.tipo === "variables" ? v.exprs.flatMap((e) => (e.rel ? [e.id, e.rel] : [e.id]))
       : v.tipo === "herencia" ? v.ids
       : v.inds.flatMap((i) => (i.ind.rel ? [i.ind.id, i.ind.rel] : [i.ind.id]));
@@ -46,18 +49,19 @@ function notaParcial(F: string[], st: ReturnType<typeof statsMandato>, bi: numbe
   return desde ? `datos desde ${fmtMes(F[st.iniI as number])}` : hasta ? `datos hasta ${fmtMes(F[st.finI as number])}` : null;
 }
 
-function esqueleto(m: Motor, o: OpcionesPres, base: BaseCfg, titulo: string, ultimo: string): DatosImagen {
+function esqueleto(m: Motor, o: OpcionesPres, base: BaseCfg | null, titulo: string, ultimo: string): DatosImagen {
   return {
     formato: o.formato, titulo, cifra: null, frases: [], leyenda: null, x: [], series: [], fmtEje: (v) => String(v), fmtEje2: null, franjas: [], presidentes: null,
-    inicioTxt: oracionInicio(base), comentario: limpiarComentario(o.comentario), unidad: "", fuente: "", nota: "",
+    inicioTxt: base ? oracionInicio(base) : null, comentario: limpiarComentario(o.comentario), unidad: "", fuente: "", nota: "",
     fecha: new Date().toLocaleDateString("es-AR"), archivo: `primerolosdatos-${slug(titulo)}-${ultimo.slice(0, 7)}`,
   };
 }
 
 /** Datos de la imagen. Null si faltan datos cargados o no hay nada que dibujar. */
 export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosImagen | null {
-  const F = m.F, PRES = crearPres(F), b = v.base;
   if (idsDeVistaPres(v).some((id) => !m.SER[id])) return null;
+  if (v.tipo === "meses") return imagenMeses(m, v, o);
+  const F = m.F, PRES = crearPres(F), b = v.base;
 
   if (v.tipo === "barras") {
     const c = m.calc(v.expr), titulo = tituloVariable(m, v.expr, c);
@@ -69,8 +73,10 @@ export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosI
       const ini = st.ini as number, fin = st.fin as number;
       const prom = v.metrica === "prom";   // promedio del mandato: sin color de mejora o empeora
       if (prom && !ok(st.prom)) { sin.push(p.n); return; }
+      // cierre − inicio: en una tasa, la barra mide la diferencia de los valores como se muestran (la misma cuenta que el texto en p.p.)
+      const dif = c.pct ? r1(r1(fin) - r1(ini)) : varNum(c, st);
       filas.push({
-        id: p.id, nombre: p.n, valor: prom ? (st.prom as number) : varNum(c, st), variacion: prom ? m.fmtC(c, st.prom as number) : variacionMostrada(m, c, ini, fin),
+        id: p.id, nombre: p.n, valor: prom ? (st.prom as number) : dif, variacion: prom ? m.fmtC(c, st.prom as number) : variacionMostrada(m, c, ini, fin),
         cls: prom ? "neutro" : claseVariacion(c.dir, c.pct, ini, fin),
         ini: m.fmtC(c, ini), fin: m.fmtC(c, fin), nota: notaParcial(F, st, baseIdx(F, p, b), p.i1),
       });
@@ -79,8 +85,12 @@ export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosI
     const d = esqueleto(m, o, b, titulo, F[lastIdx(c.v)] ?? F[F.length - 1]);
     // palabras neutras (D-012): el color se explica por lo que hizo el dato, según qué dirección es favorable para ese dato
     const color = !c.dir ? "Sin colores: para este dato no se califica si subir o bajar es favorable." : c.dir > 0 ? "Verde: subió; rojo: bajó." : "Verde: bajó; rojo: subió.";
-    d.frases = [neutro(v.metrica === "prom" ? "Promedio de todos los meses de cada mandato." : `Del inicio al cierre de cada mandato. ${color}`)];
-    d.lienzo = { tipo: "barras", filas, sinDatos: sin };
+    const cuenta = c.pct ? "Diferencia entre el valor del cierre y el del inicio de cada mandato, en puntos porcentuales." : "Del inicio al cierre de cada mandato.";
+    d.frases = [neutro(v.metrica === "prom" ? "Promedio de todos los meses de cada mandato." : `${cuenta} ${color}`)];
+    d.lienzo = {
+      tipo: "barras", filas, sinDatos: sin,
+      ...(v.metrica === "prom" ? { enc: { nombre: "Presidente", valor: "Promedio del mandato" } } : c.pct ? { enc: { nombre: "Presidente", valor: "Cierre − inicio (p.p.)" } } : {}),
+    };
     d.unidad = c.unidad; d.fuente = "Fuente: " + fuenteLegible(c.serie.fuente); d.nota = notaInflacion([c], false);
     return d;
   }
@@ -185,6 +195,25 @@ export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosI
   return d;
 }
 
+
+/** "¿Cómo fue <mes> en otros años?" (pedido 13): las columnas del mismo mes en cada año entre `desde` y `hasta`, con la frase de la ficha.
+ *  Los datos salen de `mesesIguales` (lib/ficha.ts), los mismos de la página. */
+function imagenMeses(m: Motor, v: Extract<VistaPres, { tipo: "meses" }>, o: OpcionesPres): DatosImagen | null {
+  const r = mesesIguales(m, v.expr, { desde: v.desde, hasta: v.hasta });
+  if (!r || !r.filas.length) return null;
+  const c = m.calc(v.expr);
+  const filas: FilaMes[] = r.filas.map((f) => ({ anio: f.anio, valor: f.valor, texto: f.texto, actual: f.actual, ref: f.ref }));
+  if (!filas.some((f) => f.actual)) filas[filas.length - 1].actual = true;   // el último año elegido va destacado
+  const ult = filas[filas.length - 1].anio;
+  const titulo = `${tituloVariable(m, v.expr, c)}: ${r.mes} de cada año`;
+  const d = esqueleto(m, o, null, titulo, ult);
+  d.archivo = `primerolosdatos-${slug(titulo)}-${ult}`;
+  d.frases = [neutro(r.frase)];
+  d.lienzo = { tipo: "meses", filas };
+  d.unidad = `${r.mes[0].toUpperCase()}${r.mes.slice(1)} de cada año, de ${filas[0].anio} a ${ult} · ${c.unidad}`;
+  d.fuente = "Fuente: " + fuenteLegible(c.serie.fuente); d.nota = notaInflacion([c], false);
+  return d;
+}
 
 /** Herencia de un presidente (docs/specs/herencia.md): el dibujo de "un presidente, varias variables" con los rótulos Recibió y Entregó (u Hoy).
  *  Los valores, meses y cambios salen de `tablaHerencia`, los mismos de la página. Las filas sin ningún dato no van. */

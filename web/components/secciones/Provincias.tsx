@@ -4,6 +4,7 @@
 // En qué y su evolución). Todas las cuentas están en lib/provincias.ts; acá solo se dibuja.
 // La vista "Las cuentas de cada provincia" (fase 2, ?vista=cuentas) está en ProvinciasCuentas.tsx; sin `vista` la página es la de siempre.
 // Estado en la URL: anio, medida (hab | total | pct), gasto (todo | sin_ss), prov (provincia abierta), forma (para_que | quien | en_que), ruta (nombres separados por "~") y todas.
+import { HojaListo } from "./comunes";
 import { useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { useProvincias, useProvinciasAnio } from "../useProvincias";
@@ -97,16 +98,15 @@ function Cuerpo({ c }: { c: Contexto }) {
       <Capitulo id="prov-ranking" titulo="Provincia por provincia"
         acciones={vista ? <CompartirHoja href={href} titulo={titulo} onImagen={() => setImagen(true)} texto={resp ? `${resp.frase} Fuente: ${FUENTE_PROV}.` : undefined} /> : undefined}>
         <BarraVista items={items} onAbrir={() => setHoja(true)} />
-        <Hoja titulo="Ajustes: gasto por provincia" abierta={hoja} onCerrar={() => setHoja(false)}>
+        <HojaListo titulo="Ajustes: gasto por provincia" abierta={hoja} onCerrar={() => setHoja(false)}>
           {(cerrar) => (
             <div className="prov-hoja">
               <SeccionHoja titulo="Año"><OpcionesHoja etiqueta="Año" valor={String(anio)} opciones={opAnios} onElegir={(a) => set({ anio: Number(a) === def ? null : a })} /></SeccionHoja>
               <SeccionHoja titulo="Medida"><OpcionesHoja etiqueta="Medida" valor={medida} opciones={MEDIDAS_P} onElegir={(v) => set({ medida: v === MEDIDA_P_DEFECTO ? null : v })} /></SeccionHoja>
               <SeccionHoja titulo="Qué gasto"><OpcionesHoja columna etiqueta="Qué gasto" valor={gasto} opciones={GASTOS_P} onElegir={(v) => set({ gasto: v === GASTO_P_DEFECTO ? null : v })} /></SeccionHoja>
-              <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
             </div>
           )}
-        </Hoja>
+        </HojaListo>
         {!vista ? <p className="note">No hay datos de {anio}.</p> : <Ranking v={vista} resaltar={abierta?.id ?? null} onAbrir={(id) => set({ prov: id, forma: null, ruta: null, todas: null })} />}
       </Capitulo>
       {abierta && <Detalle c={c} prov={abierta} anio={anio} medida={medida} gasto={gasto} p={p} set={set} def={def} onCerrar={cerrarDetalle} />}

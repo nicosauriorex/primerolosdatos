@@ -1,11 +1,13 @@
 "use client";
-import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSeccion } from "../useSeccion";
 import { BarraPlantilla, usePlantillaVista } from "./BarraPlantilla";
+import { FilaAjuste as FilaAj } from "./comunes";
 import { BotonCompartir } from "../PanelCompartir";
-import { Cargando, Desplegable, Selector, Seg, alternar } from "../ui";
+import { Cargando, Desplegable, Plegable, Selector, Seg, alternar } from "../ui";
 import { GraficosListos } from "../GraficosListos";
 import { CabeceraDato } from "../sistema/CabeceraDato";
+import { IconoBuscar } from "../sistema/iconos";
 import { BarraVista } from "../sistema/BarraVista";
 import { Hoja, type CerrarHoja } from "../sistema/Hoja";
 import type { DeltaProps } from "../sistema/Delta";
@@ -16,7 +18,7 @@ import { fmtMes, MESES, nf0, nf1, ok, redondeadoComo, restaLimpia } from "@/lib/
 import type { Calculo, Expr, Motor } from "@/lib/motor";
 import { PRES_DEF, aBase100, claseVariacion, estadisticasRows, etiqueta, filasGrafico, franjasPres, type EstRows } from "@/lib/estadisticas";
 import { admiteContexto, contextoDato } from "@/lib/contexto-dato";
-import { MAX_GRAFICOS, MAX_MISMA_UNIDAD, PG, TODOS_MESES, claseVariacionMostrada, comparacionesCabecera, deltaDeFrase, exprsUsadas, fraseUltimoVs, frecuenciaOrigen, leerComun, leerGrafico, sfx, textoPeriodo, textoTemporalidad, type Comun, type GEst } from "@/lib/historico";
+import { MAX_GRAFICOS, MAX_MISMA_UNIDAD, PG, TODOS_MESES, claseVariacionMostrada, comparacionesCabecera, deltaDeFrase, difAbsoluta, exprsUsadas, fraseUltimoVs, frecuenciaOrigen, leerComun, leerGrafico, opcionesComoVerlo, sfx, textoPeriodo, textoTemporalidad, type Comun, type GEst } from "@/lib/historico";
 import { fmtEjeDe, notaInflacion, tituloGrafico, type VistaImg } from "@/lib/imagen-datos";
 import { useConfig } from "../ConfigProvider";
 import { baseDeConfig, medidaInicial, medidaPreferida } from "@/lib/config";
@@ -48,6 +50,8 @@ interface Simple {
   acciones: (cerrarAntes: CerrarAntes) => ReactNode; agregar: (cerrarAntes: CerrarAntes) => ReactNode;   // los que cambian de pantalla o de vista cierran antes la ventana (D-016)
   alFabrica?: () => void;         // "Volver a lo de fábrica": solo si la vista cambió respecto de la de fábrica
 }
+/** Lo que agrega `BloqueGrafico` a la vista simple: las variables de la hoja (con una sola, la sección "Variable" no está: solo "Más variables"). */
+type SimpleCompleto = Simple & { variables: ReactNode; masVariables: ReactNode; unaSola: boolean; cambiar: (x: Expr) => void };
 
 export function Historico() {
   const [p, set, montado] = useParams();
@@ -123,7 +127,8 @@ export function Historico() {
 
   // Dentro de la ventana de Personalizar, agregar un gráfico cambia la vista: primero se cierra la ventana (`cerrarAntes`)
   const agregarBtn = (cerrarAntes?: CerrarAntes) => total < MAX_GRAFICOS && (
-    <p><button type="button" className="btn" onClick={() => (cerrarAntes ? cerrarAntes(() => setVacios(vacios + 1)) : setVacios(vacios + 1))}>+ Agregar gráfico ({total} de {MAX_GRAFICOS})</button></p>
+    <p className="hi-agregar"><button type="button" className="btn" onClick={() => (cerrarAntes ? cerrarAntes(() => setVacios(vacios + 1)) : setVacios(vacios + 1))}>
+      {cerrarAntes ? "+ Agregar gráfico" : `+ Agregar gráfico (${total} de ${MAX_GRAFICOS})`}</button></p>
   );
   if (total === 1) {
     // ¿Algo cambió respecto de lo de fábrica? Se compara lo que se ve (período, frecuencia, meses, opciones del gráfico), no los parámetros escritos.
@@ -227,10 +232,19 @@ function BloqueGrafico({ i, total, compacto, g, E, m, set, version, onQuitar, on
       {aviso && <p className="note" role="status">Con unidades distintas entran 2 variables.</p>}
     </div>
   );
+  // Con una sola variable, la hoja de ajustes no la lista (afecta a toda la página): solo ofrece sumar otra
+  const unaSola = base.length === 1;
+  const masVariables = (
+    <div className="vars-graf">
+      {b100
+        ? g.exprs.length < 10 && <FilaVariable e={null} agregable textoAgregar={`+ Agregar variable (${g.exprs.length} de 10)`} onChange={(x) => x && guardarExprs([...g.todas, x])} />
+        : <FilaVariable e={null} agregable textoAgregar="+ Agregar una segunda variable" onChange={(x) => x && guardarExprs([...base, x])} />}
+    </div>
+  );
   const falla = hayError && !sec.ocupado ? <p className="error">Las variables elegidas no se pudieron cargar. Probá otra o recargá la página.</p> : <Cargando />;
   if (simple) {
     return disp.length > 0
-      ? <Principal m={m} E={Ed} set={setG} version={version} compacto={false} simple={{ ...simple, variables: vars, cambiar: (x) => guardarExprs([x, ...base.slice(1)]) }} />
+      ? <Principal m={m} E={Ed} set={setG} version={version} compacto={false} simple={{ ...simple, variables: vars, masVariables, unaSola, cambiar: (x) => guardarExprs([x, ...base.slice(1)]) }} />
       : <div className={clase}>{vars}{falla}</div>;
   }
   return (
@@ -283,17 +297,17 @@ function ControlesFecha({ E, set, F }: { E: Comun; set: SetFn; F: string[] }) {
   };
   return (
     <>
-      <div className="controls"><label>Desde</label><SelFecha etq="Desde" valor={E.desde} min={F[0]} max={ult} onElegir={cambiarDesde} />
-        <label>Hasta</label><SelFecha etq="Hasta" valor={E.hasta} min={F[0]} max={ult} onElegir={cambiarHasta} /></div>
-      <div className="controls"><label>Atajos</label>
+      <FilaAj rotulo="Desde"><SelFecha etq="Desde" valor={E.desde} min={F[0]} max={ult} onElegir={cambiarDesde} /></FilaAj>
+      <FilaAj rotulo="Hasta"><SelFecha etq="Hasta" valor={E.hasta} min={F[0]} max={ult} onElegir={cambiarHasta} /></FilaAj>
+      <FilaAj rotulo="Atajos">
         <div className="seg">{PRESETS.map(([v, t]) => (
           <button key={t} type="button" aria-pressed={E.desde === v && E.hasta === ult} onClick={() => set({ d: v, h: null })}>{t}</button>
-        ))}</div></div>
-      <div className="controls"><label>Meses del año</label>
+        ))}</div></FilaAj>
+      <FilaAj rotulo="Meses del año">
         <div className="seg">
           <button type="button" aria-pressed={E.meses.size === 12} onClick={() => mesClick("todos")}>Todos</button>
           {MESES.map((n, k) => <button key={n} type="button" aria-pressed={E.meses.size < 12 && E.meses.has(k + 1)} onClick={() => mesClick(k + 1)}>{n}</button>)}
-        </div></div>
+        </div></FilaAj>
     </>
   );
 }
@@ -302,9 +316,9 @@ function ControlesFecha({ E, set, F }: { E: Comun; set: SetFn; F: string[] }) {
 function ControlesAgregar({ E, set }: { E: Comun; set: SetFn }) {
   if (E.freq === "M") return null;
   return (
-    <div className="controls"><label>Al ver por {E.freq === "A" ? "año" : "trimestre"}</label>
+    <FilaAj rotulo={`Al ver por ${E.freq === "A" ? "año" : "trimestre"}`} ayuda={E.ag === "cierre" ? "Último mes con dato de cada período." : "Promedio de los meses del período."}>
       <Seg valor={E.ag} opciones={[["promedio", "Promedio"], ["cierre", "Cierre"]]} onElegir={(v) => set({ ag: v === "promedio" ? null : v })} />
-      <span className="note" style={{ margin: 0 }}>{E.ag === "cierre" ? "Último mes con dato de cada período." : "Promedio de los meses del período."}</span></div>
+    </FilaAj>
   );
 }
 
@@ -312,8 +326,8 @@ function ControlesAgregar({ E, set }: { E: Comun; set: SetFn }) {
 function ControlesFrecuencia({ E, set }: { E: Comun; set: SetFn }) {
   return (
     <>
-      <div className="controls"><label>Ver por</label>
-        <Seg valor={E.freq} opciones={[["M", "Mes"], ["T", "Trimestre"], ["A", "Año"]]} onElegir={(v) => set({ f: v === "M" ? null : v })} /></div>
+      <FilaAj rotulo="Ver por">
+        <Seg valor={E.freq} opciones={[["M", "Mes"], ["T", "Trimestre"], ["A", "Año"]]} onElegir={(v) => set({ f: v === "M" ? null : v })} /></FilaAj>
       <ControlesAgregar E={E} set={set} />
     </>
   );
@@ -333,36 +347,27 @@ function Barra({ E, set, F, fija }: { E: Comun; set: SetFn; F: string[]; fija: b
   );
 }
 
-/** Una sección plegable de la ventana de Personalizar (el botón de 44 px es el título; el cuerpo se monta solo abierto). */
+/** Una sección plegable de la hoja de ajustes (renglón con chevron, sin caja; abre y cierra con animación). */
 function SeccionPers({ titulo, abiertaInicial = false, children }: { titulo: string; abiertaInicial?: boolean; children: ReactNode }) {
-  const [abierta, setAbierta] = useState(abiertaInicial);
-  return (
-    <section className="pers-sec">
-      <h3><button type="button" className="pers-sec-btn" aria-expanded={abierta} onClick={() => setAbierta(!abierta)}>
-        <span>{titulo}</span><span className="pers-sec-flecha" aria-hidden="true">{abierta ? "–" : "+"}</span></button></h3>
-      {abierta && <div className="pers-sec-cuerpo">{children}</div>}
-    </section>
-  );
+  return <Plegable resumen={titulo} inicial={abiertaInicial} nivel="renglon" className="hi-sec">{children}</Plegable>;
 }
 
-/** Sección de la hoja de ajustes que se abre sola: la del chip que se tocó ("Ajustes" abre la de la variable). */
+/** Sección de la hoja de ajustes que se abre sola: la del chip que se tocó ("Ajustes" abre la de la variable, o las fechas si hay una sola). */
 type SecPers = "variable" | "fechas" | "opciones";
 
-/** Contenido de la hoja de ajustes: variable, fechas, opciones del gráfico y guardar, plegables, y al pie "Volver a lo de fábrica" y "Listo". Va dentro de una `Hoja`. */
+/** Contenido de la hoja de ajustes: variables, fechas, opciones del gráfico y guardar, plegables. "Volver a lo de fábrica" y "Listo" van en el pie de la `Hoja`. */
 function ContenidoPers({ simple, opciones, tituloOpciones, abrir, cerrar }: {
-  simple: Simple & { variables: ReactNode }; opciones: ReactNode; tituloOpciones: string; abrir: SecPers; cerrar: CerrarHoja;
+  simple: SimpleCompleto; opciones: ReactNode; tituloOpciones: string; abrir: SecPers; cerrar: CerrarHoja;
 }) {
   const alIr: CerrarAntes = (luego) => cerrar(luego);
   return (
     <div className="hi-pers">
-      <SeccionPers titulo="Variable" abiertaInicial={abrir === "variable"}>{simple.variables}{simple.agregar(alIr)}</SeccionPers>
+      {simple.unaSola
+        ? <SeccionPers titulo="Más variables" abiertaInicial={abrir === "variable"}>{simple.masVariables}{simple.agregar(alIr)}</SeccionPers>
+        : <SeccionPers titulo="Variables" abiertaInicial={abrir === "variable"}>{simple.variables}{simple.agregar(alIr)}</SeccionPers>}
       <SeccionPers titulo="Fechas" abiertaInicial={abrir === "fechas"}>{simple.fecha}</SeccionPers>
       <SeccionPers titulo={tituloOpciones} abiertaInicial={abrir === "opciones"}>{opciones}</SeccionPers>
-      <SeccionPers titulo="Guardar y compartir">{simple.acciones(alIr)}</SeccionPers>
-      <div className="hi-pers-pie">
-        {simple.alFabrica && <button type="button" className="btn" onClick={simple.alFabrica}>Volver a lo de fábrica</button>}
-        <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
-      </div>
+      <SeccionPers titulo="Guardar y gráficos listos">{simple.acciones(alIr)}</SeccionPers>
     </div>
   );
 }
@@ -444,12 +449,13 @@ const DEFS_RES: DefResumen[] = [
 ];
 
 // ------------------------------------------------------------ gráfico principal
-function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Estado; set: SetFn; version: number; compacto: boolean; simple?: Simple & { variables: ReactNode; cambiar: (x: Expr) => void } }) {
+function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Estado; set: SetFn; version: number; compacto: boolean; simple?: SimpleCompleto }) {
   const { F } = m;
   const { config: cfg } = useConfig();
   const { metas } = useSeccion([]);
   const [personalizando, setPersonalizando] = useState<SecPers | null>(null); // hoja de ajustes abierta, con la sección que se despliega
-  const [cambiando, setCambiando] = useState(false);   // el elegidor de variable abierto desde el botón "Cambiar" de la cabecera
+  const [cambiando, setCambiando] = useState(false);   // el elegidor de variable abierto desde el botón "Cambiar dato" de la cabecera
+  const cerrarHoja = useRef<CerrarHoja | null>(null);   // "Listo" vive en el pie de la hoja, fuera de su cuerpo: cierra por el mismo camino que la cruz
   const b100 = E.modo === "b100";
   const conFranjas = E.pf === "1" ? true : E.pf === "0" ? false : cfg.franjas;
   // Claves estables: el gráfico solo se rehace (y pierde el zoom) si cambia algo que lo afecta
@@ -512,7 +518,6 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     (bd ? " La sombra va del mínimo al máximo." : "") +
     // Los valores reales dependen del IPC empalmado: se avisa con qué índice se descontó la inflación.
     (notaInflacion(lista.map((o) => o.c), b100) ? " " + notaInflacion(lista.map((o) => o.c), b100) : "") + ` Fuente: ${[...new Set(lista.map((o) => o.c.serie.fuente))].join("; ")}.`;
-  const grupo = (lbl: string, el: React.ReactNode) => <Fragment key={lbl}><label>{lbl}</label>{el}</Fragment>;
   // Franjas de presidentes: botón propio junto al gráfico (el estado sigue en el parámetro `pf`)
   const alternarFranjas = () => { const on = !conFranjas; set({ pf: on === cfg.franjas ? null : on ? "1" : "0" }); };
   const botonPresidentes = (
@@ -529,28 +534,18 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     + (!b100 && !igualA(E.refs, REFS_H.map((r) => r.k), ["ult", "prom"]) ? 1 : 0) + (!b100 && !igualA(E.refs, ["mk_ult", "mk_max", "mk_min"], ["mk_ult", "mk_max", "mk_min"]) ? 1 : 0);
   const config = (
     <>
-      <div className="controls" id="h_opciones">
-        {grupo("Mostrar", <Seg valor={E.modo} opciones={[["valor", "Valor de la serie (hasta 2 variables; hasta 4 si tienen la misma unidad)"], ["b100", "Comparar en base 100 (hasta 10)"]]} onElegir={(v) => set({ m: v === "valor" ? null : v })} />)}
-      </div>
-      <div className="controls">
-        {puedeLog && grupo("Escala", <Seg valor={E.escala} opciones={[["lin", "Lineal"], ["log", "Logarítmica"]]} onElegir={(v) => set({ e: v === "lin" ? null : v })} />)}
-        {dos && grupo("Eje derecho", <Seg valor={E.eje} opciones={[["propia", "Escala propia (adaptada a la serie)"], ["misma", "Misma escala que el izquierdo"]]} onElegir={(v) => set({ ej: v === "propia" ? null : v })} />)}
-      </div>
-      {!b100 && (
-        <div className="controls">
-          {grupo("Líneas", <Seg valor={E.refs} opciones={REFS_H.map((r) => [r.k, r.btn] as [string, string])} onElegir={refsToggle} />)}
-        </div>
+      <FilaAj rotulo="Mostrar" ayuda="Valor: hasta 2 variables, o 4 con la misma unidad. Base 100: hasta 10.">
+        <Seg valor={E.modo} opciones={[["valor", "Valor"], ["b100", "Base 100"]]} onElegir={(v) => set({ m: v === "valor" ? null : v })} />
+      </FilaAj>
+      {puedeLog && <FilaAj rotulo="Escala"><Seg valor={E.escala} opciones={[["lin", "Lineal"], ["log", "Logarítmica"]]} onElegir={(v) => set({ e: v === "lin" ? null : v })} /></FilaAj>}
+      {dos && (
+        <FilaAj rotulo="Eje derecho" ayuda={E.eje === "misma" ? "Los dos ejes usan la misma escala." : "Cada eje se adapta a su serie."}>
+          <Seg valor={E.eje} opciones={[["propia", "Propia"], ["misma", "Igual al izquierdo"]]} onElegir={(v) => set({ ej: v === "propia" ? null : v })} />
+        </FilaAj>
       )}
-      {!b100 && (
-        <div className="controls">
-          {grupo("Marcadores", <Seg valor={E.refs} opciones={[["mk_ult", "Último"], ["mk_max", "Máximo"], ["mk_min", "Mínimo"]]} onElegir={refsToggle} />)}
-        </div>
-      )}
-      {!b100 && hayBanda && (
-        <div className="controls">
-          {hayBanda && grupo("Rango", <Seg valor={E.banda} opciones={[["no", "Solo promedio"], ["si", "Con mín/máx"]]} onElegir={(v) => set({ bd: v === "no" ? null : v })} />)}
-        </div>
-      )}
+      {!b100 && <FilaAj rotulo="Líneas"><Seg valor={E.refs} opciones={REFS_H.map((r) => [r.k, r.btn] as [string, string])} onElegir={refsToggle} /></FilaAj>}
+      {!b100 && <FilaAj rotulo="Marcadores"><Seg valor={E.refs} opciones={[["mk_ult", "Último"], ["mk_max", "Máximo"], ["mk_min", "Mínimo"]]} onElegir={refsToggle} /></FilaAj>}
+      {!b100 && hayBanda && <FilaAj rotulo="Rango"><Seg valor={E.banda} opciones={[["no", "Solo promedio"], ["si", "Con mín/máx"]]} onElegir={(v) => set({ bd: v === "no" ? null : v })} /></FilaAj>}
     </>
   );
   const leyenda = <div className="legend">{lista.length > 1 && lista.map((o) => <span key={o.key} style={vcolor(o.color)}>{o.c.corto}{o.axis ? " (eje der.)" : ""}</span>)}</div>;
@@ -627,13 +622,25 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
       ...(b100 ? [{ clave: "b100", texto: "Base 100" }] : []),
       ...(puedeLog && E.escala === "log" ? [{ clave: "escala", texto: "Escala log." }] : []),
     ];
-    const abrirHoja = (clave?: string) => setPersonalizando(clave === "periodo" ? "fechas" : clave ? "opciones" : "variable");
+    const abrirHoja = (clave?: string) => setPersonalizando(clave === "periodo" ? "fechas" : clave ? "opciones" : simple.unaSola ? "fechas" : "variable");
+    // "Cómo verlo": las medidas con sentido de la primera variable (solo con una variable y sin base 100)
+    const metaE0 = metas.find((x) => x.id === E.exprs[0].id);
+    const medE = E.exprs[0].med || (metaE0 ? m.medDefault(metaE0) : "");
+    const comoVerlo = metaE0 && lista.length === 1 && !b100 ? opcionesComoVerlo(m, metaE0, medE) : [];
     return (
       <>
+        <div className="hi-cab">
+        <button type="button" className="btn hi-cambiar" aria-haspopup="dialog" onClick={() => setCambiando(true)}>
+          <IconoBuscar /><span className="hi-cambiar-txt">Cambiar dato</span></button>
         <CabeceraDato titulo={nombre} nivel={1} cifra={cifra} fecha={fechaCifra}
           deltas={deltas} frase={frase} fuente={fuente} mesDato={cifra ? (ctx ? ctx.mes : String(s0?.ult[1] ?? "")) || undefined : undefined}
-          accion={<button type="button" className="btn cambiar-dato" aria-haspopup="dialog" onClick={() => setCambiando(true)}>Cambiar</button>}
           info={o0.c.serie.desc ? <p>{o0.c.serie.desc}</p> : undefined}>
+          {comoVerlo.length > 0 && (
+            <div className="hi-comoverlo" role="group" aria-labelledby="hi-comoverlo-rot">
+              <span className="hi-comoverlo-rot lbl" id="hi-comoverlo-rot">Cómo verlo</span>
+              <Seg valor={medE} opciones={comoVerlo} onElegir={(v) => simple.cambiar({ ...E.exprs[0], med: v })} />
+            </div>
+          )}
           {!ctx && (lista.length > 1 || b100) && (
             <ul className="vs-leyenda hi-leyenda">{lista.map((o, k) => {
               const s1 = st[k];
@@ -641,19 +648,20 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
             })}</ul>
           )}
         </CabeceraDato>
+        </div>
         <p className="temporal hi-temporal">{temporal}</p>
         {resto.length > 0 && (
-          <details className="hi-mas">
-            <summary>Más comparaciones</summary>
+          <Plegable resumen="Más comparaciones" className="hi-mas" nivel="chico">
             <div className="tablewrap"><table>
               <caption className="sr-solo">Último dato contra otros valores{multi ? ` de ${o0.c.corto}` : ""}</caption>
-              <thead><tr><th>Contra</th><th>Valor</th><th>Diferencia</th></tr></thead>
+              <thead><tr><th>Contra</th><th>Valor</th>{o0.c.pct ? <th>Diferencia</th> : <><th>Variación</th><th>Diferencia</th></>}</tr></thead>
               <tbody>{resto.map((c) => (
                 <tr key={c.clave}><td>{c.titulo}{c.fecha && <small>{c.fecha}</small>}</td><td>{m.fmtC(o0.c, c.valor)}</td>
-                  <td className={`var-${c.cls}`}>{deltaDeFrase(c.frase).texto}</td></tr>
+                  <td className={`var-${c.cls}`}>{deltaDeFrase(c.frase).texto}</td>
+                  {!o0.c.pct && <td className={`var-${c.cls}`}>{difAbsoluta(o0.c.pct, c.valor, s0?.ult[0], (v) => m.fmtC(o0.c, v)) || "–"}</td>}</tr>
               ))}</tbody>
             </table></div>
-          </details>
+          </Plegable>
         )}
         {cambiando && (
           <Picker onCerrar={() => setCambiando(false)} pedido={{
@@ -674,15 +682,24 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
           <BotonCompartir className="btn primario" titulo={nombre} href={() => window.location.href} crearVista={() => vista}>
             <IconoCompartir />Compartir</BotonCompartir>
         </div>
-        <Hoja titulo="Ajustes" abierta={personalizando !== null} onCerrar={() => setPersonalizando(null)}>
-          {(cerrar) => (
-            <ContenidoPers simple={simple} abrir={personalizando ?? "variable"} cerrar={cerrar} tituloOpciones={cuenta ? `Opciones del gráfico (${cuenta})` : "Opciones del gráfico"}
-              opciones={<>
-                {simple.frecuencia}
-                <div className="controls"><label>Mostrar como</label><Seg valor={E.tabla} opciones={[["grafico", "Gráfico"], ["tabla", "Tabla"]]} onElegir={(v) => onVista(v as Vista)} /></div>
-                {config}
-              </>} />
-          )}
+        <Hoja titulo="Ajustes" abierta={personalizando !== null} onCerrar={() => setPersonalizando(null)}
+          pie={(
+            <>
+              {simple.alFabrica && <button type="button" className="btn" onClick={simple.alFabrica}>Volver a lo de fábrica</button>}
+              <button type="button" className="btn primario" onClick={() => (cerrarHoja.current ? cerrarHoja.current() : setPersonalizando(null))}>Listo</button>
+            </>
+          )}>
+          {(cerrar) => {
+            cerrarHoja.current = cerrar;
+            return (
+              <ContenidoPers simple={simple} abrir={personalizando ?? "variable"} cerrar={cerrar} tituloOpciones={cuenta ? `Opciones del gráfico (${cuenta})` : "Opciones del gráfico"}
+                opciones={<>
+                  {simple.frecuencia}
+                  <FilaAj rotulo="Mostrar como"><Seg valor={E.tabla} opciones={[["grafico", "Gráfico"], ["tabla", "Tabla"]]} onElegir={(v) => onVista(v as Vista)} /></FilaAj>
+                  {config}
+                </>} />
+            );
+          }}
         </Hoja>
         {b100 && resumen}
         {!b100 && lista.length === 1 && (

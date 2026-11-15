@@ -43,12 +43,15 @@ export interface EncVariables { ini: string; fin: string; sp: string; sinDato: s
 /** Una vela de "una variable, todos los presidentes": valores numéricos (para el dibujo) y ya formateados (para el texto). */
 export interface FilaVela { id: string; nombre: string; periodo: string; ini: number; fin: number; min: number; max: number; iniTxt: string; finTxt: string; minTxt: string; maxTxt: string; variacion: string; cls: Cls; nota: string | null }
 export interface FilaRank { puesto: number; id: string; nombre: string; score: number; indicadores: number }
+/** Una columna de "el mismo mes en cada año": `actual` va en celeste; `ref` (el año de "el más bajo/alto desde…") en ámbar. */
+export interface FilaMes { anio: string; valor: number; texto: string; actual: boolean; ref: boolean }
 /** Contenido de la imagen cuando no es un gráfico de líneas. */
 export type Lienzo =
   | { tipo: "barras"; filas: FilaBarra[]; sinDatos: string[]; enc?: { nombre: string; valor: string }; sinTope?: boolean }
   | { tipo: "variables"; filas: FilaVariable[]; presId: string; enc?: EncVariables }
   | { tipo: "velas"; filas: FilaVela[]; sinDatos: string[] }
-  | { tipo: "ranking"; filas: FilaRank[]; sinDatos: string[] };
+  | { tipo: "ranking"; filas: FilaRank[]; sinDatos: string[] }
+  | { tipo: "meses"; filas: FilaMes[] };
 
 export interface DatosImagen {
   formato: FormatoImg;
@@ -406,16 +409,18 @@ const MIN_FILA = { barras: 44, variables: 50, velas: 64, ranking: 42 } as const;
 const MAX_FILA = { barras: 100, variables: 118, velas: 120, ranking: 96 } as const;
 const ALTO_ENC = 32;      // renglón de encabezados de columnas
 const ALTO_SIN = 36;      // renglón "Sin datos: …"
-const sinDatosDe = (l: Lienzo): string[] => (l.tipo === "variables" ? [] : l.sinDatos);
+const sinDatosDe = (l: Lienzo): string[] => (l.tipo === "variables" || l.tipo === "meses" ? [] : l.sinDatos);
+const MIN_MESES = { vertical: 360, horizontal: 300 } as const;   // alto mínimo de las columnas de "el mismo mes en cada año"
 
 /** Alto mínimo del contenido: con él se elige la escala de texto con la que todo entra. En horizontal las filas pueden ir en dos columnas. */
 function minLienzo(l: Lienzo, horiz: boolean): number {
+  if (l.tipo === "meses") return horiz ? MIN_MESES.horizontal : MIN_MESES.vertical;
   const n = l.filas.length;
   return (horiz ? Math.ceil(n / 2) : n) * MIN_FILA[l.tipo] + ALTO_ENC + (sinDatosDe(l).length ? ALTO_SIN : 0) + 16;
 }
 
 /** Reparte las filas: una columna; en horizontal, si no entran con el alto mínimo, dos columnas (primero la de la izquierda). */
-function rejilla(r: Rect, n: number, tipo: Lienzo["tipo"], horiz: boolean) {
+function rejilla(r: Rect, n: number, tipo: keyof typeof MIN_FILA, horiz: boolean) {
   const gap = 32, h = r.h - ALTO_ENC;
   const cols = horiz && n > 1 && h / n < MIN_FILA[tipo] ? 2 : 1, per = Math.ceil(n / cols);
   return { cols, per, gap, cw: (r.w - gap * (cols - 1)) / cols, rowH: Math.min(h / per, MAX_FILA[tipo]), y0: r.y + ALTO_ENC };
@@ -623,6 +628,7 @@ function filasRanking(ctx: Ctx, r: Rect, L: LienzoDe<"ranking">, pal: Paleta, es
 /** El contenido de la imagen cuando no es un gráfico de líneas: el marco, las filas y la línea de "Sin datos". */
 function lienzoFilas(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number, horiz: boolean) {
   const L = d.lienzo!;
+  if (L.tipo === "meses") { columnasMeses(ctx, r, L, pal, esc); return; }
   const sin = sinDatosDe(L), hSin = sin.length ? ALTO_SIN : 0;
   const g = rejilla({ ...r, h: r.h - hSin }, L.filas.length, L.tipo, horiz);
   r = { ...r, h: Math.min(r.h, ALTO_ENC + g.per * g.rowH + hSin + 6) };   // el marco se ajusta a las filas: sin vacío debajo
@@ -640,6 +646,66 @@ function lienzoFilas(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number
     texto(ctx, pal, a, 600, r.x + 20, r.y + r.h - hSin + (hSin - alto(a, 1.2)) / 2, pal.tintaSec, 1.2);
   }
   ctx.restore();
+}
+
+/** "El mismo mes en cada año" (pedido 13): una columna por año, desde 0, como `components/sistema/BarrasMes.tsx`. El último año en celeste
+ *  con su valor arriba; el de "el más bajo/alto desde…" en ámbar con su año y valor; los demás apagados. Primer y último año debajo. */
+function columnasMeses(ctx: Ctx, r: Rect, L: LienzoDe<"meses">, pal: Paleta, esc: number) {
+  const N = L.filas.length;
+  if (!N) return;
+  ctx.fillStyle = pal.superficie; ctx.fillRect(r.x, r.y, r.w, r.h);
+  ctx.strokeStyle = pal.borde; ctx.lineWidth = 2; ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
+  const pad = 24, fVal = px(Math.max(16, 28 * Math.max(esc, 0.9))), fAnio = px(Math.max(13, 20 * Math.max(esc, 0.9))), renglon = fVal * 1.25;
+  const x0 = r.x + pad, x1 = r.x + r.w - pad;
+  const fila1 = r.y + pad + fVal, fila2 = fila1 + renglon;   // dos renglones arriba para los rótulos: nunca tapan una columna
+  const top = fila2 + 10, bottom = r.y + r.h - pad - fAnio * 1.5;
+  const vals = L.filas.map((f) => f.valor);
+  const mn = Math.min(0, ...vals);
+  let mx = Math.max(0, ...vals);
+  if (mx === mn) mx = mn + 1;
+  const Y = (v: number) => top + ((mx - v) / (mx - mn)) * (bottom - top), y0 = Y(0);
+  const banda = (x1 - x0) / N, bw = banda >= 6 ? banda * 0.7 : Math.max(1, banda - 1);
+  const xCol = (i: number) => x0 + i * banda + (banda - bw) / 2;
+  L.filas.forEach((f, i) => {
+    const a = Y(f.valor), y = Math.min(a, y0), h = Math.max(2, Math.abs(a - y0));
+    ctx.globalAlpha = f.actual || f.ref ? 1 : 0.45;
+    ctx.fillStyle = f.actual ? pal.acento : f.ref ? pal.accion : pal.tintaTenue;
+    ctx.fillRect(xCol(i), y, bw, h);
+  });
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = pal.eje; ctx.fillRect(x0, y0 - 1, x1 - x0, 2);
+  // rótulos: arriba de las columnas que quedan debajo (sin taparlas); si el del año actual y el de referencia chocan, cada uno en su renglón
+  ctx.textBaseline = "alphabetic";
+  const rotulo = (i: number, t: string) => {
+    ctx.font = fuenteDe(pal, 800, fVal);
+    const w = Math.min(ctx.measureText(t).width, x1 - x0), cx = xCol(i) + bw / 2;
+    const xa = Math.max(x0, Math.min(x1 - w, cx - w / 2));
+    let tope = Infinity;
+    L.filas.forEach((f, k) => { const a = x0 + k * banda, b = a + banda; if (b > xa && a < xa + w) tope = Math.min(tope, Y(f.valor), y0); });
+    return { t, x: xa, w, y: Math.max(fila1, Math.min(top - 4, tope - 8)) };
+  };
+  const iAct = L.filas.findIndex((f) => f.actual), iRef = L.filas.findIndex((f) => f.ref);
+  const act = iAct >= 0 ? rotulo(iAct, L.filas[iAct].texto) : null;
+  const ref = iRef >= 0 ? rotulo(iRef, `${L.filas[iRef].anio}: ${L.filas[iRef].texto}`) : null;
+  if (act && ref && act.x < ref.x + ref.w + 12 && ref.x < act.x + act.w + 12 && Math.abs(act.y - ref.y) < renglon) {
+    if (ref.y <= act.y) { ref.y = fila1; act.y = Math.max(fila2, act.y); } else { act.y = fila1; ref.y = Math.max(fila2, ref.y); }
+  }
+  // si el rótulo quedó lejos de su columna (por otras más altas debajo del texto), una línea fina lo une con ella
+  const guia = (i: number, y: number, color: string) => {
+    const cx = xCol(i) + bw / 2, yb = Math.min(Y(L.filas[i].valor), y0) - 6;
+    if (yb - (y + 8) < 14) return;
+    ctx.fillStyle = color; ctx.globalAlpha = 0.6; ctx.fillRect(cx - 1, y + 8, 2, yb - (y + 8)); ctx.globalAlpha = 1;
+  };
+  if (ref) guia(iRef, ref.y, pal.accion);
+  if (act) guia(iAct, act.y, pal.acento);
+  ctx.font = fuenteDe(pal, 800, fVal); ctx.textAlign = "left";
+  if (ref) { ctx.fillStyle = pal.accion; ctx.fillText(recortarPuntos(ctx, ref.t, x1 - x0), ref.x, ref.y); }
+  if (act) { ctx.fillStyle = pal.acento; ctx.fillText(recortarPuntos(ctx, act.t, x1 - x0), act.x, act.y); }
+  // años del primero y del último, debajo del eje
+  ctx.font = fuenteDe(pal, 600, fAnio); ctx.fillStyle = pal.tintaSec;
+  const yAnio = r.y + r.h - pad;
+  ctx.textAlign = "left"; ctx.fillText(L.filas[0].anio, x0, yAnio);
+  if (N > 1) { ctx.textAlign = "right"; ctx.fillText(L.filas[N - 1].anio, x1, yAnio); }
 }
 
 // ---------------------------------------------------------------- tarjetas

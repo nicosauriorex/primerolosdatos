@@ -29,9 +29,11 @@ export function GraficoDiario({ clave, serie, periodo, etiqueta }: { clave: Clav
     const t = ancho > 0 ? reducir(tramo, Math.max(60, Math.round(ancho))) : tramo;
     let lo = Math.min(...tramo.v), hi = Math.max(...tramo.v);
     if (barras) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
-    const pad = (hi - lo) * 0.05 || Math.abs(hi) * 0.05 || 1;
-    const y = marcasY(barras ? lo : lo - pad, hi + pad * 0.5, 4);
-    const a = y.marcas[0], b = y.marcas[y.marcas.length - 1];
+    // Eje Y (tanda 7, R9; parte E2): el borde es el dato más un margen chico, no la marca redonda siguiente; las marcas, solo dentro.
+    const pad = (hi - lo) * 0.04 || Math.abs(hi) * 0.05 || 1;
+    const a = barras && lo === 0 ? 0 : lo - pad, b = barras && hi === 0 ? 0 : hi + pad;
+    const todas = marcasY(a, b, 4), tol = (b - a) * 1e-9;
+    const y = { paso: todas.paso, marcas: todas.marcas.filter((m) => m >= a - tol && m <= b + tol) };
     const etqs = y.marcas.map((m) => fmtEjeY(m, y.paso));
     return { t, y, a, b, etqs, margenIzq: 10 + Math.max(...etqs.map((s) => s.length)) * 6.6 };
   }, [tramo, ancho, barras]);

@@ -13,7 +13,7 @@ import { BarraVista } from "../sistema/BarraVista";
 import { Hoja } from "../sistema/Hoja";
 import { InfoPunto } from "../sistema/InfoPunto";
 import { CompartirHoja } from "../sistema/CompartirHoja";
-import { CeldaPres, CeldaVar, LineaInicio, Valor, useBase } from "./comunes";
+import { CeldaPres, CeldaVar, LineaInicio, Valor, useBase, HojaListo } from "./comunes";
 import { columnaComparable, periodoMandato, variacionMostrada } from "@/lib/tablas";
 import { fmtMes, nf0, nf1, ok } from "@/lib/formato";
 import { crearPres, mejorPeor, rankingPresidentes, tablasIndicadores, type CritRk, type FilaMP, type IndRk, type Pres, type TablaInd } from "@/lib/estadisticas";
@@ -149,7 +149,7 @@ export function Ranking() {
         : <p className="note rk-sin">{valido ? "No hay indicadores con datos de al menos dos presidentes para comparar." : `Con al menos ${MIN_V} variables se arma la comparación.`}</p>}
 
       <BarraVista items={chips} onAbrir={() => setHoja(true)} />
-      <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
+      <HojaListo titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
         {(cerrar) => (
           <div className="rk-hoja">
             <Grupo titulo="Qué entra" forma="lista" valor={usaVars ? "vars" : "grupos"} onElegir={cambiarModo} opciones={[["grupos", "Por grupos"], ["vars", "Elegir variables"]]} />
@@ -157,10 +157,9 @@ export function Ranking() {
             {usaVars
               ? <p className="note">Las variables se eligen en &quot;Variables elegidas&quot;, debajo de esta hoja.</p>
               : <Grupo titulo="Grupos de indicadores" forma="chips" valor={grupos} onElegir={(v) => set({ rk: [...alternar(grupos, v)].join(",") })} opciones={I.GRUPOS_IND.map((g) => [g, g] as [string, string])} />}
-            <button type="button" className="btn primario rk-listo" onClick={() => cerrar()}>Listo</button>
           </div>
         )}
-      </Hoja>
+      </HojaListo>
       <LineaInicio info={info} F={F} />
 
       {usaVars && (

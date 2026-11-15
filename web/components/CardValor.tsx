@@ -1,8 +1,17 @@
 "use client";
 import Link from "next/link";
 import { Sparkline } from "./Sparkline";
+import { Delta } from "./sistema/Delta";
 import type { Evaluada } from "@/lib/plantillas";
 import type { Motor } from "@/lib/motor";
+
+/** "−0,1 p.p. contra hace un año" → flecha y cifra con signo (como `Delta`, R6 de la tanda 7); otro texto queda tal cual. */
+function Cambio({ texto, cls }: { texto: string; cls: Evaluada["cls"] }) {
+  const m = /^([+\-−]\S+(?: p\.p\.| %)?) contra (.+)$/.exec(texto);
+  if (!m) return <>{texto}</>;
+  const dir = /^\+/.test(m[1]) ? 1 : /^[−-]/.test(m[1]) && !/^[−-]0(,0+)?(\s|$)/.test(m[1]) ? -1 : 0;
+  return <Delta texto={m[1]} tono={cls ?? "neutro"} dir={dir} contra={`vs ${m[2]}`} />;
+}
 
 /** Tarjeta con un valor ya calculado: la de los principales de cada tema.
  *  Con `onElegir` la tarjeta no navega: es un botón que pone la variable en la ficha del dato; `elegido` la marca. */
@@ -16,7 +25,7 @@ export function CardValor({ titulo, ev, href, motor, onElegir, elegido }: {
     <>
       <T className="k" title={titulo}>{titulo}</T>
       <T className="v">{ev.val}<small>{ev.fecha}</small></T>
-      <T className={`d${c ? " var-" + c : ""}`}>{ev.texto}</T>
+      <T className={`d${c ? " var-" + c : ""}`}><Cambio texto={ev.texto} cls={c} /></T>
       <Sparkline v={ev.v} desde={desde} cls={c} />
     </>
   );

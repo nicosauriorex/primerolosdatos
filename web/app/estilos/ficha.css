@@ -1,0 +1,73 @@
+/* Tanda 7 (docs/specs/ajustes-tanda-7.md): estilos de la parte ficha. Se carga después de globals.css. */
+
+/* ---------- Página del tema: pestañas Principales / Todos los datos (riel segmentado, pedido 17) */
+.e1-pestanas { display: inline-flex; gap: 0; padding: 3px; margin: var(--e-4) 0 var(--e-3); background: var(--surface-2); border-radius: var(--r-pleno); max-width: 100%; }
+.e1-pestanas button { flex: 1 1 auto; min-height: 40px; padding: 0 var(--e-4); border: 0; border-radius: var(--r-pleno); background: none; color: var(--text-secondary); font: inherit; font-size: var(--t-sm); font-weight: 600; cursor: pointer; white-space: nowrap; transition: background var(--d-1), color var(--d-1); }
+.e1-pestanas button:hover { color: var(--text-primary); background: var(--acento-suave); }
+.e1-pestanas button[aria-selected="true"] { background: var(--acento); color: var(--sobre-acento); font-weight: 800; }
+.e1-pestanas button:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+@media (max-width: 480px) { .e1-pestanas { display: flex; } }
+.e1-panel { min-width: 0; margin-bottom: var(--e-4); }
+
+/* ---------- Todos los datos: bloques sin caja y series como renglones tocables (reemplaza .cab-subgrupo y .ficha-serie de globals.css) */
+.e1-bloques > li, .e1-series > li { padding: 0; }
+.lista-series .lista-series.e1-series { margin-left: var(--e-3); border-left: 0; padding-left: 0; }
+.e1-bloque-res { display: flex; align-items: baseline; justify-content: space-between; gap: var(--e-3); width: 100%; min-width: 0; }
+.e1-bloque-res > span:first-child { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.e1-bloque-res .cuenta { flex: none; font-size: var(--t-xs); font-weight: 400; color: var(--text-muted); }
+.e1-serie { display: flex; align-items: center; gap: var(--e-2); min-width: 0; border-top: 1px solid var(--border); }
+.e1-serie-btn { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; min-height: var(--toque, 44px); padding: var(--e-2) var(--e-3);
+  border: 0; border-radius: var(--r-2); background: none; color: var(--text-primary); font: inherit; font-size: var(--t-base); text-align: left; text-decoration: none; cursor: pointer; }
+.e1-serie-btn:hover { background: var(--acento-suave); }
+.e1-serie-btn:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: -2px; }
+.e1-serie-btn[aria-pressed="true"] { background: var(--acento-suave); font-weight: 800; box-shadow: inset 3px 0 0 var(--acento); }
+.e1-serie-nombre { max-width: 100%; overflow-wrap: anywhere; line-height: 1.25; }
+.e1-serie-unidad { font-size: var(--t-xs); color: var(--text-muted); line-height: 1.3; font-weight: 400; }
+
+/* ---------- "¿Cómo fue <mes> en otros años?": rango de años de dos puntas */
+.e1-rango { display: flex; flex-direction: column; gap: var(--e-1); max-width: 40rem; }
+.e1-rango-txt { display: flex; justify-content: space-between; gap: var(--e-3); font-size: var(--t-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.e1-rango-txt b { color: var(--text-primary); font-weight: 800; }
+.e1-rango-pista { position: relative; height: 44px; --a: 0%; --b: 100%; }
+.e1-rango-riel, .e1-rango-tramo { position: absolute; top: 50%; height: 6px; margin-top: -3px; border-radius: var(--r-pleno); pointer-events: none; }
+.e1-rango-riel { left: 0; right: 0; background: var(--surface-2); }
+.e1-rango-tramo { left: var(--a); width: calc(var(--b) - var(--a)); background: var(--acento); }
+input[type=range].e1-rango-in {   /* pisa `input[type=range] { width: 220px }` de globals.css */
+ position: absolute; left: 0; width: 100%; top: 0; height: 44px; margin: 0; background: none; pointer-events: none; -webkit-appearance: none; appearance: none; }
+.e1-rango-in::-webkit-slider-runnable-track { background: none; height: 44px; }
+.e1-rango-in::-moz-range-track { background: none; height: 44px; }
+.e1-rango-in::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; pointer-events: auto; width: 24px; height: 24px; margin-top: 10px; border-radius: 50%; border: 3px solid var(--acento); background: var(--surface-1); cursor: grab; }
+.e1-rango-in::-moz-range-thumb { pointer-events: auto; box-sizing: border-box; width: 24px; height: 24px; border-radius: 50%; border: 3px solid var(--acento); background: var(--surface-1); cursor: grab; }
+.e1-rango-in:focus { outline: none; }
+.e1-rango-in:focus-visible::-webkit-slider-thumb { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.e1-rango-in:focus-visible::-moz-range-thumb { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+
+/* ---------- Mes a mes: la leyenda de presidentes son botones que resaltan la línea (pedido 16) */
+.e1-leyenda { gap: var(--e-2); }
+.e1-leyenda button { display: inline-flex; align-items: center; min-height: 40px; padding: 0 var(--e-3); border: 0; border-radius: var(--r-pleno); background: var(--surface-1); color: var(--text-secondary); font: inherit; font-size: var(--t-sm); cursor: pointer; transition: background var(--d-1), color var(--d-1); }
+.e1-leyenda button::before { content: ""; flex: none; width: 14px; height: 3px; margin-right: 8px; background: var(--c); }
+.e1-leyenda button:hover { background: var(--acento-suave); color: var(--text-primary); }
+.e1-leyenda button[aria-pressed="true"] { background: var(--acento-suave); color: var(--text-primary); font-weight: 800; box-shadow: inset 0 0 0 2px var(--c); }
+.e1-leyenda button:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+
+/* ---------- Tabla por presidente en la computadora: la columna principal lleva el riel con la barra y, al lado, su cifra (pedido 21).
+   Reemplaza .tmand-barra y .tmand-celda-prin de globals.css (la barra era absoluta y podía quedar sin su cifra). */
+.tmand-tabla td.tmand-celda-prin { min-width: 220px; }
+.tmand2-caja { display: grid; grid-template-columns: minmax(60px, 1fr) minmax(5.5rem, auto); align-items: center; column-gap: var(--e-3); }
+.tmand2-riel { position: relative; height: 16px; }
+.tmand2-riel::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--border-fuerte); }
+.tmand2-barra { position: absolute; top: 0; bottom: 0; left: 50%; opacity: .55; border-radius: 0 2px 2px 0; }
+.tmand2-barra.tmand2-neg { left: auto; right: 50%; border-radius: 2px 0 0 2px; }
+.tmand2-num { position: static; justify-self: end; text-align: right; white-space: nowrap; }
+.tmand2-vacio { color: var(--text-muted); font-size: var(--t-md); }
+/* El título de la columna principal se lee entero y en el color del texto */
+.tmand-tabla thead th.tmand-th-prin, .tmand-tabla thead th.tmand-th-prin .tmand-orden { color: var(--text-primary); }
+.tmand-tabla thead th.tmand-th-prin { white-space: nowrap; }
+
+/* Tanda 7, barrido (R1, R6): tarjetas de los principales del tema sin caja de borde fino; el minigráfico a lo ancho */
+.principales .plantilla { border: 0; border-radius: var(--r-2); background: var(--relleno, var(--surface-1)); }
+.principales .plantilla:hover { background: var(--relleno-hover, var(--acento-suave)); }
+.principales .plantilla.ficha-elegida { box-shadow: inset 0 0 0 2px var(--acento); }
+.principales .ficha-elegir { display: flex; flex-direction: column; width: 100%; }
+.principales .plantilla .d .delta { font-size: var(--t-xs); }
+.texto-tema .ver-mas { display: inline; color: var(--acento-texto); }

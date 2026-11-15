@@ -29,15 +29,24 @@ export interface OpcionesG {
   fmtTip: (v: number) => string; tipTitle?: (r: Fila, i: number) => string; tipSub?: (r: Fila, se: SerieG) => string;
   xVals?: number[]; franjas?: FranjaG[]; xLabel?: (r: Fila, i: number) => string; maxGap?: number; label?: string;
   sinBarra?: boolean;   // no mostrar la barra de zoom bajo el gráfico
+  suave?: boolean;      // líneas suavizadas (spline monótona): solo el dibujo; valores, globo y marcadores no cambian
+  resaltar?: string | null;   // `key` de la serie destacada: opaca y 1 px más gruesa; las demás al 25 % (líneas, puntos y etiquetas finales)
 }
 
-// ------------------------------------------------------------ escalas (mismo criterio que la página vieja)
-function niceTicks(min: number, max: number, n: number): number[] {
-  const span = max - min || Math.abs(max) || 1, step0 = span / n, mag = Math.pow(10, Math.floor(Math.log10(step0)));
-  const step = [1, 2, 2.5, 5, 10].map((f) => f * mag).find((s) => span / s <= n) || mag * 10;
-  const t: number[] = []; let v = Math.floor(min / step) * step;
-  t.push(v);
-  while (v < max - 1e-9) { v += step; t.push(+v.toPrecision(12)); }
+// ------------------------------------------------------------ escalas
+// R9 (docs/specs/ajustes-tanda-7.md): el borde del eje es el dato más un margen chico (MARGEN_EJE), no la marca redonda siguiente,
+// y las marcas se dibujan solo dentro de ese rango. Un mínimo de −0,8 con máximo de 25,5 deja el eje cerca de −2 (no en −10).
+const MARGEN_EJE = 0.04;
+/** Marcas redondas (1; 2; 2,5 o 5 × 10ⁿ) DENTRO de [a, b]: el paso más grande que deja al menos 4 (como mucho unas 7). */
+function niceTicks(a: number, b: number, n: number): number[] {
+  const span = b - a || Math.abs(b) || 1, mag = Math.pow(10, Math.floor(Math.log10(span / n)));
+  const dentro = (s: number) => {
+    const t: number[] = [], tol = span * 1e-9;
+    for (let v = Math.ceil((a - tol) / s) * s; v <= b + tol; v += s) t.push(+v.toPrecision(12) || 0);   // `|| 0`: nunca "−0"
+    return t;
+  };
+  let t: number[] = [];
+  for (const f of [10, 5, 2, 1]) { t = dentro(f * mag); if (t.length >= 4) break; }   // sin 2,5: con un decimal en el rótulo, 2,25 se leería 2,3
   return t;
 }
 function logTicks(min: number, max: number): number[] {
@@ -47,15 +56,23 @@ function logTicks(min: number, max: number): number[] {
   return t.length > 9 ? t.filter((v) => Math.abs(Math.log10(v) % 1) < 1e-9) : t;
 }
 interface Esc { ticks: number[]; a: number; b: number; log: boolean }
-function escala(vals: number[], o: { log?: boolean; zero?: boolean }): Esc | null {
+/** Rango y marcas de un eje. `zero`: el eje arranca (o termina) en 0 sin margen de ese lado. `log`: el margen es proporcional (en escala log). */
+export function escala(vals: number[], o: { log?: boolean; zero?: boolean }): Esc | null {
   if (!vals.length) return null;
   let lo = Math.min(...vals), hi = Math.max(...vals);
-  if (o.log && lo > 0) { if (lo === hi) { lo *= 0.8; hi *= 1.25; } return { ticks: logTicks(lo, hi), a: lo, b: hi, log: true }; }
+  if (o.log && lo > 0) {
+    if (lo === hi) { lo *= 0.8; hi *= 1.25; }
+    const f = Math.pow(hi / lo, MARGEN_EJE), a = lo / f, b = hi * f;
+    let ticks = logTicks(a, b);
+    if (ticks.length < 2) ticks = niceTicks(a, b, 4).filter((v) => v > 0);   // rango corto: sin 1-2-5 adentro, marcas lineales
+    return { ticks, a, b, log: true };
+  }
   if (o.zero && lo > 0) lo = 0;
   if (o.zero && hi < 0) hi = 0;
-  const pad = (hi - lo) * 0.04 || Math.abs(hi) * 0.05 || 1;
-  const ticks = niceTicks(o.zero && lo === 0 ? 0 : lo - pad, hi + pad * 0.75, 5);
-  return { ticks, a: ticks[0], b: ticks[ticks.length - 1], log: false };
+  const pad = (hi - lo) * MARGEN_EJE || Math.abs(hi) * 0.05 || 1;
+  const a = o.zero && lo === 0 && hi > 0 ? 0 : lo - pad;
+  const b = o.zero && hi === 0 && lo < 0 ? 0 : hi + pad;
+  return { ticks: niceTicks(a, b, 5), a, b, log: false };
 }
 
 const css = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "gray";
@@ -178,7 +195,32 @@ function Expandido({ expandir, ayuda, children }: { expandir: Expandir; ayuda: s
   );
 }
 
-function GraficoBase({ rows, series, opts, lleno }: { rows: Fila[]; series: SerieG[]; opts: OpcionesG; lleno?: boolean }) {
+/** Mismas opciones salvo `resaltar`: cambiar la serie resaltada no rehace el gráfico (se redibuja leyendo un ref). */
+function mismasOpciones(a: OpcionesG, b: OpcionesG): boolean {
+  if (a === b) return true;
+  const ka = Object.keys(a).filter((k) => k !== "resaltar"), kb = Object.keys(b).filter((k) => k !== "resaltar");
+  return ka.length === kb.length && ka.every((k) => (a as any)[k] === (b as any)[k]);
+}
+const ALFA_APAGADA = 0.25;
+const alfaDe = (key: string, res: string | null, keys: string[]) => (res && keys.includes(res) && key !== res ? ALFA_APAGADA : 1);
+/** Duración del dibujo de entrada (token `--d-dibujo` de globals.css, "900ms" o ".9s"). */
+function durDibujo(): number {
+  const t = getComputedStyle(document.documentElement).getPropertyValue("--d-dibujo").trim();
+  const n = parseFloat(t);
+  return !isFinite(n) ? 900 : /ms$/.test(t) ? n : n * 1000;
+}
+const suaveFin = (t: number) => 1 - Math.pow(1 - t, 3);   // arranca rápido y frena al final, como `--curva`
+
+function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; series: SerieG[]; opts: OpcionesG; lleno?: boolean }) {
+  const optsRef = useRef(optsIn);
+  if (!mismasOpciones(optsRef.current, optsIn)) optsRef.current = optsIn;
+  const opts = optsRef.current;   // estable mientras solo cambie `resaltar`
+  const resaltarRef = useRef<string | null>(optsIn.resaltar ?? null);
+  resaltarRef.current = optsIn.resaltar ?? null;
+  const aplicarResaltar = useRef<() => void>(() => {});
+  useEffect(() => { aplicarResaltar.current(); }, [optsIn.resaltar]);
+  // Dibujo de entrada (pedido 16): solo la primera vez que el gráfico aparece en pantalla; no al cambiar datos, período ni zoom.
+  const yaDibujado = useRef(false);
   const cont = useRef<HTMLDivElement>(null);
   const tema = useTema();
   const estrecho = useMedia(MQ_ESTRECHO);
@@ -227,6 +269,8 @@ function GraficoBase({ rows, series, opts, lleno }: { rows: Fila[]; series: Seri
     const raw: Fila[] = [];
     const uSeries: uPlot.Series[] = [{}];
     const idxSerie: Record<string, number> = {};
+    const keys = series.map((s) => s.key);
+    const curva = opts.suave ? uPlot.paths.spline?.() : undefined;
     series.forEach((se) => {
       const ax = se.axis || 0;
       const vals = rows.map((r) => (okv(r[se.key], ax) ? (r[se.key] as number) : null));
@@ -254,7 +298,9 @@ function GraficoBase({ rows, series, opts, lleno }: { rows: Fila[]; series: Seri
       data.push(plot);
       raw.push({});
       uSeries.push({
-        label: se.name, scale: ax ? "y2" : "y", stroke: col, width: se.puntos ? 0 : 2, spanGaps: false, dash: se.dash ? [5, 4] : undefined,
+        label: se.name, scale: ax ? "y2" : "y", stroke: col, spanGaps: false, dash: se.dash ? [5, 4] : undefined,
+        width: se.puntos ? 0 : 2 + (resaltarRef.current === se.key ? 1 : 0), alpha: alfaDe(se.key, resaltarRef.current, keys),
+        ...(curva && !se.puntos ? { paths: curva } : {}),
         points: {
           show: se.puntos ? true : (uu: uPlot) => (pocos || ralo) && holgado(uu), size: se.puntos ?? 5, fill: col, stroke: col,
           // uPlot dibuja los puntos que devuelve `filter` aunque `show` sea falso: si no corresponde mostrarlos, se devuelve null
@@ -284,6 +330,9 @@ function GraficoBase({ rows, series, opts, lleno }: { rows: Fila[]; series: Seri
       const r = ejeX(mn, mx, anchoPlot(uu), estrecho); xFmt = r.fmt; return r.splits;
     };
     let hoverRef: Ref | null = null, tol = TOL_REF_MOUSE, destruido = false;
+    // Dibujo de entrada: sin movimiento reducido, sin IntersectionObserver, en la vista ampliada o si ya se dibujó una vez, todo a la vista.
+    const animar = !yaDibujado.current && !lleno && typeof IntersectionObserver !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let revelado = animar ? 0 : 1, recortado = false, raf = 0, io: IntersectionObserver | null = null;
     let lineas: { rf: Ref; v: number; tramo: string; y: number; yd: number }[] = [];
     const tip = document.createElement("div");
     tip.className = "tip"; tip.style.display = "none";
@@ -311,6 +360,14 @@ function GraficoBase({ rows, series, opts, lleno }: { rows: Fila[]; series: Seri
           splits: () => (tk[1] ? tk[1].ticks : []), values: (_u: uPlot, sp: number[]) => sp.map((v) => (opts.fmtAxis2 || opts.fmtAxis)(v)) } as uPlot.Axis] : []),
       ],
       hooks: {
+        // Dibujo de entrada: después de los ejes y la grilla se recorta el lienzo hasta `revelado` (de izquierda a derecha); el recorte
+        // abarca las series, sus puntos y lo que agrega el hook `draw`, y se quita al final de ese hook.
+        drawAxes: [(uu) => {
+          if (revelado >= 1) return;
+          const ctx = uu.ctx, L = uu.bbox.left;
+          ctx.save(); recortado = true;
+          ctx.beginPath(); ctx.rect(0, 0, L + revelado * (ctx.canvas.width - L), ctx.canvas.height); ctx.clip();
+        }],
         drawClear: [(uu) => {
           const fr = opts.franjas;
           if (!fr || !fr.length) return;
@@ -388,8 +445,10 @@ function GraficoBase({ rows, series, opts, lleno }: { rows: Fila[]; series: Seri
             for (let i = rows.length - 1; i >= 0; i--) if (okv(rows[i][se.key], ax)) {
               const cx = xOf(i), cy = yOf(rows[i][se.key], ax);
               if (cx < L - 1 || cx > L + W + 1) break; // el último dato quedó fuera de la ventana acercada
+              ctx.globalAlpha = alfaDe(se.key, resaltarRef.current, keys);
               ctx.beginPath(); ctx.arc(cx, cy, 4 * d, 0, 2 * Math.PI); ctx.fillStyle = colorDe(se.color); ctx.fill();
               ctx.lineWidth = 2 * d; ctx.strokeStyle = surf; ctx.stroke();
+              ctx.globalAlpha = 1;
               break;
             }
           });
@@ -445,8 +504,10 @@ function GraficoBase({ rows, series, opts, lleno }: { rows: Fila[]; series: Seri
                 while (t.length > 1 && ctx.measureText(t.replace(/…$/, "") + "…").width > libre) t = t.replace(/…$/, "").slice(0, -1) + "…";
                 if (!t.endsWith("…")) t += "…";
               }
+              ctx.globalAlpha = alfaDe(l.se.key, resaltarRef.current, keys);
               ctx.fillText(t, x, l.y + 4 * d);
             });
+            ctx.globalAlpha = 1;
           }
           // Etiqueta de la referencia resaltada (cursor cerca de la línea o toque en el celular)
           const selL = lineas.find((l) => l.rf === hoverRef);
@@ -460,6 +521,7 @@ function GraficoBase({ rows, series, opts, lleno }: { rows: Fila[]; series: Seri
             halo(t, x, arriba ? selL.yd - 7 * d : selL.yd + 16 * d, css("--text-primary"), "center", 11, true);
           }
           ctx.restore();
+          if (recortado) { ctx.restore(); recortado = false; }
         }],
         setCursor: [(uu) => {
           // ¿el cursor está sobre una línea de referencia? Gana la más cercana dentro de la tolerancia; ahí no hay etiqueta de la serie
@@ -493,6 +555,32 @@ function GraficoBase({ rows, series, opts, lleno }: { rows: Fila[]; series: Seri
     }, data as uPlot.AlignedData, el);
     u.over.appendChild(tip);
     u.over.style.cursor = "crosshair";
+    aplicarResaltar.current = () => {
+      const res = resaltarRef.current;
+      series.forEach((se) => {
+        const s = u.series[idxSerie[se.key]];
+        if (!s) return;
+        s.alpha = alfaDe(se.key, res, keys);
+        if (!se.puntos) s.width = 2 + (res === se.key ? 1 : 0);
+      });
+      u.redraw(false, false);
+    };
+    if (animar) {
+      io = new IntersectionObserver((es) => {
+        if (!es.some((x) => x.isIntersecting) || yaDibujado.current) return;
+        io?.disconnect(); io = null;
+        yaDibujado.current = true;
+        const dur = durDibujo(), t0 = performance.now();
+        const paso = (t: number) => {
+          if (destruido) return;
+          revelado = Math.min(1, suaveFin(Math.max(0, t - t0) / dur));
+          u.redraw(false, false);
+          if (revelado < 1) raf = requestAnimationFrame(paso);
+        };
+        raf = requestAnimationFrame(paso);
+      }, { threshold: 0.25 });
+      io.observe(el);
+    }
     // Zoom propio (mouse, lápiz y táctil): arrastre horizontal selecciona; el vertical sigue siendo scroll (touch-action: pan-y)
     const over = u.over, selEl = document.createElement("div");
     selEl.className = "sel-zoom"; over.appendChild(selEl);
@@ -557,7 +645,11 @@ function GraficoBase({ rows, series, opts, lleno }: { rows: Fila[]; series: Seri
       if (Math.abs(w - u.width) > 1 || Math.abs(h - u.height) > 1) u.setSize({ width: w, height: h });
     });
     ro.observe(el);
-    return () => { destruido = true; document.removeEventListener("pointerdown", fuera); ro.disconnect(); u.destroy(); el.innerHTML = ""; };
+    return () => {
+      destruido = true; cancelAnimationFrame(raf); io?.disconnect();
+      aplicarResaltar.current = () => {};
+      document.removeEventListener("pointerdown", fuera); ro.disconnect(); u.destroy(); el.innerHTML = "";
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rows, series, opts, xs, tema, hay, estrecho, lleno, rev, kColPres]);
 

@@ -12,7 +12,7 @@ import { BotonCompartir } from "../PanelCompartir";
 import { IconoCompartir } from "../Iconos";
 import { ContextoMandato } from "./ContextoMandato";
 import { INFO_CORTA } from "@/lib/info";
-import { CeldaVar, CeldasStats, COLS, Cabecera, LineaInicio, siguienteOrden, useBase, valorCol, type Orden } from "./comunes";
+import { CeldaVar, CeldasStats, COLS, Cabecera, LineaInicio, siguienteOrden, useBase, valorCol, type Orden, HojaListo } from "./comunes";
 import { Capitulo } from "../sistema/Capitulo";
 import { BarraVista } from "../sistema/BarraVista";
 import { Hoja } from "../sistema/Hoja";
@@ -22,7 +22,7 @@ import { GrillaPresidentes } from "../sistema/GrillaPresidentes";
 import { grillaPresidentes, tablaPresidentes } from "@/lib/presidentes";
 import { fmtMes } from "@/lib/formato";
 import { baseIdx, crearPres, type BaseCfg, nivelComparable, ordenar, statsMandato, type Pres } from "@/lib/estadisticas";
-import { velasDe } from "@/lib/ficha";
+import { bajadaTablaMandatos, velasDe } from "@/lib/ficha";
 import { grupoDe, ordenarGrupos, textoBusqueda } from "@/lib/catalogo";
 import { monedaEnSerie } from "@/lib/monedas";
 import { norm } from "@/lib/formato";
@@ -81,9 +81,9 @@ export function Presidentes() {
       aria-label={`Compartir como imagen: una variable, todos los presidentes, en ${vista === "velas" ? "velas" : "tabla"}`}
       crearVista={() => (vista === "velas"
         ? { tipo: "velas", expr: eB, presIds: selPres.map((x) => x.id), base: b }
-        : { tipo: "barras", expr: eB, presIds: T.filas.map((f) => f.id), base: b, ...(T.tasa ? { metrica: "prom" as const } : {}) })}><IconoCompartir />Compartir</BotonCompartir>
+        : { tipo: "barras", expr: eB, presIds: T.filas.map((f) => f.id), base: b, ...(T.tasa ? { metrica: "var" as const } : {}) })}><IconoCompartir />Compartir</BotonCompartir>
   );
-  const bajadaB = T.tasa ? "Inicio y cierre de cada mandato y el promedio de todos sus meses." : "Del inicio al cierre de cada mandato.";
+  const bajadaB = bajadaTablaMandatos(T.tasa);
   const notaB = (dir ? "Verde = mejoró y rojo = empeoró; el signo también está escrito." : "Sin verde ni rojo: subir o bajar no es ni bueno ni malo en sí mismo.")
     + (niv ? "" : " En montos corrientes los niveles de épocas distintas no se pueden comparar (hay inflación de por medio): solo vale la variación.")
     + ` Unidad: ${c.unidad}.`;
@@ -164,7 +164,7 @@ export function Presidentes() {
         {compartirB}</>}>
         <FilaVariable e={eB} onChange={(e) => e && set({ pv: encExpr(e) })} />
         <BarraVista items={resumenB} onAbrir={() => setHoja(true)} />
-        <Hoja titulo="Presidentes" abierta={hoja} onCerrar={() => setHoja(false)}>
+        <HojaListo titulo="Presidentes" abierta={hoja} onCerrar={() => setHoja(false)}>
           {(cerrar) => (
             <>
               <div className="pres-hoja-sec">
@@ -177,10 +177,9 @@ export function Presidentes() {
               <div className="pres-hoja-sec">
                 <LineaInicio info={info} F={F} />
               </div>
-              <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
             </>
           )}
-        </Hoja>
+        </HojaListo>
         <div className="pres-cuerpo">
         {vista === "tabla" ? (
           T.filas.length ? (

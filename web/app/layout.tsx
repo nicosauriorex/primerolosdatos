@@ -1,6 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
 import "./globals.css";
+import "./estilos/portada.css";
+import "./estilos/variables.css";
+import "./estilos/historico.css";
+import "./estilos/ficha.css";
+import "./estilos/grafico.css";
+import "./estilos/bcra.css";
 import { DatosProvider, Errores } from "@/components/DatosProvider";
 import { Barra, CabeceraPagina, NavegacionGlobal, PieSitio } from "@/components/Nav";
 import { ConfigProvider } from "@/components/ConfigProvider";

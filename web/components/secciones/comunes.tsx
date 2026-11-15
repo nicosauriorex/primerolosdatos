@@ -1,7 +1,8 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useConfig } from "../ConfigProvider";
 import { Modal } from "../ui";
+import { Hoja, type CerrarHoja } from "../sistema/Hoja";
 import { fmtMes, ok } from "@/lib/formato";
 import type { Calculo, Motor } from "@/lib/motor";
 import { AYUDA_T, PRES_DEF, baseIdx, baseTxt, crearPres, oracionInicio, varNum, type Pres, type StatsM } from "@/lib/estadisticas";
@@ -161,3 +162,27 @@ export function CeldasStats({ m, c, st, cols, comp }: { m: Motor; c: Calculo; st
 }
 export const valorCol = (c: Calculo, st: StatsM, k: string | null): number | null | undefined =>
   !st.n || !k ? null : k === "var" ? varNum(c, st) : (st as unknown as Record<string, number | undefined>)[k];
+
+
+/** Hoja de ajustes con "Listo" en el pie (R3): el cuerpo es el de siempre, `(cerrar) => …`; el botón cierra por el mismo camino que la cruz (botón Atrás incluido). */
+export function HojaListo({ titulo, abierta, onCerrar, children, pieExtra }: {
+  titulo: string; abierta: boolean; onCerrar: () => void; children: (cerrar: CerrarHoja) => ReactNode; pieExtra?: ReactNode;
+}) {
+  const cerrarHoja = useRef<CerrarHoja | null>(null);
+  return (
+    <Hoja titulo={titulo} abierta={abierta} onCerrar={onCerrar}
+      pie={<>{pieExtra}<button type="button" className="btn primario" onClick={() => (cerrarHoja.current ? cerrarHoja.current() : onCerrar())}>Listo</button></>}>
+      {(cerrar) => { cerrarHoja.current = cerrar; return children(cerrar); }}
+    </Hoja>
+  );
+}
+
+/** Una fila de ajustes: rótulo arriba (celular) o a la izquierda en una columna de ancho fijo (desde 600 px), control al lado y aclaración chica debajo. */
+export function FilaAjuste({ rotulo, ayuda, children }: { rotulo: string; ayuda?: ReactNode; children: ReactNode }) {
+  return (
+    <div className="controls hi-fila">
+      <span className="lbl hi-rotulo">{rotulo}</span>
+      <div className="hi-ctl">{children}{ayuda ? <p className="hi-ayuda">{ayuda}</p> : null}</div>
+    </div>
+  );
+}

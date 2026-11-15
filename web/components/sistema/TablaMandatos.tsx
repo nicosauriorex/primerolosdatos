@@ -39,8 +39,10 @@ export function AjustesTabla({ vista, onVista, columnas, extras, elegidas, onEle
       <button type="button" className="vistabar-ajustes tmand-ajustes-btn" aria-haspopup="dialog" aria-label={`Ajustes de la tabla${resumen ? `: ${resumen}` : ""}`} onClick={() => setAbierta(true)}>
         <IconoAjustes /><span>Ajustes{resumen ? ` · ${resumen}` : ""}</span>
       </button>
-      <Hoja titulo="Ajustes de la tabla" abierta={abierta} onCerrar={() => setAbierta(false)}>
-        {(cerrar) => (
+      {/* "Listo" va en el pie de la hoja (R3). Cerrar con setAbierta(false) también devuelve la entrada del historial (lo hace `useAtras` al desmontar) */}
+      <Hoja titulo="Ajustes de la tabla" abierta={abierta} onCerrar={() => setAbierta(false)}
+        pie={<button type="button" className="btn primario hoja-listo" onClick={() => setAbierta(false)}>Listo</button>}>
+        {() => (
           <div className="tmand-ajustes">
             {onVista && vista && (
               <div className="tmand-ajuste">
@@ -54,7 +56,6 @@ export function AjustesTabla({ vista, onVista, columnas, extras, elegidas, onEle
                 <FilaChips opciones={opcionesExtras} valor={set} onElegir={tocar} etiqueta="Más columnas" />
               </div>
             )}
-            <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
           </div>
         )}
       </Hoja>
@@ -98,7 +99,7 @@ export function TablaMandatos({ filas, columnas, visibles, resaltar, etiqueta, e
                 <span className="tmand-periodo">{f.periodo}</span>
               </span>
               <span className="tmand-prin" style={{ color: tonoVar(p?.tono) }}>
-                {p ? p.texto : "—"}
+                {p && p.valor != null ? p.texto : "—"}
                 {principal && <span className="tmand-prin-t">{principal.titulo}</span>}
               </span>
               {otras.length > 0 && (
@@ -146,11 +147,18 @@ export function TablaMandatos({ filas, columnas, visibles, resaltar, etiqueta, e
                 const ce = f.celdas[c.clave];
                 if (c.clave !== principal?.clave) return <td key={c.clave} className="tmand-celda">{ce?.texto ?? "—"}</td>;
                 const v = ce?.valor;
-                const frac = v == null || !tope ? 0 : Math.min(1, Math.abs(v) / tope) * 50;
+                // Sin dato: solo la raya, sin barra. Con dato: la barra (a partir del centro del riel) y siempre su cifra al lado.
+                if (v == null) return <td key={c.clave} className="tmand-celda tmand-celda-prin"><span className="tmand2-vacio">—<span className="sr-solo"> sin dato</span></span></td>;
+                const frac = tope ? Math.min(1, Math.abs(v) / tope) : 0;
+                const color = ce?.tono ? tonoVar(ce.tono) : "var(--acento)";
                 return (
                   <td key={c.clave} className="tmand-celda tmand-celda-prin">
-                    {v != null && <span className={`tmand-barra${v < 0 ? " tmand-neg" : ""}`} style={{ ["--f" as string]: frac / 50, background: tonoVar(ce?.tono ?? null) === "var(--text-primary)" ? "var(--acento)" : tonoVar(ce?.tono) }} aria-hidden="true" />}
-                    <span className="tmand-num" style={{ color: tonoVar(ce?.tono) }}>{ce?.texto ?? "—"}</span>
+                    <div className="tmand2-caja">
+                      <span className="tmand2-riel" aria-hidden="true">
+                        <span className={`tmand2-barra${v < 0 ? " tmand2-neg" : ""}`} style={{ width: `${frac * 50}%`, background: color }} />
+                      </span>
+                      <span className="tmand-num tmand2-num" style={{ color: tonoVar(ce?.tono) }}>{ce?.texto ?? "—"}</span>
+                    </div>
                   </td>
                 );
               })}

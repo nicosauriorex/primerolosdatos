@@ -30,9 +30,24 @@ export const FX_KEYS = ["oficial", "blue", "mep", "ccl"] as const;
 export const BASE_IDS = ["ipc_empalme", "cpi_usa", "fx_oficial", "fx_blue", "fx_mep", "fx_ccl", "poblacion", "pib_nom_anual"];
 
 /** Variaciones: mensual, interanual (12 meses) y promedio geométrico mensual de 12 meses; con sufijo `_r` son reales (descontada la inflación). */
-const VAR_BASE: Opcion[] = [["vm", "Mensual"], ["via", "Interanual (últimos 12 meses)"], ["vp12", "Mensual promedio de 12 meses"]];
+const VAR_BASE: Opcion[] = [["vm", "Var. mensual"], ["via", "Var. interanual"], ["vp12", "Var. mensual promedio 12 meses"]];
 const RE_VAR = /^(vm|via|vp12)(_r)?$/;
 export const ES_VAR = (m?: string) => !!m && RE_VAR.test(m);
+const ETQ_VAR: Record<string, string> = { vm: "Var. mensual", via: "Var. interanual", vp12: "Var. mensual promedio 12 meses" };
+/** Promedio móvil del valor: sufijo `_mm3` o `_mm12` sobre cualquier código de medida de valor (`real_mm12`, `corr_mm3`, `usd_blue_mm12`). Los códigos sin sufijo no cambian. */
+const RE_MM = /_mm(3|12)$/;
+/** Código sin el sufijo de promedio móvil y la cantidad de meses (0 = sin suavizado). */
+export const partirMM = (m: string): [string, number] => { const r = RE_MM.exec(m); return r ? [m.slice(0, r.index), Number(r[1])] : [m, 0]; };
+export const sufijoMM = (m?: string) => { const r = m ? RE_MM.exec(m) : null; return r ? r[0] : ""; };
+/** Media de los últimos `n` valores ya convertidos; si falta alguno, null (sin huecos tapados). */
+export function mediaMovil(arr: Vals, n: number): Vals {
+  return arr.map((_, i) => {
+    if (i < n - 1) return null;
+    let t = 0;
+    for (let k = i - n + 1; k <= i; k++) { const x = arr[k]; if (!ok(x)) return null; t += x; }
+    return t / n;
+  });
+}
 /** Los links viejos usaban `vac` (acumulada en el año): hoy se leen como interanual. */
 export const normMed = (m?: string) => (m === "vac" ? "via" : m);
 /** Series de IPC general: contra la inflación general serían una línea plana, no se les ofrece "Real" ni índice real. */
@@ -117,13 +132,16 @@ export function crearMotor(F: string[]) {
   const esIndice = (s: SerieMeta) => s.tipo === "idx" || /índice/i.test(s.u || "");
   const MONETARIA = (s: SerieMeta) => ["ars", "idx", "usd", "fx"].includes(s.tipo);
 
+  /** El promedio móvil solo vale para un valor (pesos, dólares, tipo de cambio), no para variaciones, índices tal cual ni tasas. */
+  const permiteMM = (s: SerieMeta, medBase: string) => ["ars", "fx", "usd"].includes(s.tipo) && !!medBase && !ES_VAR(medBase) && medBase !== "asis" && medBase !== "tal_cual";
+
   const esPct = (s: SerieMeta) => /%/.test(s.u || "") && !/\$/.test(s.u || "");
   const grupoVar = (real: boolean): GrupoMed => ({
     k: "var", nombre: "Variaciones",
     dims: [{ opciones: VAR_BASE }, ...(real ? [{ opciones: [["nom", "Nominal"], ["real", "Real (descontada la inflación)"]] as Opcion[] }] : [])],
     unir: (v) => v[0] + (v[1] === "real" ? "_r" : ""),
     partir: (c) => { const r = RE_VAR.exec(c); return !r || (!real && r[2]) ? null : real ? [r[1], r[2] ? "real" : "nom"] : [r[1]]; },
-    etq: (v) => `Variación ${({ vm: "mensual", via: "interanual", vp12: "mensual promedio 12 meses" } as Record<string, string>)[v[0]]}${v[1] === "real" ? " real" : ""}`,
+    etq: (v) => `${ETQ_VAR[v[0]]}${v[1] === "real" ? " real" : ""}`,
   });
   /** Índices de precios por rubro: Mensual, Interanual, Promedio de 12 meses e Índice, y un único interruptor Nominal / Real (contra la inflación general) que vale para las cuatro.
    *  Los códigos no cambian: `vm`, `via`, `vp12` y con sufijo `_r` en real; el índice nominal es `corr` y el real (el precio relativo de antes) es `real`. */
@@ -138,7 +156,7 @@ export function crearMotor(F: string[]) {
       return r ? [r[1], r[2] ? "real" : "nom"] : null;
     },
     etq: (v) => v[0] === "ind" ? (v[1] === "real" ? "Índice real (contra la inflación general)" : "Índice tal cual (base 100)")
-      : `Variación ${({ vm: "mensual", via: "interanual", vp12: "mensual promedio 12 meses" } as Record<string, string>)[v[0]]}${v[1] === "real" ? " real" : ""}`,
+      : `${ETQ_VAR[v[0]]}${v[1] === "real" ? " real" : ""}`,
   });
   const simple = (k: string, nombre: string, opciones: Opcion[], tenue?: string): GrupoMed => ({
     k, nombre, dims: [{ opciones, tenue }],
@@ -182,18 +200,21 @@ export function crearMotor(F: string[]) {
   const cantMedidas = (g: GrupoMed[]) => g.reduce((n, x) => n + x.dims.reduce((m, d) => m * d.opciones.length, 1), 0);
   /** Grupo y valores de cada fila para una medida, o null si no corresponde a la serie. */
   function ubicarMedida(s: SerieMeta, med: string): { g: GrupoMed; v: string[] } | null {
-    for (const g of gruposMedida(s)) { const v = g.partir(med); if (v) return { g, v }; }
+    const mb = partirMM(med)[0];
+    for (const g of gruposMedida(s)) { const v = g.partir(mb); if (v) return { g, v }; }
     return null;
   }
   /** Nombre corto de la medida (texto del botón). */
   const etiquetaMedida = (s: SerieMeta, med: string): string => {
-    const u = ubicarMedida(s, med);
-    return u ? u.g.etq(u.v) : "";
+    const u = ubicarMedida(s, med), mm = partirMM(med)[1];
+    return u ? u.g.etq(u.v) + (mm ? ` · promedio móvil ${mm} meses` : "") : "";
   };
   /** Resumen corto de la medida para el renglón de la variable ("pesos de hoy", "en US$ blue", "variación interanual"). */
   const resumenMedida = (s: SerieMeta, med: string): string => {
     const u = ubicarMedida(s, med);
     if (!u) return "";
+    const mm = partirMM(med)[1];
+    if (mm) { const b = resumenMedida(s, partirMM(med)[0]); return `${b || s.u} · promedio móvil ${mm} meses`; }
     const { g, v } = u;
     if (g.k === "pesos") {
       const t = ({ real: "pesos de hoy", corr: "pesos corrientes", realbi: "pesos de hoy, neto de inflación de EE.UU.", arscorr: "pesos corrientes (al oficial)" } as Record<string, string>)[v[0]];
@@ -207,7 +228,7 @@ export function crearMotor(F: string[]) {
     // no "índice tal cual (base 100)": la base va en la unidad (índices generales y de rubros de precios)
     if ((g.k === "indice" && v[0] === "corr") || (g.k === "var" && v[0] === "ind" && v[1] !== "real")) return "índice";
     const t = g.etq(v);
-    return /^[A-ZÁÉÍÓÚ]{2,}/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1);
+    return g.k === "var" || /^[A-ZÁÉÍÓÚ]{2,}/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1);
   };
   /** Lista plana de todas las medidas válidas (código, nombre). */
   function medidasDe(s: SerieMeta): Opcion[] {
@@ -336,9 +357,12 @@ export function crearMotor(F: string[]) {
         : { v, nombre: `${A.n}: cuánto se compra con 1 ${B2.n}`, unidad: esIdx ? "índice (primer dato = 100)" : `${cant} por cada ${B2.n}`, dir: dirAB, corto: "" };
       r.corto = e.modo === "medido" ? `${A.n} / ${B2.n}` : `${A.n} por ${B2.n}`;
     } else {
-      const med = e.forzar || medidasDe(A).some((m) => m[0] === e.med) ? (e.med as string) : medDefault(A);
-      r = { v: transformar(A, A.vals, med), nombre: A.n, corto: A.n, unidad: unidadDe(A, med), dir: dirEfectiva(A, med, null), flujo: !!A.flujo };
-      if (A.mn && A.mx) { r.lo = transformar(A, A.mn, med); r.hi = transformar(A, A.mx, med); }
+      const [medB, mm0] = partirMM(e.med || "");
+      const med = e.forzar || medidasDe(A).some((m) => m[0] === medB) ? medB : medDefault(A);
+      const mm = mm0 && permiteMM(A, med) ? mm0 : 0;   // el suavizado solo vale sobre un valor
+      const suave = (x: Vals) => (mm ? mediaMovil(x, mm) : x);
+      r = { v: suave(transformar(A, A.vals, med)), nombre: mm ? `${A.n} (promedio móvil ${mm} meses)` : A.n, corto: A.n, unidad: unidadDe(A, med) + (mm ? `, promedio móvil ${mm} meses` : ""), dir: dirEfectiva(A, med, null), flujo: !!A.flujo };
+      if (A.mn && A.mx) { r.lo = suave(transformar(A, A.mn, med)); r.hi = suave(transformar(A, A.mx, med)); }
       if (esc === "pc") {
         const [fa, uu] = FACTOR_U(r.unidad);
         const POB = b.POB as Vals;
@@ -388,7 +412,7 @@ export function crearMotor(F: string[]) {
   };
 
   return {
-    F, N, SER, idxDe, agregar, calc, transformar, variacion, unidadDe, medidasDe, gruposMedida, cantMedidas, ubicarMedida, etiquetaMedida, resumenMedida, medDefault, esIndice, MONETARIA,
+    F, N, SER, idxDe, agregar, calc, transformar, variacion, unidadDe, medidasDe, gruposMedida, cantMedidas, ubicarMedida, permiteMM, etiquetaMedida, resumenMedida, medDefault, esIndice, MONETARIA,
     relPermitido, relDestino, escPermitidas, nominalPesos, fmtC, variacionTxt, difAbsTxt, variacionAbsTxt,
     refs: () => { base(); return { refAR, refUS, REF_AR, REF_US }; },
     base,
@@ -397,7 +421,7 @@ export function crearMotor(F: string[]) {
     medArs: (): Opcion[] => [["real", `Pesos reales (de ${base() && refAR})`], ["corr", "Pesos corrientes"],
       ...FX_KEYS.map((k): Opcion => [`usdr_${k}`, `Dólares reales al ${FX_NOM[k]} (de ${refUS})`]),
       ...FX_KEYS.map((k): Opcion => [`usd_${k}`, `Dólares corrientes al ${FX_NOM[k]}`]),
-      ["vm", "Variación mensual en pesos (%)"], ["via", "Variación interanual en pesos (%)"]],
+      ["vm", "Var. mensual en pesos (%)"], ["via", "Var. interanual en pesos (%)"]],
   };
 }
 export type Motor = ReturnType<typeof crearMotor>;

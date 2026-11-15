@@ -117,9 +117,32 @@ function actualInferior(ruta: string): string {
   return "otra";
 }
 
+/** Al abrir otra página, arriba de todo (R8 de la tanda 7): Next deja la ventana donde estaba si el comienzo de la página destino
+ *  "ya se ve" o mientras carga, y el título quedaba fuera de pantalla. Atrás/Adelante (popstate) y los links con #ancla no se tocan. */
+function useArribaAlCambiarDePagina(ruta: string) {
+  const previa = useRef(ruta);
+  // Solo cuenta el popstate que cambia de página (Atrás/Adelante entre páginas): al dispararse, `location` ya es la de destino.
+  // Cerrar una capa con Atrás también dispara popstate, pero en la misma ruta: no deja marca y el próximo link sube igual.
+  const porHistorial = useRef(false);
+  useEffect(() => {
+    const f = () => { if (window.location.pathname !== previa.current) porHistorial.current = true; };
+    window.addEventListener("popstate", f);
+    return () => window.removeEventListener("popstate", f);
+  }, []);
+  useEffect(() => {
+    if (previa.current === ruta) return;
+    previa.current = ruta;
+    const atras = porHistorial.current;
+    porHistorial.current = false;
+    if (atras) return;
+    if (!window.location.hash) window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [ruta]);
+}
+
 /** Navegación del celular (barra inferior, D-023) y buscador global. Va dentro de `DatosProvider`: el buscador usa los datos. */
 export function NavegacionGlobal() {
   const ruta = usePathname() || "/";
+  useArribaAlCambiarDePagina(ruta);
   const [buscar, setBuscar] = useState(false);
   const [mas, setMas] = useState(false);
   useEffect(() => {

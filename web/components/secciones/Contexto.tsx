@@ -15,7 +15,7 @@ import { Grafico, type Fila, type OpcionesG, type SerieG } from "../Grafico";
 import { useConfig } from "../ConfigProvider";
 import { baseDeConfig } from "@/lib/config";
 import { PALETA } from "../util";
-import { CeldaPres, Valor } from "./comunes";
+import { CeldaPres, FilaAjuste, HojaListo, Valor } from "./comunes";
 import { columnaComparable, periodoMandato } from "@/lib/tablas";
 import { nf0, nf1, ok, r1 } from "@/lib/formato";
 import { PRES_DEF, crearPres, franjasPres, nombreCorto, type Pres } from "@/lib/estadisticas";
@@ -272,27 +272,29 @@ function Comparar({ datos, p, set, resalta }: { datos: DatosContexto; p: URLSear
       acciones={<CompartirHoja href={hrefBloque(p, "comparar")} titulo="La Argentina y otros países" texto={resp ? `${resp} Fuente: ${datos.fuente}.` : undefined} />}>
       {resp && <p className="ctx-respuesta">{resp}</p>}
       <BarraVista items={chips} onAbrir={() => setHoja(true)} />
-      <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
+      <HojaListo titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
         {(cerrar) => (
           <div className="ctx-hoja">
-            <div className="controls">
-              <label>Dato</label>
+            <FilaAjuste rotulo="Dato">
               <Selector etiqueta="Dato" valor={def.id} opciones={COMPARAR.map((x) => [x.id, x.n] as [string, string])} onElegir={(v) => set({ cpd: v === "crec" ? null : v })} />
-              {esIdx && <>
-                <label>Ver como</label>
+            </FilaAjuste>
+            {esIdx && (
+              <FilaAjuste rotulo="Ver como">
                 <Seg valor={baseAnio == null ? "valor" : "base"} opciones={[["valor", "Valor"], ["base", "Base 100"]]} onElegir={(v) => set({ cpb: v === "valor" ? "valor" : null })} />
-                {baseAnio != null && <Selector etiqueta="Año base" valor={String(baseAnio)} opciones={datos.anios.filter((y) => y <= hasta).map((y) => [String(y), `desde ${y}`] as [string, string])} onElegir={(v) => set({ cpb: v === "2000" ? null : v })} />}
-              </>}
-            </div>
-            <div className="controls">
-              <label>Países</label>
+              </FilaAjuste>
+            )}
+            {esIdx && baseAnio != null && (
+              <FilaAjuste rotulo="Año base">
+                <Selector etiqueta="Año base" valor={String(baseAnio)} opciones={datos.anios.filter((y) => y <= hasta).map((y) => [String(y), `desde ${y}`] as [string, string])} onElegir={(v) => set({ cpb: v === "2000" ? null : v })} />
+              </FilaAjuste>
+            )}
+            <FilaAjuste rotulo="Países">
               <Seg valor={new Set(sel)} opciones={[...PAISES.filter((e) => validas.has(e)), VEC, ...grupos.filter((g) => g !== VEC)].map((e) => [e, nombreEnt(datos, e)] as [string, string])}
                 onElegir={(v) => set({ cpp: [...alternar(new Set(sel), v, true)].join(",") || "-" })} />
-            </div>
-            <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
+            </FilaAjuste>
           </div>
         )}
-      </Hoja>
+      </HojaListo>
       <div className="ctx-titulo-graf">
         <h3>{def.n}</h3>
         <InfoPunto etiqueta="Cómo se mide este dato">

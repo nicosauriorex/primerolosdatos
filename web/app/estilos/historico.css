@@ -1,0 +1,41 @@
+/* Tanda 7 (docs/specs/ajustes-tanda-7.md): estilos de la parte historico. Se carga después de globals.css. */
+
+/* ---- Cabecera de Histórico: "Cambiar dato" arriba a la derecha y "Cómo verlo" debajo de la cifra (reemplaza el botón .cambiar-dato junto a las variaciones) ---- */
+.hi-cab { position: relative; min-width: 0; }
+.hi-cambiar { position: absolute; top: 0; right: 0; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2); min-height: var(--toque); padding: 0; width: var(--toque); }
+.hi-cambiar svg { width: 1.15em; height: 1.15em; flex: none; }
+/* en el celular el botón es solo la lupa (el nombre accesible sigue en el texto oculto) y el título le deja lugar */
+.hi-cambiar-txt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.hi-cab .cabdato-titulo { padding-right: calc(var(--toque) + var(--e-2)); }
+@media (min-width: 480px) {
+  .hi-cambiar { width: auto; padding: 0 var(--e-4); }
+  .hi-cambiar-txt { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: nowrap; }
+  .hi-cab .cabdato-titulo { padding-right: 11rem; }
+}
+.hi-comoverlo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2) var(--e-3); min-width: 0; }
+.hi-comoverlo-rot { font-size: var(--t-sm); font-weight: 700; color: var(--text-secondary); }
+.hi-comoverlo .seg { max-width: 100%; min-width: 0; }
+
+/* ---- Hoja de ajustes: filas alineadas (R4). Rótulo arriba en el celular; a la izquierda en una columna fija entre 600 y 899 px
+   (desde 900 px la hoja es un panel de 400 px y vuelve a ir arriba). Reemplaza el `.controls` de flujo libre y `.ctx-hoja .controls label` ---- */
+.hoja .hi-fila { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--e-2); align-items: start; margin: 0 0 var(--e-4); min-width: 0; }
+.hoja .hi-rotulo { font-size: var(--t-sm); font-weight: 700; color: var(--text-secondary); min-width: 0; overflow-wrap: anywhere; }
+@media (min-width: 600px) and (max-width: 899px) {
+  .hoja .hi-fila { grid-template-columns: 9rem minmax(0, 1fr); column-gap: var(--e-4); }
+  .hoja .hi-rotulo { padding-top: calc((var(--toque) - 1.4em) / 2); }
+}
+.hi-ctl { display: flex; flex-direction: column; align-items: flex-start; gap: var(--e-2); min-width: 0; max-width: 100%; }
+.hi-ctl .seg, .hi-ctl .chips { max-width: 100%; min-width: 0; }
+.hi-ayuda { margin: 0; font-size: var(--t-sm); line-height: 1.4; color: var(--text-muted); max-width: 60ch; }
+.hi-pers { display: block; min-width: 0; }
+.hi-pers .vars-graf { min-width: 0; max-width: 100%; }
+.hi-agregar { margin: var(--e-3) 0 0; }
+.hi-agregar:first-child { margin-top: 0; }
+
+/* Mismo espacio entre grupos en todas las hojas de ajustes (R4: --e-5 entre grupos, --e-4 entre filas); reemplaza los gap de globals.css */
+.gas-hoja, .prov-hoja, .uni-hoja, .elec-hoja, .rk-hoja { gap: var(--e-5); }
+.ctx-hoja { gap: 0; }
+
+/* ---- Más comparaciones: columna "Dif." (diferencia absoluta) ---- */
+.hi-mas th:nth-child(4), .hi-mas td:nth-child(4) { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hi-mas td:nth-child(4) { font-weight: 700; }

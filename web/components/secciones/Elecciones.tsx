@@ -7,7 +7,7 @@ import { BarraVista } from "../sistema/BarraVista";
 import { Hoja } from "../sistema/Hoja";
 import { InfoPunto } from "../sistema/InfoPunto";
 import { BotonInfo } from "../Variables";
-import { CeldaVar, LineaInicio, Valor, useBase } from "./comunes";
+import { CeldaVar, LineaInicio, Valor, useBase, HojaListo } from "./comunes";
 import { PALETA } from "../util";
 import { fmtMes, fmtNum, nf0, nf1, nf2, norm, ok } from "@/lib/formato";
 import { CORTES_R, crearElec, crearPres, estimarVoto, METRICA_E, pearson, ultimoGlobalDe, valorElec, valorHoy } from "@/lib/estadisticas";
@@ -170,7 +170,7 @@ export function Elecciones() {
           </InfoPunto>
         </p>
         <BarraVista items={chips} onAbrir={() => setHoja(true)} />
-        <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
+        <HojaListo titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
           {(cerrar) => (
             <div className="elec-hoja">
               <Opciones titulo="Elecciones" forma="dos" valor={tipos} onElegir={(v) => set({ et: [...alternar(tipos, v)].join(",") })}
@@ -186,10 +186,9 @@ export function Elecciones() {
               </div>
               <Opciones titulo="Detalle regional de precios" forma="lista" valor={conIpc} onElegir={(v) => set({ eipc: v === "no" ? null : v })}
                 opciones={[["no", "Sin detalle regional de precios"], ["si", "Con todo"]]} />
-              <button type="button" className="btn primario elec-listo" onClick={() => cerrar()}>Listo</button>
             </div>
           )}
-        </Hoja>
+        </HojaListo>
         {voto && (
           <>
             <details className="elec-mas">

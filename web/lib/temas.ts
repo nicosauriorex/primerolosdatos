@@ -27,6 +27,11 @@ export const TEMAS: Tema[] = [
     principales: [
       { id: "ipc_empalme", nombre: "Inflación mensual", corto: "la inflación", med: "vm" },
       { id: "ipc_empalme", nombre: "Inflación interanual", corto: "la inflación interanual", med: "via" },
+      // Componentes de la inflación (nacional), variación mensual (tanda 7, pedido 17)
+      { id: "ipc_nacional_n_estaci", nombre: "Inflación núcleo", corto: "la inflación núcleo", med: "vm" },
+      { id: "ipc_nacional_r_estaci", nombre: "Inflación de precios regulados", corto: "la inflación de precios regulados", med: "vm" },
+      { id: "ipc_nacional_b_bienes", nombre: "Inflación de bienes", corto: "la inflación de bienes", med: "vm" },
+      { id: "ipc_nacional_s_bienes", nombre: "Inflación de servicios", corto: "la inflación de servicios", med: "vm" },
     ], grupos: ["Precios contra la inflación"], q: "inflación", desc: "Inflación mensual e interanual, índices por rubro y región, y precio de productos concretos en Argentina." },
   { slug: "salarios", nombre: "Salarios y jubilaciones", cats: ["Salarios"], corto: INFO_CORTA["Salarios"].texto, largo: largoDe("Salarios"),
     principales: [

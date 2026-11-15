@@ -382,6 +382,39 @@ export function puntoTxt(clave: ClaveDiario, dia: number, v: number): { fecha: s
   const t = d.nf.format(Math.abs(v));
   return { fecha: fmtDia(dia, true), valor: `${v < 0 && /[1-9]/.test(t) ? "−" : ""}${d.pref}${t}${d.suf}` };   // sin "−0"
 }
+/** Resumen de ruedas de las compras del Banco Central en un período (sigue a `per`): con los valores ya redondeados como se muestran (millones de US$). */
+export interface ResumenRuedas {
+  desde: number; hasta: number;                 // primer y último día del tramo
+  ruedas: number;                               // ruedas con dato en el período
+  compra: { n: number; total: number };         // ruedas compradoras y US$ comprados
+  sinOperar: number;                            // ruedas sin compras ni ventas
+  venta: { n: number; total: number };          // ruedas vendedoras y US$ vendidos (total positivo)
+  neto: number;                                 // compras − ventas
+  promedio: number | null;                      // neto / ruedas, redondeado a entero; null sin ruedas
+}
+export function resumenRuedas(s: SerieDiaria, per: PeriodoDiario): ResumenRuedas {
+  const t = recorte("compras", s, per), def = DEFS.compras;
+  let nC = 0, tC = 0, nV = 0, tV = 0, n0 = 0;
+  for (const x of t.v) {
+    const r = Math.round(x * 10 ** def.dec) / 10 ** def.dec || 0;
+    if (r > 0) { nC++; tC += r; } else if (r < 0) { nV++; tV += -r; } else n0++;
+  }
+  const ruedas = t.v.length, neto = tC - tV;
+  return { desde: t.dias[0], hasta: t.dias[ruedas - 1], ruedas, compra: { n: nC, total: tC }, sinOperar: n0, venta: { n: nV, total: tV }, neto, promedio: ruedas ? Math.round(neto / ruedas) : null };
+}
+/** Texto con signo y sin unidad ("+1.234", "−56", "0"). */
+export const netoTxt = (x: number): string => (x === 0 ? "0" : `${signo(x)}${nf0.format(Math.abs(x))}`);
+
+/** Una línea para la fila de compras: rueda anterior, acumulados y racha, sin repetir lo que ya está en la cifra principal. */
+export function lineaCompras(v: ResumenVariable): string {
+  const partes: string[] = [];
+  if (v.destacado) partes.push(v.destacado.charAt(0).toUpperCase() + v.destacado.slice(1));     // "La mayor compra desde el 22-oct-26"
+  partes.push(...v.filas.map((f) => `${f.rotulo}: ${f.valor}`));
+  const racha = v.frases.find((x) => /ruedas seguidas/.test(x));
+  if (racha) partes.push(racha.toLowerCase());
+  return partes.join(" · ");
+}
+
 /** El valor más alto y el más bajo de un tramo (con su fecha), ya con su unidad, para el pie del gráfico grande. */
 export function extremosTramo(clave: ClaveDiario, t: Tramo): { alto: { fecha: string; valor: string }; bajo: { fecha: string; valor: string } } {
   let imax = 0, imin = 0;

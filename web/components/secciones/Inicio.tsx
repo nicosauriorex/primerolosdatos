@@ -18,11 +18,11 @@ import type { Comparacion, Comparaciones } from "@/lib/plantillas";
 import { ORGANISMOS } from "@/lib/fuentes";
 import type { Expr, Motor, SerieMeta } from "@/lib/motor";
 import { comparaciones, crearPlantillas, distanciaRecord, evaluar, interanualTxt, hrefPlantilla, plantillaDeExpr, plantillaSuelta, type Evaluada, type Plantilla } from "@/lib/plantillas";
-import { TEMAS, hrefHistorico, idsDe, principalesDe, type Tema } from "@/lib/temas";
+import { TEMAS, hrefDato, idsDe, principalesDe, type Tema } from "@/lib/temas";
 import { MAS_BUSCADOS } from "@/lib/busqueda";
 import { GRUPOS_SECCIONES, seccionesDe } from "@/lib/secciones";
 import { useParams } from "@/lib/url";
-import { PLACAS } from "@/lib/datos-fijos";
+import { PLACAS, datoFijoDe, hrefFijo } from "@/lib/datos-fijos";
 
 interface Extra { texto: string; cls: Evaluada["cls"] }
 interface DefCifra {
@@ -50,6 +50,20 @@ const CIFRAS: DefCifra[] = [
   { titulo: "Dólar blue, en pesos de hoy", e: PLACAS.dolarBlue, fuente: "Ámbito y Bluelytics" },
 ];
 
+const nf2 = new Intl.NumberFormat("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+/** Cifras de 7 o más dígitos se abrevian a millones con dos decimales ("1.935.678" → "1,94 M"); el resto queda igual.
+ *  Devuelve el texto corto y el completo (para lectores de pantalla). */
+export function abreviarCifra(val: string): { corto: string; completo: string } {
+  const corto = val.replace(/\d{1,3}(?:\.\d{3}){2,}(?!\d)|\d{7,}/g, (t) => { const n = Number(t.replace(/\./g, "")); return isFinite(n) ? `${nf2.format(n / 1e6)} M` : t; });
+  return { corto, completo: val };
+}
+/** Link de una placa: la ficha del dato (`/dato/<slug>/` si es un dato fijo, si no `/dato/?v=…`). */
+function hrefPlaca(p: Plantilla, def: Expr, vista: Parameters<typeof hrefPlantilla>[1]): string {
+  const e = p.e ?? def;
+  const fijo = datoFijoDe(e);
+  return fijo ? hrefFijo(fijo.slug) : p.e ? hrefDato(e) : hrefPlantilla(p, vista);
+}
+
 /** Verdadero cuando el elemento entra (o está por entrar) en pantalla. */
 function useVisible<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T>(null);
@@ -74,7 +88,7 @@ function FilaComp({ c }: { c: Comparacion }) {
     <li className="placa-comp" aria-label={`${c.rotulo}, ${c.fecha}: ${c.valor}. Cambio hasta hoy: ${c.variacion}`}>
       <span className="placa-comp-rot">{c.rotulo} ({c.fecha})</span>
       <b>{c.valor}</b>
-      <Delta en="placa" texto={c.variacion} tono={c.cls} dir={dir} />
+      <Delta en="placa" animar texto={c.variacion} tono={c.cls} dir={dir} />
     </li>
   );
 }
@@ -109,6 +123,8 @@ function Carrusel({ plantillas }: { plantillas: Plantilla[] }) {
   const [reinicio, setReinicio] = useState(0);        // cambia cada vez que hay que volver a contar el intervalo desde cero
   const destino = useRef<{ k: number; hasta: number } | null>(null);   // placa a la que se está yendo por código
   const n = items.length;
+  // Las cuatro cifras con el mismo tamaño: el largo mayor (ya abreviadas) fija el tamaño de todas
+  const largoMax = Math.max(4, ...items.map((it) => (it.ev ? abreviarCifra(it.ev.val).corto.length : 0)));
 
   // R6: el contador solo corre con la placa en pantalla (mitad o más) y la página quieta; al aparecer o al terminar de deslizar la página vuelve a cero.
   useEffect(() => {
@@ -192,9 +208,12 @@ function Carrusel({ plantillas }: { plantillas: Plantilla[] }) {
         {items.map(({ d, p, ev, extra, comp }, k) => (
           <li key={d.titulo} className="placa" aria-current={k === activa ? "true" : undefined} aria-roledescription="diapositiva" aria-label={`${k + 1} de ${n}`}>
             {ev ? (
-              <Link prefetch={false} href={p.id.startsWith("c-") && p.e ? hrefHistorico(p.e) : hrefPlantilla(p, ev.vista)} className="placa-link" aria-label={`Abrir en Histórico: ${d.titulo}, ${ev.val}`}>
+              <Link prefetch={false} href={hrefPlaca(p, d.e, ev.vista)} className="placa-link" aria-label={`Ver el dato: ${d.titulo}, ${abreviarCifra(ev.val).completo}`}>
                 <h3 className="placa-titulo">{d.titulo}</h3>
-                <div className="placa-num" style={{ ["--n" as string]: Math.max(4, ev.val.length) }}>{ev.val}</div>
+                <div className="placa-num" style={{ ["--n" as string]: largoMax }}>
+                  <span aria-hidden="true">{abreviarCifra(ev.val).corto}</span>
+                  <span className="pt-solo-lectura">{ev.val}</span>
+                </div>
                 {extra && <p className="placa-ctx">{extra.texto}</p>}
                 {comp && (
                   <ul className="placa-comps">

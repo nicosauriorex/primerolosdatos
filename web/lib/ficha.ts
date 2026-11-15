@@ -7,15 +7,13 @@ import { fmtMes, lastIdx, mesNum, nf1, ok, redondeadoComo, r1 } from "./formato"
 import { frecuenciaOrigen, leerComun, type Comun, type FrecOrigen } from "./historico";
 import type { ClaveFrase, DesdePref } from "./config";
 import { contextoDato, type ContextoDato } from "./contexto-dato";
-import { DATOS_FIJOS, datoFijoDe, mismaVariable } from "./datos-fijos";
-import type { Calculo, Expr, Motor, SerieMeta } from "./motor";
+import type { Calculo, Expr, Motor } from "./motor";
 import { comparaciones, plantillaSuelta, type Comparacion } from "./plantillas";
 import { datosDesde, periodoMandato, variacionMostrada } from "./tablas";
-import { TEMAS, hrefDato, principalesDe } from "./temas";
 import { encExpr } from "./url";
 import type { VelaDato } from "@/components/Velas";
 import type { DeltaProps } from "@/components/sistema/Delta";
-import type { ColumnaMandato, FilaMandato } from "@/components/sistema/TablaMandatos";
+import type { CeldaMandato, ColumnaMandato, FilaMandato } from "@/components/sistema/TablaMandatos";
 
 /** Variable por defecto de la ficha (la de la ruta /dato/ sin parámetro o con uno inválido): la inflación mensual. */
 export const EXPR_DEFECTO: Expr = { id: "ipc_empalme", med: "vm", rel: null, modo: "compra", esc: "" };
@@ -184,19 +182,25 @@ export interface MesesIguales {
 }
 const MIN_MESES_IGUALES = 10;
 /** Todos los valores del mismo mes calendario que el último dato, del más viejo al más nuevo, y en qué puesto queda el de hoy.
- *  El puesto se cuenta con los valores redondeados como se muestran (empates: mismo puesto). Null si la serie no es mensual o hay menos de 10. */
-export function mesesIguales(m: Motor, e: Expr): MesesIguales | null {
+ *  El puesto se cuenta con los valores redondeados como se muestran (empates: mismo puesto). Null si la serie no es mensual o hay menos de 10.
+ *  `rango`: solo los años de `desde` a `hasta` (inclusive); la frase y el puesto se cuentan con esos años y el último de ellos hace de "actual".
+ *  Con rango hacen falta al menos 3 años; los 10 de mínimo se piden sobre la serie entera. */
+export function mesesIguales(m: Motor, e: Expr, rango?: { desde: number; hasta: number }): MesesIguales | null {
   if (!m.SER[e.id] || (e.rel && !m.SER[e.rel])) return null;
   const c = m.calc(e), F = m.F, u = lastIdx(c.v);
   if (u < 0 || frecuenciaOrigen(c.v) !== "M") return null;
   const mm = F[u].slice(5, 7);
   const fmt = (v: number) => m.fmtC(c, v);
-  const filas: MesesIguales["filas"] = [];
+  let filas: MesesIguales["filas"] = [];
   for (let i = 0; i <= u; i++) {
     const x = c.v[i];
     if (F[i].slice(5, 7) === mm && ok(x)) filas.push({ anio: F[i].slice(0, 4), valor: x, texto: fmt(x).replace(/^-/, "−"), actual: i === u, ref: false });
   }
   if (filas.length < MIN_MESES_IGUALES) return null;
+  if (rango) {
+    filas = filas.filter((f) => Number(f.anio) >= rango.desde && Number(f.anio) <= rango.hasta).map((f, k, a) => ({ ...f, actual: k === a.length - 1 }));
+    if (filas.length < 3) return null;
+  }
   const red = filas.map((f) => redondeadoComo(fmt, f.valor)), hoy = red[red.length - 1];
   const abajo = 1 + red.filter((v) => v < hoy).length, arriba = 1 + red.filter((v) => v > hoy).length;
   const sentido = abajo <= arriba ? "bajo" : "alto", puesto = sentido === "bajo" ? abajo : arriba;
@@ -228,43 +232,58 @@ export function mesesIguales(m: Motor, e: Expr): MesesIguales | null {
 // ------------------------------------------------------------ Capítulo "¿Cómo le fue con cada presidente?"
 export interface TablaFicha { filas: FilaMandato[]; columnas: ColumnaMandato[]; visibles: string[]; extras: string[]; tasa: boolean }
 /** Filas y columnas de `TablaMandatos` de la ficha: una fila por presidente con datos.
- *  Tasa (C2): Inicio, Cierre y Promedio (principal, sin tono); Mediana, Mínimo, Máximo y, si es variación mensual, Acumulada, aparte.
+ *  Tasa (pedido 15, tanda 7): Inicio, Cierre y Variación (principal, cierre − inicio en p.p., con tono según `dir`); aparte Promedio, Mediana, Mínimo,
+ *  Máximo, Acumulada (si es variación mensual) y los promedios de los 6 y 12 meses antes del mes 0 y de los últimos 6 y 12 meses del mandato.
  *  Serie en nivel: Inicio, Cierre y Variación (principal, con tono); Promedio, Mínimo y Máximo aparte. */
 export function filasMandatosFicha(m: Motor, e: Expr, b: BaseCfg): TablaFicha {
   const F = m.F, c = m.calc(e), tasa = c.pct, vm = esVariacionMensual(m, e);
   // con "−" y nunca "−0,0" (un cero redondeado va sin signo)
   const t = (v: number | null | undefined) => menos(m.fmtC(c, v).replace(/^-(?=0(?:,0+)?(?![\d,]))/, ""));
+  const sin: CeldaMandato = { texto: "–", valor: null };
+  /** Promedio de los `n` meses seguidos desde `desde`: sin dato si falta alguno o se sale de la serie. */
+  const promedio = (desde: number, n: number): CeldaMandato => {
+    let suma = 0;
+    for (let i = desde; i < desde + n; i++) { const x = c.v[i]; if (i < 0 || !ok(x)) return sin; suma += x; }
+    return { texto: t(suma / n), valor: suma / n };
+  };
   const filas: FilaMandato[] = [];
   for (const x of crearPres(F)) {
     const st = statsMandato(F, c.v, x, b);
     if (!st.n) continue;
     const desde = datosDesde(F, c.v, x);
+    const cls = claseVariacion(c.dir, c.pct, st.ini, st.fin);
     const celdas: FilaMandato["celdas"] = {
       ini: { texto: t(st.ini), valor: st.ini ?? null }, fin: { texto: t(st.fin), valor: st.fin ?? null },
+      var: { texto: varNum(c, st) == null ? "–" : menos(variacionMostrada(m, c, st.ini, st.fin)), valor: varNum(c, st), tono: cls === "neutro" ? null : cls },
       prom: { texto: t(st.prom), valor: st.prom ?? null }, min: { texto: t(st.min), valor: st.min ?? null }, max: { texto: t(st.max), valor: st.max ?? null },
     };
     if (tasa) {
       celdas.med = { texto: t(st.med), valor: st.med ?? null };
       if (vm) { const a = acumulada(c.v, st); celdas.acum = { texto: a == null ? "–" : `${menos(nf1.format(r1(a)))} %`, valor: a }; }
-    } else {
-      const cls = claseVariacion(c.dir, c.pct, st.ini, st.fin);
-      celdas.var = { texto: varNum(c, st) == null ? "–" : menos(variacionMostrada(m, c, st.ini, st.fin)), valor: varNum(c, st), tono: cls === "neutro" ? null : cls };
+      // los meses anteriores al mes 0 (el que se toma como inicio) y los últimos del mandato
+      celdas.p6a = st.iniI == null ? sin : promedio(st.iniI - 6, 6);
+      celdas.p12a = st.iniI == null ? sin : promedio(st.iniI - 12, 12);
+      celdas.u6 = st.finI == null ? sin : promedio(st.finI - 5, 6);
+      celdas.u12 = st.finI == null ? sin : promedio(st.finI - 11, 12);
     }
     filas.push({ id: x.id, nombre: x.corto, periodo: periodoMandato(F, x) + (desde ? ` (${desde})` : ""), color: x.color, celdas });
   }
+  const base: ColumnaMandato[] = [{ clave: "ini", titulo: "Inicio" }, { clave: "fin", titulo: "Cierre" }, { clave: "var", titulo: "Variación", principal: true }];
   if (tasa) {
     return {
-      tasa, filas, visibles: ["ini", "fin", "prom"], extras: ["med", "min", "max", ...(vm ? ["acum"] : [])],
-      columnas: [{ clave: "ini", titulo: "Inicio" }, { clave: "fin", titulo: "Cierre" }, { clave: "prom", titulo: "Promedio", principal: true },
-        { clave: "med", titulo: "Mediana" }, { clave: "min", titulo: "Mínimo" }, { clave: "max", titulo: "Máximo" }, ...(vm ? [{ clave: "acum", titulo: "Acumulada" }] : [])],
+      tasa, filas, visibles: ["ini", "fin", "var"], extras: ["prom", "med", "min", "max", ...(vm ? ["acum"] : []), "p6a", "p12a", "u6", "u12"],
+      columnas: [...base, { clave: "prom", titulo: "Promedio" }, { clave: "med", titulo: "Mediana" }, { clave: "min", titulo: "Mínimo" }, { clave: "max", titulo: "Máximo" },
+        ...(vm ? [{ clave: "acum", titulo: "Acumulada" }] : []),
+        { clave: "p6a", titulo: "Prom. 6 meses antes" }, { clave: "p12a", titulo: "Prom. 12 meses antes" }, { clave: "u6", titulo: "Prom. últimos 6 meses" }, { clave: "u12", titulo: "Prom. últimos 12 meses" }],
     };
   }
   return {
     tasa, filas, visibles: ["ini", "fin", "var"], extras: ["prom", "min", "max"],
-    columnas: [{ clave: "ini", titulo: "Inicio" }, { clave: "fin", titulo: "Cierre" }, { clave: "var", titulo: "Variación", principal: true },
-      { clave: "prom", titulo: "Promedio" }, { clave: "min", titulo: "Mínimo" }, { clave: "max", titulo: "Máximo" }],
+    columnas: [...base, { clave: "prom", titulo: "Promedio" }, { clave: "min", titulo: "Mínimo" }, { clave: "max", titulo: "Máximo" }],
   };
 }
+/** Bajada del capítulo de la tabla por presidente (la ficha y /presidentes/ dicen lo mismo). */
+export const bajadaTablaMandatos = (tasa: boolean): string => (tasa ? "Inicio, cierre y cuánto cambió en cada mandato." : "Del inicio al cierre de cada mandato.");
 /** Variación acumulada en el mandato de una variación mensual, en %: (Π (1 + vᵢ/100) − 1) × 100 sobre los meses iniI + 1 … finI,
  *  así es igual al índice del cierre sobre el del mes 0, menos 1. Null si falta algún mes. */
 export function acumulada(v: ArrayLike<number | null | undefined>, st: StatsM): number | null {
@@ -274,32 +293,3 @@ export function acumulada(v: ArrayLike<number | null | undefined>, st: StatsM): 
   return (p - 1) * 100;
 }
 
-// ------------------------------------------------------------ "Ver también"
-const NOMBRE_COMPONENTE: [string, string][] = [
-  ["ipc_nacional_n_estaci", "Inflación núcleo"], ["ipc_nacional_r_estaci", "Inflación de precios regulados"], ["ipc_nacional_e_estaci", "Inflación de precios estacionales"],
-];
-const MAX_RELACIONADAS = 5;
-/** Nombre público de una variable para un link: el de un principal de los temas si es exactamente esa variable; si no, el de la serie. */
-function nombreDe(e: Expr, S: Record<string, SerieMeta>): string {
-  for (const t of TEMAS) { const p = principalesDe(t, S).find((x) => mismaVariable(x, e)); if (p) return p.nombre; }
-  const n = S[e.id]?.n ?? e.id;
-  return e.med === "via" ? `${n}, interanual` : e.med === "vm" ? `${n}, mensual` : n;
-}
-/** Hasta 5 links "Ver también": la otra medida de la misma serie si es un dato fijo; para la inflación, núcleo, regulados y estacionales;
- *  y los otros principales del tema. Sin la variable misma ni repetidos. */
-/** `sinTema`: dentro de la página de un tema, sus principales ya están arriba como tarjetas: no se repiten. */
-export function relacionadasDe(e: Expr, S: Record<string, SerieMeta>, sinTema = false): { nombre: string; href: string }[] {
-  const out: { nombre: string; href: string }[] = [], vistos = new Set<string>([hrefDato(e)]);
-  const sumar = (x: Expr, nombre?: string) => {
-    const href = hrefDato(x);
-    if (vistos.has(href) || !S[x.id]) return;
-    vistos.add(href); out.push({ nombre: nombre ?? nombreDe(x, S), href });
-  };
-  const propio = datoFijoDe(e);
-  if (propio) DATOS_FIJOS.filter((d) => d !== propio && d.e.id === e.id && (d.e.rel ?? "") === (e.rel ?? "") && (d.e.esc ?? "") === (e.esc ?? "")).forEach((d) => sumar(d.e));
-  if (e.id === "ipc_empalme") NOMBRE_COMPONENTE.forEach(([id, n]) => sumar({ id, med: "vm", rel: null, modo: "compra", esc: "" }, n));
-  const cat = S[e.id]?.cat[0];
-  const tema = TEMAS.find((t) => cat && t.cats.includes(cat));
-  if (tema && !sinTema) principalesDe(tema, S).forEach((p) => sumar(p, p.nombre));
-  return out.slice(0, MAX_RELACIONADAS);
-}

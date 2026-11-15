@@ -3,6 +3,7 @@
 // Va debajo de la tabla de las cuentas. Los cálculos están en lib/provinciasAlicuotas.ts; acá solo se dibuja.
 // Estado en la URL: ib_act (actividad), ib_anio y ib_orden (desc | asc); el valor por defecto no se escribe. La ventana de aperturas es un estado local (cierra con la cruz, Atrás y Escape).
 // Si el archivo falta o no valida, el bloque no aparece.
+import { HojaListo } from "./comunes";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useProvinciasAlicuotas } from "../useProvincias";
 import { Modal } from "../ui";
@@ -75,16 +76,15 @@ function Cuerpo({ d, c, p, set }: { d: DatosAlicuotas; c: Contexto; p: URLSearch
     <Capitulo id="pc-ib" titulo="Cuánto cobra cada provincia de Ingresos Brutos">
       {frase && <p className="prov-respuesta">{frase}</p>}
       <BarraVista items={items} onAbrir={() => setHoja(true)} />
-      <Hoja titulo="Ajustes: Ingresos Brutos" abierta={hoja} onCerrar={() => setHoja(false)}>
+      <HojaListo titulo="Ajustes: Ingresos Brutos" abierta={hoja} onCerrar={() => setHoja(false)}>
         {(cerrar) => (
           <div className="prov-hoja">
             <SeccionHoja titulo="Actividad"><OpcionesHoja columna etiqueta="Actividad" valor={actividad.slug} opciones={opcionesActividadA(d)} onElegir={(s) => set({ ib_act: s === defA.slug ? null : s })} /></SeccionHoja>
             <SeccionHoja titulo="Año"><OpcionesHoja etiqueta="Año" valor={String(anio)} opciones={opcionesAnioA(d)} onElegir={(a) => set({ ib_anio: Number(a) === defAnio ? null : a })} /></SeccionHoja>
             <SeccionHoja titulo="Orden"><OpcionesHoja etiqueta="Orden" valor={orden} opciones={ORDENES_A} onElegir={(o) => set({ ib_orden: o === ORDEN_A_DEFECTO ? null : o })} /></SeccionHoja>
-            <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
           </div>
         )}
-      </Hoja>
+      </HojaListo>
       <div className="prov-linea-nota">
         <p className="note">{v ? `${v.actividad.n}, ${v.anio}. Alícuota teórica de la ley, no lo que se paga en promedio.` : `No hay datos de ${anio}.`}</p>
         <InfoPunto etiqueta="Cómo leer las alícuotas">

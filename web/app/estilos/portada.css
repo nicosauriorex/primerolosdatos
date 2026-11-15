@@ -1,0 +1,43 @@
+/* Tanda 7 (docs/specs/ajustes-tanda-7.md): estilos de la parte portada. Se carga después de globals.css. */
+
+/* Texto solo para lectores de pantalla (la cifra abreviada de la placa lleva el valor completo así) */
+.pt-solo-lectura { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Todas las secciones (pedido 23): desde 900 px columnas parejas que se llenan, alineadas arriba; ningún grupo se parte.
+   reemplaza .indice-secciones { display: grid; grid-template-columns: repeat(2, …) } de globals.css */
+@media (min-width: 900px) {
+  .inicio .indice-secciones { display: block; columns: 2; column-gap: var(--e-6); }
+  .inicio .indice-grupo { break-inside: avoid; margin: 0 0 var(--e-5); }
+  .inicio .indice-grupo:last-child { margin-bottom: 0; }
+}
+
+/* Preguntale (pedido 22): atajos "Desde" de "Qué subió más" */
+.preg-desde { display: grid; gap: var(--e-1); min-width: 0; }
+.preg-desde-rot { font-size: var(--t-sm); font-weight: 700; color: var(--text-muted); }
+
+/* MiniGrafico: línea con puntos, fechas y globo. Los puntos y el globo se posicionan en % sobre el área del dibujo. */
+.preg-mini { height: auto; }
+.mg { display: grid; gap: var(--e-1); width: 100%; min-width: 0; color: var(--acento-texto); }
+.mg-area { position: relative; height: 96px; margin: 0 8px; touch-action: pan-y; cursor: crosshair; }
+.mg-area svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.mg-l1, .mg-l2 { stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.mg-l1 { stroke: var(--series-1); }
+.mg-l2 { stroke: var(--series-2); }
+.mg-punto { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--series-1); border: 2px solid var(--surface-1); box-sizing: border-box; pointer-events: none; }
+.mg-p2 { background: var(--series-2); }
+.mg-cmp { background: var(--surface-1); border: 2px solid var(--series-1); }
+.mg-guia { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--text-muted); pointer-events: none; }
+.mg-globo { position: absolute; top: 0; z-index: 2; display: grid; gap: 1px; padding: var(--e-1) var(--e-2); transform: translateX(8px); background: var(--text-primary); color: var(--surface-1);
+  border-radius: var(--r-2); font-size: var(--t-xs); line-height: 1.3; white-space: nowrap; pointer-events: none; font-variant-numeric: tabular-nums; }
+.mg-globo.mg-izq { transform: translateX(calc(-100% - 8px)); }
+.mg-globo b { font-weight: 800; }
+.mg-eje { position: relative; height: 1.3em; margin: 0 8px; font-size: var(--t-xs); color: var(--text-muted); }
+.mg-fecha { position: absolute; top: 0; white-space: nowrap; }
+.mg-ini { left: 0; }
+.mg-fin { right: 0; }
+.mg-med { transform: translateX(-50%); }
+.mg-leyenda { display: flex; flex-wrap: wrap; gap: var(--e-1) var(--e-4); margin: 0; padding: 0; list-style: none; font-size: var(--t-sm); color: var(--text-primary); }
+.mg-leyenda li { display: inline-flex; align-items: center; gap: var(--e-2); min-width: 0; overflow-wrap: anywhere; }
+.mg-leyenda i { flex: none; width: 14px; height: 3px; border-radius: 2px; }
+.mg-k1 { background: var(--series-1); }
+.mg-k2 { background: var(--series-2); }

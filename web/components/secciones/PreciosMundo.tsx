@@ -1,5 +1,6 @@
 "use client";
 // Bloque "Precios en el mundo" de Contexto (bloque 6c): cuánto cuesta cada rubro en la Argentina contra el mundo, en dólares.
+import { FilaAjuste, HojaListo } from "./comunes";
 import { useEffect, useMemo, useState } from "react";
 import { usePreciosMundo } from "../usePreciosMundo";
 import { Cargando, Selector, Seg } from "../ui";
@@ -123,25 +124,26 @@ function Detalle({ d, rid, dolar, arg, p, set }: { d: DatosPM; rid: string; dola
   return (
     <>
       <BarraVista items={chips} onAbrir={() => setHoja(true)} />
-      <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
+      <HojaListo titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
         {(cerrar) => (
           <div className="ctx-hoja">
-            <div className="controls"><label>Rubro</label>
-              <Selector etiqueta="Rubro" valor={rid} opciones={Object.keys(d.rubros).map((k) => [k, d.rubros[k].n] as [string, string])} onElegir={(v) => set({ pmr: v === "total" ? null : v })} /></div>
-            <div className="controls"><label>Dólar para los precios argentinos</label>
-              <Seg valor={dolar} opciones={DOLARES} onElegir={(v) => set({ pmd: v === "oficial" ? null : v })} /></div>
-            <div className="controls"><label>Países</label>
+            <FilaAjuste rotulo="Rubro">
+              <Selector etiqueta="Rubro" valor={rid} opciones={Object.keys(d.rubros).map((k) => [k, d.rubros[k].n] as [string, string])} onElegir={(v) => set({ pmr: v === "total" ? null : v })} />
+            </FilaAjuste>
+            <FilaAjuste rotulo="Dólar" ayuda="Para convertir los precios argentinos.">
+              <Seg valor={dolar} opciones={DOLARES} onElegir={(v) => set({ pmd: v === "oficial" ? null : v })} />
+            </FilaAjuste>
+            <FilaAjuste rotulo="Países">
               <div className="seg" role="group" aria-label="Países para comparar">
                 {disponibles.map((c) => (
                   <button key={c} type="button" aria-pressed={elegidos.includes(c)} disabled={!habilitado(c)} title={habilitado(c) ? undefined : `Sin datos por rubro: ${d.sin_datos[c]}`}
                     onClick={() => alternar(c)}>{d.paises[c]}{!habilitado(c) ? <small> (sin datos por rubro)</small> : null}</button>
                 ))}
               </div>
-            </div>
-            <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
+            </FilaAjuste>
           </div>
         )}
-      </Hoja>
+      </HojaListo>
       <div className="ctx-titulo-graf">
         <h3>{r.n}: Argentina contra el mundo</h3>
         <InfoPunto etiqueta="Cómo leer este gráfico">

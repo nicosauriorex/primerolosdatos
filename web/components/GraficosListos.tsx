@@ -4,6 +4,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { useSeccion } from "./useSeccion";
+import { IconoIr } from "./Iconos";
 import { Capitulo } from "./sistema/Capitulo";
 import { Lamina, Laminas } from "./sistema/Lamina";
 import { mismaVariable } from "@/lib/datos-fijos";
@@ -31,10 +32,10 @@ export function GraficosListos({ m, e, metas, nivel, nombre, titulo = "Gráficos
   if (!evs.length) return null;
   return (
     <Capitulo id={id} nivel={nivel} titulo={titulo}>
-      <Laminas etiqueta={`Gráficos listos con ${nombre}`}>
+      <div><Laminas etiqueta={`Gráficos listos con ${nombre}`}>
         {evs.map(({ x, ev }) => <Lamina key={x.id} titulo={x.titulo} cifra={ev!.val} fecha={ev!.fecha} v={ev!.v} desde={m.idxDe("2003-01")} tono={ev!.cls} href={hrefPlantilla(x, ev!.vista)} />)}
-      </Laminas>
-      <p className="fi-mas"><Link prefetch={false} className="enlace" href={`/plantillas/?${new URLSearchParams({ q: nombre }).toString()}`}>Ver todos los gráficos listos</Link></p>
+      </Laminas></div>
+      <p className="fi-mas"><Link prefetch={false} className="btn" href={`/plantillas/?${new URLSearchParams({ q: nombre }).toString()}`}>Ver todos los gráficos listos<IconoIr /></Link></p>
     </Capitulo>
   );
 }

@@ -7,7 +7,7 @@ import { useConfig } from "../ConfigProvider";
 import { Picker, conPunteroFino } from "../Variables";
 import { Modal, useAtras, useCapa } from "../ui";
 import { IconoIr } from "../Iconos";
-import { Sparkline } from "../Sparkline";
+import { MiniGrafico } from "../sistema/MiniGrafico";
 import { FilaChips } from "../sistema/FilaChips";
 import { Delta } from "../sistema/Delta";
 import { IconoCerrar } from "../sistema/iconos";
@@ -16,7 +16,7 @@ import { baseDeConfig } from "@/lib/config";
 import { type SerieMeta } from "@/lib/motor";
 import { PRES_DEF } from "@/lib/estadisticas";
 import {
-  MEDIDAS_DOLAR, PRESIDENTES, SALARIOS, anios, contraer, hrefCompra, hrefDesde, hrefMedida, hrefPresidente, hrefSubio,
+  MEDIDAS_DOLAR, PRESIDENTES, SALARIOS, anios, atajosSubio, contraer, hrefCompra, hrefDesde, hrefMedida, hrefPresidente, hrefSubio,
   idsCompra, idsMontos, idsPrecios, respuestaCompra, respuestaDesde, respuestaMedida, respuestaPresidente, respuestaSubio, rotulo,
   seccionesCompra, todosLosPrincipales, type Opcion, type Respuesta,
 } from "@/lib/oraciones";
@@ -91,8 +91,14 @@ export function ListaHueco({ etiqueta, valor, opciones, onElegir }: { etiqueta: 
   );
 }
 
-/** Ventana de "¿Cuánto … compra un …?": todos los ítems ya desplegados, con separadores (Canastas, Precios promedio por categoría, Dólares). El buscador va arriba. */
-function ListaProductos({ S, ids, valor, onElegir, onCerrar }: { S: Record<string, SerieMeta>; ids: string[]; valor: string; onElegir: (id: string) => void; onCerrar: () => void }) {
+/** Textos de la ventana de lista resumida de un hueco. */
+interface TextosLista { titulo: string; busca: string; buscar: string; pie: string }
+const LISTA_COMPRA: TextosLista = { titulo: "Elegir producto", busca: "Buscá: asado, yerba, dólar blue…", buscar: "Buscar un producto", pie: "Elegí un producto, una canasta o un dólar. Esc para cerrar." };
+const LISTA_MONTO: TextosLista = { titulo: "Elegir qué medir", busca: "Buscá: salario, canasta, asado…", buscar: "Buscar qué medir", pie: "Elegí un salario, una canasta o un producto. Esc para cerrar." };
+const LISTA_PRECIO: TextosLista = { titulo: "Elegir un precio", busca: "Buscá: carne, alquiler, yerba…", buscar: "Buscar un precio", pie: "Elegí un producto o un rubro de precios. Esc para cerrar." };
+
+/** Ventana resumida de un hueco (como "¿Cuánto … compra un …?"): todos los ítems ya desplegados, con separadores (Salarios, Canastas, Precios promedio por categoría, Rubros del IPC, Dólares). El buscador va arriba. */
+function ListaProductos({ S, ids, valor, onElegir, onCerrar, t }: { S: Record<string, SerieMeta>; ids: string[]; valor: string; onElegir: (id: string) => void; onCerrar: () => void; t: TextosLista }) {
   const [q, setQ] = useState("");
   const inp = useRef<HTMLInputElement>(null);
   useEffect(() => { if (conPunteroFino()) inp.current?.focus(); }, []);   // en táctil el teclado no se abre solo
@@ -105,9 +111,9 @@ function ListaProductos({ S, ids, valor, onElegir, onCerrar }: { S: Record<strin
   const elegir = (id: string) => { onCerrar(); onElegir(id); };
   let anterior = "";
   return (
-    <Modal titulo="Elegir producto" onCerrar={onCerrar}>
+    <Modal titulo={t.titulo} onCerrar={onCerrar}>
       <header>
-        <input ref={inp} type="search" value={q} autoComplete="off" placeholder="Buscá: asado, yerba, dólar blue…" aria-label="Buscar un producto"
+        <input ref={inp} type="search" value={q} autoComplete="off" placeholder={t.busca} aria-label={t.buscar}
           onChange={(ev) => setQ(ev.target.value)} onKeyDown={(ev) => { if (ev.key === "Enter" && primero) elegir(primero); }} />
       </header>
       <ul className="lista-compra">
@@ -127,14 +133,14 @@ function ListaProductos({ S, ids, valor, onElegir, onCerrar }: { S: Record<strin
         })}
         {!visibles.length && <li className="note">Sin resultados. Probá con otra palabra.</li>}
       </ul>
-      <footer>{visibles.length ? "Elegí un producto, una canasta o un dólar. Esc para cerrar." : "Sin resultados."}</footer>
+      <footer>{visibles.length ? t.pie : "Sin resultados."}</footer>
     </Modal>
   );
 }
 
-/** Un hueco de la oración: botón con el valor subrayado. Listas cortas: desplegable pegado al botón; `compra`: ventana con todo desplegado; otras listas largas: selector de variables filtrado. */
-function Hueco({ valor, opciones, onElegir, etiqueta, ids, S, compra }: {
-  valor: string; opciones?: Opcion[]; onElegir: (v: string) => void; etiqueta: string; ids?: string[]; S: Record<string, SerieMeta>; compra?: boolean;
+/** Un hueco de la oración: botón con el valor subrayado. Listas cortas: desplegable pegado al botón; `lista`: ventana resumida con todo desplegado; `ids` sin `lista`: selector de variables filtrado. */
+function Hueco({ valor, opciones, onElegir, etiqueta, ids, S, lista }: {
+  valor: string; opciones?: Opcion[]; onElegir: (v: string) => void; etiqueta: string; ids?: string[]; S: Record<string, SerieMeta>; lista?: TextosLista;
 }) {
   const [abierto, setAbierto] = useState(false);
   const conjunto = useMemo(() => new Set(ids ?? []), [ids]);
@@ -144,8 +150,8 @@ function Hueco({ valor, opciones, onElegir, etiqueta, ids, S, compra }: {
     return (
       <span className="hueco">
         <button type="button" className="btn sel-btn" aria-label={etiqueta} aria-haspopup="dialog" onClick={() => setAbierto(true)}><span className="et">{rotulo(valor, S)}</span></button>
-        {abierto && (compra
-          ? <ListaProductos S={S} ids={ids} valor={valor} onElegir={onElegir} onCerrar={() => setAbierto(false)} />
+        {abierto && (lista
+          ? <ListaProductos S={S} ids={ids} valor={valor} onElegir={onElegir} onCerrar={() => setAbierto(false)} t={lista} />
           : <Picker pedido={pedido} onCerrar={() => setAbierto(false)} />)}
       </span>
     );
@@ -154,11 +160,11 @@ function Hueco({ valor, opciones, onElegir, etiqueta, ids, S, compra }: {
 }
 
 type Clave = "compra" | "presidente" | "desde" | "dolares" | "subio";
-const PREGUNTAS: [Clave, string][] = [["compra", "Cuánto compra"], ["presidente", "Con cada presidente"], ["desde", "Desde un año"], ["dolares", "En dólares"], ["subio", "Qué subió más"]];
+const PREGUNTAS: [Clave, string][] = [["compra", "Cuánto compra"], ["presidente", "Con cada presidente"], ["subio", "Qué subió más"], ["dolares", "En dólares"], ["desde", "Desde un año"]];
 const IDS_PRES = PRES_DEF.map((x) => x.id);
 
 /** La respuesta en el lugar: cifra grande, fecha, detalle, minigráfico y cambios. Mientras carga, "Calculando…" con el mismo alto. */
-export function RespuestaVista({ r, listo, href, info }: { r: Respuesta | null; listo: boolean; href?: string; info?: ReactNode }) {
+export function RespuestaVista({ r, listo, href, info, despues }: { r: Respuesta | null; listo: boolean; href?: string; info?: ReactNode; despues?: ReactNode }) {
   const cifra = <p className="preg-cifra">{r?.cifra}</p>;
   return (
     <div className="preg-resp" aria-live="polite">
@@ -166,7 +172,8 @@ export function RespuestaVista({ r, listo, href, info }: { r: Respuesta | null; 
         <div className="preg-fundido" key={r.cifra + (r.fecha ?? "")}>
           {info ? <div className="pq-cifra-fila">{cifra}{info}</div> : cifra}
           {(r.fecha || r.detalle) && <p className="preg-meta">{[r.fecha, r.detalle].filter(Boolean).join(" · ")}</p>}
-          {r.v && <div className="preg-mini"><Sparkline v={r.v} desde={r.desde ?? 0} /></div>}
+          {r.v && r.F && r.fmt && <div className="preg-mini"><MiniGrafico v={r.v} F={r.F} desde={r.desde} hasta={r.hasta} fmt={r.fmt} cmp={r.cmp} v2={r.v2} leyenda={r.leyenda} nombre={r.detalle} /></div>}
+          {despues}
           {r.deltas && <div className="preg-deltas">{r.deltas.map((d, i) => <Delta key={i} {...d} />)}</div>}
         </div>
       )}
@@ -193,6 +200,7 @@ export function Oraciones({ S }: { S: Record<string, SerieMeta> }) {
   const [ind3, setInd3] = useState(clave(Math.max(0, principales.findIndex((p) => p.id === "sipa_med")))), [anio, setAnio] = useState("2017");
   const [monto, setMonto] = useState("sipa_med"), [med, setMed] = useState("usdr_blue");
   const [a, setA] = useState("ipc_gba_01_1_2_coicop"), [b, setB] = useState("ipc_gba_04_1_1_coicop");
+  const [inicioSubio, setInicioSubio] = useState("");   // AAAA-MM elegido en los atajos "Desde" ("" = el más antiguo con datos de los dos); no va en la URL
   const p2 = principales[Number(ind2)] ?? principales[0], p3 = principales[Number(ind3)] ?? principales[0];
 
   // Las preguntas que dependen de una serie ausente no aparecen como chip.
@@ -215,31 +223,37 @@ export function Oraciones({ S }: { S: Record<string, SerieMeta> }) {
       case "presidente": return p2 ? respuestaPresidente(motor, p2, pres, base) : null;
       case "desde": return p3 ? respuestaDesde(motor, p3, anio) : null;
       case "dolares": return respuestaMedida(motor, monto, med);
-      default: return respuestaSubio(motor, a, b, S);
+      default: return respuestaSubio(motor, a, b, S, inicioSubio || undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [motor, listo, version, actual, producto, salario, p2, p3, pres, anio, monto, med, a, b, base, S]);
+  }, [motor, listo, version, actual, producto, salario, p2, p3, pres, anio, monto, med, a, b, inicioSubio, base, S]);
+  const atajos = useMemo(() => (motor && listo && actual === "subio" ? atajosSubio(motor, a, b) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [motor, listo, version, actual, a, b]);
   if (!principales.length) return null;
 
   const href = actual === "compra" ? hrefCompra(producto, salario) : actual === "presidente" ? hrefPresidente(p2, pres) : actual === "desde" ? hrefDesde(p3, anio)
-    : actual === "dolares" ? hrefMedida(monto, med) : hrefSubio(a, b);
+    : actual === "dolares" ? hrefMedida(monto, med) : hrefSubio(a, b, respuesta?.inicio);
 
   return (
     <div className="preg">
       <FilaChips opciones={disponibles} valor={actual} onElegir={(v) => setElegida(v as Clave)} etiqueta="Preguntas" />
       <p className="preg-oracion">
-        {actual === "compra" && <>¿Cuánto <Hueco valor={producto} ids={compra} compra etiqueta="Producto" onElegir={setProducto} S={S} /> compra un{" "}
+        {actual === "compra" && <>¿Cuánto <Hueco valor={producto} ids={compra} lista={LISTA_COMPRA} etiqueta="Producto" onElegir={setProducto} S={S} /> compra un{" "}
           <Hueco valor={salario} opciones={salarios} etiqueta="Salario" onElegir={setSalario} S={S} />?</>}
         {actual === "presidente" && <>¿Cómo le fue <Hueco valor={ind2} opciones={opcPrincipalesA} etiqueta="Indicador" onElegir={setInd2} S={S} /> con{" "}
           <Hueco valor={pres} opciones={PRESIDENTES} etiqueta="Presidente" onElegir={setPres} S={S} />?</>}
         {actual === "desde" && <>¿Cómo cambió <Hueco valor={ind3} opciones={opcPrincipales} etiqueta="Indicador" onElegir={setInd3} S={S} /> desde{" "}
           <Hueco valor={anio} opciones={lista} etiqueta="Año" onElegir={setAnio} S={S} />?</>}
-        {actual === "dolares" && <>¿Cómo evolucionó <Hueco valor={monto} ids={montos} etiqueta="Monto" onElegir={setMonto} S={S} /> en{" "}
+        {actual === "dolares" && <>¿Cómo evolucionó <Hueco valor={monto} ids={montos} lista={LISTA_MONTO} etiqueta="Monto" onElegir={setMonto} S={S} /> en{" "}
           <Hueco valor={med} opciones={MEDIDAS_DOLAR} etiqueta="Medida" onElegir={setMed} S={S} />?</>}
-        {actual === "subio" && <>¿Qué subió más: <Hueco valor={a} ids={precios} etiqueta="Primer precio" onElegir={setA} S={S} /> o{" "}
-          <Hueco valor={b} ids={precios} etiqueta="Segundo precio" onElegir={setB} S={S} />?</>}
+        {actual === "subio" && <>¿Qué subió más: <Hueco valor={a} ids={precios} lista={LISTA_PRECIO} etiqueta="Primer precio" onElegir={setA} S={S} /> o{" "}
+          <Hueco valor={b} ids={precios} lista={LISTA_PRECIO} etiqueta="Segundo precio" onElegir={setB} S={S} />?</>}
       </p>
-      <RespuestaVista r={respuesta} listo={listo} href={href} />
+      <RespuestaVista r={respuesta} listo={listo} href={href} despues={actual === "subio" && atajos.length > 1 ? (
+        <div className="preg-desde"><span className="preg-desde-rot" id="preg-desde-r">Desde</span>
+          <FilaChips opciones={atajos} valor={respuesta?.inicio ?? ""} onElegir={setInicioSubio} etiqueta="Desde cuándo" /></div>
+      ) : undefined} />
     </div>
   );
 }

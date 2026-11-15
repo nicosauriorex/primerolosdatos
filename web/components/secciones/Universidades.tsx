@@ -3,6 +3,7 @@
 // "Desarrollo de la Educación Superior", en pesos de hoy y % del PIB, la evolución 2018-2026, la lista con buscador, lo transferido por estudiante (2023 y 2024)
 // y el control y la rendición de cuentas. Todas las cuentas están en lib/universidades.ts; acá solo se dibuja.
 // Estado en la URL: anio, med (hoy | pib), orden (monto | var | est), u (universidad abierta) y q (lo escrito en el buscador).
+import { HojaListo } from "./comunes";
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useUniversidades } from "../useUniversidades";
@@ -84,7 +85,7 @@ function Cuerpo({ c }: { c: Contexto }) {
     <section className="uni">
       <p className="sub">Cuánto transfiere la Nación a cada universidad nacional, año por año, y lo que se sabe de cómo se controla. Datos oficiales del presupuesto.</p>
       <BarraVista items={chips} onAbrir={() => setHoja(true)} />
-      <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
+      <HojaListo titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
         {(cerrar) => (
           <div className="uni-hoja">
             <p className="uni-hoja-rotulo" id="uni-h-anio">Año</p>
@@ -95,10 +96,9 @@ function Cuerpo({ c }: { c: Contexto }) {
             </div>
             <p className="uni-hoja-rotulo">Medida</p>
             <Seg valor={medida} opciones={MEDIDAS_U} onElegir={(v) => set({ med: v === MEDIDA_U_DEFECTO ? null : v })} />
-            <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
           </div>
         )}
-      </Hoja>
+      </HojaListo>
       {!vista || !resp ? <p className="note" role="status">No hay datos de lo transferido en {anio}.</p> : (
         <>
           <CabeceraDato nivel={2} titulo="Lo transferido a las universidades" cifra={resp.cifra} fecha={resp.fecha} frase={resp.frase}

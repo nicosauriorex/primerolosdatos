@@ -1,8 +1,8 @@
 // Cómo se lee Histórico desde la URL: parámetros de cada gráfico y del período. Lo usan la sección y la imagen de compartir.
 import { desdePreferido, type DesdePref } from "./config";
 import { claseVariacion, etiqueta, type EstRows, type Fila } from "./estadisticas";
-import { MESES, mesNum, nf0, nf1, ok, redondeadoComo, restaLimpia, rotuloAnterior } from "./formato";
-import type { Expr, Motor } from "./motor";
+import { MESES, fmtNum, mesNum, nf0, nf1, ok, redondeadoComo, restaLimpia, rotuloAnterior } from "./formato";
+import { ES_VAR, type Expr, type Motor, type SerieMeta } from "./motor";
 import { decExpr, lista as listaUrl, unoDe } from "./url";
 
 export const TODOS_MESES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -175,3 +175,42 @@ export function textoPeriodo(desde: string, hasta: string, meses: Set<number>): 
   return `${a} – ${MESES[+m1 - 1]} ${y1}${sueltos}`;
 }
 const MESES_CAP = MESES.map((x) => x[0].toUpperCase() + x.slice(1));
+
+
+/** La diferencia absoluta entre el último dato y otro valor, en la unidad de la serie ("+103.163", "−45,2"), para la columna "Dif." de "Más comparaciones".
+ *  Solo para series que no son porcentaje (en las de porcentaje la diferencia ya está en puntos). La cuenta sale de los valores tal como se ven
+ *  (`mostrado`): un solo redondeo, así que cierra con las cifras de la tabla. Vacía si falta algún dato; "0" si dan igual ya redondeados. */
+export function difAbsoluta(pct: boolean, valor: number | null | undefined, hasta: number | null | undefined, mostrado: (v: number) => string): string {
+  if (pct || !ok(valor) || !ok(hasta)) return "";
+  const d = restaLimpia(redondeadoComo(mostrado, hasta), redondeadoComo(mostrado, valor));
+  if (d === 0) return "0";
+  return `${d > 0 ? "+" : "−"}${fmtNum(Math.abs(d))}`;
+}
+
+/** Las formas de ver la primera variable que tienen sentido, para el control "Cómo verlo" de la cabecera: hasta tres medidas [código, rótulo]
+ *  (variación mensual, variación interanual y el valor o el índice). Cada una cambia solo la medida (`med`): el resto de la variable queda igual.
+ *  Sin al menos dos opciones no hay control (por ejemplo, una tasa o un monto en dólares). Si la medida actual no es ninguna de las tres, va primera. */
+export function opcionesComoVerlo(m: Motor, meta: SerieMeta, med: string): [string, string][] {
+  const validas = new Set(m.medidasDe(meta).map((x) => x[0]));
+  const mm = /_mm(?:3|12)$/.exec(med)?.[0] ?? "", actual = med.slice(0, med.length - mm.length);   // el suavizado se conserva al pasar a otro valor
+  const real = actual === "real" || actual.endsWith("_r");
+  const suf = real && (validas.has("vm_r") || validas.has("via_r")) ? "_r" : "";
+  const precios = meta.cat[0] === "Precios", indice = meta.tipo === "idx";
+  const rv = suf ? " real" : "";
+  const out: [string, string][] = [];
+  const mensual: [string, string] | null = validas.has("vm" + suf) ? ["vm" + suf, (precios ? "Mensual" : "Var. mensual") + rv] : null;
+  const interanual: [string, string] | null = validas.has("via" + suf) ? ["via" + suf, (precios ? "Interanual" : "Var. interanual") + rv] : null;
+  // el valor: la medida actual si ya es un valor; si no, la de fábrica (o el índice tal cual si la de fábrica es una variación)
+  let vb = ES_VAR(actual) ? m.medDefault(meta) : actual;
+  if (ES_VAR(vb)) vb = validas.has("corr") ? "corr" : "";
+  const valor: [string, string] | null = vb ? [vb + (ES_VAR(actual) ? "" : mm), indice ? (vb === "real" ? "Índice real" : "Índice") : vb === "real" ? "Valor real" : "Valor"] : null;
+  const conVariaciones = ES_VAR(m.medDefault(meta)) || indice;   // las variaciones primero en índices y precios; en montos, el valor primero
+  const orden = conVariaciones ? [mensual, interanual, valor] : [valor, interanual, mensual];
+  for (const o of orden) if (o) out.push(o);
+  if (out.length < 2) return [];
+  if (!out.some((o) => o[0] === med)) {
+    const etq = m.etiquetaMedida(meta, actual);
+    if (etq) out.unshift([med, etq.length > 22 ? "Otra medida" : etq]);
+  }
+  return out;
+}

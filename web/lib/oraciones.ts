@@ -31,17 +31,21 @@ const ids = (S: Record<string, SerieMeta>, f: (s: SerieMeta) => boolean) => Obje
 /** Qué compra el salario: productos, canastas y dólares. */
 export const idsCompra = (S: Record<string, SerieMeta>) =>
   ids(S, (s) => s.id.startsWith("pp_gba_") || s.id.startsWith("can_") || (FX_KEYS as readonly string[]).some((k) => s.id === "fx_" + k));
-/** Los ítems de "¿Cuánto … compra un …?" ya ordenados y con sus separadores: Canastas, Precios promedio (una sección por categoría) y Dólares. */
-export interface SeccionCompra { grupo: "Canastas" | "Precios promedio" | "Dólares"; categoria?: string; ids: string[] }
+/** Los ítems de una lista de huecos ya ordenados y con sus separadores: Salarios, Canastas, Precios promedio (una sección por categoría), Rubros del IPC y Dólares. */
+export interface SeccionCompra { grupo: "Salarios y jubilaciones" | "Canastas" | "Precios promedio" | "Rubros del IPC" | "Dólares"; categoria?: string; ids: string[] }
 export function seccionesCompra(S: Record<string, SerieMeta>, ids: string[]): SeccionCompra[] {
   const nombre = (id: string) => rotulo(id, S);
   const porNombre = (a: string, b: string) => nombre(a).localeCompare(nombre(b), "es");
   const out: SeccionCompra[] = [];
+  const salarios = SALARIOS.filter((i) => ids.includes(i) && S[i]);
+  if (salarios.length) out.push({ grupo: "Salarios y jubilaciones", ids: salarios });
   const canastas = ids.filter((i) => i.startsWith("can_") && S[i]).sort(porNombre);
   if (canastas.length) out.push({ grupo: "Canastas", ids: canastas });
   const cats = new Map<string, string[]>();
   ids.filter((i) => i.startsWith("pp_gba_") && S[i]).forEach((i) => { const c = S[i].cat[3] ?? "Otros"; if (!cats.has(c)) cats.set(c, []); cats.get(c)!.push(i); });
   [...cats].sort((a, b) => a[0].localeCompare(b[0], "es")).forEach(([c, v]) => out.push({ grupo: "Precios promedio", categoria: c.replace(/^\d+\s+/, ""), ids: v.sort(porNombre) }));
+  const resto = ids.filter((i) => S[i] && !SALARIOS.includes(i) && !i.startsWith("can_") && !i.startsWith("pp_gba_") && !i.startsWith("fx_")).sort(porNombre);
+  if (resto.length) out.push({ grupo: "Rubros del IPC", ids: resto });
   const dolares = (FX_KEYS as readonly string[]).map((k) => "fx_" + k).filter((i) => ids.includes(i) && S[i]);
   if (dolares.length) out.push({ grupo: "Dólares", ids: dolares });
   return out;
@@ -65,22 +69,33 @@ const e = (id: string, extra: Partial<Expr> = {}): Expr => ({ id, rel: null, mod
 /** ¿Cuánto [producto] compra un [salario]? Una variable (el producto medido en salarios): la ficha. */
 export const hrefCompra = (producto: string, salario: string) =>
   hrefDato(e(producto, { rel: salario, med: "corr" }));
-/** ¿Cómo le fue a [indicador] con [presidente]? La ficha de esa variable con el presidente resaltado en la tabla y sumado a Meses de mandato. */
-export const hrefPresidente = (p: Principal, presidente: string) =>
-  hrefDato(p, PRES_DEF.some((x) => x.id === presidente) ? { pd: presidente } : {});
+/** ¿Cómo le fue a [indicador] con [presidente]? El Histórico de esa variable en el período de su mandato (`d` y `h`). */
+export const hrefPresidente = (p: Principal, presidente: string) => {
+  const k = PRES_DEF.findIndex((x) => x.id === presidente);
+  if (k < 0) return hrefDato(p);
+  // Histórico con el período del mandato: desde que asumió hasta el mes antes de que asuma el siguiente (el último, hasta hoy)
+  const sig = PRES_DEF[k + 1], extra: Record<string, string> = { d: PRES_DEF[k].ini };
+  if (sig) { const [y, mm] = sig.ini.split("-").map(Number); extra.h = mm === 1 ? `${y - 1}-12` : `${y}-${String(mm - 1).padStart(2, "0")}`; }
+  return hrefHistorico(p, extra);
+};
 /** ¿Cómo cambió [indicador] desde [año]? Histórico desde ese año (la ficha no recorta el período). */
 export const hrefDesde = (p: Principal, anio: string) => hrefHistorico(p, { d: `${anio}-01` });
 /** ¿Cómo evolucionó [monto] en [medida]? Una variable con su medida: la ficha. */
 export const hrefMedida = (id: string, med: string) => hrefDato(e(id, { med }));
 /** ¿Qué subió más: [a] o [b]? Dos variables: Histórico en base 100, contra la inflación. */
-export const hrefSubio = (a: string, b: string) =>
-  `/historico/?${new URLSearchParams({ v: [e(a, { med: "real" }), e(b, { med: "real" })].map(encExpr).join(","), m: "b100" }).toString()}`;
+export const hrefSubio = (a: string, b: string, desde?: string) =>
+  `/historico/?${new URLSearchParams({ v: [e(a, { med: "real" }), e(b, { med: "real" })].map(encExpr).join(","), m: "b100", ...(desde ? { d: desde } : {}) }).toString()}`;
 
 export { todosLosPrincipales };
 
 // ---- las respuestas en el lugar (funciones puras sobre el Motor; las cuentas salen de los valores mostrados)
 /** Lo que se dibuja bajo una pregunta: cifra grande, fecha y detalle, minigráfico (desde `desde`) y cambios. */
-export interface Respuesta { cifra: string; fecha?: string; detalle?: string; v?: Vals; desde?: number; deltas?: DeltaProps[] }
+export interface Respuesta {
+  cifra: string; fecha?: string; detalle?: string; v?: Vals; desde?: number; deltas?: DeltaProps[];
+  /** Para el minigráfico: último índice a dibujar (si no, hasta el final), fechas del motor, formateador del valor, índice del dato de comparación,
+   *  segunda línea (con su leyenda) y mes de inicio efectivo. */
+  hasta?: number; F?: string[]; fmt?: (x: number) => string; cmp?: number; v2?: Vals; leyenda?: [string, string]; inicio?: string;
+}
 
 const signo = (d: number): 1 | -1 | 0 => (d > 0 ? 1 : d < 0 ? -1 : 0);
 /** Un cambio entre dos valores del mismo cálculo, con el texto del motor y el tono según la dirección de la variable. */
@@ -105,8 +120,10 @@ export function respuestaCompra(m: Motor, producto: string, salario: string): Re
     // Como el gráfico listo de la misma cuenta ("110 kg", lib/curiosidades.ts): entero desde 100 y con la unidad corta ("kg", "litros")
     const x = c.v[u] as number, unidad = c.unidad.split(" ")[0];
     const cifra = (Math.abs(x) >= 100 ? nf0 : nf1).format(x) + (unidad && unidad.length <= 8 && !/^\d/.test(unidad) ? " " + unidad : "");
+    const uni = unidad && unidad.length <= 8 && !/^\d/.test(unidad) ? " " + unidad : "";
     return {
       cifra, fecha: fmtMes(m.F[u]), detalle: c.unidad, v: c.v, desde: m.idxDe("2003-01"),
+      F: m.F, fmt: (y) => (Math.abs(y) >= 100 ? nf0 : nf1).format(y) + uni, cmp: ok(ant) ? u - 12 : undefined,
       deltas: ok(ant) ? [deltaDe(m, c, ant, c.v[u] as number, "vs hace un año")] : undefined,
     };
   } catch { return null; }
@@ -123,9 +140,9 @@ export function respuestaPresidente(m: Motor, p: Principal, presidente: string, 
     const rango = `${fmtMes(m.F[st.iniI])} → ${fmtMes(m.F[st.finI])}`;
     const cifra = `${m.fmtC(c, st.ini)} → ${m.fmtC(c, st.fin)}`;
     if (c.pct) {
-      return { cifra, fecha: rango, detalle: `Promedio del mandato de ${pr.n}: ${m.fmtC(c, st.prom)}`, v: c.v, desde: pr.i0 };
+      return { cifra, fecha: rango, detalle: `Promedio del mandato de ${pr.n}: ${m.fmtC(c, st.prom)}`, v: c.v, desde: pr.i0, hasta: st.finI, F: m.F, fmt: (x) => m.fmtC(c, x), cmp: st.iniI };
     }
-    return { cifra, fecha: rango, detalle: `Mandato de ${pr.n}`, v: c.v, desde: pr.i0, deltas: [deltaDe(m, c, st.ini, st.fin)] };
+    return { cifra, fecha: rango, detalle: `Mandato de ${pr.n}`, v: c.v, desde: pr.i0, hasta: st.finI, F: m.F, fmt: (x) => m.fmtC(c, x), cmp: st.iniI, deltas: [deltaDe(m, c, st.ini, st.fin)] };
   } catch { return null; }
 }
 
@@ -138,7 +155,7 @@ export function respuestaDesde(m: Motor, p: Principal, anio: string): Respuesta 
     while (j < u && !ok(c.v[j])) j++;
     if (u < 0 || j >= u || !ok(c.v[j])) return null;
     return {
-      cifra: `${m.fmtC(c, c.v[j])} → ${m.fmtC(c, c.v[u])}`, fecha: `${fmtMes(m.F[j])} → ${fmtMes(m.F[u])}`, detalle: c.unidad, v: c.v, desde: j,
+      cifra: `${m.fmtC(c, c.v[j])} → ${m.fmtC(c, c.v[u])}`, fecha: `${fmtMes(m.F[j])} → ${fmtMes(m.F[u])}`, detalle: c.unidad, v: c.v, desde: j, F: m.F, fmt: (x) => m.fmtC(c, x), cmp: j,
       deltas: [deltaDe(m, c, c.v[j] as number, c.v[u] as number)],
     };
   } catch { return null; }
@@ -155,23 +172,55 @@ export function respuestaMedida(m: Motor, monto: string, med: string): Respuesta
     // Montos en pesos o dólares: entero desde 100 y con la moneda adelante ("US$ 1.205"); el resto, con el formato del motor
     const x = c.v[u] as number, unidad = c.unidad.split(" ")[0];
     const cifra = /^(US\$|\$)/.test(unidad) ? `${unidad} ${(Math.abs(x) >= 100 ? nf0 : nf1).format(x)}` : m.fmtC(c, x);
+    const fmt = (y: number) => (/^(US\$|\$)/.test(unidad) ? `${unidad} ${(Math.abs(y) >= 100 ? nf0 : nf1).format(y)}` : m.fmtC(c, y));
     return {
-      cifra, fecha: fmtMes(m.F[u]), detalle: c.unidad, v: c.v, desde: m.idxDe("2003-01"),
+      cifra, fecha: fmtMes(m.F[u]), detalle: c.unidad, v: c.v, desde: m.idxDe("2003-01"), F: m.F, fmt, cmp: ok(ant) ? u - 12 : undefined,
       deltas: ok(ant) ? [deltaDe(m, c, ant, c.v[u] as number, "vs hace un año")] : undefined,
     };
   } catch { return null; }
 }
 
-/** ¿Qué subió más: [a] o [b]? Variación real acumulada de cada uno desde el primer mes en que los dos tienen dato, hasta el último mes en que los dos tienen. */
-export function respuestaSubio(m: Motor, a: string, b: string, S: Record<string, SerieMeta>): Respuesta | null {
+/** Primer y último mes (índices) en que los dos precios tienen dato, o null si no hay un tramo. */
+function tramoComun(ca: Calculo, cb: Calculo): [number, number] | null {
+  const n = Math.min(ca.v.length, cb.v.length);
+  let s = -1, u = -1;
+  for (let i = 0; i < n; i++) if (ok(ca.v[i]) && ok(cb.v[i])) { if (s < 0) s = i; u = i; }
+  return s < 0 || u <= s ? null : [s, u];
+}
+
+/** Los atajos "Desde" de "¿Qué subió más?": [mes AAAA-MM, texto]. El más viejo con datos de los dos, dic 2023, hace un año y este año (sin repetir meses ni pasar del último dato). */
+export function atajosSubio(m: Motor, a: string, b: string): [string, string][] {
+  const ea = e(a, { med: "real" }), eb = e(b, { med: "real" });
+  if (sinCalcular(m, ea) || sinCalcular(m, eb)) return [];
+  try {
+    const t = tramoComun(m.calc(ea), m.calc(eb));
+    if (!t) return [];
+    const [s, u] = t, vistos = new Set<string>(), out: [string, string][] = [];
+    const sumar = (i: number, txt: string) => {
+      const k = Math.max(s, i);
+      if (k >= u || vistos.has(m.F[k])) return;
+      vistos.add(m.F[k]); out.push([m.F[k], txt]);
+    };
+    sumar(s, `El más antiguo (${fmtMes(m.F[s])})`);
+    sumar(m.idxDe("2023-12"), "Dic-23");
+    sumar(u - 12, "Hace un año");
+    sumar(m.idxDe(`${m.F[u].slice(0, 4)}-01`), "Este año");
+    return out;
+  } catch { return []; }
+}
+
+/** ¿Qué subió más: [a] o [b]? Variación real acumulada de cada uno desde `desde` (AAAA-MM; si no hay, o es anterior, desde el primer mes en que los dos tienen dato) hasta el último mes en que los dos tienen. */
+export function respuestaSubio(m: Motor, a: string, b: string, S: Record<string, SerieMeta>, desde?: string): Respuesta | null {
   const ea = e(a, { med: "real" }), eb = e(b, { med: "real" });
   if (sinCalcular(m, ea) || sinCalcular(m, eb)) return null;
   try {
     const ca = m.calc(ea), cb = m.calc(eb);
-    const n = Math.min(ca.v.length, cb.v.length);
-    let s = -1, u = -1;
-    for (let i = 0; i < n; i++) if (ok(ca.v[i]) && ok(cb.v[i])) { if (s < 0) s = i; u = i; }
-    if (s < 0 || u <= s) return null;
+    const t = tramoComun(ca, cb);
+    if (!t) return null;
+    const u = t[1], pedido = desde ? m.idxDe(desde) : -1;
+    let s = Math.max(t[0], pedido);
+    while (s < u && !(ok(ca.v[s]) && ok(cb.v[s]))) s++;
+    if (s >= u) return null;
     const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
     const na = rotulo(a, S), nb = rotulo(b, S);
     // El % que se muestra (1 decimal) es el que se compara: si dan igual, se dice igual.
@@ -183,8 +232,11 @@ export function respuestaSubio(m: Motor, a: string, b: string, S: Record<string,
     const cifra = pa === pb ? `${cap(na)} y ${nb} ${pa < 0 ? "bajaron" : "subieron"} igual`
       : Math.max(pa, pb) < 0 ? `${cap(ga)} ${verbo(ga, "bajó", "bajaron")} menos que ${pe}`
       : `${cap(ga)} ${verbo(ga, "subió", "subieron")} más que ${pe}`;
+    // Gráfico base 100 en el mes de inicio, para comparar las dos líneas
+    const b100 = (c: Calculo): Vals => c.v.map((x, i) => (i >= s && i <= u && ok(x) ? (x / (c.v[s] as number)) * 100 : null));
     return {
-      cifra, fecha: `${fmtMes(m.F[s])} → ${fmtMes(m.F[u])}`, detalle: "Variación en pesos de hoy, desde el primer mes con datos de los dos",
+      cifra, fecha: `${fmtMes(m.F[s])} → ${fmtMes(m.F[u])}`, detalle: desde && s > t[0] ? "Variación en pesos de hoy, desde el inicio elegido" : "Variación en pesos de hoy, desde el primer mes con datos de los dos",
+      v: b100(ca), v2: b100(cb), leyenda: [na, nb], desde: s, hasta: u, F: m.F, fmt: (x) => nf1.format(x), cmp: s, inicio: m.F[s],
       deltas: [
         { texto: txt(pa), tono: "neutro", dir: signo(pa), contra: na },
         { texto: txt(pb), tono: "neutro", dir: signo(pb), contra: nb },

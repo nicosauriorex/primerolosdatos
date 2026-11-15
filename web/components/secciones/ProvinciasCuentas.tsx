@@ -3,6 +3,7 @@
 // de las 24 jurisdicciones, y el detalle de cada una. Todas las cuentas están en lib/provinciasCuentas.ts; acá solo se dibuja.
 // Estado en la URL: vista=cuentas, ind (id del indicador), anio, orden (desc | asc) y prov (provincia abierta).
 // El bloque de alícuotas de Ingresos Brutos (fase 3, ProvinciasAlicuotas.tsx) usa ib_act, ib_anio e ib_orden.
+import { HojaListo } from "./comunes";
 import { useCallback, useMemo, useState } from "react";
 import { useProvinciasCuentas } from "../useProvincias";
 import { Cargando } from "../ui";
@@ -73,7 +74,7 @@ function CuerpoC({ d, c, p, set, montado }: { d: DatosCuentas; c: Contexto; p: U
       <Capitulo id="prov-ranking" titulo="Provincia por provincia"
         acciones={vista ? <CompartirHoja href={href} titulo={titulo} onImagen={() => setImagen(true)} texto={resp ? `${resp.frase} Fuente: ${FUENTE_C}.` : undefined} /> : undefined}>
         <BarraVista items={items} onAbrir={() => setHoja(true)} />
-        <Hoja titulo="Ajustes: cuentas de las provincias" abierta={hoja} onCerrar={() => setHoja(false)}>
+        <HojaListo titulo="Ajustes: cuentas de las provincias" abierta={hoja} onCerrar={() => setHoja(false)}>
           {(cerrar) => (
             <div className="prov-hoja">
               {gruposIndicador(x).map(([g, ops]) => (
@@ -81,10 +82,9 @@ function CuerpoC({ d, c, p, set, montado }: { d: DatosCuentas; c: Contexto; p: U
               ))}
               {!I.fijo && <SeccionHoja titulo="Año"><OpcionesHoja etiqueta="Año" valor={String(anio)} opciones={opcionesAnioC(x0)} onElegir={(a) => set({ anio: Number(a) === def ? null : a })} /></SeccionHoja>}
               <SeccionHoja titulo="Orden"><OpcionesHoja etiqueta="Orden" valor={orden} opciones={ORDENES_C} onElegir={(v) => set({ orden: v === ORDEN_C_DEFECTO ? null : v })} /></SeccionHoja>
-              <button type="button" className="btn primario" onClick={() => cerrar()}>Listo</button>
             </div>
           )}
-        </Hoja>
+        </HojaListo>
         {!I.fijo && avisoPeriodoC(x) && <p className="note" role="status">{avisoPeriodoC(x)}</p>}
         {!vista ? <p className="note">No hay datos de {etiquetaPeriodo(x, anio)} para este indicador{I.id === "gasto_hab" || I.id === "recaud_hab" || I.fijo ? " (hace falta la población de la provincia en ese año)" : ""}.</p>
           : <Ranking v={vista} resaltar={abierta?.id ?? null} onAbrir={(id) => set({ prov: id })} />}

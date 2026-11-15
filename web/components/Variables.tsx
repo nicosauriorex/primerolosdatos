@@ -1,6 +1,7 @@
 "use client";
 // Selector de variables (árbol + búsqueda), ventana de información y fila de controles de una variable.
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useDatos } from "./DatosProvider";
 import { useConfig } from "./ConfigProvider";
 import { medidaInicial } from "@/lib/config";
@@ -11,7 +12,7 @@ import { ORDEN_RAIZ, textoBusqueda } from "@/lib/catalogo";
 import { esOculta, rutaPublica } from "@/lib/nombres";
 import { catListado, colapsarRegiones, listables, ordenarListado, otrasRegiones } from "@/lib/regiones";
 import { INFO_CAT, INFO_CORTA } from "@/lib/info";
-import type { Expr, Motor, SerieMeta } from "@/lib/motor";
+import { sufijoMM, partirMM, type Expr, type Motor, type SerieMeta } from "@/lib/motor";
 
 interface Nodo { nombre: string; hijos: Map<string, Nodo>; items: SerieMeta[]; total: number }
 const nodoNuevo = (nombre: string): Nodo => ({ nombre, hijos: new Map(), items: [], total: 0 });
@@ -47,7 +48,8 @@ export function BotonInfo({ id }: { id: string }) {
     <>
       <button type="button" className="info-btn" title="Qué es y cómo se calcula" aria-label={nombre ? `Qué es ${nombre}` : "Qué es esta variable"} aria-haspopup="dialog"
         onClick={(ev) => { ev.stopPropagation(); setAbierto(true); }}>i</button>
-      {abierto && <Info id={id} onCerrar={() => setAbierto(false)} />}
+      {/* Portal al <body>: dentro del renglón del selector le llegaban los estilos de los botones de la lista del Modal (cruz gigante, columna apretada) */}
+      {abierto && createPortal(<Info id={id} onCerrar={() => setAbierto(false)} />, document.body)}
     </>
   );
 }
@@ -84,6 +86,14 @@ function Info({ id, onCerrar }: { id: string; onCerrar: () => void }) {
   );
 }
 
+const Svg = ({ children }: { children: React.ReactNode }) => (
+  <svg className="vr-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{children}</svg>
+);
+const IconoFlechaDer = () => <Svg><path d="M5 12h14M13 6l6 6-6 6" /></Svg>;
+const IconoFlechaIzq = () => <Svg><path d="M19 12H5M11 6l-6 6 6 6" /></Svg>;
+const IconoChevron = () => <Svg><path d="M9 6l6 6-6 6" /></Svg>;
+const IconoCarpeta = () => <Svg><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></Svg>;
+
 /** Texto largo plegado a 2 líneas: "ver más" aparece solo si no entra. */
 function TextoPlegable({ html }: { html: string }) {
   const [abierto, setAbierto] = useState(false);
@@ -103,12 +113,14 @@ function IntroCategoria({ nombre, reco, onReco }: { nombre: string; reco: { id: 
   const [abierto, setAbierto] = useState(false);
   return (
     <li className="info-cat intro-cat">
-      <p>{INFO_CORTA[nombre].texto}</p>
-      <div className="intro-acc">
-        {reco && <button type="button" className="btn reco" onClick={() => onReco(reco)}>Recomendado: {reco.nombre}</button>}
-        <button type="button" className="ver-mas" aria-expanded={abierto} onClick={() => setAbierto(!abierto)}>{abierto ? "ver menos" : "ver más"}</button>
-      </div>
+      <p>{INFO_CORTA[nombre].texto}{" "}<button type="button" className="ver-mas" aria-expanded={abierto} onClick={() => setAbierto(!abierto)}>{abierto ? "ver menos" : "ver más"}</button></p>
       {abierto && <div className="info-larga" dangerouslySetInnerHTML={{ __html: INFO_CAT[nombre] }} />}
+      {reco && (
+        <div className="vr-reco">
+          <span className="vr-reco-rotulo">Recomendado</span>
+          <button type="button" className="vr-reco-btn" onClick={() => onReco(reco)}><span>{reco.nombre}</span><IconoFlechaDer /></button>
+        </div>
+      )}
     </li>
   );
 }
@@ -160,9 +172,9 @@ function PickerInterior({ pedido }: { pedido: PickerPedido }) {
     // cada rubro o producto una vez; con "patagonia" sale con esa región ya elegida
     const res: [number, SerieMeta][] = colapsarRegiones(crudo.map((r) => r[1]), sub).map((s) => [0, s]);
     cuerpo = res.slice(0, 150).map(([, s]) => (
-      <li key={s.id}>
+      <li key={s.id} className="vr-var">
         <button type="button" title={s.desc || ""} onClick={() => elegir(s.id)}>
-          <span>{s.n}<span className="ruta">{rutaPublica(s.cat).join(" › ")} · {s.u}</span></span>
+          <span><span className="vr-nombre">{s.n}</span><span className="ruta">{rutaPublica(s.cat)[0]} · {s.u}</span></span>
           <Insignia s={s} esIndice={motor ? motor.esIndice(s) : false} />
         </button>
         <BotonInfo id={s.id} />
@@ -183,6 +195,7 @@ function PickerInterior({ pedido }: { pedido: PickerPedido }) {
         {camino.map((c, k) => <span key={k}> › <button type="button" onClick={() => setCamino(camino.slice(0, k + 1))}>{c}</button></span>)}
       </>
     );
+    const carpetas = [...nodo.hijos.values()];
     cuerpo = (
       <>
         {camino.length > 0 && INFO_CAT[ultimo] && (
@@ -191,21 +204,25 @@ function PickerInterior({ pedido }: { pedido: PickerPedido }) {
                 onReco={(r) => elegir(r.id, r.med, r.esc)} />
             : <li className="info-cat"><TextoPlegable key={ultimo} html={INFO_CAT[ultimo]} /></li>
         )}
-        {[...nodo.hijos.values()].map((h) => (
-          <li key={h.nombre} className="carpeta">
-            <button type="button" onClick={() => { setCamino([...camino, h.nombre]); setTodo(false); setQ(""); if (conPunteroFino()) inp.current?.focus(); }}>
-              <span>{h.nombre}{INFO_CAT[h.nombre] ? <span className="tiene-info" title="Tiene explicación"> ⓘ</span> : null}</span>
-              <span className="cuenta">{h.total}</span>
-            </button>
-          </li>
-        ))}
+        {nodo.items.length > 0 && <li className="vr-rotulo" role="presentation">Variables</li>}
         {nodo.items.map((s) => (
-          <li key={s.id}>
+          <li key={s.id} className="vr-var">
             <button type="button" title={s.desc || ""} onClick={() => elegir(s.id)}>
-              <span>{s.n}<span className="ruta">{s.u}</span></span>
+              <span><span className="vr-nombre">{s.n}</span><span className="ruta">{s.u}</span></span>
               <Insignia s={s} esIndice={motor ? motor.esIndice(s) : false} />
             </button>
             <BotonInfo id={s.id} />
+          </li>
+        ))}
+        {carpetas.length > 0 && <li className="vr-rotulo" role="presentation">{camino.length === 0 ? "Categorías" : nodo.items.length ? "Más series, por fuente" : "Carpetas"}</li>}
+        {carpetas.map((h) => (
+          <li key={h.nombre} className="carpeta">
+            <button type="button" onClick={() => { setCamino([...camino, h.nombre]); setTodo(false); setQ(""); if (conPunteroFino()) inp.current?.focus(); }}>
+              <IconoCarpeta />
+              <span className="vr-nombre">{h.nombre}{INFO_CAT[h.nombre] ? <span className="tiene-info" title="Tiene explicación"> ⓘ</span> : null}</span>
+              <span className="cuenta">{h.total}</span>
+              <IconoChevron />
+            </button>
           </li>
         ))}
       </>
@@ -218,7 +235,13 @@ function PickerInterior({ pedido }: { pedido: PickerPedido }) {
         <input ref={inp} type="search" value={q} autoComplete="off" placeholder={pedido.titulo || "Buscar: ropa, alquiler, salario, reservas, asado…"}
           onChange={(ev) => setQ(ev.target.value)}
           onKeyDown={(ev) => { if (ev.key === "Enter") { if (primero.current) elegir(primero.current); } }} />
-        <div className="migas">{migas}</div>
+        <div className="vr-nav">
+          {camino.length > 0 && (
+            <button type="button" className="vr-atras" aria-label={`Volver a ${camino.length > 1 ? camino[camino.length - 2] : "todas las variables"}`}
+              onClick={() => { setCamino(camino.slice(0, -1)); setTodo(false); setQ(""); }}><IconoFlechaIzq /></button>
+          )}
+          <div className="migas">{migas}</div>
+        </div>
       </header>
       <ul>{cuerpo}</ul>
       <footer>{pie}</footer>
@@ -235,7 +258,7 @@ function SelectorMedida({ A, med, motor, onElegir }: { A: SerieMeta; med: string
   const porDefecto = (g: (typeof grupos)[number]) => g.unir(g.dims.map((d) => d.opciones.find((o) => o[0] === config.dolar)?.[0] ?? d.opciones[0][0]));
   const medActual = act.g.unir(act.v);
   return (
-    <Desplegable className="med-desp" etiqueta={motor.etiquetaMedida(A, medActual)}>
+    <Desplegable className="med-desp" etiqueta={motor.etiquetaMedida(A, medActual + sufijoMM(med))}>
       {grupos.length > 1 && (
         <div className="seg" role="group" aria-label="Tipo de medida">
           {grupos.map((g) => <button key={g.k} type="button" aria-pressed={g === act.g || g.k === act.g.k} onClick={() => { if (g.k !== act.g.k) onElegir(porDefecto(g)); }}>{g.nombre}</button>)}
@@ -344,7 +367,7 @@ export function RenglonVariable({ e, onChange, color, quitable, sinRel, onMover,
     <div className="fila-var limpia">
       {color && <span className="punto" style={{ ["--c" as string]: `var(${color})` }} />}
       <button type="button" className="nombre-var" title={`${A.n} · ${resumen}`} onClick={() => setAbierta(true)}>
-        <b>{A.n}</b><span className="resumen"> · {resumen}</span>
+        <b>{A.n}</b><span className="resumen">{resumen}</span>
       </button>
       {error && <span className="error" role="alert">No se pudieron bajar los datos.</span>}
       {verEnSalarios && (
@@ -369,7 +392,7 @@ function Grupo({ titulo, children }: { titulo: string; children: React.ReactNode
 function BotonesConfigurar({ d, onAceptar }: { d: Expr; onAceptar: (e: Expr) => void }) {
   const cerrarModal = useCerrarModal();
   return (
-    <footer>
+    <footer className="config-pie">
       <button type="button" className="btn" onClick={() => cerrarModal()}>Cancelar</button>
       <button type="button" className="btn primario" onClick={() => cerrarModal(() => onAceptar(d))}>Aceptar</button>
     </footer>
@@ -398,7 +421,7 @@ function ConfigurarVariable({ e0, sinRel, onAceptar, onCerrar }: { e0: Expr; sin
   const esMon = (g?: { k: string }) => !!g && (g.k === "pesos" || g.k === "dolares");
   const monedaG = grupos.filter(esMon), varG = grupos.find((g) => g.k === "var"), otrosG = grupos.filter((g) => !esMon(g) && g !== varG);
   const enMoneda = esMon(act.g);
-  const setMed = (m: string) => setD({ ...d, med: m });
+  const setMed = (m: string) => setD({ ...d, med: m + (motor.permiteMM(A, m) ? sufijoMM(d.med) : "") });   // el suavizado se conserva solo mientras la medida sea un valor
   const porDefecto = (g: (typeof grupos)[number]) => g.unir(g.dims.map((x) => x.opciones.find((o) => o[0] === config.dolar)?.[0] ?? x.opciones[0][0]));
   const setDim = (i: number, v: string) => { const nv = act.v.slice(); nv[i] = v; setMed(act.g.unir(nv)); };
 
@@ -427,6 +450,8 @@ function ConfigurarVariable({ e0, sinRel, onAceptar, onCerrar }: { e0: Expr; sin
     },
   });
   const hayMedida = !conRel && escV !== "pib";
+  const medBase = partirMM(medAct)[0];
+  const haySuave = hayMedida && !escV && motor.permiteMM(A, medBase);
   const regiones = otrasRegiones(metas, A.id);   // otras regiones del mismo rubro o producto (el IPC y los precios promedio vienen por región)
   return (
     <>
@@ -463,6 +488,12 @@ function ConfigurarVariable({ e0, sinRel, onAceptar, onCerrar }: { e0: Expr; sin
           )}
           {hayMedida && como.length < 2 && !enMoneda && (
             <Grupo titulo="Cómo se mide"><span className="lbl">{motor.esIndice(A) ? "Índice: se ve tal cual" : A.u}</span></Grupo>
+          )}
+          {haySuave && (
+            <Grupo titulo="Suavizado">
+              <Seg valor={sufijoMM(d.med)} opciones={[["", "Sin"], ["_mm3", "Promedio 3 meses"], ["_mm12", "Promedio 12 meses"]]} onElegir={(v) => setD({ ...d, med: medBase + v })} />
+              <span className="cfg-ayuda">Cada mes muestra el promedio de ese mes y los anteriores; si falta algún dato, no se dibuja.</span>
+            </Grupo>
           )}
           {escs.length > 0 && !conRel && (
             <Grupo titulo="Total, por habitante o % del PIB">

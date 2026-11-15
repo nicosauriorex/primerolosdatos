@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { IconoAbajo } from "./Iconos";
 
 /** Grupo de botones. `valor` es un string (selección única) o un Set (múltiple). */
 export function Seg({ opciones, valor, onElegir, id }: {
@@ -291,6 +292,31 @@ export function Selector({ etiqueta, valor, opciones, onElegir, className = "" }
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+/** Plegable sin caja: un renglón con el resumen y un chevron que gira, una línea de 1 px abajo y una región que abre y cierra con
+ *  animación de alto y opacidad (`grid-template-rows: 0fr → 1fr`; sin animar con "reducir movimiento").
+ *  Controlado (`abierto` + `onCambiar`) o no controlado (`inicial`). Los hijos quedan montados; cerrado, `inert` los saca del foco.
+ *  `nivel`: "renglon" (por defecto, texto normal), "chico" (renglón de 40 px, texto chico y gris). */
+export function Plegable({ resumen, abierto, onCambiar, inicial = false, className, children, nivel }: {
+  resumen: ReactNode; abierto?: boolean; onCambiar?: (a: boolean) => void; inicial?: boolean; className?: string; children: ReactNode; nivel?: "renglon" | "chico";
+}) {
+  const [interno, setInterno] = useState(inicial);
+  const controlado = abierto !== undefined;
+  const esta = controlado ? abierto : interno;
+  const id = useId();
+  const alternar = () => { const n = !esta; if (!controlado) setInterno(n); onCambiar?.(n); };
+  return (
+    <div className={`plegable plegable-nivel-${nivel ?? "renglon"}${className ? " " + className : ""}`} data-abierto={esta ? "true" : "false"}>
+      <button type="button" className="plegable-cab" aria-expanded={esta} aria-controls={id} onClick={alternar}>
+        <span className="plegable-resumen">{resumen}</span>
+        <span className="plegable-chev" aria-hidden="true"><IconoAbajo /></span>
+      </button>
+      <div className="plegable-region" id={id} inert={!esta} aria-hidden={!esta}>
+        <div className="plegable-interior">{children}</div>
+      </div>
     </div>
   );
 }
