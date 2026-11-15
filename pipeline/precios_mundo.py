@@ -14,6 +14,10 @@ Fuentes (todas sin clave; se verificaron el 2026-11-09):
      desde 2026 sigue prc_hicp_minr (ECOICOP 2, unidad I25, el total es TOTAL). Se empalman en el último mes en común,
      igual que la OCDE: solo los códigos que no cambian de contenido (08, 09 y 12 sí cambian y quedan hasta dic-2025).
    - Brasil: IBGE, SIDRA tabla 7060 (IPCA, variación mensual por grupo; se encadena a un índice).
+   - EE.UU. y Chile: la OCDE dejó de publicar sus divisiones (EE.UU. desde ene-2025, Chile desde ene-2024; siguen el total
+     y alimentos). Se encadenan con la fuente nacional en el último mes en común (spec docs/specs/precios-mundo-bls-ine.md):
+     EE.UU., BLS (API pública v1, IPC-U sin desestacionalizar; cada división se arma con grupos del BLS y sus pesos de dic-2024);
+     Chile, INE (planilla del IPC base 2023, COICOP 2018; dic-2023 sale de la variación mensual de ene-2024).
 3) Tipo de cambio mensual contra el dólar: OCDE, DSD_STES@DF_FINMARK, medida CC (moneda local por US$).
 
 Todo pasa por la caché de datos/cache/ (si la fuente falla se usa la última copia). El JSON final también queda en
@@ -228,6 +232,148 @@ def _ibge_ipc():
     return red.cache_json("pm_ibge_ipc", bajar) or {}
 
 
+# EE.UU.: división de la OCDE -> {grupo del BLS: peso relativo de dic-2024 (IPC-U, tabla "Relative importance of components",
+# https://www.bls.gov/cpi/tables/relative-importance/2024.htm)}. Peso negativo = se resta (los seguros van a "varios" como en COICOP).
+# Control contra la OCDE en 2024 en la spec.
+BLS_DIV = {
+    "CP02": {"SAF116": 0.835, "SEGA": 0.482},
+    "CP03": {"SAA": 1.0},
+    "CP04": {"SEHA": 7.499, "SEHC": 26.282, "SAH2": 4.312},
+    "CP05": {"SAH3": 1.0},
+    "CP06": {"SAM": 8.273, "SEME": -0.793},
+    "CP07": {"SAT": 16.571, "SETE": -2.796},
+    "CP08": {"SAE2": 1.0},
+    "CP09": {"SAR": 1.0},
+    "CP10": {"SAE1": 1.0},
+    "CP11": {"SEFV": 1.0},
+    "CP12": {"SAG": 2.925, "SEGA": -0.482, "SETE": 2.796, "SEME": 0.793},
+}
+# EE.UU., productos de alimentos (la OCDE nunca los publicó): la serie sale entera del BLS desde 2017, con los mismos pesos
+# de dic-2024. Carne = carnes + aves (el ICP mide carne sin pescado); leche = lácteos + huevos.
+BLS_PROD = {
+    "carne": {"SAF11211": 0.919, "SEFF": 0.288},
+    "pan": {"SAF111": 1.0},
+    "leche": {"SEFJ": 0.741, "SEFH": 0.172},
+    "frutas": {"SEFK": 1.0},
+    "verduras": {"SEFL": 1.0},
+}
+INE_CHL = ("https://www.ine.gob.cl/docs/default-source/%C3%ADndice-de-precios-al-consumidor/cuadros-estadisticos/"
+           "base-anual-2023_100/series-de-tiempo/ipc-xls.xlsx")
+# Chile: división de la OCDE -> divisiones del INE (COICOP 2018). 08 y 09 cambian de contenido y quedan en dic-2023;
+# 12 de COICOP 1999 = 12 (seguros y servicios financieros) + 13 (bienes y servicios diversos) de COICOP 2018.
+INE_DIV = {f"CP{i:02d}": [i] for i in (2, 3, 4, 5, 6, 7, 10, 11)} | {"CP12": [12, 13]}
+
+
+def _bls_ipc():
+    """{grupo del BLS: {mes: índice}} desde 2017 (API pública v1: hasta 25 series y 10 años por pedido, así que un pedido
+    por cada tramo de 10 años; oct-2025 no existe). Las divisiones solo usan desde 2024; los productos, desde 2017."""
+    def bajar():
+        grupos = sorted({g for c in (*BLS_DIV.values(), *BLS_PROD.values()) for g in c})
+        out = {}
+        for desde in range(int(DESDE[:4]), date.today().year + 1, 10):
+            cuerpo = json.dumps({"seriesid": [f"CUUR0000{g}" for g in grupos], "startyear": str(desde),
+                                 "endyear": str(min(desde + 9, date.today().year))}).encode()
+            d = json.loads(red.bajar("https://api.bls.gov/publicAPI/v1/timeseries/data/", data=cuerpo,
+                                     headers={"Content-Type": "application/json"}, timeout=120))
+            if d.get("status") != "REQUEST_SUCCEEDED":
+                raise RuntimeError(f"BLS: {d.get('status')} {d.get('message')}")
+            for s in d["Results"]["series"]:
+                out.setdefault(s["seriesID"][8:], {}).update(
+                    {f"{x['year']}-{x['period'][1:]}": float(x["value"]) for x in s["data"]
+                     if re.fullmatch(r"M(0[1-9]|1[0-2])", x["period"]) and re.fullmatch(r"\d+(\.\d+)?", x["value"])})
+        if set(out) != set(grupos):
+            raise RuntimeError(f"BLS: faltan grupos {sorted(set(grupos) - set(out))}")
+        # un dato roto hace fallar la descarga: cache_json sigue con la copia anterior en vez de guardarlo
+        if (rotos := [g for g in grupos if _salto(out[g])]):
+            raise RuntimeError(f"BLS: salto mensual de más de 30 % en {rotos}")
+        return out
+    return red.cache_json("pm_bls_ipc", bajar) or {}
+
+
+def _ine_chl():
+    """{división del INE (1 a 13): {"pond": peso, "idx": {mes: índice}}}, con dic-2023 deducido de la variación de ene-2024."""
+    def bajar():
+        import openpyxl
+        wb = openpyxl.load_workbook(io.BytesIO(red.bajar(INE_CHL, ua="Mozilla/5.0", timeout=180)), read_only=True, data_only=True)
+        ws = wb.active
+        ws.reset_dimensions()  # sin esto, en modo read_only se ve una sola fila
+        out, cab = {}, None
+        for fila in ws.iter_rows(values_only=True):
+            if cab is None:
+                if fila and fila[0] == "Año":
+                    cab = {n: i for i, n in enumerate(fila) if n}
+                continue
+            anio, mes, div, grupo = fila[cab["Año"]], fila[cab["Mes"]], fila[cab["División"]], fila[cab["Grupo"]]
+            if div is None or grupo is not None or anio is None or fila[cab["Índice"]] is None:
+                continue
+            d = out.setdefault(str(int(div)), {"pond": float(fila[cab["Ponderación"]]), "idx": {}})
+            t = f"{int(anio)}-{int(mes):02d}"
+            d["idx"][t] = float(fila[cab["Índice"]])
+            if t == "2024-01":
+                d["idx"]["2023-12"] = round(d["idx"][t] / (1 + float(fila[cab["Variación Mensual (%)"]]) / 100), 4)
+        if cab is None or len(out) != 13 or any("2023-12" not in d["idx"] for d in out.values()):
+            raise RuntimeError("INE Chile: la planilla cambió de forma")
+        if (rotos := [k for k, d in out.items() if _salto(d["idx"])]):
+            raise RuntimeError(f"INE Chile: salto mensual de más de 30 % en las divisiones {rotos}")
+        return out
+    return red.cache_json("pm_ine_chl", bajar) or {}
+
+
+def _combinar(componentes, base=None):
+    """Índice de Laspeyres con base 100 en el mes `base`: componentes = [(peso, {mes: índice})]. Con base=None los índices ya
+    están en la base de los pesos (INE: promedio 2023 = 100) y se promedian tal cual. Un mes sin algún componente queda afuera."""
+    if base is not None and any(base not in s for _, s in componentes):
+        return {}
+    meses = set.intersection(*[set(s) for _, s in componentes])
+    total = sum(w for w, _ in componentes)
+    return {m: sum(w * s[m] / (s[base] if base else 100) for w, s in componentes) / total * 100 for m in sorted(meses)}
+
+
+def _salto(s, desde="2023-06", tope=0.3):
+    """Primer salto mensual de más de `tope` (un empalme mal hecho o un dato roto se ve así): (mes, mes siguiente, variación) o None."""
+    ms = sorted(m for m in s if m >= desde)
+    for a, b in zip(ms, ms[1:]):
+        if abs(s[b] / s[a] - 1) > tope:
+            return a, b, s[b] / s[a] - 1
+    return None
+
+
+def _encadenar(vieja, nueva):
+    """Sigue `vieja` desde su último mes con la variación de `nueva` (ese mes tiene que estar en `nueva`)."""
+    m = max(vieja)
+    if m not in nueva:
+        return vieja
+    return {**vieja, **{t: round(x * vieja[m] / nueva[m], 4) for t, x in nueva.items() if t > m}}
+
+
+def _completar_usa_chl(ocde):
+    """Alarga en `ocde` las divisiones de EE.UU. (BLS) y Chile (INE) que la OCDE dejó de publicar.
+    Devuelve {país: último mes de la OCDE en las divisiones empalmadas} para el texto de la página."""
+    empalmes = {}
+
+    def poner(pais, cod, nueva):
+        k = f"{pais}|{cod}"
+        serie = _encadenar(ocde[k], nueva)
+        if serie is ocde[k]:
+            return
+        # control: un empalme mal hecho se ve como un salto enorme; esa división queda solo con la OCDE (no corta la corrida)
+        if (sal := _salto(serie)):
+            print(f"  AVISO {k}: salto de {sal[2]:+.0%} de {sal[0]} a {sal[1]}; no se empalma")
+            return
+        empalmes.setdefault(pais, set()).add(max(ocde[k]))
+        ocde[k] = serie
+
+    bls = _bls_ipc()
+    for cod, comp in BLS_DIV.items():
+        if f"USA|{cod}" in ocde and bls and all(g in bls for g in comp):
+            poner("USA", cod, _combinar([(w, bls[g]) for g, w in comp.items()], max(ocde[f"USA|{cod}"])))
+    ine = _ine_chl()
+    for cod, divs in INE_DIV.items():
+        if f"CHL|{cod}" in ocde and ine and all(str(d) in ine for d in divs):
+            poner("CHL", cod, _combinar([(ine[str(d)]["pond"], ine[str(d)]["idx"]) for d in divs]))
+    return {p: max(ms) for p, ms in empalmes.items()}
+
+
 # ------------------------------------------------------------------ 3) tipo de cambio
 def _tc_ocde():
     def bajar():
@@ -245,6 +391,30 @@ def _alinear(d, meses):
     return [None if d is None or d.get(m) is None else round(float(d[m]), 4) for m in meses]
 
 
+MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+
+
+def _notas_estimado(empalmes, usa_prod=()):
+    """Texto de "Cómo se mide" para los países cuya inflación por rubro sigue con la fuente nacional (fechas calculadas)."""
+    def mes(t):
+        return f"{MESES_CORTOS[int(t[5:]) - 1]}-{t[2:4]}"
+    notas = {}
+    if "USA" in empalmes:
+        notas["USA"] = (f"la inflación por rubro es la de la OCDE hasta {mes(empalmes['USA'])} y después la del BLS "
+                        "(Oficina de Estadísticas Laborales), armando cada rubro con los grupos de su IPC y sus pesos.")
+    if usa_prod:
+        cortos = {"carne": "carne", "pan": "pan", "leche": "lácteos", "frutas": "frutas", "verduras": "verduras"}
+        nombres = [cortos.get(r, r) for r in usa_prod]
+        lista = ", ".join(nombres[:-1]) + " y " + nombres[-1] if len(nombres) > 1 else nombres[0]
+        frase = f"{lista[0].upper()}{lista[1:]}: la inflación sale toda del BLS desde 2017, porque la OCDE no los publica."
+        notas["USA"] = f"{notas['USA']} {frase}" if "USA" in notas else frase
+    if "CHL" in empalmes:
+        notas["CHL"] = (f"la inflación por rubro es la de la OCDE hasta {mes(empalmes['CHL'])} y después la del INE "
+                        "(Instituto Nacional de Estadísticas, IPC base 2023). Comunicación y Recreación siguen solo con la OCDE "
+                        "porque el INE cambió lo que incluyen.")
+    return notas
+
+
 def construir_json():
     """Arma el dict de precios_mundo.json. Si el ICP no se puede bajar y no hay copia, devuelve None."""
     print("Precios en el mundo: bajando ICP, IPC por rubro y tipos de cambio...")
@@ -257,6 +427,10 @@ def construir_json():
         return None
     meses = _meses()
     ocde, eu, br, tc = _ocde_ipc(), _eurostat_ipc(), _ibge_ipc(), _tc_ocde()
+    empalmes = _completar_usa_chl(ocde)
+    bls = _bls_ipc()
+    usa_prod = {rid: c for rid, comp in BLS_PROD.items()
+                if bls and all(g in bls for g in comp) and (c := _combinar([(w, bls[g]) for g, w in comp.items()], "2024-12"))}
     ipc = {}
     for rid, r in RUBROS.items():
         por = {}
@@ -267,6 +441,8 @@ def construir_json():
                 s = eu.get(r["eu"])
             elif fuente == "ibge" and r["br"]:
                 s = br.get(r["br"])
+            elif pais == "USA" and rid in usa_prod:
+                s = usa_prod[rid]
             else:
                 continue
             if s and any(m in s for m in meses):
@@ -282,7 +458,9 @@ def construir_json():
         "paises": PAISES, "medido": {a: medido[a] for a in sorted(medido)}, "fechas": meses, "ipc": ipc, "tc": tcs,
         "sin_datos": SIN_DATOS,
         "notas_pais": {"EA": "El nivel medido es el promedio simple de Alemania, Francia, Italia y España."},
-        "fuente": "Banco Mundial (Programa de Comparación Internacional, ICP); OCDE; Eurostat; IBGE; INDEC",
+        # de dónde sale la inflación por rubro con la que se estima mes a mes (se muestra en "Cómo se mide")
+        "notas_estimado": _notas_estimado(empalmes, usa_prod),
+        "fuente": "Banco Mundial (Programa de Comparación Internacional, ICP); OCDE; Eurostat; IBGE; BLS (EE.UU.); INE (Chile); INDEC",
     }
     (CACHE / "precios_mundo.json").write_text(json.dumps(datos, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     llenos = sum(1 for r in ipc.values() for s in r.values() if s)

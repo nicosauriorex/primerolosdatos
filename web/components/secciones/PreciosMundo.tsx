@@ -17,7 +17,7 @@ import { FilaAjuste, HojaListo } from "./comunes";
 import { Pildoras } from "./Ranking";
 import { fmtMes, nf0, nf1, norm, ok } from "@/lib/formato";
 import {
-  ARG, DICHO_PAIS, DOLARES, PAISES_DEF, aniosMedidos, argDesdeMotor, compararPorPresidente, compararPorRubro, compararPrecios, frasePrecios, niveles,
+  ARG, DICHO_PAIS, DOLARES, PAISES_DEF, aniosMedidos, argDesdeMotor, compararPorPresidente, compararPorRubro, presidentesSinDato, fraseSinPresidentes, compararPrecios, frasePrecios, niveles,
   opcionesPeriodo, periodoDe, referencias,
   type ArgPM, type DatosPM, type Dolar, type FilaPrecio, type Niveles,
 } from "@/lib/preciosMundo";
@@ -125,6 +125,8 @@ function Cuerpo({ m, d, PRES, p, set }: { m: Motor; d: DatosPM; PRES: Pres[]; p:
   const comunRubro = fechaComun(porRubro.filas);
   const barrasRubro = rubrosOrd.map((f) => barraDe(f, comunRubro));
   const porPres = useMemo(() => compararPorPresidente(d, arg, rid, ref, contra, PRES, m.F, dolar), [d, arg, rid, ref, contra, PRES, m.F, dolar]);
+  const presSin = useMemo(() => presidentesSinDato(d, PRES, m.F, porPres), [d, PRES, m.F, porPres]);
+  const avisoPres = fraseSinPresidentes(presSin, rubro.n, dichoContra);
   const barrasPres = porPres.map((f) => ({ ...barraDe(f, null), sub: f.fecha, nota2: f.cierre ? `al cierre ${txtDif(f.cierre.dif)}` : undefined }));
 
   // ---- opciones de "Contra": el mundo primero, después la región y los países con dato
@@ -145,7 +147,7 @@ function Cuerpo({ m, d, PRES, p, set }: { m: Motor; d: DatosPM; PRES: Pres[]; p:
     filas: rubrosOrd, soloMedido: [], refNombre: nombreRef, dolar, fuente: d.fuente, enc: "Rubro", contraDicho: dichoContra,
   } : null);
   const vistaPres = (): VistaCtx | null => (porPres.length ? {
-    tipo: "ctx-precios", titulo: `${rubro.n}: precios por presidente`, frase: `${rubro.n}: precios de ${dichoRef} contra ${dichoContra}, promedio de cada presidencia.`,
+    tipo: "ctx-precios", titulo: `${rubro.n}: precios por presidente`, frase: `${rubro.n}: precios de ${dichoRef} contra ${dichoContra}, promedio de cada presidencia.${avisoPres ? ` ${avisoPres}` : ""}`,
     filas: porPres.map((f) => (f.cierre ? { ...f, fecha: `${f.fecha} · al cierre (${f.cierre.fecha}): ${txtDif(f.cierre.dif)}` } : f)), soloMedido: [], refNombre: nombreRef, dolar, fuente: d.fuente, enc: "Presidente", orden: "fijo", contraDicho: dichoContra,
   } : null);
   const compartir = (cual: string, crear: () => VistaCtx | null) => (
@@ -223,6 +225,9 @@ function Cuerpo({ m, d, PRES, p, set }: { m: Motor; d: DatosPM; PRES: Pres[]; p:
             <GraficoBarrasH filas={barrasPres} etiqueta={`${rubro.n} por presidente: ${nombreRef} contra ${dichoContra}, promedio del mandato`}
               elegida={periodo.tipo === "pres" ? periodo.id : undefined} onElegir={(id) => set({ pqa: periodo.tipo === "pres" && periodo.id === id ? null : `p-${id}` })} fmtEje={fmtEje} escala={escala} />
           )}
+          {barrasPres.length > 0 && presSin.length > 0 && (
+            <p className="note" role="status">{avisoPres}</p>
+          )}
         </Columna>
       </div>
 
@@ -234,6 +239,7 @@ function Cuerpo({ m, d, PRES, p, set }: { m: Motor; d: DatosPM; PRES: Pres[]; p:
         <p className="note">«Medido» es lo que midió el Banco Mundial (Programa de Comparación Internacional, ICP: {aniosMedidos(d).join(", ")}). «Estimado» es nuestra cuenta mes a mes desde la última medición, con la inflación del rubro y el tipo de cambio de cada país. Lo estimado puede desviarse de la próxima medición.
           {" "}Con cepo o brecha alta, el nivel en dólares depende mucho del dólar elegido. No se comparan calidades ni impuestos por separado.</p>
         <p className="note">Fuente: {d.fuente}. La zona euro es el promedio simple de Alemania, Francia, Italia y España en lo medido, y el índice armonizado de la zona en lo estimado.</p>
+        {Object.entries(d.notas_estimado ?? {}).map(([c, t]) => <p key={c} className="note">{d.paises[c] ?? c}: {t}</p>)}
       </details>
     </Capitulo>
   );

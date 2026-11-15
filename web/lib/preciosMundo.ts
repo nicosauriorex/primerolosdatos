@@ -16,6 +16,7 @@ export interface DatosPM {
   tc: Record<string, (number | null)[]>;                             // país -> moneda local por US$
   sin_datos: Record<string, string>;
   notas_pais: Record<string, string>;
+  notas_estimado?: Record<string, string>;                           // país -> de dónde sale su inflación por rubro
   fuente: string;
 }
 export type Dolar = "oficial" | "blue";
@@ -368,6 +369,23 @@ export function compararPorRubro(d: DatosPM, arg: ArgPM, ref: string, contra: st
     if (!fechaTxt && f.modo === "estimado") fechaTxt = r.fechaTxt;
   }
   return { filas, fechaTxt };
+}
+
+/** Aviso cuando un presidente queda sin barra: "Sin Milei: no hay datos de carne en México para ese mandato." ("" si no falta ninguno). */
+export function fraseSinPresidentes(sin: string[], rubroN: string, dichoContra: string): string {
+  if (!sin.length) return "";
+  return `Sin ${sin.join(" ni ")}: no hay datos de ${rubroN.toLowerCase()} en ${dichoContra} para ${sin.length > 1 ? "esos mandatos" : "ese mandato"}.`;
+}
+
+/** Presidentes del período que no tienen fila en `compararPorPresidente` (ni estimado ni medición en su mandato). */
+export function presidentesSinDato(d: DatosPM, PRES: Pres[], F: string[], filas: FilaPrecio[]): string[] {
+  const con = new Set(filas.map((f) => f.ent));
+  return opcionesPeriodo(d, PRES, F)
+    .filter((op) => op.grupo === "Presidente")
+    .flatMap((op) => {
+      const per = periodoDe(op.id, d, PRES, F);
+      return per.tipo === "pres" && !con.has(per.id) ? [PRES.find((x) => x.id === per.id)?.n ?? per.id] : [];
+    });
 }
 
 /** Segunda vuelta: un rubro y un país de referencia contra `contra`, el promedio de cada mandato (Macri, Alberto Fernández, Milei) en orden cronológico.

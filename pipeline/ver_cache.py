@@ -5,6 +5,7 @@ Uso:
   python pipeline/ver_cache.py indec_canastas       columnas, tipos, cantidad de filas y las últimas 8
   python pipeline/ver_cache.py indec_canastas --donde codigo=CBA --filas 12
   python pipeline/ver_cache.py d_a3500_bcra --desde 2024-01-01 --hasta 2024-01-31
+  python pipeline/ver_cache.py pm_ocde_ipc --clave "USA|CP03"   entra a una clave de un JSON anidado (se puede repetir)
 
 Nunca muestra más de 60 filas ni más de 200 caracteres por celda. No acepta compilado.json (es enorme).
 """
@@ -48,6 +49,7 @@ def main():
     ap.add_argument("--desde", help="fecha mínima (para series con índice de fechas)")
     ap.add_argument("--hasta", help="fecha máxima (para series con índice de fechas)")
     ap.add_argument("--inicio", action="store_true", help="mostrar las primeras filas en lugar de las últimas")
+    ap.add_argument("--clave", action="append", default=[], help="en un JSON anidado, entrar a esta clave (se puede repetir)")
     a = ap.parse_args()
 
     if not a.nombre:
@@ -59,6 +61,14 @@ def main():
     f, dato = _abrir(a.nombre)
     n = max(1, min(a.filas, MAX_FILAS))
     print(f"{f.name}: {f.stat().st_size / 1024:.0f} KB")
+    for c in a.clave:
+        if not isinstance(dato, dict) or c not in dato:
+            sys.exit(f"No existe la clave '{c}'.")
+        dato = dato[c]
+        if isinstance(dato, list):
+            dato = pd.DataFrame(dato) if dato and isinstance(dato[0], dict) else pd.Series(dato)
+        elif isinstance(dato, dict) and dato and all(not isinstance(v, (dict, list)) for v in dato.values()):
+            dato = pd.Series(dato)
     if not isinstance(dato, (pd.DataFrame, pd.Series)):
         claves = list(dato)[:40] if isinstance(dato, dict) else []
         print(f"JSON con estructura anidada. Tipo: {type(dato).__name__}. Primeras claves: {claves}")
