@@ -4,7 +4,7 @@
 import { useEffect, useState, type ReactNode, type Ref } from "react";
 import { Delta, type DeltaProps } from "./Delta";
 import { InfoPunto } from "./InfoPunto";
-import { Plegable, Seg } from "../ui";
+import { Desplegable, Plegable, Seg } from "../ui";
 
 /** ¿La pantalla es de computadora (≥ 900 px, donde la cabecera tiene dos columnas)? Empieza en falso (celular) hasta medir. */
 function useColumnaDoble(): boolean {
@@ -30,8 +30,9 @@ export function ComoVerlo({ opciones, valor, onElegir }: { opciones: [string, st
 /** `secundarias`: otras medidas del mismo dato (por ejemplo, el interanual de la inflación mensual), como cifras chicas con su rótulo.
  *  `fuente`: la fuente pública del dato (la misma que imprime la imagen); sale en un renglón chico debajo de la cifra y de las secundarias.
  *  `mesDato`: el mes del último dato; con `fuente` completa el renglón ("Fuente: INDEC · dato de oct-26").
- *  `extras`: las comparaciones de más (inicio del período, promedio, mediana, máximo, mínimo), con la misma `Delta`. En computadora (dos columnas) van
- *  a la vista debajo de las dos variaciones, en la columna de la derecha (R18); en el celular, plegadas en "Más comparaciones" justo debajo de ellas.
+ *  `extras`: las comparaciones de más (inicio del período, promedio, mediana, máximo, mínimo), con la misma `Delta`. En computadora (dos columnas), en el
+ *  chip "Más comparaciones" debajo de las dos variaciones, que abre un panel ENCIMA de la página (no empuja el gráfico hacia abajo; pedido 2026-11-15);
+ *  en el celular, plegadas en "Más comparaciones" justo debajo de ellas.
  *  `accion`: ya no se dibuja (R11, tanda 8): el Compartir va en el capítulo del gráfico (prop `acciones` de `Capitulo`). Queda por compatibilidad.
  *  `nivel`: el del título (h1 en la página de un dato, h2 dentro de un tema). `tituloRef`/`tituloId`: para llevar el foco al título. */
 export function CabeceraDato({ titulo, cifra, unidad, fecha, deltas, extras = [], secundarias = [], frase, fuente, mesDato, info, nivel = 1, tituloRef, tituloId, children }: {
@@ -71,7 +72,7 @@ export function CabeceraDato({ titulo, cifra, unidad, fecha, deltas, extras = []
               {deltas.slice(0, 3).map((d, i) => <li key={i}><Delta {...d} /></li>)}
             </ul>
           )}
-          {extras.length > 0 && (doble ? lista : <Plegable resumen="Más comparaciones" nivel="chico" className="cabdato-mas">{lista}</Plegable>)}
+          {extras.length > 0 && (doble ? <Desplegable etiqueta={`Más comparaciones (${extras.length})`} className="cabdato-mas-d">{lista}</Desplegable> : <Plegable resumen="Más comparaciones" nivel="chico" className="cabdato-mas">{lista}</Plegable>)}
         </div>
       )}
       {children ? <div className="cabdato-grafico">{children}</div> : null}

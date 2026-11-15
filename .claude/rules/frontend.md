@@ -25,6 +25,7 @@ paths:
 - **Lo que se ve se puede compartir**, en la forma en que se ve (gráfico, tabla, velas).
 - **Palabras del público**: nombres de `web/lib/nombres.ts`; sin siglas ni jerga a secas. En las imágenes compartibles, palabras neutras (nunca "bueno", "malo", "mejor", "peor") y sin veredicto (D-012).
 - **Verde = mejor, rojo = peor**, siempre con signo o texto; nunca solo color.
+- **Chips compactos (R24)**: los controles que están en la página (filas de chips, barra de vista, Ajustes, botones que abren una ventana) se ven de 32 px con borde fino y fondo de superficie, y se tocan en 44 px. Un control nuevo usa `.chip-c` (bloque R24 al final de `globals.css`). Las listas de opciones dentro de una hoja siguen de 44 px (una fila de chips es compacta en todos lados).
 - Sin `<select>` nativo: `Selector`, `Seg`, `Desplegable` y `Modal` de `web/components/ui.tsx`.
 - Las clases CSS nuevas no repiten nombres existentes (buscar antes con grep: `.marca` ya es el logo).
 - Después de una tanda: barrido por código de todas las rutas a 360 px y 1280 px (desborde horizontal, pantalla de error, errores de consola) y de cada ventana abierta.

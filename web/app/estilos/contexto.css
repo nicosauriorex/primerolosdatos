@@ -2,13 +2,9 @@
 
 /* G2: precios contra el mundo (arriba de /contexto/): píldora del rubro, lista con buscador y escala de las barras */
 .ctxr-fila { display: flex; align-items: center; gap: var(--e-3) var(--e-2); flex-wrap: wrap; margin-bottom: var(--e-3); }
-.ctxr-pildora, .ctxr-ajustes { position: relative; display: inline-flex; align-items: center; gap: var(--e-1); min-height: 32px; max-width: 100%; padding: 0 var(--e-3); border: 1px solid var(--border); border-radius: var(--r-pleno);
-  background: var(--surface-1); color: var(--text-primary); font: inherit; font-size: var(--t-sm); line-height: 1; cursor: pointer; }
-.ctxr-pildora::before, .ctxr-ajustes::before { content: ""; position: absolute; inset: -6px 0; }   /* área de toque de 44 px */
+/* .ctxr-pildora y .ctxr-ajustes: el chip compacto de globals.css (R24) */
 .ctxr-pildora b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
 .ctxr-pildora svg, .ctxr-ajustes svg { width: 14px; height: 14px; flex: none; }
-.ctxr-pildora:hover, .ctxr-ajustes:hover { background: var(--relleno-hover); border-color: var(--border-fuerte); }
-.ctxr-pildora:focus-visible, .ctxr-ajustes:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
 .ctxr-rotulo { font-size: var(--t-sm); color: var(--text-muted); font-weight: 400; flex: none; }
 .ctxr-hoja { display: grid; gap: var(--e-3); min-width: 0; }
 .ctxr-buscar { width: 100%; box-sizing: border-box; min-height: var(--toque); }
@@ -22,7 +18,7 @@
 /* Tanda 10: capítulo "Precios contra el mundo" (PreciosMundo.tsx; prefijo pmc-) */
 /* Tres gráficos: en computadora (>= 1100 px) uno al lado del otro; en angosto, solo el elegido con la FilaChips (el primer dibujo ya sale bien: es CSS puro) */
 .pmc-chips { margin: var(--e-2) 0 var(--e-3); min-width: 0; }
-.pmc-tres { display: block; min-width: 0; }
+.pmc-tres { display: block; min-width: 0; overflow-anchor: none; }   /* 5.4: tocar una fila cambia lo de adentro; sin esto el navegador "sigue" un elemento que cambia y la página salta hasta 380 px */
 .pmc-col { display: none; min-width: 0; }
 .pmc-col[data-activa="true"] { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--e-2); align-items: center; }
 .pmc-col > * { grid-column: 1 / -1; }
@@ -52,9 +48,6 @@
 .pmc-clave { display: inline-block; width: 18px; border-top: 3px solid var(--text-muted); vertical-align: middle; }
 .pmc-punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); vertical-align: middle; }
 .pmc-claves { margin-top: var(--e-1); }
-/* Botones Por rubro · Por país · Por presidente del celular, del mismo tamaño que los filtros (tercera vuelta, T1); el toque sigue en 44 px */
-.pmc-chips .chips-cuerpo { height: 32px; line-height: 32px; padding: 0 var(--e-3); }
-
 /* Por rubro: lista larga con su deslizador (~8 filas); el eje y la escala quedan fuera de lo que se desliza */
 .pmc-desliz { position: relative; min-width: 0; }
 .pmc-desliz .gbh-lista { max-height: calc(8 * (var(--toque) + 1px)); overflow-y: auto; overscroll-behavior: contain; }

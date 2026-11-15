@@ -347,7 +347,10 @@ export function frasePrecios(d: DatosPM, rid: string, ref: string, fila: FilaPre
     ? (igual ? `Vivir en ${en} cuesta lo mismo ${que}` : `Vivir en ${en} es ${nn} % más ${adj} ${que}`)
     : (igual ? `${cap(rub.dicho)} ${plural ? "cuestan" : "cuesta"} lo mismo en ${en} ${que}` : `${cap(rub.dicho)} ${plural ? "están" : "está"} ${nn} % más ${adj} en ${en} ${que}`);
   // la fecha propia de la fila manda en "hoy" (cada país puede tener otro último mes) y en lo medido
-  const cuando = fila.modo === "medido" ? fila.fecha : fechaTxt.startsWith("estimado") ? `estimado ${fila.fecha}` : fechaTxt;
+  // en el promedio de un presidente, los meses que de verdad entraron para esta fila (la zona euro puede terminar antes): igual que la barra
+  const coma = fechaTxt.indexOf(", ");
+  const cuando = fila.modo === "medido" ? fila.fecha : fechaTxt.startsWith("estimado") ? `estimado ${fila.fecha}`
+    : fechaTxt.startsWith("promedio de ") && coma > 0 && /^promedio \D/.test(fila.fecha) ? `${fechaTxt.slice(0, coma)}, ${fila.fecha.slice("promedio ".length)}` : fechaTxt;
   const conArg = ref === ARG || fila.ent === ARG;
   return `${cuerpo} (${cuando}${conArg ? `, dólar ${dolar}` : ""}).`;
 }

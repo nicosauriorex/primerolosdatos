@@ -29,6 +29,8 @@ import type { Pres } from "@/lib/estadisticas";
 type Setter = (c: Record<string, string | null | undefined>) => void;
 const TITULO = "Precios contra el mundo";
 const RUBRO_DEF = "total", CONTRA_DEF = "mundo";   // sin filtro: el consumo total (todos los rubros) contra el mundo (pedido 2026-11-15; antes, carne contra la zona euro)
+// Los links viejos con uno solo de los dos (rubro o "contra") completan el otro con el valor de antes, para seguir mostrando lo mismo.
+const RUBRO_VIEJO = "carne", CONTRA_VIEJO = "EA";
 const GRUPOS_PERIODO: Record<string, string> = { Hoy: "Hoy", "Un año": "Un año", Presidente: "Promedio de un presidente" };
 const VISTAS: [string, string][] = [["rubro", "Por rubro"], ["pais", "Por país"], ["pres", "Por presidente"]];
 const ESCALA_MAS = "más caro →";
@@ -57,7 +59,9 @@ export function estadoPrecios(d: DatosPM, m: Motor, p: URLSearchParams, PRES: Pr
   const arg = argDesdeMotor(m, d);
   const ids = Object.keys(d.rubros);
   // pmr: los links viejos del gráfico; un link viejo del gráfico sin rubro (con pmp) mostraba el consumo total y lo sigue mostrando
-  const defRubro = !p.has("pqr") && !p.has("pmr") && p.has("pmp") && d.rubros.total ? "total" : d.rubros[RUBRO_DEF] ? RUBRO_DEF : ids[0];
+  const conRubro = p.has("pqr") || p.has("pmr"), conContra = p.has("pqc");
+  const defRubro = !conRubro && p.has("pmp") && d.rubros.total ? "total"
+    : !conRubro && conContra && d.rubros[RUBRO_VIEJO] ? RUBRO_VIEJO : d.rubros[RUBRO_DEF] ? RUBRO_DEF : ids[0];
   const rid = unoDe(p.has("pqr") ? p.get("pqr") : p.get("pmr"), ids, defRubro);
   const refs = referencias(d, arg, rid, dolar);
   const ref = unoDe(p.get("pqd"), refs, ARG);
@@ -66,7 +70,8 @@ export function estadoPrecios(d: DatosPM, m: Motor, p: URLSearchParams, PRES: Pr
   const periodo = periodoDe(pqa || null, d, PRES, m.F);
   const cmp = compararPrecios(d, arg, rid, ref, periodo, dolar);
   const ents = [...cmp.filas, ...cmp.soloMedido].map((f) => f.ent);
-  const contraDef = ents.includes(CONTRA_DEF) ? CONTRA_DEF : ents.includes("mundo") ? "mundo" : (ents[0] ?? CONTRA_DEF);
+  const preferido = conRubro && !conContra ? CONTRA_VIEJO : CONTRA_DEF;
+  const contraDef = ents.includes(preferido) ? preferido : ents.includes(CONTRA_DEF) ? CONTRA_DEF : (ents[0] ?? CONTRA_DEF);
   const contra = unoDe(p.get("pqc"), ents, contraDef);
   const fila = cmp.filas.find((f) => f.ent === contra) ?? cmp.soloMedido.find((f) => f.ent === contra) ?? null;
   const frase = fila ? frasePrecios(d, rid, ref, fila, cmp.fechaTxt, dolar) : null;
@@ -95,11 +100,13 @@ function Cuerpo({ m, d, PRES, p, set }: { m: Motor; d: DatosPM; PRES: Pres[]; p:
 
   // Cambiar el rubro, el "contra" o el "desde" de arriba hace que "¿Cómo viene?" vuelva a seguirlos (se borran sus filtros propios).
   const seguir = { pvr: null, pmp: null };
-  const elegirRubro = (v: string) => set({ pqr: v === RUBRO_DEF ? null : v, pmr: null, ...seguir });
-  const elegirContra = (v: string) => set({ pqc: v === e.contraDef ? null : v, ...seguir });
+  // Rubro y "contra" se escriben juntos (o ninguno, si son los de por defecto): así ninguno depende del valor por defecto del otro.
+  const fijar = (r: string, c: string) => (r === RUBRO_DEF && c === CONTRA_DEF ? set({ pqr: null, pmr: null, pqc: null, ...seguir }) : set({ pqr: r, pmr: null, pqc: c, ...seguir }));
+  const elegirRubro = (v: string) => fijar(v, contra);
+  const elegirContra = (v: string) => fijar(rid, v);
   // En las barras, tocar la ya elegida saca el filtro (vuelve al valor por defecto); en las hojas, elegir la actual no cambia nada.
-  const alternarContra = (v: string) => (v === contra ? set({ pqc: null, ...seguir }) : elegirContra(v));
-  const alternarRubro = (v: string) => (v === rid ? set({ pqr: null, pmr: null, ...seguir }) : elegirRubro(v));
+  const alternarContra = (v: string) => fijar(rid, v === contra ? CONTRA_DEF : v);
+  const alternarRubro = (v: string) => fijar(v === rid ? RUBRO_DEF : v, contra);
   const elegirRef = (v: string) => set({ pqd: v === ARG ? null : v, ...seguir });
   const elegirPeriodo = (v: string) => set({ pqa: v === "" ? null : v });
   const opSel = e.opciones.find((o) => o.id === e.pqa);
@@ -192,7 +199,7 @@ function Cuerpo({ m, d, PRES, p, set }: { m: Motor; d: DatosPM; PRES: Pres[]; p:
         <Columna activa={vista === "rubro"} titulo="Por rubro" acciones={compartir("por rubro", vistaRubro)}
           pildoras={<Pildora rotulo="Contra" valor={opcionesContra.find((o) => o.id === contra)?.n ?? dichoContra} onClick={() => setAbierta("contra")} />}>
           {!barrasRubro.length ? <p className="note" role="status">No hay rubros con datos contra {dichoContra} en este período.</p> : (
-            <Deslizable clave={`${rid}|${barrasRubro.length}`}><GraficoBarrasH filas={barrasRubro} etiqueta={`Por rubro: ${nombreRef} contra ${dichoContra}, diferencia de nivel de precios`} elegida={rid}
+            <Deslizable clave={`${rid}|${barrasRubro.length}`} centro={rid}><GraficoBarrasH filas={barrasRubro} etiqueta={`Por rubro: ${nombreRef} contra ${dichoContra}, diferencia de nivel de precios`} elegida={rid}
               onElegir={alternarRubro} fmtEje={fmtEje} escala={escala} /></Deslizable>
           )}
         </Columna>
@@ -200,7 +207,7 @@ function Cuerpo({ m, d, PRES, p, set }: { m: Motor; d: DatosPM; PRES: Pres[]; p:
           pildoras={<Pildora rotulo="Rubro" valor={rubro.n} onClick={() => setAbierta("rubro")} />}>
           {!fila ? sinDatos : (
             <>
-              <Deslizable clave={`${contra}|${rid}|${barrasPais.length + barrasMedido.length}`}>
+              <Deslizable clave={`${contra}|${rid}|${barrasPais.length + barrasMedido.length}`} centro={contra}>
                 <GraficoBarrasH filas={[...barrasPais, ...barrasMedido]} etiqueta={`${rubro.n}: ${nombreRef} contra cada país, diferencia de nivel de precios`} elegida={resaltadas}
                   onElegir={alternarContra} fmtEje={fmtEje} escala={escala} />
               </Deslizable>
@@ -232,22 +239,24 @@ function Cuerpo({ m, d, PRES, p, set }: { m: Motor; d: DatosPM; PRES: Pres[]; p:
   );
 }
 
-/** Lista larga con su propio deslizador vertical (~8 filas; el eje queda abajo, fuera de lo que se desliza), sombra si hay más y la fila elegida a la vista al cargar
- *  (se mueve el scrollTop de la lista, nunca la ventana). */
-function Deslizable({ clave, children }: { clave: string; children: ReactNode }) {
+/** Lista larga con su propio deslizador vertical (~8 filas; el eje queda abajo, fuera de lo que se desliza), sombra si hay más y la fila elegida (`centro`)
+ *  a la vista al cargar o cuando cambia desde afuera (se mueve el scrollTop de la lista, nunca la ventana). Si el cambio vino de tocar una fila de esta
+ *  misma lista, no se recentra: la fila tocada queda donde estaba. */
+function Deslizable({ clave, centro, children }: { clave: string; centro: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
+  const tocada = useRef(0);   // cuándo se tocó una fila de la lista
   useEffect(() => {
     const raiz = ref.current, lista = raiz?.querySelector<HTMLElement>(".gbh-lista");
     if (!raiz || !lista) return;
     const marcar = () => raiz.setAttribute("data-mas", lista.scrollTop + lista.clientHeight < lista.scrollHeight - 2 ? "true" : "false");
-    const sel = lista.querySelector<HTMLElement>(".gbh-res");
-    if (sel) { const t = sel.offsetTop - lista.offsetTop; lista.scrollTop = Math.max(0, t - (lista.clientHeight - sel.offsetHeight) / 2); }
+    const sel = lista.querySelector<HTMLElement>(`[data-id="${CSS.escape(centro)}"]`);
+    if (sel && Date.now() - tocada.current > 1500) { const t = sel.offsetTop - lista.offsetTop; lista.scrollTop = Math.max(0, t - (lista.clientHeight - sel.offsetHeight) / 2); }
     marcar();
     lista.addEventListener("scroll", marcar, { passive: true });
     window.addEventListener("resize", marcar);
     return () => { lista.removeEventListener("scroll", marcar); window.removeEventListener("resize", marcar); };
-  }, [clave]);
-  return <div ref={ref} className="pmc-desliz" data-mas="false">{children}</div>;
+  }, [clave, centro]);
+  return <div ref={ref} className="pmc-desliz" data-mas="false" onClickCapture={() => { tocada.current = Date.now(); }}>{children}</div>;
 }
 
 const fmtEje = (v: number) => txtDif(Math.round(v));

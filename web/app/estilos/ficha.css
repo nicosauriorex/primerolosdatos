@@ -44,7 +44,8 @@ input[type=range].e1-rango-in {   /* pisa `input[type=range] { width: 220px }` d
 
 /* ---------- Mes a mes: la leyenda de presidentes son botones que resaltan la línea (pedido 16) */
 .e1-leyenda { gap: var(--e-2); }
-.e1-leyenda button { display: inline-flex; align-items: center; min-height: 40px; padding: 0 var(--e-3); border: 0; border-radius: var(--r-pleno); background: var(--surface-1); color: var(--text-secondary); font: inherit; font-size: var(--t-sm); cursor: pointer; transition: background var(--d-1), color var(--d-1); }
+.e1-leyenda button { display: inline-flex; align-items: center; position: relative; min-height: 32px; padding: 0 var(--e-3); border: 1px solid var(--border); border-radius: var(--r-pleno); background: var(--surface-1); color: var(--text-secondary); font: inherit; font-size: var(--t-sm); cursor: pointer; transition: background var(--d-1), color var(--d-1); }
+.e1-leyenda button::after { content: ""; position: absolute; inset: -6px -2px; }   /* R24: chip compacto, toque de 44 px (::before es la línea de color) */
 .e1-leyenda button::before { content: ""; flex: none; width: 14px; height: 3px; margin-right: 8px; background: var(--c); }
 .e1-leyenda button:hover { background: var(--acento-suave); color: var(--text-primary); }
 .e1-leyenda button[aria-pressed="true"] { background: var(--acento-suave); color: var(--text-primary); font-weight: 800; box-shadow: inset 0 0 0 2px var(--c); }
@@ -74,10 +75,7 @@ input[type=range].e1-rango-in {   /* pisa `input[type=range] { width: 220px }` d
 
 /* ---------- Tanda 8, E1.2: controles del dibujo mes por mes (Repetir, Pausa/Seguir, Velocidad), chicos y debajo del gráfico */
 .fi-anim { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2) var(--e-3); margin: var(--e-2) 0; }
-.fi-anim-btn { display: inline-flex; align-items: center; gap: var(--e-1); min-height: var(--toque, 44px); padding: 0 var(--e-3); border: 0; border-radius: var(--r-pleno); background: var(--surface-2); color: var(--text-secondary); font: inherit; font-size: var(--t-sm); font-weight: 600; cursor: pointer; transition: background var(--d-1), color var(--d-1); }
-.fi-anim-btn:hover:not(:disabled) { background: var(--acento-suave); color: var(--text-primary); }
 .fi-anim-btn:disabled { opacity: .45; cursor: default; }
-.fi-anim-btn:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
 .fi-anim-btn .icono { width: 16px; height: 16px; }
 
 /* ---------- Tanda 8, E1.3: rótulos de "¿Cómo fue <mes> en otros años?" arriba, unidos a su columna con una línea fina de puntos */

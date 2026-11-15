@@ -41,7 +41,7 @@ export function GraficoBarrasH({ filas, etiqueta, elegida, onElegir, fmtEje, esc
           const estilo = { "--i": i, "--c": colorDe(f.tono) } as CSSProperties;
           const cuerpo = (
             <>
-              <span className="gbh-nombre" title={f.nombre}>
+              <span className="gbh-nombre" title={f.sub ? `${f.nombre} · ${f.sub}` : f.nombre}>
                 <span className="gbh-n">{f.nombre}</span>
                 {f.sub && <span className="gbh-sub">{f.sub}</span>}
               </span>
@@ -60,7 +60,7 @@ export function GraficoBarrasH({ filas, etiqueta, elegida, onElegir, fmtEje, esc
           );
           const cls = `gbh-fila${esElegida(f.id) ? " gbh-res" : ""}`;
           return (
-            <li key={f.id} className="gbh-item" style={estilo}>
+            <li key={f.id} className="gbh-item" style={estilo} data-id={f.id}>
               {onElegir
                 ? <button type="button" className={`${cls} gbh-toca`} onClick={() => onElegir(f.id)} aria-pressed={esElegida(f.id)}>{cuerpo}</button>
                 : <div className={cls}>{cuerpo}</div>}

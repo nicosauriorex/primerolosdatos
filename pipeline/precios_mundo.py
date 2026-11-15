@@ -10,7 +10,9 @@ Fuentes (todas sin clave; se verificaron el 2026-11-09):
 2) IPC por división (COICOP) mensual de cada país:
    - OCDE (EE.UU., México, Colombia, Chile): API SDMX, dos bases que se empalman con el mes en común:
      COICOP 1999 (DSD_PRICES@DF_PRICES_ALL) y COICOP 2018 (DSD_PRICES_COICOP2018@DF_PRICES_C2018_ALL).
-   - Zona euro: Eurostat, prc_hicp_midx (IPCA armonizado por COICOP, unidad I15).
+   - Zona euro: Eurostat, IPCA armonizado. prc_hicp_midx (ECOICOP 1, unidad I15) quedó congelada en dic-2025;
+     desde 2026 sigue prc_hicp_minr (ECOICOP 2, unidad I25, el total es TOTAL). Se empalman en el último mes en común,
+     igual que la OCDE: solo los códigos que no cambian de contenido (08, 09 y 12 sí cambian y quedan hasta dic-2025).
    - Brasil: IBGE, SIDRA tabla 7060 (IPCA, variación mensual por grupo; se encadena a un índice).
 3) Tipo de cambio mensual contra el dólar: OCDE, DSD_STES@DF_FINMARK, medida CC (moneda local por US$).
 
@@ -30,7 +32,7 @@ CACHE = red.CACHE
 
 WB = "https://api.worldbank.org/v2/"
 OCDE = "https://sdmx.oecd.org/public/rest/data/"
-EUROSTAT = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_midx"
+EUROSTAT = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/"
 DESDE = "2017-01"  # la estimación arranca en la primera medición del ICP que usamos
 
 # código -> nombre. Los de la OCDE/Eurostat/IBGE son los de cada fuente; ver RUBROS.
@@ -170,17 +172,35 @@ def _ocde_ipc():
 
 
 def _eurostat_ipc():
-    def bajar():
-        cods = sorted({r["eu"] for r in RUBROS.values() if r["eu"]})
-        url = f"{EUROSTAT}?geo=EA&unit=I15&sinceTimePeriod=2016-12&format=JSON&" + "&".join(f"coicop={c}" for c in cods)
+    """{código ECOICOP 1: {mes: índice}} empalmando prc_hicp_midx (hasta dic-2025) con prc_hicp_minr (ECOICOP 2)."""
+    def leer(tabla, dim, unidad, cods):
+        url = f"{EUROSTAT}{tabla}?geo=EA&unit={unidad}&sinceTimePeriod=2016-12&format=JSON&" + "&".join(f"{dim}={c}" for c in cods)
         d = json.loads(red.bajar(url, ua="Mozilla/5.0", timeout=180))
         tiempos = {i: t for t, i in d["dimension"]["time"]["category"]["index"].items()}
-        coi = {i: c for c, i in d["dimension"]["coicop"]["category"]["index"].items()}
+        coi = {i: c for c, i in d["dimension"][dim]["category"]["index"].items()}
         nt = len(tiempos)
         out = {}
         for pos, val in d["value"].items():
             pos = int(pos)
             out.setdefault(coi[pos // nt], {})[tiempos[pos % nt]] = float(val)
+        return out
+
+    def bajar():
+        cods = sorted({r["eu"] for r in RUBROS.values() if r["eu"]})
+        v1 = leer("prc_hicp_midx", "coicop", "I15", cods)
+        # mismo contenido en las dos versiones: total, divisiones 01 a 07, 10 y 11 y los productos de alimentos
+        a_v2 = {c: ("TOTAL" if c == "CP00" else c) for c in cods if c not in ("CP08", "CP09", "CP12")}
+        # si falla, que falle todo: cache_json usa la copia anterior (ya empalmada) en vez de guardar una serie cortada en dic-2025
+        v2 = leer("prc_hicp_minr", "coicop18", "I25", sorted(a_v2.values()))
+        out = {}
+        for c, s in v1.items():
+            n = v2.get(a_v2.get(c))
+            if n:
+                comun = sorted(set(s) & set(n))
+                if comun:
+                    m = comun[-1]
+                    s = {**s, **{t: round(x * s[m] / n[m], 4) for t, x in n.items() if t > m}}
+            out[c] = s
         return out
     return red.cache_json("pm_eurostat_ipc", bajar) or {}
 

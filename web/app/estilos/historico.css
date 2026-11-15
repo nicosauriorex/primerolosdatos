@@ -22,8 +22,10 @@
 @media (min-width: 900px) {
   .hi-cab .cabdato-titulo { padding-right: 0; }
   .hi-cab .cabdato { grid-template-columns: minmax(0, 1fr) minmax(14rem, 40%); }
-  /* A1: Compartir y "Cambiar dato" van en su propio renglón por encima de la cabecera, a la derecha: no pisan la línea divisoria de la columna derecha */
-  .hi-cab-acc { position: static; justify-content: flex-end; margin: 0 0 var(--e-3); }
+  /* Pedido 2026-11-15 (antes A1, renglón propio que bajaba el título): Compartir y "Cambiar dato" arriba de la columna derecha; el título arranca arriba
+     de todo y la columna derecha deja lugar a los botones (no pisan la línea divisoria) */
+  .hi-cab-acc { top: 0; right: 0; }
+  .hi-cab .cabdato-lado { padding-top: calc(var(--toque) + var(--e-4)); justify-content: flex-start; }
 }
 
 /* Fila de controles de arriba del gráfico: período, frecuencia, Ajustes y, a la derecha, pantalla completa (44 px) */

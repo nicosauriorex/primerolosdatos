@@ -1385,12 +1385,8 @@ h4.her-cita-t { margin: var(--e-4) 0 var(--e-1); font-size: var(--t-md); }
 .chips::-webkit-scrollbar { display: none; }
 .chips[data-mas~="izq"] { --fi: 24px; }
 .chips[data-mas~="der"] { --fd: 24px; }
-.chips > button { flex: none; min-height: var(--toque); padding: 4px 0; border: 0; background: none; color: var(--text-primary); cursor: pointer; font: inherit; }
-.chips-cuerpo { display: block; height: 36px; line-height: 36px; padding: 0 var(--e-4); font-size: .875rem; border-radius: var(--r-pleno); background: var(--relleno); transition: background var(--d-1);
-  font-size: var(--t-base); font-weight: 600; white-space: nowrap; }
-.chips > button:hover .chips-cuerpo { background: var(--relleno-hover); }
-.chips > button[aria-pressed="true"] .chips-cuerpo { background: var(--acento); color: var(--sobre-acento); }
-.chips > a:hover .chips-cuerpo { background: var(--relleno-hover); }
+.chips > button { flex: none; min-height: var(--toque); padding: 6px 0; border: 0; background: none; color: var(--text-primary); cursor: pointer; font: inherit; }
+.chips-cuerpo { display: block; border-radius: var(--r-pleno); white-space: nowrap; }   /* alto, borde y colores: chip compacto (R24, al final) */
 .chips > button:focus-visible { outline-offset: -2px; }
 
 /* ---------------------------------------------------------------- Hoja */
@@ -1435,15 +1431,10 @@ h4.her-cita-t { margin: var(--e-4) 0 var(--e-1); font-size: var(--t-md); }
 .vistabar-fila::-webkit-scrollbar { display: none; }
 .vistabar-fila[data-mas~="izq"] { --fi: 24px; }
 .vistabar-fila[data-mas~="der"] { --fd: 24px; }
-.vistabar-chip { flex: none; min-height: var(--toque); padding: 4px 0; border: 0; background: none; color: var(--text-primary); cursor: pointer; font: inherit; }
-.vistabar-cuerpo { display: block; height: 36px; line-height: 36px; padding: 0 var(--e-4); border-radius: var(--r-pleno); background: var(--relleno); transition: background var(--d-1);
-  font-size: var(--t-base); font-weight: 600; white-space: nowrap; }
-.vistabar-chip:hover .vistabar-cuerpo { background: var(--relleno-hover); }
-.vistabar-chip[aria-pressed="true"] .vistabar-cuerpo { background: var(--acento); color: var(--sobre-acento); }
-.vistabar-chip:focus-visible, .vistabar-ajustes:focus-visible { outline-offset: -2px; }
-.vistabar-ajustes { flex: none; display: inline-flex; align-items: center; gap: var(--e-2); min-height: var(--toque); min-width: var(--toque); padding: 0 var(--e-3);
-  border: 0; border-radius: var(--r-pleno); background: var(--relleno); color: var(--text-primary); font: inherit; font-size: var(--t-base); font-weight: 700; cursor: pointer; transition: background var(--d-1); }
-.vistabar-ajustes:hover { background: var(--relleno-hover); }
+.vistabar-chip { flex: none; min-height: var(--toque); padding: 6px 0; border: 0; background: none; color: var(--text-primary); cursor: pointer; font: inherit; }
+.vistabar-cuerpo { display: block; border-radius: var(--r-pleno); white-space: nowrap; }   /* alto, borde y colores: chip compacto (R24, al final) */
+.vistabar-chip:focus-visible { outline-offset: -2px; }
+.vistabar-ajustes { flex: none; }   /* el resto: chip compacto (R24, al final) */
 
 /* ---------------------------------------------------------------- CompartirHoja */
 .comphoja-boton { display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2); min-height: var(--toque); min-width: var(--toque); padding: 0 var(--e-3);
@@ -2448,7 +2439,7 @@ nav.tabs .con-menu { align-self: stretch; align-items: center; }
 .compartir.solo-icono { width: 32px; padding: 0; }
 
 /* Gráfico de barras horizontales (contexto, segunda vuelta) */
-.gbh { width: 100%; min-width: 0; --gbh-nom: 32%; --gbh-val: 78px; }
+.gbh { width: 100%; min-width: 0; --gbh-nom: 32%; --gbh-val: 78px; overflow-anchor: none; }
 .gbh-escala { display: flex; justify-content: space-between; gap: var(--e-2); margin: 0 0 var(--e-1); font-size: var(--v-rotulo); color: var(--text-muted); line-height: 1.3; }
 .gbh-lista { list-style: none; margin: 0; padding: 0; }
 .gbh-item { border-top: 1px solid var(--border); }
@@ -2460,7 +2451,7 @@ nav.tabs .con-menu { align-self: stretch; align-items: center; }
 .gbh-res { background: var(--acento-suave); }
 .gbh-nombre { display: flex; flex-direction: column; min-width: 0; padding-right: var(--e-2); }
 .gbh-n { font-size: var(--t-sm); font-weight: 600; line-height: 1.25; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; }
-.gbh-sub { font-size: var(--v-rotulo); color: var(--text-muted); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gbh-sub { font-size: var(--v-rotulo); color: var(--text-muted); line-height: 1.3; overflow-wrap: anywhere; }   /* 5.3: baja de renglón en vez de cortarse («promedio ene-…» no se leía) */
 .gbh-zona { position: relative; display: block; height: 28px; min-width: 0; }
 .gbh-pista { position: absolute; inset: 0; display: block; pointer-events: none; }
 .gbh-marca { position: absolute; top: 0; bottom: 0; width: 1px; margin-left: -.5px; background: var(--grid); }
@@ -2479,3 +2470,33 @@ nav.tabs .con-menu { align-self: stretch; align-items: center; }
 .gbh-eje-zona { position: relative; display: block; height: 20px; }
 .gbh-eje-num { position: absolute; top: 3px; transform: translateX(-50%); font-size: var(--v-rotulo); color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .gbh-barra { transition: none; } }
+
+/* R24 (pedido 2026-11-15, «lo de los chips chicos está bueno también para toda la página»): CHIP COMPACTO. Los controles que están en la página
+   (filas de chips, chips de la barra de vista, Ajustes y botones de abrir una ventana, Elegir fechas, animación de la ficha; la leyenda de la ficha, en ficha.css) se ven de 32 px,
+   con borde fino y fondo de superficie; el área de toque sigue siendo de 44 px (::before, o el botón que envuelve al cuerpo). Las opciones DENTRO de
+   una hoja o ventana siguen de 44 px a la vista: son listas para elegir con el dedo. Un control nuevo de este tipo usa .chip-c. */
+.chip-c, .ctxr-pildora, .ctxr-ajustes, .vistabar-ajustes, .bcra-fechas, .fi-anim-btn {
+  position: relative; display: inline-flex; align-items: center; gap: var(--e-1); min-height: 32px; min-width: 0; max-width: 100%; padding: 0 var(--e-3);
+  border: 1px solid var(--border); border-radius: var(--r-pleno); background: var(--surface-1); color: var(--text-primary);
+  font: inherit; font-size: var(--t-sm); font-weight: 600; line-height: 1; cursor: pointer; transition: background var(--d-1), border-color var(--d-1); }
+.chip-c::before, .ctxr-pildora::before, .ctxr-ajustes::before, .vistabar-ajustes::before, .bcra-fechas::before, .fi-anim-btn::before {
+  content: ""; position: absolute; inset: -6px -2px; }   /* área de toque de 44 px de alto */
+.chip-c svg, .vistabar-ajustes svg, .bcra-fechas svg, .fi-anim-btn svg { width: 14px; height: 14px; flex: none; }
+.chip-c:hover:not(:disabled), .ctxr-pildora:hover, .ctxr-ajustes:hover, .vistabar-ajustes:hover, .bcra-fechas:hover, .fi-anim-btn:hover:not(:disabled) {
+  background: var(--relleno-hover); border-color: var(--border-fuerte); }
+.chip-c:focus-visible, .ctxr-pildora:focus-visible, .ctxr-ajustes:focus-visible, .vistabar-ajustes:focus-visible, .bcra-fechas:focus-visible, .fi-anim-btn:focus-visible {
+  outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.chip-c[aria-pressed="true"], .bcra-fechas[aria-pressed="true"], .fi-anim-btn[aria-pressed="true"] { background: var(--acento); border-color: var(--acento); color: var(--sobre-acento); font-weight: 700; }
+/* Filas de chips (FilaChips) y chips de la barra de vista: el botón mide 44 px (toque) y el cuerpo que se ve, 32 */
+.chips-cuerpo, .vistabar-cuerpo { box-sizing: border-box; height: 32px; line-height: 30px; padding: 0 var(--e-3); border: 1px solid var(--border); background: var(--surface-1);
+  font-size: var(--t-sm); font-weight: 600; transition: background var(--d-1), border-color var(--d-1); }
+.chips > button:hover .chips-cuerpo, .chips > a:hover .chips-cuerpo, .vistabar-chip:hover .vistabar-cuerpo { background: var(--relleno-hover); border-color: var(--border-fuerte); }
+.chips > button[aria-pressed="true"] .chips-cuerpo, .vistabar-chip[aria-pressed="true"] .vistabar-cuerpo { background: var(--acento); border-color: var(--acento); color: var(--sobre-acento); font-weight: 700; }
+
+/* "Más comparaciones" de la cabecera del dato en computadora: chip compacto (R24) que abre un panel flotante encima de la página (no empuja el gráfico) */
+.cabdato-mas-d { position: relative; margin-top: var(--e-3); }
+.cabdato-mas-d .btn.drop { min-height: 32px; padding: 0 var(--e-3); border: 1px solid var(--border); background: var(--surface-1); font-size: var(--t-sm); font-weight: 600; position: relative; }
+.cabdato-mas-d .btn.drop::before { content: ""; position: absolute; inset: -6px -2px; }
+.cabdato-mas-d .btn.drop:hover { background: var(--relleno-hover); border-color: var(--border-fuerte); }
+.cabdato-mas-d .panel { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; margin: 0; width: max-content; max-width: min(30rem, calc(100vw - 32px));
+  box-shadow: 0 12px 32px rgb(0 0 0 / .35); }

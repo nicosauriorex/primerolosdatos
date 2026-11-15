@@ -36,10 +36,6 @@
 /* Período: atajos y "Elegir fechas" en la misma fila (el botón baja de renglón si no entra) */
 .bcra-periodo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); min-width: 0; }
 .bcra-periodo .chips { flex: 0 1 auto; min-width: 0; }
-.bcra-fechas { flex: none; min-height: var(--alto-toque); padding: 0 var(--e-4); border: 0; border-radius: var(--r-pleno); background: var(--surface-2); color: inherit; font: inherit; font-size: .875rem; cursor: pointer; }
-.bcra-fechas:hover { background: var(--acento-suave); }
-.bcra-fechas[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento); font-weight: 700; }
-.bcra-fechas:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
 /* Tanda 9, parte F (docs/specs/ajustes-tanda-9.md) */
 /* Ventana "Elegir fechas": aire entre bloques (--e-3), etiqueta pegada a su campo (--e-1), Aplicar primario */
 .bcra-form-fechas { display: flex; flex-direction: column; gap: var(--e-4); }
