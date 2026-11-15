@@ -12,7 +12,7 @@ Todo en español: código, comentarios, nombres de variables, commits y textos d
 - Vista previa de los links en redes: `cd web && npm run previas` (después de los JSON y antes de `npm run build`): dibuja `web/public/previas/<slug>.png` de cada dato fijo (`web/lib/datos-fijos.ts`), `sitio.png` y `_datos.json` (título y descripción de `/dato/<slug>/`). Generado, no versionado; sin él el build sale igual, con textos genéricos.
 - Python 3.14 + pandas. No hay tests todavía; la verificación es que el comando de arriba termine sin error y la página abra bien.
 - Ver el sitio en local: configuración `web-out` de `.claude/launch.json` (sirve `web/out` en el puerto 3100). Después de cada `npm run build` alcanza con recargar.
-- Publicar: `git push` a `main` dispara `.github/workflows/actualizar.yml`. Solo lo disparan cambios en `web/`, `pipeline/`, `requirements.txt` o el workflow (un push solo de `docs/` o `CLAUDE.md` no corre nada). Si el push solo toca `web/`, va en modo rápido (1 minuto, sin bajar datos); si toca `pipeline/`, `datos/`, `requirements.txt` o el workflow, corre completo (10 minutos). Si el push es rechazado, es por el commit diario de datos: `git pull --rebase` y volver a subir.
+- Publicar: `git push` a `main` dispara `.github/workflows/actualizar.yml`. Solo lo disparan cambios en `web/`, `pipeline/`, `requirements.txt` o el workflow (un push solo de `docs/` o `CLAUDE.md` no corre nada). Si el push solo toca `web/`, va en modo rápido (1 minuto, sin bajar datos); si toca `pipeline/`, `datos/`, `requirements.txt` o el workflow, corre completo (10 minutos). Subir siempre con `git pull --rebase -q && git push`, nunca `git push` solo: el workflow sube commits diarios de datos a `main` y un push directo casi siempre es rechazado.
 
 # Estructura que no se deduce sola
 - `web/public/datos/` es GENERADO por el pipeline (no versionado): nunca editarlo. `datos/cache/compilado.json` también es generado (respaldo para `--solo-json`): no leerlo entero.
@@ -44,7 +44,7 @@ Leer `docs/ESTADO.md`: qué está hecho, qué sigue y qué quedó sin verificar.
 - Decisiones de arquitectura: registrarlas en `docs/DECISIONES.md`.
 - Ideas sueltas del usuario: `docs/IDEAS.md`. No implementarlas sin que se pida.
   - Al bajar una idea a spec: marcarla con `→ spec: docs/specs/<nombre>.md`.
-  - Al terminar de implementar y verificar: tachar la idea con la fecha (`~~idea~~ ✅ AAAA-MM-DD`), pasarla a la sección "Hecho" al final y poner `Estado: implementada (fecha)` en la spec. No borrar.
+  - Al terminar de implementar y verificar: tachar la idea con la fecha (`~~idea~~ ✅ AAAA-MM-DD`), moverla (con el título de su sección) a `docs/IDEAS-HECHAS.md` y poner `Estado: implementada (fecha)` en la spec. No borrar: `IDEAS.md` queda solo con lo abierto.
   - Llevar el estado de cada bloque en la tabla "Próximos bloques" de `docs/ROADMAP.md` (spec lista / hecho). "¿Qué sigue?" = el primer bloque no hecho de esa tabla.
 - Detalle de modelos/agentes/flujo: `docs/COMO-TRABAJAMOS.md` (para el usuario; no hace falta leerlo en cada tarea).
 

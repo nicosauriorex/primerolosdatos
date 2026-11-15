@@ -1,6 +1,6 @@
 # Primero los Datos
 
-Datos económicos de Argentina en una sola página: precios, salarios, dólar, actividad, pobreza, cuentas fiscales y sector externo. Todo sale de fuentes oficiales o públicas y se actualiza solo.
+Datos económicos de Argentina para responder en redes con una imagen: precios, salarios, dólar, actividad, pobreza, cuentas fiscales, sector externo, presidentes, Banco Central, gasto y provincias. Todo sale de fuentes oficiales o públicas y se actualiza solo. Publicado en https://primerolosdatos.com.ar.
 
 ## De dónde salen los datos
 
@@ -36,4 +36,4 @@ Opcional: con la variable de entorno `INDEC_TOKEN` (registro gratis en api.indec
 
 ## Hacia dónde va
 
-Hoy cada dato se puede compartir como imagen (con su contexto y su fuente) o como link a la vista exacta. Lo que sigue: vista previa de los links en redes, páginas fijas por indicador y, más adelante, una comunidad para comentar y votar datos. El estado al día está en [`docs/ESTADO.md`](docs/ESTADO.md). Ver [`docs/ROADMAP.md`](docs/ROADMAP.md) y [`docs/DECISIONES.md`](docs/DECISIONES.md).
+Hoy cada dato se puede compartir como imagen (con su contexto y su fuente) o como link a la vista exacta, con vista previa en redes. Lo que sigue: contar qué se comparte, novedades con calendario de publicaciones y predicciones. El estado al día está en [`docs/ESTADO.md`](docs/ESTADO.md). Ver [`docs/ROADMAP.md`](docs/ROADMAP.md) y [`docs/DECISIONES.md`](docs/DECISIONES.md).

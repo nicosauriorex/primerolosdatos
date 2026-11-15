@@ -2,7 +2,7 @@
 
 Para retomar en una sesión nueva. Última actualización: 2026-11-15.
 
-**Reglas de este archivo:** máximo ~1 página. Una línea por bloque, con link a su spec; el detalle (cómo se verificó, qué marcó el revisor, medidas) va a la spec, no acá. Al cerrar una tanda: agregar su línea, sacar de "Sin verificar" lo que se verificó y, si una sección crece, mover lo viejo a `docs/HISTORIAL.md`.
+**Reglas de este archivo:** máximo ~1 página. Las ideas abiertas están en `docs/IDEAS.md`; las hechas, en `docs/IDEAS-HECHAS.md`. Una línea por bloque, con link a su spec; el detalle (cómo se verificó, qué marcó el revisor, medidas) va a la spec, no acá. Al cerrar una tanda: agregar su línea, sacar de "Sin verificar" lo que se verificó y, si una sección crece, mover lo viejo a `docs/HISTORIAL.md`.
 
 ## Dónde estamos
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
@@ -16,7 +16,7 @@ Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes
 - Mantenimiento del pipeline (`pipeline/red.py`) — 2026-11-14 — [spec](specs/mantenimiento-pipeline.md)
 
 ## Qué sigue, en orden
-1. **Contar los Compartir** (bloque 9a, decidido el 2026-11-15): spec pendiente. Después, Novedades y calendario (9b) y Predicciones (9c).
+1. **El primer bloque no hecho de la tabla "Próximos bloques" de `docs/ROADMAP.md`** (la única lista de bloques). Hoy: Contar los Compartir (9a), spec pendiente.
 2. **Mantenimiento a mano cuando salgan datos nuevos:** herencia (`datos/manual/herencia.json`; nivel de reservas netas del FMI en la 3ª revisión, dic-2026, y saldos de DEG cada mes en `reservas_netas_supuestos.json`); Congreso (cada 1 de marzo, cortes de las dos cámaras y vetos del año); provincias (el III trimestre de la DNAP entra solo: mirar que pase el control).
 3. **Pendientes sin fuente o sin decidir:** semáforo (desestacionalizado X-13; CAME, patentamientos, Construya, escrituras, leche, petróleo); gasto (empresas públicas sin fuente; universidades: estudiantes antes de 2023 y las 8 sin datos en el PIU); Congreso (leyes del Ejecutivo de Menem a CFK 1); herencia (cepo de 2003 y 2007, FMI de 1995 a 2002).
 4. **Imagen al compartir que falta:** "La Argentina y otros países", "Lo esperado" y "Viento" en Contexto; Resumen por hitos; alícuotas de provincias. Elecciones ya tiene.

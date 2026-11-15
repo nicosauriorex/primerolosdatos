@@ -9,6 +9,7 @@ Basado en la documentación oficial de Claude Code (code.claude.com/docs: best-p
 | `CLAUDE.md` | Lo mínimo: comandos, trampas, convenciones | Siempre (por eso es corto) |
 | `docs/ESTADO.md` | Dónde estamos, qué sigue y qué quedó sin verificar | Al empezar cada sesión ("leé docs/ESTADO.md y seguí") |
 | `docs/HISTORIAL.md` | El detalle de cada tanda que salió de `ESTADO.md` | Solo cuando hace falta el detalle de algo viejo |
+| `docs/IDEAS-HECHAS.md` | Las ideas que ya se implementaron, con fecha y spec | Solo para saber de dónde salió algo |
 | `.claude/rules/pipeline.md` | Reglas del Python | Solo al tocar `pipeline/` |
 | `.claude/rules/frontend.md` | Reglas del frontend y reglas de interfaz que salieron de tus pedidos | Solo al tocar `web/` |
 | `.claude/skills/spec` | `/spec <idea>`: te entrevista y escribe la spec | Cuando lo llamás |
@@ -80,5 +81,5 @@ Publicar: un push que solo toca `web/` o `docs/` se publica en un minuto; si toc
 - Algo que Claude tuvo que corregir dos veces → una línea en `CLAUDE.md` (o en la regla de esa carpeta).
 - Un procedimiento de varios pasos que se repite → un skill nuevo.
 - Algo que no puede fallar nunca → `settings.json` (deny) o un hook.
-- Una decisión → `docs/DECISIONES.md`. Una idea → `docs/IDEAS.md`. Un plan → `docs/ROADMAP.md`. El estado para retomar → `docs/ESTADO.md`.
+- Una decisión → `docs/DECISIONES.md`. Una idea → `docs/IDEAS.md` (y cuando se hace, a `docs/IDEAS-HECHAS.md`). Un plan → `docs/ROADMAP.md`. El estado para retomar → `docs/ESTADO.md`.
 - Una regla de interfaz que vale para todo el sitio → `.claude/rules/frontend.md`.
