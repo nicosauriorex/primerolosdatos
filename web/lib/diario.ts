@@ -466,15 +466,36 @@ export function extremosTramo(clave: ClaveDiario, t: Tramo): { alto: { fecha: st
 export interface CambioParte { texto: string; tono: ClsDiario; dir: 1 | -1 | 0; contra: string; etiqueta: string }
 const dirDeTexto = (t: string): 1 | -1 | 0 => (t.startsWith("+") ? 1 : /^[-−]/.test(t) ? -1 : 0);
 
+/** Una diferencia ya formateada (con signo) con su unidad: "−US$ 851 millones", "+$ 5,20", "+0,25 p.p." (una diferencia de tasas va en puntos, una sola vez).
+ *  `compacto`: sin la unidad en pesos ni dólares (la cifra de la fila ya la dice). */
+function difConUnidad(def: Def, t: string, compacto = false): string {
+  return /%|p\.p\./.test(t) ? t : def.tipo === "tasa" ? `${t.replace(/\s*puntos$/, "")} p.p.` : compacto ? t : t.replace(/^([+−-]?)/, `$1${def.pref}`) + def.suf;
+}
+
+/** Debajo del gráfico grande: el valor al inicio del período elegido y la variación del último dato contra ese inicio (con los valores mostrados).
+ *  Las compras (un flujo del día) no se restan del inicio: solo el valor de ese día. */
+export interface InicioTramo { fecha: string; valor: string; cambio: (CambioParte & { pct: string | null }) | null }
+export function inicioTramo(clave: ClaveDiario, t: Tramo): InicioTramo {
+  const def = DEFS[clave], n = t.v.length;
+  const a = redondeadoComo((x) => def.nf.format(x), t.v[0]) || 0, b = redondeadoComo((x) => def.nf.format(x), t.v[n - 1]) || 0;
+  const { fecha, valor } = puntoTxt(clave, t.dias[0], t.v[0]);
+  if (def.tipo === "flujo" || n < 2) return { fecha, valor, cambio: null };
+  const dif = Math.round((b - a) * 10 ** def.dec) / 10 ** def.dec || 0;
+  const texto = difConUnidad(def, difTxt(clave, dif));
+  const dir = dif === 0 ? 0 : dif > 0 ? 1 : -1;
+  const contra = `vs ${fmtDia(t.dias[0], true)}`;
+  const etiqueta = dir === 0 ? `Sin cambios ${contra.replace(/^vs\s+/, "contra el ")}` : `${dir > 0 ? "Sube" : "Baja"} ${texto.replace(/^[+−-]/, "")} ${contra.replace(/^vs\s+/, "contra el ")}`;
+  return { fecha, valor, cambio: { texto: dif === 0 ? "sin cambios" : texto, tono: clsDe(def.dir, dif), dir, contra, etiqueta, pct: dif === 0 || def.tipo === "tasa" ? null : pctTxt(a, b) } };
+}
+
+
 /** Los cambios de una variable de nivel o tasa contra el día anterior y contra un mes atrás, tal como ya los calcula el parte
  *  (con los valores mostrados). Las compras (un flujo) no se comparan con el día anterior: sin cambios.
  *  `compacto` (filas de la lista): sin "US$ … millones" ni "$ " (la cifra de la fila ya dice la unidad) y con el rótulo corto ("día ant.", "mes"). */
 export function cambiosDe(v: ResumenVariable, compacto = false): CambioParte[] {
   const r: CambioParte[] = [];
-  // con su unidad: "−US$ 851 millones", "+$ 5,20", "+0,25 p.p." (una diferencia de tasas va en puntos)
   const def = DEFS[v.clave];
-  // (la diferencia de una tasa ya viene en "puntos": se dice una sola vez, "+0,31 p.p.", nunca "puntos p.p.")
-  const conUnidad = (t: string) => /%|p\.p\./.test(t) ? t : def.tipo === "tasa" ? `${t.replace(/\s*puntos$/, "")} p.p.` : compacto ? t : t.replace(/^([+−-]?)/, `$1${def.pref}`) + def.suf;
+  const conUnidad = (t: string) => difConUnidad(def, t, compacto);
   const arma = (t: string, tono: ClsDiario, largo: string, corto: string): CambioParte => {
     const texto = conUnidad(t), dir = dirDeTexto(t);
     const sinSigno = texto.replace(/^[+−-]/, "");

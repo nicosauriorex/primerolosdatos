@@ -15,6 +15,7 @@ import { Delta } from "../sistema/Delta";
 import { Lamina, Laminas } from "../sistema/Lamina";
 import { IconoSeccion, IconoTema } from "../sistema/iconosTemas";
 import { nf1 } from "@/lib/formato";
+import { contextoDato } from "@/lib/contexto-dato";
 import type { Comparacion, Comparaciones } from "@/lib/plantillas";
 import { ORGANISMOS } from "@/lib/fuentes";
 import type { Expr, Motor, SerieMeta } from "@/lib/motor";
@@ -108,6 +109,8 @@ function Carrusel({ plantillas }: { plantillas: Plantilla[] }) {
     if (!ev && d.alt) { ef = plantillaSuelta("c-" + d.alt.id, d.titulo, d.alt); ev = evaluar(motor, ef); }   // sin dato interanual: el nivel y el mes
     let extra: Extra | null = null;
     try { extra = ev ? d.contexto?.(motor, ef, ev) ?? null : null; } catch { extra = null; }
+    // B1 (tanda 9): sin bajada propia, el primer hecho de contexto de la ficha (la misma lógica de `contexto-dato.ts`)
+    if (!extra && ev) { try { const f = contextoDato(motor, ef.e ?? d.e)?.frases[0]; if (f) extra = { texto: f.texto, cls: null }; } catch { extra = null; } }
     const comp = ev ? comparaciones(motor, ef) : null;
     return { d, p: ef, ev, extra, comp };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -367,6 +370,7 @@ export function Inicio() {
                           <span className="sec-icono" aria-hidden="true"><IconoSeccion carpeta={s.carpeta} /></span>
                           <b className="sec-nombre">{s.nombre}</b>
                           <span className="sec-para">{s.corto ?? s.para}</span>
+                          <span className="sec-flecha" aria-hidden="true"><IconoDerecha /></span>
                         </Link>
                       </li>
                     ))}

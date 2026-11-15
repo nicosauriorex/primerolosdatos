@@ -98,6 +98,12 @@ export const todosLosPrincipales = (S: Record<string, SerieMeta>): Principal[] =
 export const idsDe = (e: Expr): string[] => [e.id, ...(e.rel ? [e.rel] : [])];
 
 export const seriesDe = (t: Tema, metas: SerieMeta[]): SerieMeta[] => metas.filter((s) => t.cats.includes(s.cat[0]));
+/** Series de otros países (no son indicadores de la Argentina): en "Todos los datos" van en su propio bloque, "Otros países", y se abren en variación interanual.
+ *  Hoy solo la inflación de EEUU (CPI-U); si se suma otra serie extranjera a un tema, se agrega acá. */
+const SERIES_OTROS_PAISES = new Set(["cpi_usa"]);
+export const esOtroPais = (s: { id: string }): boolean => SERIES_OTROS_PAISES.has(s.id);
+export const NOMBRE_OTROS_PAISES = "Otros países";
+
 /** Subgrupo dentro del tema (`cat[1]` con su nombre público; con varias categorías se antepone la categoría). Sin subgrupo: "Generales".
  *  Bienes, Servicios, Estacional, Núcleo y Regulados van con los indicadores de inflación. */
 export const subgrupoDe = (t: Tema, s: SerieMeta): string => {

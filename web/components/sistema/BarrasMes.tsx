@@ -17,7 +17,8 @@ const PX_CAR = 7.2, PAD = 8;   // ancho estimado por carácter y aire mínimo en
 type Rotulo = { clave: string; i: number; texto: string; clase: string; guia: string; peso: number };
 type Puesto = Rotulo & { x0: number; w: number; xb: number; fila: number };
 
-export function BarrasMes({ filas, etiqueta }: { filas: FilaBarraMes[]; etiqueta: string }) {
+/** `cero` (R20, por defecto sí): con valores por debajo del cero, la línea del cero va con el color propio `--cero`. */
+export function BarrasMes({ filas, etiqueta, cero = true }: { filas: FilaBarraMes[]; etiqueta: string; cero?: boolean }) {
   const caja = useRef<HTMLDivElement>(null);
   const [ancho, setAncho] = useState(0);
   const [sel, setSel] = useState<number | null>(null);
@@ -100,7 +101,7 @@ export function BarrasMes({ filas, etiqueta }: { filas: FilaBarraMes[]; etiqueta
             return <rect key={f.anio + i} className={`bmes-col${f.actual ? " bmes-actual" : ""}${f.ref ? " bmes-ref" : ""}${i === sel ? " bmes-sel" : ""}`}
               x={i * banda + (banda - bw) / 2} y={top} width={bw} height={h} />;
           })}
-          <line className="bmes-cero" x1={0} x2={ancho} y1={y0} y2={y0} />
+          <line className={`bmes-cero${cero && min < 0 ? " bmes-cero-marca" : ""}`} x1={0} x2={ancho} y1={y0} y2={y0} />
           {puestos.map((p) => (
             <g key={p.clave}>
               <line className={`bmes-guia ${p.guia}`} x1={p.xb} x2={p.xb} y1={RENGLON[p.fila] + 4} y2={cima(p.i) - 1} />

@@ -238,7 +238,7 @@ function PickerInterior({ pedido }: { pedido: PickerPedido }) {
         <div className="vr-nav">
           {camino.length > 0 && (
             <button type="button" className="vr-atras" aria-label={`Volver a ${camino.length > 1 ? camino[camino.length - 2] : "todas las variables"}`}
-              onClick={() => { setCamino(camino.slice(0, -1)); setTodo(false); setQ(""); }}><IconoFlechaIzq /></button>
+              onClick={() => { setCamino(camino.slice(0, -1)); setTodo(false); setQ(""); }}><IconoFlechaIzq /><span>{camino.length > 1 ? camino[camino.length - 2] : "Todas"}</span></button>
           )}
           <div className="migas">{migas}</div>
         </div>

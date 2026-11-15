@@ -6,7 +6,7 @@ import { FilaAjuste as FilaAj } from "./comunes";
 import { BotonCompartir } from "../PanelCompartir";
 import { Cargando, Desplegable, Plegable, Selector, Seg, alternar } from "../ui";
 import { GraficosListos } from "../GraficosListos";
-import { CabeceraDato } from "../sistema/CabeceraDato";
+import { CabeceraDato, ComoVerlo } from "../sistema/CabeceraDato";
 import { IconoBuscar } from "../sistema/iconos";
 import { BarraVista } from "../sistema/BarraVista";
 import { Hoja, type CerrarHoja } from "../sistema/Hoja";
@@ -18,7 +18,7 @@ import { fmtMes, MESES, nf0, nf1, ok, redondeadoComo, restaLimpia } from "@/lib/
 import type { Calculo, Expr, Motor } from "@/lib/motor";
 import { PRES_DEF, aBase100, claseVariacion, estadisticasRows, etiqueta, filasGrafico, franjasPres, type EstRows } from "@/lib/estadisticas";
 import { admiteContexto, contextoDato } from "@/lib/contexto-dato";
-import { MAX_GRAFICOS, MAX_MISMA_UNIDAD, PG, TODOS_MESES, claseVariacionMostrada, comparacionesCabecera, deltaDeFrase, difAbsoluta, exprsUsadas, fraseUltimoVs, frecuenciaOrigen, leerComun, leerGrafico, opcionesComoVerlo, sfx, textoPeriodo, textoTemporalidad, type Comun, type GEst } from "@/lib/historico";
+import { MAX_GRAFICOS, MAX_MISMA_UNIDAD, PG, TODOS_MESES, claseVariacionMostrada, comparacionesCabecera, deltaDeComparacion, exprsUsadas, fraseUltimoVs, frecuenciaOrigen, leerComun, leerGrafico, opcionesComoVerlo, sfx, textoPeriodo, textoTemporalidad, type Comun, type GEst } from "@/lib/historico";
 import { fmtEjeDe, notaInflacion, tituloGrafico, type VistaImg } from "@/lib/imagen-datos";
 import { useConfig } from "../ConfigProvider";
 import { baseDeConfig, medidaInicial, medidaPreferida } from "@/lib/config";
@@ -137,7 +137,7 @@ export function Historico() {
     const mismos = (a: Set<unknown>, b: Set<unknown>) => a.size === b.size && [...a].every((x) => b.has(x));
     const franjasDe = (pf: string) => (pf === "1" ? true : pf === "0" ? false : config.franjas);
     const hayCambios = !!g0 && (E.desde !== E0.desde || E.hasta !== E0.hasta || E.freq !== E0.freq || E.ag !== E0.ag || !mismos(E.meses, E0.meses)
-      || g.modo !== g0.modo || g.escala !== g0.escala || g.banda !== g0.banda || g.eje !== g0.eje || g.tabla !== g0.tabla || !mismos(g.refs, g0.refs) || franjasDe(g.pf) !== franjasDe(g0.pf));
+      || g.modo !== g0.modo || g.escala !== g0.escala || g.banda !== g0.banda || g.eje !== g0.eje || g.tabla !== g0.tabla || g.cero !== g0.cero || !mismos(g.refs, g0.refs) || franjasDe(g.pf) !== franjasDe(g0.pf));
     // Vista simple: el dato, su contexto y el gráfico; los controles de siempre quedan en "Personalizar".
     const simple: Simple = {
       titulo: info.titulo,
@@ -257,7 +257,7 @@ function BloqueGrafico({ i, total, compacto, g, E, m, set, version, onQuitar, on
 
 /** La vista de un gráfico tal como se ve (variables ya cargadas, período y frecuencia), para armar la imagen de compartir. */
 const vistaImg = (E: Comun, g: GEst, exprs: Expr[], titulo?: string): VistaImg =>
-  ({ exprs, modo: g.modo, eje: g.eje, desde: E.desde, hasta: E.hasta, meses: E.meses, freq: E.freq, ag: E.ag, titulo, tabla: g.tabla === "tabla" });
+  ({ exprs, modo: g.modo, eje: g.eje, desde: E.desde, hasta: E.hasta, meses: E.meses, freq: E.freq, ag: E.ag, titulo, tabla: g.tabla === "tabla", ...(g.cero ? {} : { cero: false }) });
 
 // ------------------------------------------------------------ barra fija: período + Mes / Trimestre / Año
 const pad2 = (n: number) => String(n).padStart(2, "0");
@@ -484,6 +484,7 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     const rows: Fila[] = filasGrafico(F, lista, { desde: E.desde, hasta: E.hasta, meses: E.meses, freq: E.freq, cierre: E.ag === "cierre", banda: bd });
     if (b100) { const bases = aBase100(rows, lista.map((o) => o.key)); lista.forEach((o) => { o.base = bases[o.key]; }); }
     const puedeLog = rows.every((r) => lista.every((o) => !ok(r[o.key]) || r[o.key] > 0));
+    const cruzaCero = !b100 && rows.some((r) => lista.some((o) => ok(r[o.key]) && r[o.key] < 0));   // R20: con valores negativos se ofrece la "Línea del cero"
     const st = lista.map((o) => estadisticasRows(rows, o.key));
     // Toda la historia de la primera variable (misma frecuencia, todos los meses) para el período anterior y el año atrás de la cabecera
     const hist: Fila[] = b100 || !lista.length ? [] : filasGrafico(F, lista.slice(0, 1), { desde: F[0], hasta: E.hasta, meses: new Set(TODOS_MESES), freq: E.freq, cierre: E.ag === "cierre", banda: false });
@@ -506,11 +507,12 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
       fmtAxis: b100 ? (v: number) => nf0.format(v) : ejeFmt(lista[0].c), fmtAxis2: dos ? ejeFmt(lista[1].c) : null, fmtTip: fmtDe(lista[0]), tipTitle: etiqueta,
       height: compacto ? 260 : undefined,
       label: lista.map((o) => o.c.corto).join(", "),
+      cero: E.cero,
     };
-    return { lista, dos, hayBanda, bd, rows, hist, puedeLog, st, fmtDe, series, opts };
+    return { lista, dos, hayBanda, bd, rows, hist, puedeLog, cruzaCero, st, fmtDe, series, opts };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [m, version, kExprs, E.modo, E.desde, E.hasta, kMeses, E.freq, E.ag, E.escala, E.banda, E.eje, kRefs, compacto]);
-  const { lista, dos, hayBanda, bd, rows, hist, puedeLog, st, series } = D;
+  }, [m, version, kExprs, E.modo, E.desde, E.hasta, kMeses, E.freq, E.ag, E.escala, E.banda, E.eje, E.cero, kRefs, compacto]);
+  const { lista, dos, hayBanda, bd, rows, hist, puedeLog, cruzaCero, st, series } = D;
   const kBase = `${cfg.t0}|${JSON.stringify(cfg.t0p)}`;
   const franjas = useMemo(() => (conFranjas ? franjasPres(F, baseDeConfig(cfg, PRES_DEF.map((x) => x.id))) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -542,7 +544,7 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     const act = ks.filter((k) => set0.has(k)).sort().join(","), d = def.slice().sort().join(",");
     return act === d;
   };
-  const cuenta = (b100 ? 1 : 0) + (puedeLog && E.escala !== "lin" ? 1 : 0) + (dos && E.eje !== "propia" ? 1 : 0) + (hayBanda && E.banda !== "no" ? 1 : 0)
+  const cuenta = (b100 ? 1 : 0) + (cruzaCero && !E.cero ? 1 : 0) + (puedeLog && E.escala !== "lin" ? 1 : 0) + (dos && E.eje !== "propia" ? 1 : 0) + (hayBanda && E.banda !== "no" ? 1 : 0)
     + (!b100 && !igualA(E.refs, REFS_H.map((r) => r.k), ["ult", "prom"]) ? 1 : 0) + (!b100 && !igualA(E.refs, ["mk_ult", "mk_max", "mk_min"], ["mk_ult", "mk_max", "mk_min"]) ? 1 : 0);
   const config = (
     <>
@@ -557,6 +559,7 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
       )}
       {!b100 && <FilaAj rotulo="Líneas"><Seg valor={E.refs} opciones={REFS_H.map((r) => [r.k, r.btn] as [string, string])} onElegir={refsToggle} /></FilaAj>}
       {!b100 && <FilaAj rotulo="Marcadores"><Seg valor={E.refs} opciones={[["mk_ult", "Último"], ["mk_max", "Máximo"], ["mk_min", "Mínimo"]]} onElegir={refsToggle} /></FilaAj>}
+      {cruzaCero && <FilaAj rotulo="Línea del cero" ayuda="Marca el cero con un color propio, para ver qué quedó por encima y qué por debajo."><Seg valor={E.cero ? "si" : "no"} opciones={[["si", "Prendida"], ["no", "Apagada"]]} onElegir={(v) => set({ cero: v === "si" ? null : "0" })} /></FilaAj>}
       {!b100 && hayBanda && <FilaAj rotulo="Rango"><Seg valor={E.banda} opciones={[["no", "Solo promedio"], ["si", "Con mín/máx"]]} onElegir={(v) => set({ bd: v === "no" ? null : v })} /></FilaAj>}
     </>
   );
@@ -609,14 +612,14 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     const nombre = simple.titulo ?? titulo;
     const vista = { exprs: E.exprs, modo: E.modo, eje: E.eje, desde: E.desde, hasta: E.hasta, meses: E.meses, freq: E.freq, ag: E.ag, titulo: simple.titulo ?? undefined, tabla: E.tabla === "tabla",
       // la imagen sale con las mismas frases de contexto que la cabecera (quien comparte puede cambiarlas en el panel)
-      frases: ctx ? ctx.frases.flatMap((f) => (f.clave ? [f.clave] : [])) : undefined } satisfies VistaImg;
-    // Dos a la vista (período anterior y un año atrás), con el mismo número que la frase de siempre; el resto, en una tabla plegada
-    const aLaVista = comps.filter((c) => c.clave === "anterior" || c.clave === "anio");
-    const resto = comps.filter((c) => c.clave !== "anterior" && c.clave !== "anio");
-    const deltas: DeltaProps[] = aLaVista.map((c) => {
-      const d = deltaDeFrase(c.frase), ref = c.fecha ?? c.titulo.toLowerCase();
-      return { texto: d.texto, tono: c.cls, dir: d.dir, contra: `vs ${ref}`, etiqueta: `${c.titulo}${c.fecha ? ` (${c.fecha})` : ""}: ${m.fmtC(o0.c, c.valor)}. Cambio: ${d.texto}` };
-    });
+      frases: ctx ? ctx.frases.flatMap((f) => (f.clave ? [f.clave] : [])) : undefined,
+      // R20/C6: con la línea del cero apagada la imagen tampoco la dibuja
+      ...(E.cero ? {} : { cero: false }) } satisfies VistaImg;
+    // Dos a la vista (período anterior y un año atrás), con el mismo número que la frase de siempre; el resto (inicio, promedio, mediana, máximo, mínimo)
+    // va en la misma cabecera, con la misma `Delta`: a la vista en computadora y plegado en el celular (R18).
+    const mostradoC = (v: number) => m.fmtC(o0.c, v);
+    const deltas: DeltaProps[] = comps.filter((c) => c.clave === "anterior" || c.clave === "anio").map((c) => deltaDeComparacion(c, mostradoC));
+    const extras: DeltaProps[] = comps.filter((c) => c.clave !== "anterior" && c.clave !== "anio").map((c) => deltaDeComparacion(c, mostradoC, true, s0 ? { pct: o0.c.pct, ultimo: s0.ult[0] } : undefined));
     const frase = multi ? (comps.length ? `Cambios y comparaciones de: ${o0.c.corto}` : undefined) : ctx?.frases[0]?.texto;
     // Sin contexto (trimestral, anual) pero con una sola variable: igual va la cifra del último dato
     const suelta = !ctx && lista.length === 1 && !b100 && !!s0;
@@ -651,14 +654,9 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
             <IconoBuscar /><span className="hi-cambiar-txt">Cambiar dato</span></button>
         </div>
         <CabeceraDato titulo={nombre} nivel={1} cifra={cifra} fecha={fechaCifra}
-          deltas={deltas} frase={frase} fuente={fuente} mesDato={cifra ? (ctx ? ctx.mes : String(s0?.ult[1] ?? "")) || undefined : undefined}
+          deltas={deltas} extras={extras} frase={frase} fuente={fuente} mesDato={cifra ? (ctx ? ctx.mes : String(s0?.ult[1] ?? "")) || undefined : undefined}
           info={o0.c.serie.desc ? <p>{o0.c.serie.desc}</p> : undefined}>
-          {comoVerlo.length > 0 && (
-            <div className="hi-comoverlo" role="group" aria-labelledby="hi-comoverlo-rot">
-              <span className="hi-comoverlo-rot lbl" id="hi-comoverlo-rot">Cómo verlo</span>
-              <Seg valor={medE} opciones={comoVerlo} onElegir={(v) => simple.cambiar({ ...E.exprs[0], med: v })} />
-            </div>
-          )}
+          {comoVerlo.length > 0 && <ComoVerlo opciones={comoVerlo} valor={medE} onElegir={(v) => simple.cambiar({ ...E.exprs[0], med: v })} />}
           {!ctx && (lista.length > 1 || b100) && (
             <ul className="vs-leyenda hi-leyenda">{lista.map((o, k) => {
               const s1 = st[k];
@@ -668,19 +666,6 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
         </CabeceraDato>
         </div>
         <p className="temporal hi-temporal">{temporal}</p>
-        {resto.length > 0 && (
-          <Plegable resumen="Más comparaciones" className="hi-mas" nivel="chico">
-            <div className="tablewrap"><table>
-              <caption className="sr-solo">Último dato contra otros valores{multi ? ` de ${o0.c.corto}` : ""}</caption>
-              <thead><tr><th>Contra</th><th>Valor</th>{o0.c.pct ? <th>Diferencia</th> : <><th>Variación</th><th>Diferencia</th></>}</tr></thead>
-              <tbody>{resto.map((c) => (
-                <tr key={c.clave}><td>{c.titulo}{c.fecha && <small>{c.fecha}</small>}</td><td>{m.fmtC(o0.c, c.valor)}</td>
-                  <td className={`var-${c.cls}`}>{deltaDeFrase(c.frase).texto}</td>
-                  {!o0.c.pct && <td className={`var-${c.cls}`}>{difAbsoluta(o0.c.pct, c.valor, s0?.ult[0], (v) => m.fmtC(o0.c, v)) || "–"}</td>}</tr>
-              ))}</tbody>
-            </table></div>
-          </Plegable>
-        )}
         {cambiando && (
           <Picker onCerrar={() => setCambiando(false)} pedido={{
             titulo: "Buscá o navegá",

@@ -2,9 +2,9 @@
 // Una variable (`Expr`, la misma de la URL del Histórico) contada en capítulos: ahora, cómo viene, el mismo mes en otros años,
 // cada presidente y mes a mes desde que asumió. Funciones puras (sin React): la ficha y las imágenes usan las mismas.
 // Ver docs/specs/ajustes-tanda-5.md y docs/specs/remodelacion-fichas.md.
-import { baseIdx, calcularMandato, claseVariacion, crearPres, filasGrafico, mesInicioTxt, statsMandato, varNum, type BaseCfg, type Fila, type ModoMandato, type Pres, type StatsM } from "./estadisticas";
+import { baseIdx, calcularMandato, claseVariacion, crearPres, estadisticasRows, filasGrafico, mesInicioTxt, statsMandato, varNum, type BaseCfg, type Fila, type ModoMandato, type Pres, type StatsM } from "./estadisticas";
 import { fmtMes, lastIdx, mesNum, nf1, ok, redondeadoComo, r1 } from "./formato";
-import { frecuenciaOrigen, leerComun, type Comun, type FrecOrigen } from "./historico";
+import { TODOS_MESES, comparacionesCabecera, deltaDeComparacion, frecuenciaOrigen, leerComun, type Comun, type FrecOrigen } from "./historico";
 import type { ClaveFrase, DesdePref } from "./config";
 import { contextoDato, type ContextoDato } from "./contexto-dato";
 import type { Calculo, Expr, Motor } from "./motor";
@@ -137,12 +137,14 @@ function masBajoDesde(m: Motor, c: Calculo): string | null {
 
 export interface CabeceraFicha {
   cifra: string; fecha: string; deltas: DeltaProps[]; secundarias: { rotulo: string; valor: string }[]; frase?: string; ultimoDisponible: boolean;
+  /** Las comparaciones extra de la cabecera (inicio del período, promedio, mediana, máximo, mínimo), las mismas que muestra Histórico. Vacío si no se pidieron (`desdeCfg`). */
+  extras: DeltaProps[];
   /** Clave de `frase` entre las del contexto del dato: la imagen que se comparte desde la ficha lleva esta misma frase. */
   fraseClave?: ClaveFrase;
 }
 /** Lo que muestra la apertura de la ficha: la cifra con su fecha, hasta dos cambios (contra el período anterior y contra un año atrás),
  *  el interanual si la cifra es una variación mensual, y un hecho que los cambios no dicen (nunca un adjetivo, D-012). Null sin datos. */
-export function cabeceraFicha(m: Motor, e: Expr): CabeceraFicha | null {
+export function cabeceraFicha(m: Motor, e: Expr, desdeCfg?: DesdePref): CabeceraFicha | null {
   const ctx: ContextoDato | null = contextoDato(m, e);
   if (!ctx) return null;
   const c = m.calc(e);
@@ -160,7 +162,22 @@ export function cabeceraFicha(m: Motor, e: Expr): CabeceraFicha | null {
   // C5: si más es peor, la distancia al récord no es la referencia natural: no se usa
   const elegida: [ClaveFrase, string | null | undefined][] = [["desde", bajo], ["desde", desde], ["record", c.dir < 0 ? null : de("record")], ["minimo", de("minimo")]];
   const [fraseClave, frase] = elegida.find(([, t]) => !!t) ?? [undefined, undefined];
-  return { cifra: ctx.valor, fecha: ctx.mes, deltas, secundarias, frase: frase ?? undefined, fraseClave, ultimoDisponible: ctx.ultimoDisponible };
+  const extras = desdeCfg ? comparacionesExtra(m, c, desdeCfg) : [];
+  return { cifra: ctx.valor, fecha: ctx.mes, deltas, secundarias, frase: frase ?? undefined, fraseClave, ultimoDisponible: ctx.ultimoDisponible, extras };
+}
+
+/** Las comparaciones extra del último dato (inicio del período, promedio, mediana, máximo, mínimo) con el período de la ficha (el de la vista simple de Histórico):
+ *  la misma función y el mismo formato que usa Histórico (`comparacionesCabecera`, `deltaDeComparacion`). */
+function comparacionesExtra(m: Motor, c: Calculo, desdeCfg: DesdePref): DeltaProps[] {
+  const F = m.F, { E, rows } = historicoFicha(m, c, desdeCfg);
+  const est = estadisticasRows(rows, "s0");
+  if (!est) return [];
+  const col = [{ key: "s0", c, flujo: !!c.flujo, ultimo: !!c.ultimo }];
+  const hist = filasGrafico(F, col, { desde: F[0], hasta: E.hasta, meses: new Set(TODOS_MESES), freq: "M", cierre: false, banda: false });
+  const mostrado = (v: number) => m.fmtC(c, v);
+  return comparacionesCabecera({ rows, hist, key: "s0", est, freq: "M", origen: frecuenciaOrigen(c.v), meses: E.meses, dir: c.dir, pct: c.pct, mostrado })
+    .filter((x) => x.clave !== "anterior" && x.clave !== "anio")
+    .map((x) => deltaDeComparacion(x, mostrado, true, { pct: c.pct, ultimo: est.ult[0] }));
 }
 
 /** ¿Es la variación mensual de un índice (se puede acumular)? */
@@ -180,11 +197,11 @@ export interface MesesIguales {
   desde: { anio: string; texto: string; sentido: "bajo" | "alto"; igual: boolean } | null;
   frase: string;
 }
-const MIN_MESES_IGUALES = 10;
+const MIN_MESES_IGUALES = 6;   // R: los rubros del IPC en interanual (desde 2018) tienen pocos años del mismo mes
 /** Todos los valores del mismo mes calendario que el último dato, del más viejo al más nuevo, y en qué puesto queda el de hoy.
- *  El puesto se cuenta con los valores redondeados como se muestran (empates: mismo puesto). Null si la serie no es mensual o hay menos de 10.
+ *  El puesto se cuenta con los valores redondeados como se muestran (empates: mismo puesto). Null si la serie no es mensual o hay menos de 6 (`MIN_MESES_IGUALES`).
  *  `rango`: solo los años de `desde` a `hasta` (inclusive); la frase y el puesto se cuentan con esos años y el último de ellos hace de "actual".
- *  Con rango hacen falta al menos 3 años; los 10 de mínimo se piden sobre la serie entera. */
+ *  Con rango hacen falta al menos 3 años; los 6 de mínimo se piden sobre la serie entera. */
 export function mesesIguales(m: Motor, e: Expr, rango?: { desde: number; hasta: number }): MesesIguales | null {
   if (!m.SER[e.id] || (e.rel && !m.SER[e.rel])) return null;
   const c = m.calc(e), F = m.F, u = lastIdx(c.v);
@@ -218,11 +235,17 @@ export function mesesIguales(m: Motor, e: Expr, rango?: { desde: number; hasta: 
   if (iBajo >= 0 && iAlto >= 0 && iBajo !== iAlto) {
     const k = Math.min(iBajo, iAlto), s = k === iBajo ? "bajo" : "alto";   // todos los años del medio quedaron por encima (o por debajo): el de hoy es el más bajo (o alto) desde ese año
     // Solo si dice algo: que haya al menos un año en el medio
-    if (k <= red.length - 3) { filas[k].ref = true; ref = { anio: filas[k].anio, texto: filas[k].texto, sentido: s, igual: red[k] === hoy }; }
+    // V3 (R21): el "desde" solo se dice en el mismo sentido que el puesto ("el más alto desde 2019" junto a "el 3.º más bajo" se lee como contradicción);
+    // si va en contra no se dice ni se pinta el año de referencia.
+    if (k <= red.length - 3 && s === sentido) { filas[k].ref = true; ref = { anio: filas[k].anio, texto: filas[k].texto, sentido: s, igual: red[k] === hoy }; }
   }
-  const fraseDesde = ref
-    ? (ref.igual ? `Es el ${mes} más ${ref.sentido} desde ${ref.anio}, cuando también fue ${ref.texto}. ` : `Es el ${mes} más ${ref.sentido} desde ${ref.anio} (${ref.texto}). `)
+  // En su lugar, si el puesto es 2.º o 3.º: "Solo 2024 y 2025 estuvieron más altos." (los años estrictamente por delante del de hoy).
+  const delante = filas.slice(0, -1).filter((_, k) => (sentido === "alto" ? red[k] > hoy : red[k] < hoy)).map((f) => f.anio);
+  const fraseSolo = !ref && (puesto === 2 || puesto === 3) && delante.length === puesto - 1
+    ? `Solo ${delante.length > 1 ? delante.slice(0, -1).join(", ") + " y " : ""}${delante[delante.length - 1]} ${delante.length > 1 ? "estuvieron" : "estuvo"} más ${sentido === "alto" ? (delante.length > 1 ? "altos" : "alto") : (delante.length > 1 ? "bajos" : "bajo")}. `
     : "";
+  const fraseDesde = !ref ? fraseSolo
+    : ref.igual ? `Es el ${mes} más ${ref.sentido} desde ${ref.anio}, cuando también fue ${ref.texto}. ` : `Es el ${mes} más ${ref.sentido} desde ${ref.anio} (${ref.texto}). `;
   const frase = `${mes[0].toUpperCase()}${mes.slice(1)} de ${actual.anio}: ${actual.texto}. ` + fraseDesde + (puesto === 1
     ? `Es el más ${sentido} de los ${de} ${plural} desde ${desde}.`
     : `Entre los ${de} ${plural} desde ${desde}, es el ${puesto}.º más ${sentido}.`);

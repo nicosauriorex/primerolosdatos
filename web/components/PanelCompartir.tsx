@@ -67,6 +67,8 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
   const [aviso, setAviso] = useState<string | null>(null);
   const [estado, setEstado] = useState<"cargando" | "listo" | "sin-datos" | "sin-periodo">("cargando");
   const [archivo, setArchivo] = useState<File | null>(null);
+  const [armado, setArmado] = useState(false);   // R22: la imagen es de una vista armada a gusto (lo decide `armarImagen*`)
+  const [resaltados, setResaltados] = useState<string[] | null>(null);   // null = los de la vista
   const [ampliada, setAmpliada] = useState(false);   // vista previa a pantalla completa (tocarla en el celular)
   const previa = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -112,7 +114,7 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
       if (!pres && per && !periodoValido) { setEstado("sin-periodo"); return; }   // hasta terminar de dibujar no hay imagen nueva: no se ofrece la vieja
       try {
         datos = esVistaPres(vista)
-          ? armarImagenPres(motor, vista, { formato, comentario: comentarioAplicado })
+          ? armarImagenPres(motor, vista.tipo === "mandato" && resaltados ? { ...vista, resaltados } : vista, { formato, comentario: comentarioAplicado })
           : armarImagen(motor, { ...vista, exprs: exprsUsadas(motor, vista), desde: per?.desde ?? vista.desde, hasta: per?.hasta ?? vista.hasta }, {
             formato, comentario: comentarioAplicado, personal: img, periodoEnTitulo,
             base: baseDeConfig(config, PRES_DEF.map((p) => p.id)), colPres: config.colPres,
@@ -124,12 +126,13 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
       await esperarFuentes(pal.familia);
       if (!vivo || !canvas.current) return;
       dibujarImagen(canvas.current, datos, pal);
+      setArmado(!!datos.armado);
       setEstado("listo");
       canvas.current.toBlob((b) => { if (vivo) setArchivo(b ? archivoPng(b, datos!.archivo) : null); }, "image/png");
     })();
     return () => { vivo = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cargado, motor, version, vista, formato, per?.desde, per?.hasta, periodoValido, periodoEnTitulo, JSON.stringify(img), comentarioAplicado, kBase, config.colPres]);
+  }, [cargado, motor, version, vista, formato, per?.desde, per?.hasta, periodoValido, periodoEnTitulo, JSON.stringify(img), comentarioAplicado, kBase, config.colPres, resaltados]);
 
   const mostrar = (t: string | null) => { setAviso(t); if (t) setTimeout(() => setAviso(null), 4000); };
   const alResultado = (r: ResultadoImagen) => mostrar(avisoImagen(r));
@@ -152,6 +155,9 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
         <div className="comp-opciones">
           <div className="controls"><label>Formato</label>
             <Seg valor={formato} opciones={FORMATOS_IMG} onElegir={(f) => cambiar({ formatoImagen: f as FormatoImg })} /></div>
+          {vista && esVistaPres(vista) && vista.tipo === "mandato" && (
+            <ResaltarPres vista={vista} elegidos={resaltados ?? vista.resaltados ?? []} onCambiar={setResaltados} />
+          )}
           {!pres && disp.length > 0 && per && (
             <details className="comp-personalizar">
               <summary>Personalizar imagen</summary>
@@ -203,11 +209,11 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
       <footer>
         {puedeCompartir && (
           <button type="button" className="btn primario" disabled={!archivo}
-            onClick={async () => { const r = await compartirImagen(archivo!, titulo, href); mostrar(r === "error" ? "No se pudo compartir la imagen" : avisoImagen(r)); }}>Compartir imagen</button>
+            onClick={async () => { const r = await compartirImagen(archivo!, titulo, href, armado); mostrar(r === "error" ? "No se pudo compartir la imagen" : avisoImagen(r)); }}>Compartir imagen</button>
         )}
         <button type="button" className={`btn${puedeCompartir ? "" : " primario"}`} disabled={!archivo} onClick={() => alResultado(descargarImagen(archivo!))}>Descargar</button>
         {puedeCopiarImagen() && <button type="button" className="btn" disabled={!archivo} onClick={async () => alResultado(await copiarImagen(archivo!))}>Copiar imagen</button>}
-        <button type="button" className="btn" onClick={async () => mostrar(avisoCompartir(await compartir(href, titulo)))}>Copiar link</button>
+        <button type="button" className="btn" onClick={async () => mostrar(avisoCompartir(await compartir(href, titulo, armado)))}>Copiar link</button>
       </footer>
     </Modal>
   );
@@ -286,6 +292,18 @@ function Datos<T extends string>({ t, todos, elegidos, tope, f }: { t: string; t
   return (
     <div className="comp-datos">
       <span className="note" style={{ margin: 0 }}>{t}</span>
+      <Seg valor={new Set<string>(elegidos)} opciones={todos} onElegir={alternar} />
+    </div>
+  );
+}
+
+/** R12 (C2): elección múltiple "Resaltar" de la imagen de Meses de mandato, con los presidentes de la vista. Ninguno elegido = todos iguales. */
+function ResaltarPres({ vista, elegidos, onCambiar }: { vista: Extract<VistaPres, { tipo: "mandato" }>; elegidos: string[]; onCambiar: (l: string[]) => void }) {
+  const todos: [string, string][] = vista.presIds.flatMap((id) => { const p = PRES_DEF.find((x) => x.id === id); return p ? [[id, p.corto ?? p.n] as [string, string]] : []; });
+  const alternar = (id: string) => onCambiar(elegidos.includes(id) ? elegidos.filter((x) => x !== id) : [...elegidos, id]);
+  return (
+    <div className="comp-datos">
+      <span className="note" style={{ margin: 0 }}>Resaltar presidentes (ninguno = todos iguales)</span>
       <Seg valor={new Set<string>(elegidos)} opciones={todos} onElegir={alternar} />
     </div>
   );

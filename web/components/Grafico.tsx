@@ -34,6 +34,8 @@ export interface OpcionesG {
   /** Dibujo por pasos (E1.2): cuántas filas se ven, contadas desde la primera; el resto no se dibuja ni aparece en el globo. `null`/ausente = todas.
    *  Solo recorta lo visible: valores, escala (la del gráfico completo desde el primer cuadro) y eje no cambian. Cambiarlo no rehace el gráfico. */
   revelar?: number | null;
+  /** Línea del cero (R20): marcada con el color `--cero` cuando el rango del eje vertical incluye el cero. Por defecto sí; `false` la saca. Sin efecto en escala logarítmica. */
+  cero?: boolean;
 }
 
 // ------------------------------------------------------------ escalas
@@ -376,6 +378,18 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
           const ctx = uu.ctx, L = uu.bbox.left;
           ctx.save(); recortado = true;
           ctx.beginPath(); ctx.rect(0, 0, L + revelado * (ctx.canvas.width - L), ctx.canvas.height); ctx.clip();
+        },
+        // Línea del cero: debajo de las series (se dibuja antes que ellas), en el color propio `--cero`, solo si el eje la incluye
+        (uu) => {
+          if (opts.cero === false || opts.log) return;
+          const y0 = uu.scales.y.min, y1 = uu.scales.y.max;
+          if (y0 == null || y1 == null || !(y0 < 0 && y1 > 0)) return;
+          const ctx = uu.ctx, d = dpr(), yy = uu.valToPos(0, "y", true);
+          ctx.save();
+          ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--cero").trim() || "#8a93b8";
+          ctx.lineWidth = 1.5 * d; ctx.setLineDash([]);
+          ctx.beginPath(); ctx.moveTo(uu.bbox.left, yy); ctx.lineTo(uu.bbox.left + uu.bbox.width, yy); ctx.stroke();
+          ctx.restore();
         }],
         drawClear: [(uu) => {
           const fr = opts.franjas;

@@ -1,6 +1,7 @@
 "use client";
 // Recuadro "Contexto del mandato": resumen corto para un presidente (Por presidente y detalle de Ranking).
 import Link from "next/link";
+import { Plegable } from "../ui";
 import { useContexto } from "../useContexto";
 import { usePreciosMundo } from "../usePreciosMundo";
 import { useCapacidad } from "../useCapacidad";
@@ -27,12 +28,11 @@ export function ContextoMandato({ m, pres }: { m: Motor; pres: Pres }) {
   const r = resumenMandato(m, datos, pres, grupo[2]);
   const s = r.sorpresa;
   return (
-    <details className="callout contexto-plegado">
-      <summary><b>Contexto del mandato</b>{" "}
-        <span className="resumen">{pres.n}{ok(r.crecArg.v) && ok(r.crecGrp.v) ? `: crece ${nf1.format(r.crecArg.v)} % por año contra ${nf1.format(r.crecGrp.v)} % ${grupo[1].toLowerCase() === "mundo" ? "del mundo" : "de " + grupo[1]}` : ""}</span></summary>
-      <span style={{ color: "var(--text-muted)" }}>({pres.n}, {textoAnios(r.anios)}; comparado con {grupo[1].toLowerCase() === "mundo" ? "el mundo" : grupo[1]})</span>
+    <Plegable className="pres-ctx" resumen={<span className="pres-ctx-resumen">Contexto del mandato{" "}
+        <span className="resumen">{pres.n}{ok(r.crecArg.v) && ok(r.crecGrp.v) ? `: crece ${nf1.format(r.crecArg.v)} % por año contra ${nf1.format(r.crecGrp.v)} % ${grupo[1].toLowerCase() === "mundo" ? "del mundo" : "de " + grupo[1]}` : ""}</span></span>}>
+      <p className="pres-ctx-sub note">({pres.n}, {textoAnios(r.anios)}; comparado con {grupo[1].toLowerCase() === "mundo" ? "el mundo" : grupo[1]})</p>
       {!r.anios.length ? <p className="note">Sin años completos en el mandato.</p> : (
-        <ul style={{ margin: "6px 0", paddingLeft: 18 }}>
+        <ul>
           <li>Crecimiento promedio: Argentina {ok(r.crecArg.v) ? `${nf1.format(r.crecArg.v)} %` : "—"}; {grupo[1]} {ok(r.crecGrp.v) ? `${nf1.format(r.crecGrp.v)} %` : "—"}.</li>
           {ok(s.sArg) && ok(s.sGrp) && ok(s.dif) &&
             <li>Contra lo que proyectaba el FMI en abril: la Argentina {signo(s.sArg)} puntos por año; {grupo[1]}, {signo(s.sGrp)}. Diferencia: {signo(r1(r1(s.sArg) - r1(s.sGrp)))} puntos.</li>}
@@ -41,7 +41,7 @@ export function ContextoMandato({ m, pres }: { m: Motor; pres: Pres }) {
           {r.hayViento && <li>Viento externo: {r.favor} a favor, {r.neutro} neutros y {r.contra} en contra.</li>}
         </ul>
       )}
-      <Link href={`/contexto/?cpr=${pres.id}`} prefetch={false}>Ver el contexto completo</Link>
-    </details>
+      <p><Link href={`/contexto/?cpr=${pres.id}`} prefetch={false}>Ver el contexto completo</Link></p>
+    </Plegable>
   );
 }

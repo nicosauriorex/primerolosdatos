@@ -22,6 +22,8 @@ export interface VistaImg {
   frases?: ClaveFrase[];
   /** El texto de esa frase tal como lo muestra la página (la cabecera de la ficha la calcula sobre toda la serie): la imagen lo usa tal cual mientras quien comparte no elija otras. */
   fraseFija?: string;
+  /** Línea del cero (R20): false = no se dibuja (el Histórico la apaga con `cero=0`). Sin esto, se dibuja si los valores cruzan el cero. */
+  cero?: boolean;
 }
 export interface OpcionesImg {
   formato: FormatoImg; comentario: string; base: BaseCfg; colPres?: Record<string, string>;
@@ -241,6 +243,7 @@ export function armarImagen(m: Motor, v: VistaImg, o: OpcionesImg): DatosImagen 
     fmtEje: b100 ? (x) => nf0.format(x) : fmtEjeDe(calcs[0]),
     fmtEje2: !b100 && lista.length === 2 && v.eje !== "misma" ? fmtEjeDe(calcs[1]) : null,
     franjas, tarjetas, lineasRef, marcasExt, marcaUltimo: pers ? pers.marcaUltimo : true,
+    cero: v.cero, armado: lista.length > 1,   // R22: con más de una serie, la vista la armó quien comparte
     inicioTxt: conPres ? oracionInicio(o.base) : null,
     comentario: limpiarComentario(o.comentario),
     unidad: b100 ? "Base 100: primer dato del período = 100" : [...new Set(calcs.map((c) => c.unidad))].join(" · "),

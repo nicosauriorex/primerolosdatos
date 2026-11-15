@@ -21,8 +21,9 @@
    y el título usa todo su ancho, sin partir palabras. */
 @media (min-width: 900px) {
   .hi-cab .cabdato-titulo { padding-right: 0; }
-  .hi-cab .cabdato-lado { padding-top: calc(var(--toque) + var(--e-4)); }
-  .hi-cab .cabdato { grid-template-columns: minmax(0, 1fr) minmax(max-content, auto); }
+  .hi-cab .cabdato { grid-template-columns: minmax(0, 1fr) minmax(14rem, 40%); }
+  /* A1: Compartir y "Cambiar dato" van en su propio renglón por encima de la cabecera, a la derecha: no pisan la línea divisoria de la columna derecha */
+  .hi-cab-acc { position: static; justify-content: flex-end; margin: 0 0 var(--e-3); }
 }
 
 /* Fila de controles de arriba del gráfico: período, frecuencia, Ajustes y, a la derecha, pantalla completa (44 px) */
@@ -56,7 +57,3 @@
 /* Mismo espacio entre grupos en todas las hojas de ajustes (R4: --e-5 entre grupos, --e-4 entre filas); reemplaza los gap de globals.css */
 .gas-hoja, .prov-hoja, .uni-hoja, .elec-hoja, .rk-hoja { gap: var(--e-5); }
 .ctx-hoja { gap: 0; }
-
-/* ---- Más comparaciones: columna "Dif." (diferencia absoluta) ---- */
-.hi-mas th:nth-child(4), .hi-mas td:nth-child(4) { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.hi-mas td:nth-child(4) { font-weight: 700; }

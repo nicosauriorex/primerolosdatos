@@ -122,6 +122,28 @@ Uso central: alguien escribe en redes "Milei fundió la economía" y otra person
   (→ spec: docs/specs/plantillas-y-vistas.md, como plantillas "cuánto compra un salario"; los índices del IPC medidos en salarios quedan pendientes.)
 - Galería pública de plantillas hechas por la gente (cuando haya cuentas).
 
+## ~~Ajustes pedidos al recorrer la página, tanda 9 (2026-11-15)~~ ✅ 2026-11-15 (salvo Contexto internacional, pendiente de propuesta)
+→ spec: docs/specs/ajustes-tanda-9.md
+- Ficha y Histórico: a la derecha de la línea divisoria de las variaciones queda mucho vacío; el Compartir del Histórico pisa esa línea; "Más comparaciones" mal ubicado.
+- Compartir con tarjetas: las píldoras "Datos de cada presidente" pegadas al borde.
+- Ficha de inflación desde la portada: solo la mensual; dar la opción de verla de otras formas (interanual, índice) como en el Histórico.
+- Placa del dólar blue: debajo de la cifra no dice nada (por ejemplo "el más bajo desde…").
+- Precios, Todos los datos: la inflación de EEUU (CPI-U) aparece como índice entre los indicadores de la Argentina; sacarla o mostrarla en variación interanual. Rubros del IPC en interanual sin "¿Cómo fue octubre en otros años?".
+- Mes a mes desde que asumió: la imagen respeta el presidente resaltado (o pregunta cuáles resaltar); la animación se dibuja de corrido, como con lápiz, sin saltos de mes en mes.
+- ¿Cómo fue <mes> en otros años?: la frase "el más bajo desde 2023" contradice "el 3.º más alto". Gráficos que cruzan el cero: línea del cero de color, con opción para sacarla.
+- Banco Central: "Elegir fechas" sin aire entre los campos; al cerrar el gráfico, volver a la fila que se abrió; en el gráfico, inicio del período y variación contra el último además de más alto y más bajo; ícono del Banco Central en "En vivo".
+- Todas las secciones: otro diseño para las cajas.
+- Cambiar dato: el botón ← y el Recomendado pegado a la explicación.
+- Todos los presidentes, de un vistazo: mapa de calor por defecto, con opción para sacarlo, y que vaya a la imagen.
+- Una variable, todos los presidentes: tres botones que hacen lo mismo y dos Ajustes; lo mismo en Herencia y otros menús.
+- Un presidente, todas las variables: muchos botones y filtros antes de la tabla; "Contexto del mandato" sin el relleno bien.
+- Recibido y entregado: filas muy altas sin necesidad; la imagen pisa las variables con su explicación.
+- Lo que se arma a gusto (Ranking y demás): al compartir, "Armá el tuyo". En Ranking no se pueden volver a sacar los filtros de grupos.
+- Elecciones sin Compartir.
+- Menú Más con un ícono por sección.
+- Contexto internacional (no implementar todavía: el usuario sigue mirando la sección y después se propone una remodelación): precios contra el mundo más claro (más caro / más barato debajo de la variación), filtro de año o promedio de cada presidencia, imagen al compartir, barras con los países en el eje vertical verdes o rojas, sin el renglón "Argentina 95,0 · Bolivia 76,6 (mundo = 100)", comparar países contra la Argentina y países entre sí; sacar el "Con un salario mediano se compran…" de esa parte; los links "Ver la evolución de este rubro" parecen llevar a otra página y cortan la navegación (que sea limpia como la ficha); en "Precios en el mundo" algunos países solo con puntos y leyendas redundantes (color = país; línea = estimado, punto = medido).
+- Regla: cada pedido vale para todo el sitio (barrido).
+
 ## ~~Ajustes pedidos al recorrer la página, tanda 8 (2026-11-14)~~ ✅ 2026-11-15
 → spec: docs/specs/ajustes-tanda-8.md
 - Placas de la portada con variaciones, fecha y fuente a la misma altura entre placas; "¿Qué datos te interesan?" con la cifra alineada aunque lleve unidad, e íconos por tema; "Todas las secciones" menos aburrida (mosaico con íconos y explicación).

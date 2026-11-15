@@ -12,7 +12,7 @@ export const FORMATOS: Record<FormatoImg, { w: number; h: number }> = {
 export interface Paleta {
   familia: string;
   fondo: string; superficie: string; barra: string; sobreBarra: string; borde: string; tinta: string; tintaSec: string; tintaTenue: string;
-  grilla: string; eje: string; acento: string; sobreAcento: string; accion: string; bueno: string; malo: string;
+  grilla: string; eje: string; cero: string; acento: string; sobreAcento: string; accion: string; bueno: string; malo: string;
   series: string[];                 // en el orden de PALETA de components/util.ts
   pres: Record<string, string>;     // color de cada presidente (id → color)
   /** Fondos de las celdas del semáforo de actividad (intensidad 1 a 4) y el color del texto que va encima de cada uno. */
@@ -23,6 +23,7 @@ export interface SerieImg {
   presId?: string;                   // si es de un presidente, se dibuja con su color
   etiqueta?: string;                 // nombre escrito al final de la línea
   trazo?: "continuo" | "corto" | "largo";
+  resalte?: "fuerte" | "tenue";    // presidente resaltado (línea gruesa) o atenuado (el resto, cuando hay resaltados), igual que en pantalla
 }
 type Cls = "bueno" | "malo" | "neutro";
 /** Un dato de una tarjeta: su rótulo, su valor y, si aplica, un mes o período. */
@@ -45,13 +46,31 @@ export interface FilaVela { id: string; nombre: string; periodo: string; ini: nu
 export interface FilaRank { puesto: number; id: string; nombre: string; score: number; indicadores: number }
 /** Una columna de "el mismo mes en cada año": `actual` va en celeste; `ref` (el año de "el más bajo/alto desde…") en ámbar. */
 export interface FilaMes { anio: string; valor: number; texto: string; actual: boolean; ref: boolean }
+/** Grilla "Todos los presidentes, de un vistazo": una fila por presidente y una columna por dato clave. `cls` es el lado (verde o rojo) y `calor` (0 a 1) la intensidad. */
+export interface ColumnaGrillaImg { nombre: string; metrica: string }
+export interface CeldaGrillaImg { texto: string; cls: Cls; calor: number }
+export interface FilaGrillaImg { id: string; nombre: string; periodo: string; celdas: CeldaGrillaImg[] }
+/** Elecciones (V7). Todo viene calculado: la imagen solo dibuja. */
+export interface GraficoDisp {
+  nombre: string; sub: string; ejeX: string; ejeY: string;
+  x0: number; x1: number; y0: number; y1: number;           // rangos de los ejes
+  xTicks: { v: number; t: string }[]; yTicks: { v: number; t: string }[];
+  pts: { x: number; y: number; etq: string; pres: boolean }[];   // pres: presidencial (lleno); si no, legislativa (vacío)
+  recta: { a: number; b: number } | null;                   // y = a + b·x
+  hoy: { x: number; y: number; txt: string; extra: string | null } | null;
+}
+export interface FilaCorr { nombre: string; r: number; rTxt: string; detalle: string }
 /** Contenido de la imagen cuando no es un gráfico de líneas. */
 export type Lienzo =
+  | { tipo: "hoy"; cifra: string | null; rotulo: string; frases: string[]; referencia: string | null }
+  | { tipo: "dispersion"; graficos: GraficoDisp[] }
+  | { tipo: "correlacion"; filas: FilaCorr[] }
   | { tipo: "barras"; filas: FilaBarra[]; sinDatos: string[]; enc?: { nombre: string; valor: string }; sinTope?: boolean }
   | { tipo: "variables"; filas: FilaVariable[]; presId: string; enc?: EncVariables }
   | { tipo: "velas"; filas: FilaVela[]; sinDatos: string[] }
   | { tipo: "ranking"; filas: FilaRank[]; sinDatos: string[] }
-  | { tipo: "meses"; filas: FilaMes[] };
+  | { tipo: "meses"; filas: FilaMes[] }
+  | { tipo: "grilla"; columnas: ColumnaGrillaImg[]; filas: FilaGrillaImg[]; calor: boolean };
 
 export interface DatosImagen {
   formato: FormatoImg;
@@ -78,6 +97,8 @@ export interface DatosImagen {
   log?: boolean;                     // eje Y logarítmico
   refLinea?: number | null;          // línea horizontal de referencia
   fuenteCorta?: string;              // si la fuente no entra en dos renglones, esta
+  cero?: boolean;                    // línea del cero (R20): se dibuja si los valores la cruzan, salvo que sea false
+  armado?: boolean;                  // vista armada a gusto (R22): el pie dice "Armado en primerolosdatos.com.ar · armá el tuyo"
 }
 
 export const SITIO = "primerolosdatos.com.ar";
@@ -266,6 +287,10 @@ function grafico(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number) {
       ctx.strokeStyle = pal.grilla; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(pl.x, y); ctx.lineTo(pl.x + pl.w, y); ctx.stroke();
       ctx.fillStyle = pal.tintaTenue; ctx.textAlign = "right"; ctx.fillText(d.fmtEje(t), pl.x - pad * 0.6, y);
     });
+    if (d.cero !== false && !log && R0.mn < 0 && R0.mx > 0) {   // R20: la línea del cero, de un color propio más fuerte que la grilla
+      const y = Y(0);
+      ctx.strokeStyle = pal.cero; ctx.lineWidth = px(3 * esc); ctx.beginPath(); ctx.moveTo(pl.x, y); ctx.lineTo(pl.x + pl.w, y); ctx.stroke();
+    }
     if (d.refLinea != null && (!log || d.refLinea > 0)) {
       const y = Y(d.refLinea);
       if (y >= pl.y && y <= pl.y + pl.h) { ctx.strokeStyle = pal.tintaTenue; ctx.lineWidth = 2; ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.moveTo(pl.x, y); ctx.lineTo(pl.x + pl.w, y); ctx.stroke(); ctx.setLineDash([]); }
@@ -318,9 +343,11 @@ function grafico(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number) {
   const puntas: { s: SerieImg; x: number; y: number; col: string }[] = [];
   ctx.save();
   ctx.beginPath(); ctx.rect(pl.x - 2, pl.y - 6, pl.w + 4, pl.h + 12); ctx.clip();
-  vis.forEach(({ s }) => {
+  // los presidentes resaltados se dibujan al final (arriba), con línea gruesa; los atenuados, finos y con poca opacidad
+  [...vis].sort((a, b) => (a.s.resalte === "fuerte" ? 1 : 0) - (b.s.resalte === "fuerte" ? 1 : 0)).forEach(({ s }) => {
     const R = s.axis === 1 && R1 ? R1 : R0!, Y = Yde(R), col = s.presId ? (pal.pres[s.presId] ?? pal.acento) : (pal.series[s.color] ?? pal.acento);
-    ctx.strokeStyle = col; ctx.lineWidth = px(4.5 * esc); ctx.lineJoin = "round"; ctx.lineCap = s.trazo && s.trazo !== "continuo" ? "butt" : "round";
+    ctx.globalAlpha = s.resalte === "tenue" ? 0.3 : 1;
+    ctx.strokeStyle = col; ctx.lineWidth = px((s.resalte === "fuerte" ? 7.5 : s.resalte === "tenue" ? 3.5 : 4.5) * esc); ctx.lineJoin = "round"; ctx.lineCap = s.trazo && s.trazo !== "continuo" ? "butt" : "round";
     ctx.setLineDash(DASH[s.trazo ?? "continuo"].map((n) => n * esc));
     let abierto = false, ultimo = null as [number, number] | null, tramo: [number, number][] = [];
     ctx.beginPath();
@@ -331,10 +358,10 @@ function grafico(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number) {
       tramo.push([xx, yy]);
       ultimo = [xx, yy];
     });
-    ctx.stroke(); ctx.setLineDash([]);
+    ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
     if (ultimo) {
       const [ux, uy] = ultimo;
-      if (d.marcaUltimo !== false) {
+      if (d.marcaUltimo !== false && s.resalte !== "tenue") {
         ctx.fillStyle = col; ctx.strokeStyle = pal.superficie; ctx.lineWidth = px(3 * esc);
         ctx.beginPath(); ctx.arc(ux, uy, px(9 * esc), 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         ocupados.push({ x: ux - 11 * esc, y: uy - 11 * esc, w: 22 * esc, h: 22 * esc });
@@ -385,7 +412,7 @@ function grafico(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number) {
   if (conEtq.length) {
     const ft = px(fs * 0.95), alto = ft * 1.25;
     ctx.font = fuenteDe(pal, 800, ft); ctx.textBaseline = "middle"; ctx.textAlign = "left";
-    const items = puntas.filter((p) => p.s.etiqueta).map((p) => {
+    const items = puntas.filter((p) => p.s.etiqueta && p.s.resalte !== "tenue").map((p) => {
       const t = nomEtq(p.s.etiqueta!), w = ctx.measureText(t).width;
       return { t, w, x: Math.min(p.x + px(14 * esc), r.x + r.w - w - 6), y: p.y, col: p.col };
     }).sort((a, b) => a.y - b.y);
@@ -405,16 +432,20 @@ function grafico(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number) {
 
 // ---------------------------------------------------------------- filas: una variable entre presidentes, un presidente con varias variables, ranking
 type LienzoDe<T extends Lienzo["tipo"]> = Extract<Lienzo, { tipo: T }>;
-const MIN_FILA = { barras: 44, variables: 50, velas: 64, ranking: 42 } as const;   // alto mínimo legible de una fila (en px del lienzo)
-const MAX_FILA = { barras: 100, variables: 118, velas: 120, ranking: 96 } as const;
+const MIN_FILA = { barras: 44, variables: 50, velas: 64, ranking: 42, correlacion: 54 } as const;   // alto mínimo legible de una fila (en px del lienzo)
+const MAX_FILA = { barras: 100, variables: 118, velas: 120, ranking: 96, correlacion: 84 } as const;
 const ALTO_ENC = 32;      // renglón de encabezados de columnas
 const ALTO_SIN = 36;      // renglón "Sin datos: …"
-const sinDatosDe = (l: Lienzo): string[] => (l.tipo === "variables" || l.tipo === "meses" ? [] : l.sinDatos);
+const sinDatosDe = (l: Lienzo): string[] => (l.tipo === "barras" || l.tipo === "velas" || l.tipo === "ranking" ? l.sinDatos : []);
+const MIN_ELEC = { hoy: { vertical: 380, horizontal: 280 }, dispersion: { vertical: 560, horizontal: 300 } } as const;   // alto mínimo de las imágenes de Elecciones
+const MIN_GRILLA = 40, ALTO_ENC_GRILLA = 54;   // alto mínimo de una fila de la grilla de presidentes y de su encabezado (dos renglones)
 const MIN_MESES = { vertical: 360, horizontal: 300 } as const;   // alto mínimo de las columnas de "el mismo mes en cada año"
 
 /** Alto mínimo del contenido: con él se elige la escala de texto con la que todo entra. En horizontal las filas pueden ir en dos columnas. */
 function minLienzo(l: Lienzo, horiz: boolean): number {
   if (l.tipo === "meses") return horiz ? MIN_MESES.horizontal : MIN_MESES.vertical;
+  if (l.tipo === "grilla") return l.filas.length * MIN_GRILLA + ALTO_ENC_GRILLA + 16;
+  if (l.tipo === "hoy" || l.tipo === "dispersion") return MIN_ELEC[l.tipo][horiz ? "horizontal" : "vertical"];
   const n = l.filas.length;
   return (horiz ? Math.ceil(n / 2) : n) * MIN_FILA[l.tipo] + ALTO_ENC + (sinDatosDe(l).length ? ALTO_SIN : 0) + 16;
 }
@@ -456,7 +487,7 @@ function minigrafico(ctx: Ctx, v: (number | null)[], x: number, y: number, w: nu
   if (ult) { ctx.fillStyle = color; ctx.strokeStyle = fondo; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(ult[0], ult[1], 4.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
 }
 
-function filasBarras(ctx: Ctx, r: Rect, L: LienzoDe<"barras">, pal: Paleta, esc: number, horiz: boolean) {
+function filasBarras(ctx: Ctx, r: Rect, L: LienzoDe<"barras">, pal: Paleta, esc: number, horiz: boolean, cero: boolean) {
   const n = L.filas.length, g = rejilla(r, n, "barras", horiz), { f1, f2 } = tamFila(g.rowH, esc), pad = 14;
   // escala común: un tope para que un valor enorme no aplaste al resto (la barra se corta y el número va completo)
   const abs = L.filas.flatMap((f) => (f.valor == null ? [] : [Math.abs(f.valor)])).sort((a, b) => a - b);
@@ -472,7 +503,7 @@ function filasBarras(ctx: Ctx, r: Rect, L: LienzoDe<"barras">, pal: Paleta, esc:
     const cx = r.x + c * (g.cw + g.gap), q0 = geom(cx);
     encabezado(ctx, pal, esc, r.y + 9, [{ t: L.enc?.nombre ?? "Presidente", x: q0.left, w: wA }, { t: L.enc?.valor ?? "Variación en el mandato", x: q0.xBar, w: wBar + wV + iw * 0.02, alinear: "left" }]);
     const unidad = pos + neg > 0 ? wBar / (pos + neg) : 0, x0 = q0.xBar + neg * unidad;
-    if (neg > 0) { ctx.fillStyle = pal.eje; ctx.fillRect(x0 - 1, g.y0, 2, g.rowH * g.per); }
+    if (neg > 0) { ctx.fillStyle = cero ? pal.cero : pal.eje; ctx.fillRect(x0 - 1, g.y0, 3, g.rowH * g.per); }
   }
   L.filas.forEach((f, k) => {
     const c = Math.floor(k / g.per), i = k % g.per, cx = r.x + c * (g.cw + g.gap), y = g.y0 + i * g.rowH, q0 = geom(cx);
@@ -531,10 +562,14 @@ function filasVariables(ctx: Ctx, r: Rect, L: LienzoDe<"variables">, pal: Paleta
     const c = Math.floor(k / g.per), i = k % g.per, cx = r.x + c * (g.cw + g.gap), y = g.y0 + i * g.rowH, q = col(cx);
     if (i > 0) separador(ctx, pal, cx + pad, y, g.cw - pad * 2);
     // el nombre va en un renglón; si para eso habría que achicarlo mucho y la fila es alta, en dos renglones (con un tamaño que deje lugar a la unidad)
-    const aN = ajustar(ctx, pal, f.nombre, { peso: 800, max: tamNom, min: tamNom, ancho: wNom, lineas: dosOk ? 2 : 1 });
-    const aU = ajustar(ctx, pal, f.unidad, { peso: 400, max: f2, min: 10, ancho: iw * fr.nom - 10, lineas: 1 });
-    const yt = y + (g.rowH - alto(aN, 1.2) - alto(aU, 1.2)) / 2;
-    texto(ctx, pal, aN, 800, q.nom, yt, pal.tinta, 1.2); texto(ctx, pal, aU, 400, q.nom, yt + alto(aN, 1.2), pal.tintaTenue, 1.2);
+    // la fila reserva el alto de su nombre (hasta dos renglones, cortado con "…") más el renglón de la unidad; si el nombre y la unidad no entran juntos, va solo el nombre
+    const hMax = g.rowH - 8;
+    let aN = ajustar(ctx, pal, f.nombre, { peso: 800, max: tamNom, min: tamNom, ancho: wNom, lineas: dosOk ? 2 : 1 });
+    if (alto(aN, 1.2) > hMax) aN = ajustar(ctx, pal, f.nombre, { peso: 800, max: tamNom, min: tamNom, ancho: wNom, lineas: 1 });
+    let aU: Ajustado | null = f.unidad ? ajustar(ctx, pal, f.unidad, { peso: 400, max: f2, min: 10, ancho: iw * fr.nom - 10, lineas: 1 }) : null;
+    if (aU && alto(aN, 1.2) + alto(aU, 1.2) > hMax) aU = null;
+    const yt = y + (g.rowH - alto(aN, 1.2) - (aU ? alto(aU, 1.2) : 0)) / 2;
+    texto(ctx, pal, aN, 800, q.nom, yt, pal.tinta, 1.2); if (aU) texto(ctx, pal, aU, 400, q.nom, yt + alto(aN, 1.2), pal.tintaTenue, 1.2);
     if (f.ini == null || f.fin == null) {
       const aS = ajustar(ctx, pal, L.enc?.sinDato ?? "sin datos en este mandato", { peso: 600, max: f1, min: 11, ancho: iw * (1 - fr.nom) - 8, lineas: 1 });
       texto(ctx, pal, aS, 600, q.ini, y + (g.rowH - alto(aS, 1.2)) / 2, pal.tintaTenue, 1.2);
@@ -547,7 +582,8 @@ function filasVariables(ctx: Ctx, r: Rect, L: LienzoDe<"variables">, pal: Paleta
     cel(f.ini, q.ini, iw * fr.ini, 600, pal.tintaSec, tamIni); cel(f.fin, q.fin, iw * fr.fin, 600, pal.tinta, tamFin);
     const colorV = f.cls === "neutro" ? pal.tinta : colorCls(pal, f.cls);
     const aV = ajustar(ctx, pal, f.variacion ?? "–", { peso: 900, max: tamVar, min: tamVar, ancho: iw * fr.vr - 8, lineas: 1 });
-    const aNota = f.nota ? ajustar(ctx, pal, f.nota, { peso: 600, max: f2, min: 10, ancho: iw * fr.vr - 8, lineas: 1 }) : null;
+    let aNota: Ajustado | null = f.nota ? ajustar(ctx, pal, f.nota, { peso: 600, max: f2, min: 10, ancho: iw * fr.vr - 8, lineas: 1 }) : null;
+    if (aNota && alto(aV, 1.2) + alto(aNota, 1.2) > hMax) aNota = null;   // como la unidad: si la nota no entra bajo la variación, va solo la variación
     const yv = y + (g.rowH - alto(aV, 1.2) - (aNota ? alto(aNota, 1.2) : 0)) / 2;
     texto(ctx, pal, aV, 900, q.vr + iw * fr.vr - 8, yv, colorV, 1.2, "right");
     if (aNota) texto(ctx, pal, aNota, 600, q.vr + iw * fr.vr - 8, yv + alto(aV, 1.2), pal.tintaTenue, 1.2, "right");
@@ -556,7 +592,7 @@ function filasVariables(ctx: Ctx, r: Rect, L: LienzoDe<"variables">, pal: Paleta
   });
 }
 
-function filasVelas(ctx: Ctx, r: Rect, L: LienzoDe<"velas">, pal: Paleta, esc: number, horiz: boolean) {
+function filasVelas(ctx: Ctx, r: Rect, L: LienzoDe<"velas">, pal: Paleta, esc: number, horiz: boolean, cero: boolean) {
   const n = L.filas.length, g = rejilla(r, n, "velas", horiz), { f1, f2 } = tamFila(g.rowH, esc), pad = 14;
   const iw = g.cw - pad * 2 - 8, fr = { nom: 0.3, vela: 0.46, vr: 0.24 };
   const col = (cx: number) => { const x = cx + 8 + pad; return { nom: x, vela: x + iw * fr.nom, vr: x + iw * (fr.nom + fr.vela) }; };
@@ -582,7 +618,7 @@ function filasVelas(ctx: Ctx, r: Rect, L: LienzoDe<"velas">, pal: Paleta, esc: n
     const aV = ajustar(ctx, pal, `Mín. ${f.minTxt} · Inicio ${f.iniTxt} · Cierre ${f.finTxt} · Máx. ${f.maxTxt}`, { peso: 600, max: f2, min: 10, ancho: wV, lineas: 1 });
     const hTxt = alto(aV, 1.2), hVela = Math.min(g.rowH - hTxt - 12, 34), yVela = y + (g.rowH - hVela - hTxt - 4) / 2, yc = yVela + hVela / 2;
     const X = (v: number) => q.vela + ((v - lo) / rango) * wV;
-    if (lo < 0 && hi > 0) { ctx.fillStyle = pal.eje; ctx.fillRect(X(0) - 1, yVela, 2, hVela); }
+    if (lo < 0 && hi > 0) { ctx.fillStyle = cero ? pal.cero : pal.eje; ctx.fillRect(X(0) - 1, yVela, 3, hVela); }
     ctx.fillStyle = pal.tintaTenue; ctx.fillRect(X(f.min), yc - 1.5, Math.max(2, X(f.max) - X(f.min)), 3);
     ctx.fillRect(X(f.min) - 1.5, yc - hVela * 0.3, 3, hVela * 0.6); ctx.fillRect(X(f.max) - 1.5, yc - hVela * 0.3, 3, hVela * 0.6);
     const xa = Math.min(X(f.ini), X(f.fin)), wa = Math.max(Math.abs(X(f.fin) - X(f.ini)), 4);
@@ -628,7 +664,11 @@ function filasRanking(ctx: Ctx, r: Rect, L: LienzoDe<"ranking">, pal: Paleta, es
 /** El contenido de la imagen cuando no es un gráfico de líneas: el marco, las filas y la línea de "Sin datos". */
 function lienzoFilas(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number, horiz: boolean) {
   const L = d.lienzo!;
-  if (L.tipo === "meses") { columnasMeses(ctx, r, L, pal, esc); return; }
+  const cero = d.cero !== false;
+  if (L.tipo === "meses") { columnasMeses(ctx, r, L, pal, esc, cero); return; }
+  if (L.tipo === "grilla") { tablaGrilla(ctx, r, L, pal, esc); return; }
+  if (L.tipo === "hoy") { tarjetaHoy(ctx, r, L, pal, esc); return; }
+  if (L.tipo === "dispersion") { dispersiones(ctx, r, L, pal, esc, horiz); return; }
   const sin = sinDatosDe(L), hSin = sin.length ? ALTO_SIN : 0;
   const g = rejilla({ ...r, h: r.h - hSin }, L.filas.length, L.tipo, horiz);
   r = { ...r, h: Math.min(r.h, ALTO_ENC + g.per * g.rowH + hSin + 6) };   // el marco se ajusta a las filas: sin vacío debajo
@@ -637,9 +677,10 @@ function lienzoFilas(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number
   ctx.strokeStyle = pal.borde; ctx.lineWidth = 2; ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
   ctx.save();
   ctx.beginPath(); ctx.rect(r.x + 2, r.y + 2, r.w - 4, r.h - 4); ctx.clip();
-  if (L.tipo === "barras") filasBarras(ctx, caja, L, pal, esc, horiz);
+  if (L.tipo === "barras") filasBarras(ctx, caja, L, pal, esc, horiz, cero);
   else if (L.tipo === "variables") filasVariables(ctx, caja, L, pal, esc, horiz);
-  else if (L.tipo === "velas") filasVelas(ctx, caja, L, pal, esc, horiz);
+  else if (L.tipo === "velas") filasVelas(ctx, caja, L, pal, esc, horiz, cero);
+  else if (L.tipo === "correlacion") filasCorrelacion(ctx, caja, L, pal, esc, horiz);
   else filasRanking(ctx, caja, L, pal, esc, horiz);
   if (sin.length) {
     const a = ajustar(ctx, pal, `Sin datos: ${sin.join(", ")}`, { peso: 600, max: 22 * Math.max(esc, 0.9), min: 13, ancho: r.w - 40, lineas: 1 });
@@ -648,9 +689,56 @@ function lienzoFilas(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number
   ctx.restore();
 }
 
+/** "Todos los presidentes, de un vistazo": una fila por presidente y una columna por dato clave, con el mismo texto de cada celda que la pantalla.
+ *  Con `calor`, cada celda lleva un fondo verde (mejor lugar de la columna) o rojo (peor), más intenso cuanto más lejos del medio; el texto con signo se mantiene siempre. */
+function tablaGrilla(ctx: Ctx, r: Rect, L: LienzoDe<"grilla">, pal: Paleta, esc: number) {
+  const n = L.filas.length, nc = L.columnas.length;
+  const pad = 14, hEnc = ALTO_ENC_GRILLA, rowH = Math.min((r.h - hEnc - 8) / Math.max(1, n), 96);
+  const alt = Math.min(r.h, hEnc + n * rowH + 8);
+  ctx.fillStyle = pal.superficie; ctx.fillRect(r.x, r.y, r.w, alt);
+  ctx.strokeStyle = pal.borde; ctx.lineWidth = 2; ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, alt - 2);
+  if (!n || !nc) return;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(r.x + 2, r.y + 2, r.w - 4, alt - 4); ctx.clip();
+  const iw = r.w - pad * 2, wNom = iw * 0.24, wc = (iw - wNom) / nc, x0 = r.x + pad;
+  const { f1, f2 } = tamFila(rowH, esc);
+  // encabezado de dos renglones: el dato y, debajo, qué se mide
+  L.columnas.forEach((c, j) => {
+    const cx = x0 + wNom + j * wc + wc / 2;
+    const a1 = ajustar(ctx, pal, c.nombre.toUpperCase(), { peso: 800, max: 15 * Math.max(esc, 0.9), min: 10, ancho: wc - 8, lineas: 1 });
+    const a2 = ajustar(ctx, pal, c.metrica.toLowerCase(), { peso: 600, max: 14 * Math.max(esc, 0.9), min: 10, ancho: wc - 8, lineas: 1 });
+    texto(ctx, pal, a1, 800, cx, r.y + 8, pal.tintaTenue, 1.2, "center");
+    texto(ctx, pal, a2, 600, cx, r.y + 8 + alto(a1, 1.2), pal.tintaTenue, 1.2, "center");
+  });
+  encabezado(ctx, pal, esc, r.y + 8, [{ t: "Presidente", x: x0 + 8, w: wNom - 8 }]);
+  const textos = L.filas.flatMap((f) => f.celdas.map((c) => c.texto));
+  const tamC = tamComun(ctx, pal, textos, { peso: 800, max: f1 * 1.05, min: 10, ancho: wc - 14 });
+  L.filas.forEach((f, i) => {
+    const y = r.y + hEnc + i * rowH;
+    separador(ctx, pal, r.x + pad, y, iw);
+    ctx.fillStyle = pal.pres[f.id] ?? pal.eje; ctx.fillRect(x0, y + 7, 6, rowH - 14);
+    const dosOk = rowH >= 50;
+    const aN = ajustar(ctx, pal, f.nombre, { peso: 800, max: f1, min: 11, ancho: wNom - 22, lineas: 1 });
+    const aP = dosOk ? ajustar(ctx, pal, f.periodo, { peso: 600, max: f2, min: 10, ancho: wNom - 22, lineas: 1 }) : null;
+    const yt = y + (rowH - alto(aN, 1.2) - (aP ? alto(aP, 1.2) : 0)) / 2;
+    texto(ctx, pal, aN, 800, x0 + 16, yt, pal.tinta, 1.2); if (aP) texto(ctx, pal, aP, 600, x0 + 16, yt + alto(aN, 1.2), pal.tintaSec, 1.2);
+    f.celdas.forEach((c, j) => {
+      const cx = x0 + wNom + j * wc;
+      if (L.calor && c.cls !== "neutro") {   // misma intensidad que la pantalla (fondoCalor): 10 % a 60 % según el lugar entre los presidentes
+        ctx.globalAlpha = 0.1 + 0.5 * (c.calor ?? 0); ctx.fillStyle = c.cls === "bueno" ? pal.bueno : pal.malo;
+        ctx.fillRect(cx + 3, y + 4, wc - 6, rowH - 8); ctx.globalAlpha = 1;
+      }
+      const a = ajustar(ctx, pal, c.texto, { peso: 800, max: tamC, min: tamC, ancho: wc - 10, lineas: 1 });
+      const tinta = c.texto === "—" ? pal.tintaTenue : L.calor ? pal.tinta : c.cls === "neutro" ? pal.tinta : colorCls(pal, c.cls);
+      texto(ctx, pal, a, 800, cx + wc / 2, y + (rowH - alto(a, 1.2)) / 2, tinta, 1.2, "center");
+    });
+  });
+  ctx.restore();
+}
+
 /** "El mismo mes en cada año" (pedido 13): una columna por año, desde 0, como `components/sistema/BarrasMes.tsx`. El último año en celeste
  *  con su valor arriba; el de "el más bajo/alto desde…" en ámbar con su año y valor; los demás apagados. Primer y último año debajo. */
-function columnasMeses(ctx: Ctx, r: Rect, L: LienzoDe<"meses">, pal: Paleta, esc: number) {
+function columnasMeses(ctx: Ctx, r: Rect, L: LienzoDe<"meses">, pal: Paleta, esc: number, cero: boolean) {
   const N = L.filas.length;
   if (!N) return;
   ctx.fillStyle = pal.superficie; ctx.fillRect(r.x, r.y, r.w, r.h);
@@ -673,7 +761,8 @@ function columnasMeses(ctx: Ctx, r: Rect, L: LienzoDe<"meses">, pal: Paleta, esc
     ctx.fillRect(xCol(i), y, bw, h);
   });
   ctx.globalAlpha = 1;
-  ctx.fillStyle = pal.eje; ctx.fillRect(x0, y0 - 1, x1 - x0, 2);
+  if (mn < 0) { ctx.fillStyle = cero ? pal.cero : pal.eje; ctx.fillRect(x0, y0 - (cero ? 1.5 : 0.5), x1 - x0, cero ? 3 : 1); }   // cruza el cero: línea propia (R20), salvo que se haya apagado
+  else { ctx.fillStyle = pal.eje; ctx.fillRect(x0, y0 - 1, x1 - x0, 2); }
   // rótulos: arriba de las columnas que quedan debajo (sin taparlas); si el del año actual y el de referencia chocan, cada uno en su renglón
   ctx.textBaseline = "alphabetic";
   const rotulo = (i: number, t: string) => {
@@ -706,6 +795,171 @@ function columnasMeses(ctx: Ctx, r: Rect, L: LienzoDe<"meses">, pal: Paleta, esc
   const yAnio = r.y + r.h - pad;
   ctx.textAlign = "left"; ctx.fillText(L.filas[0].anio, x0, yAnio);
   if (N > 1) { ctx.textAlign = "right"; ctx.fillText(L.filas[N - 1].anio, x1, yAnio); }
+}
+
+// ---------------------------------------------------------------- Elecciones (V7)
+/** "Qué dicen los datos sobre el voto al oficialismo hoy": la cifra grande, lo que mide y las frases que la explican. */
+function tarjetaHoy(ctx: Ctx, r: Rect, L: LienzoDe<"hoy">, pal: Paleta, esc: number) {
+  const pad = 28, ancho = r.w - pad * 2, S = Math.max(esc, 0.9);
+  const bloques: { a: Ajustado; peso: number; color: string; antes: number }[] = [];
+  const poner = (t: string, peso: number, max: number, min: number, lineas: number, color: string, antes: number) => {
+    const a = ajustar(ctx, pal, t, { peso, max, min, ancho, lineas }); bloques.push({ a, peso, color, antes });
+  };
+  if (L.cifra) {
+    poner(L.cifra, 900, Math.min(170 * S, r.h * 0.3), 56, 1, pal.acento, 0);
+    poner(L.rotulo, 600, 30 * S, 17, 2, pal.tintaSec, 6);
+  }
+  L.frases.forEach((f, k) => poner(f, 600, 26 * S, 16, 3, pal.tinta, k === 0 ? (L.cifra ? 26 : 0) : 12));
+  if (L.referencia) poner(L.referencia, 600, 24 * S, 16, 3, pal.tintaSec, 18);
+  const hCont = bloques.reduce((s, b) => s + b.antes + alto(b.a, 1.2), 0), alt = Math.min(r.h, hCont + pad * 2);
+  ctx.fillStyle = pal.superficie; ctx.fillRect(r.x, r.y, r.w, alt);
+  ctx.strokeStyle = pal.borde; ctx.lineWidth = 2; ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, alt - 2);
+  ctx.fillStyle = pal.acento; ctx.fillRect(r.x, r.y, 8, alt);
+  ctx.save(); ctx.beginPath(); ctx.rect(r.x + 2, r.y + 2, r.w - 4, alt - 4); ctx.clip();
+  let y = r.y + pad;
+  bloques.forEach((b) => { y += b.antes; texto(ctx, pal, b.a, b.peso, r.x + pad, y, b.color, 1.2); y += alto(b.a, 1.2); });
+  ctx.restore();
+}
+
+interface CajaE { x0: number; y0: number; x1: number; y1: number }
+const chocaE = (a: CajaE, b: CajaE) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+/** R15: prueba arriba a la derecha, derecha, arriba, izquierda y abajo del punto, y toma la primera caja libre dentro del área (sin tapar puntos, la recta ni otras etiquetas);
+ *  si ninguna está libre, la lleva al borde de arriba del gráfico, corrida hasta un hueco, unida al punto con una línea fina de puntos. */
+function ubicarEtq(ax: number, ay: number, w: number, h: number, area: CajaE, ocupado: CajaE[]): { caja: CajaE; ancla: CanvasTextAlign; guia: boolean } {
+  const g = 9;
+  const cands: [CajaE, CanvasTextAlign][] = [
+    [{ x0: ax + g, y0: ay - 4 - h, x1: ax + g + w, y1: ay - 4 }, "left"],
+    [{ x0: ax + g + 2, y0: ay - h / 2, x1: ax + g + 2 + w, y1: ay + h / 2 }, "left"],
+    [{ x0: ax - w / 2, y0: ay - g - h, x1: ax + w / 2, y1: ay - g }, "center"],
+    [{ x0: ax - g - 2 - w, y0: ay - h / 2, x1: ax - g - 2, y1: ay + h / 2 }, "right"],
+    [{ x0: ax - w / 2, y0: ay + g, x1: ax + w / 2, y1: ay + g + h }, "center"],
+  ];
+  for (const [c, ancla] of cands) {
+    if (c.x0 < area.x0 || c.x1 > area.x1 || c.y0 < area.y0 || c.y1 > area.y1) continue;
+    if (!ocupado.some((o) => chocaE(c, o))) return { caja: c, ancla, guia: false };
+  }
+  let x0 = Math.max(area.x0, Math.min(ax - w / 2, area.x1 - w));
+  let caja: CajaE = { x0, y0: area.y0, x1: x0 + w, y1: area.y0 + h };
+  for (let k = 0; k < 80 && ocupado.some((o) => chocaE(caja, o)) && caja.x1 + 4 <= area.x1; k++) { x0 += 4; caja = { x0, y0: area.y0, x1: x0 + w, y1: area.y0 + h }; }
+  return { caja, ancla: "center", guia: true };
+}
+
+/** Gráficos de dispersión: una cuadrícula de hasta 4 (2 × 2, o los 4 en fila en 16:9). Puntos llenos = presidencial, vacíos = legislativa; rombo = hoy; recta de ajuste punteada.
+ *  Cada punto lleva su año; las etiquetas no se pisan (R15). Los ejes llevan su nombre. */
+function dispersiones(ctx: Ctx, r: Rect, L: LienzoDe<"dispersion">, pal: Paleta, esc: number, horiz: boolean) {
+  const n = L.graficos.length;
+  if (!n) return;
+  ctx.fillStyle = pal.superficie; ctx.fillRect(r.x, r.y, r.w, r.h);
+  ctx.strokeStyle = pal.borde; ctx.lineWidth = 2; ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
+  const S = Math.max(esc, 0.9), pad = 22, gap = 26;
+  const cols = horiz ? Math.min(n, 4) : Math.min(n, 2), rows = Math.ceil(n / cols);
+  const cw = (r.w - pad * 2 - gap * (cols - 1)) / cols, ch = (r.h - pad * 2 - gap * (rows - 1)) / rows;
+  const fT = px(Math.max(14, 20 * S)), fS = px(Math.max(12, 16 * S)), fTick = px(Math.max(12, 14 * S));
+  L.graficos.forEach((G, k) => {
+    const cx = r.x + pad + (k % cols) * (cw + gap), cy = r.y + pad + Math.floor(k / cols) * (ch + gap);
+    ctx.save(); ctx.beginPath(); ctx.rect(cx - 4, cy - 4, cw + 8, ch + 8); ctx.clip();
+    const aN = ajustar(ctx, pal, G.nombre, { peso: 800, max: fT, min: 12, ancho: cw, lineas: 1 });
+    const aS = ajustar(ctx, pal, G.sub, { peso: 600, max: fS, min: 11, ancho: cw, lineas: 1 });
+    texto(ctx, pal, aN, 800, cx, cy, pal.tinta, 1.2); texto(ctx, pal, aS, 600, cx, cy + alto(aN, 1.2), pal.tintaSec, 1.2);
+    const head = alto(aN, 1.2) + alto(aS, 1.2) + 10;
+    ctx.font = fuenteDe(pal, 600, fTick);
+    const wYt = Math.max(0, ...G.yTicks.map((t) => ctx.measureText(t.t).width));
+    const pl = { x0: cx + wYt + fTick * 1.3 + 12, x1: cx + cw - 10, y0: cy + head + 8, y1: cy + ch - fTick * 2.7 - 8 };
+    if (pl.x1 - pl.x0 < 50 || pl.y1 - pl.y0 < 50) { ctx.restore(); return; }
+    const X = (v: number) => pl.x0 + ((v - G.x0) / (G.x1 - G.x0 || 1)) * (pl.x1 - pl.x0), Y = (v: number) => pl.y1 - ((v - G.y0) / (G.y1 - G.y0 || 1)) * (pl.y1 - pl.y0);
+    // rejilla y números de los ejes
+    ctx.textBaseline = "middle"; ctx.textAlign = "right";
+    G.yTicks.forEach((t) => { const y = Y(t.v); ctx.fillStyle = pal.grilla; ctx.fillRect(pl.x0, y - 0.5, pl.x1 - pl.x0, 1.5); ctx.font = fuenteDe(pal, 600, fTick); ctx.fillStyle = pal.tintaTenue; ctx.fillText(t.t, pl.x0 - 6, y); });
+    ctx.textBaseline = "top"; ctx.textAlign = "center";
+    G.xTicks.forEach((t) => { ctx.font = fuenteDe(pal, 600, fTick); ctx.fillStyle = pal.tintaTenue; ctx.fillText(t.t, Math.max(pl.x0 + 8, Math.min(pl.x1 - 8, X(t.v))), pl.y1 + 5); });
+    ctx.fillStyle = pal.eje; ctx.fillRect(pl.x0 - 1, pl.y0, 2, pl.y1 - pl.y0); ctx.fillRect(pl.x0, pl.y1 - 1, pl.x1 - pl.x0, 2);
+    // nombre de cada eje
+    const aX = ajustar(ctx, pal, G.ejeX, { peso: 600, max: fTick, min: 10, ancho: pl.x1 - pl.x0, lineas: 1 });
+    texto(ctx, pal, aX, 600, (pl.x0 + pl.x1) / 2, pl.y1 + 5 + fTick * 1.35, pal.tintaSec, 1.2, "center");
+    const aY = ajustar(ctx, pal, G.ejeY, { peso: 600, max: fTick, min: 10, ancho: pl.y1 - pl.y0, lineas: 1 });
+    ctx.save(); ctx.translate(cx, (pl.y0 + pl.y1) / 2); ctx.rotate(-Math.PI / 2); texto(ctx, pal, aY, 600, 0, 0, pal.tintaSec, 1.2, "center"); ctx.restore();
+    // lo que ya ocupa lugar: puntos, recta y marcador de hoy
+    const rp = 6.5, ocupado: CajaE[] = G.pts.map((q) => ({ x0: X(q.x) - rp - 1, y0: Y(q.y) - rp - 1, x1: X(q.x) + rp + 1, y1: Y(q.y) + rp + 1 }));
+    ctx.save(); ctx.beginPath(); ctx.rect(pl.x0, pl.y0, pl.x1 - pl.x0, pl.y1 - pl.y0); ctx.clip();
+    if (G.recta) {
+      const { a, b } = G.recta;
+      ctx.strokeStyle = pal.tintaSec; ctx.globalAlpha = 0.8; ctx.lineWidth = 2.5; ctx.setLineDash([9, 7]);
+      ctx.beginPath(); ctx.moveTo(X(G.x0), Y(a + b * G.x0)); ctx.lineTo(X(G.x1), Y(a + b * G.x1)); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+      for (let i = 0; i <= 60; i++) { const xv = G.x0 + ((G.x1 - G.x0) * i) / 60, qx = X(xv), qy = Y(a + b * xv); ocupado.push({ x0: qx - 3, y0: qy - 3, x1: qx + 3, y1: qy + 3 }); }
+    }
+    let etHoy: ReturnType<typeof ubicarEtq> | null = null, lineasHoy: string[] = [];
+    const area: CajaE = { x0: pl.x0 + 2, y0: pl.y0 + 2, x1: pl.x1 - 2, y1: pl.y1 - 2 };
+    ctx.font = fuenteDe(pal, 800, fTick);
+    const hh = fTick * 1.2;
+    if (G.hoy) {
+      const hx = X(G.hoy.x), hy = Y(G.hoy.y);
+      ocupado.push({ x0: hx - 10, y0: hy - 11, x1: hx + 10, y1: hy + 11 }, { x0: pl.x0, y0: hy - 2, x1: hx, y1: hy + 2 });
+      lineasHoy = G.hoy.extra ? [G.hoy.txt, G.hoy.extra] : [G.hoy.txt];
+      const w = Math.max(...lineasHoy.map((l) => ctx.measureText(l).width)) + 4;
+      etHoy = ubicarEtq(hx, hy, w, hh * lineasHoy.length, area, ocupado);
+      ocupado.push(etHoy.caja);
+    }
+    ctx.font = fuenteDe(pal, 600, fTick);
+    const etqs = G.pts.map((q) => {
+      const u = ubicarEtq(X(q.x), Y(q.y), ctx.measureText(q.etq).width + 2, hh, area, ocupado);
+      ocupado.push(u.caja);
+      return u;
+    });
+    const poner = (u: ReturnType<typeof ubicarEtq>, lineas: string[], ax: number, ay: number, peso: number, color: string) => {
+      const tx = u.ancla === "left" ? u.caja.x0 : u.ancla === "right" ? u.caja.x1 : (u.caja.x0 + u.caja.x1) / 2;
+      if (u.guia) { ctx.strokeStyle = pal.tintaTenue; ctx.lineWidth = 1.5; ctx.setLineDash([2, 4]); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo((u.caja.x0 + u.caja.x1) / 2, u.caja.y1); ctx.stroke(); ctx.setLineDash([]); }
+      ctx.font = fuenteDe(pal, peso, fTick); ctx.fillStyle = color; ctx.textAlign = u.ancla; ctx.textBaseline = "top";
+      lineas.forEach((l, i) => ctx.fillText(l, tx, u.caja.y0 + i * hh));
+    };
+    if (G.hoy && etHoy) {
+      const hx = X(G.hoy.x), hy = Y(G.hoy.y);
+      ctx.strokeStyle = pal.accion; ctx.lineWidth = 1.5; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(pl.x0, hy); ctx.lineTo(hx, hy); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = pal.accion; ctx.strokeStyle = pal.superficie; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(hx, hy - 9); ctx.lineTo(hx + 8, hy); ctx.lineTo(hx, hy + 9); ctx.lineTo(hx - 8, hy); ctx.closePath(); ctx.fill(); ctx.stroke();
+      poner(etHoy, lineasHoy, hx, hy, 800, pal.tinta);
+    }
+    G.pts.forEach((q, i) => {
+      const px0 = X(q.x), py0 = Y(q.y);
+      ctx.fillStyle = q.pres ? pal.acento : pal.superficie; ctx.strokeStyle = pal.acento; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(px0, py0, 5.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      poner(etqs[i], [q.etq], px0, py0, 600, pal.tintaSec);
+    });
+    ctx.restore(); ctx.restore();
+  });
+}
+
+/** Correlación de cada variable con el voto: una barra horizontal por variable desde el cero (a la derecha, positiva; a la izquierda, negativa) y su valor con signo.
+ *  Los colores distinguen el signo (no si es favorable o no); el signo va siempre escrito. */
+function filasCorrelacion(ctx: Ctx, r: Rect, L: LienzoDe<"correlacion">, pal: Paleta, esc: number, horiz: boolean) {
+  const n = L.filas.length, g = rejilla(r, n, "correlacion", horiz), { f1, f2 } = tamFila(g.rowH, esc), pad = 14;
+  const iw = g.cw - pad * 2, fr = { nom: 0.4, bar: 0.4, val: 0.2 };
+  const col = (cx: number) => { const x = cx + pad; return { nom: x, bar: x + iw * fr.nom, val: x + iw }; };
+  const wNom = iw * fr.nom - 14, wBar = iw * fr.bar - 16, wVal = iw * fr.val - 4;
+  const tamVal = tamComun(ctx, pal, L.filas.map((f) => f.rTxt), { peso: 900, max: f1 * 1.15, min: 12, ancho: wVal });
+  const tamNomC = Math.max(13, Math.min(f1, tamComun(ctx, pal, L.filas.map((f) => f.nombre), { peso: 800, max: f1, min: 13, ancho: wNom })));
+  for (let c = 0; c < g.cols; c++) {
+    const q = col(r.x + c * (g.cw + g.gap));
+    encabezado(ctx, pal, esc, r.y + 9, [{ t: "Variable", x: q.nom, w: wNom }, { t: "Correlación (de −1 a +1)", x: q.bar, w: wBar }, { t: "r", x: q.val - wVal, w: wVal, alinear: "right" }]);
+  }
+  L.filas.forEach((f, k) => {
+    const c = Math.floor(k / g.per), i = k % g.per, cx = r.x + c * (g.cw + g.gap), y = g.y0 + i * g.rowH, q = col(cx);
+    if (i > 0) separador(ctx, pal, cx + pad, y, g.cw - pad * 2);
+    // un solo tamaño para todos los nombres (que no salten de tamaño entre filas); el que no entra en un renglón baja a dos
+    let aN = ajustar(ctx, pal, f.nombre, { peso: 800, max: tamNomC, min: tamNomC, ancho: wNom, lineas: 2 });
+    if (aN.lineas.length > 1 && alto(aN, 1.2) > g.rowH - 8) aN = ajustar(ctx, pal, f.nombre, { peso: 800, max: tamNomC, min: tamNomC, ancho: wNom, lineas: 1 });
+    let aD: Ajustado | null = ajustar(ctx, pal, f.detalle, { peso: 600, max: f2, min: 10, ancho: wNom, lineas: 1 });
+    if (alto(aN, 1.2) + alto(aD, 1.2) > g.rowH - 6) aD = null;
+    const yt = y + (g.rowH - alto(aN, 1.2) - (aD ? alto(aD, 1.2) : 0)) / 2;
+    texto(ctx, pal, aN, 800, q.nom, yt, pal.tinta, 1.2); if (aD) texto(ctx, pal, aD, 600, q.nom, yt + alto(aN, 1.2), pal.tintaSec, 1.2);
+    const bh = Math.min(g.rowH * 0.42, 28), by = y + (g.rowH - bh) / 2, xm = q.bar + wBar / 2, mitad = wBar / 2;
+    ctx.fillStyle = pal.grilla; ctx.fillRect(q.bar, by, wBar, bh);
+    const largo = Math.max(3, Math.min(1, Math.abs(f.r)) * mitad);
+    ctx.fillStyle = f.r >= 0 ? pal.acento : pal.accion; ctx.fillRect(f.r >= 0 ? xm : xm - largo, by, largo, bh);
+    ctx.fillStyle = pal.eje; ctx.fillRect(xm - 1, by - 4, 3, bh + 8);
+    const aV = ajustar(ctx, pal, f.rTxt, { peso: 900, max: tamVal, min: tamVal, ancho: wVal, lineas: 1 });
+    texto(ctx, pal, aV, 900, q.val, y + (g.rowH - alto(aV, 1.2)) / 2, pal.tinta, 1.2, "right");
+  });
 }
 
 // ---------------------------------------------------------------- tarjetas
@@ -836,8 +1090,11 @@ function componer(ctx: Ctx, d: DatosImagen, pal: Paleta, esc: number, pintar: bo
     texto(ctx, pal, aFuente, 400, m, y, pal.tintaTenue, 1.25); y += alto(aFuente, 1.25);
     if (aInicio) { texto(ctx, pal, aInicio, 600, m, y, pal.tintaSec, 1.25); y += alto(aInicio, 1.25); }
     y += S(6);
-    ctx.font = fuenteDe(pal, 800, fBase); ctx.textBaseline = "top"; ctx.textAlign = "left"; ctx.fillStyle = pal.acento; ctx.fillText(SITIO, m, y);
-    ctx.font = fuenteDe(pal, 400, px(S(22))); ctx.textAlign = "right"; ctx.fillStyle = pal.tintaTenue; ctx.fillText(`Generado el ${d.fecha}`, W - m, y + 2);
+    ctx.font = fuenteDe(pal, 400, px(S(22))); ctx.textAlign = "right"; ctx.textBaseline = "top"; ctx.fillStyle = pal.tintaTenue; ctx.fillText(`Generado el ${d.fecha}`, W - m, y + 2);
+    const wGen = ctx.measureText(`Generado el ${d.fecha}`).width;
+    // R22: una vista armada a gusto lo dice, para que quien la recibe sepa que es una elección y pueda hacer la suya
+    const aSitio = ajustar(ctx, pal, d.armado ? `Armado en ${SITIO} · armá el tuyo` : SITIO, { peso: 800, max: fBase, min: px(S(16)), ancho: W - 2 * m - wGen - S(24), lineas: 1 });
+    texto(ctx, pal, aSitio, 800, m, y, pal.acento, 1.18);
   }
 
   // ----- texto de arriba (título, cifra, contexto)

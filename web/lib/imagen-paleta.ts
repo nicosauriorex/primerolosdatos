@@ -12,7 +12,7 @@ export function paletaDe(t: (token: string) => string, familia: string, colPres:
   return {
     familia,
     fondo: t("--surface-0"), superficie: t("--surface-1"), barra: t("--barra"), sobreBarra: t("--sobre-barra"), borde: t("--border"),
-    tinta: t("--text-primary"), tintaSec: t("--text-secondary"), tintaTenue: t("--text-muted"), grilla: t("--grid"), eje: t("--axis"),
+    tinta: t("--text-primary"), tintaSec: t("--text-secondary"), tintaTenue: t("--text-muted"), grilla: t("--grid"), eje: t("--axis"), cero: t("--cero"),
     acento: t("--acento"), sobreAcento: t("--sobre-acento"), accion: t("--accion"), bueno: t("--bueno"), malo: t("--malo"),
     series: PALETA.map(t), pres,
     fondosBueno: [1, 2, 3, 4].map((n) => t(`--bueno-f${n}`)), fondosMalo: [1, 2, 3, 4].map((n) => t(`--malo-f${n}`)),

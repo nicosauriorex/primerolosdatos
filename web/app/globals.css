@@ -6,7 +6,7 @@
   /* Color */
   --surface-0: #0a1230; --surface-1: #121c44; --surface-2: #060b20; --border: #2a3870; --border-fuerte: #4a5a94;
   --text-primary: #f3f6fb; --text-secondary: #c3cde6; --text-muted: #94a2c6;
-  --grid: #1b2757; --axis: #4a5a94; --neutral: #94a2c6;
+  --grid: #1b2757; --axis: #4a5a94; --cero: #7e8dc4; --neutral: #94a2c6;
   --acento: #6cc4ff; --sobre-acento: #0a1230; --acento-texto: #6cc4ff; --acento-suave: #17295c;
   --accion: #ffb81c; --sobre-accion: #0a1230; --foco: #ffb81c;
   --campo: #f3f6fb; --sobre-campo: #0a1230; --campo-ayuda: #47516b;
@@ -50,7 +50,7 @@
   color-scheme: light;
   --surface-0: #eef3fb; --surface-1: #ffffff; --surface-2: #dde6f5; --border: #c5d1e8; --border-fuerte: #8b9bc0;
   --text-primary: #0a1230; --text-secondary: #37446b; --text-muted: #56638a;
-  --grid: #dfe6f3; --axis: #9aa8c9; --neutral: #6b7799;
+  --grid: #dfe6f3; --axis: #9aa8c9; --cero: #6b7aa6; --neutral: #6b7799;
   --acento: #6cc4ff; --sobre-acento: #0a1230; --acento-texto: #0b5cad; --acento-suave: #dcecfb;
   --accion: #ffb81c; --sobre-accion: #0a1230; --foco: #0b5cad;
   --campo: #ffffff; --sobre-campo: #0a1230; --campo-ayuda: #56638a;
@@ -70,7 +70,7 @@
     color-scheme: light;
     --surface-0: #eef3fb; --surface-1: #ffffff; --surface-2: #dde6f5; --border: #c5d1e8; --border-fuerte: #8b9bc0;
     --text-primary: #0a1230; --text-secondary: #37446b; --text-muted: #56638a;
-    --grid: #dfe6f3; --axis: #9aa8c9; --neutral: #6b7799;
+    --grid: #dfe6f3; --axis: #9aa8c9; --cero: #6b7aa6; --neutral: #6b7799;
     --acento: #6cc4ff; --sobre-acento: #0a1230; --acento-texto: #0b5cad; --acento-suave: #dcecfb;
     --accion: #ffb81c; --sobre-accion: #0a1230; --foco: #0b5cad;
     --campo: #ffffff; --sobre-campo: #0a1230; --campo-ayuda: #56638a;
@@ -412,7 +412,7 @@ td.c-mis { min-width: 0; }
 .vela-nota { flex-basis: 100%; }
 .vela-svg { display: block; width: 100%; height: 28px; margin: 2px 0; background: color-mix(in srgb, var(--text-muted) 10%, transparent); border-radius: var(--r-1); }
 .vela-mecha, .vela-tope { stroke: var(--text-secondary); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
-.vela-cero { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.vela-cero { stroke: var(--cero, var(--text-muted)); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
 .vela-cuerpo { stroke: var(--surface-1); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .vela-cuerpo.c-bueno { fill: var(--bueno); } .vela-cuerpo.c-malo { fill: var(--malo); } .vela-cuerpo.c-neutro { fill: var(--neutral); }
 .vela-val { display: flex; flex-wrap: wrap; gap: 0 var(--e-4); font-size: var(--t-xs); color: var(--text-secondary); }
@@ -725,6 +725,10 @@ th small { display: block; font-size: var(--t-micro); font-weight: 400; color: v
 .comp-marca { display: flex; align-items: center; gap: var(--e-2); font-size: var(--t-sm); min-height: 32px; cursor: pointer; }
 .comp-marca input { width: 18px; height: 18px; flex: none; }
 .comp-datos { display: grid; gap: var(--e-1); }
+/* Tanda 9 (C1): las píldoras de cada grupo del panel no quedan pegadas al borde de abajo del bloque */
+.comp-grupo-cuerpo { padding-bottom: var(--e-3); }
+.comp-opciones .seg, .comp-datos .seg { margin-bottom: var(--e-3); }
+.comp-grupo-cuerpo .comp-datos:last-child .seg, .comp-grupo-cuerpo > .seg:last-child { margin-bottom: 0; }
 @media (max-width: 700px) {
   .comp-previa { position: sticky; top: calc(-1 * var(--e-4)); z-index: 2; }
   .comp-previa { height: 30vh; }
@@ -987,7 +991,7 @@ tr.nota-grupo td { background: var(--surface-0); color: var(--text-secondary); t
     color-scheme: light;
     --surface-0: #eef3fb; --surface-1: #ffffff; --surface-2: #dde6f5; --border: #c5d1e8; --border-fuerte: #8b9bc0;
     --text-primary: #0a1230; --text-secondary: #37446b; --text-muted: #56638a;
-    --grid: #dfe6f3; --axis: #9aa8c9; --neutral: #6b7799;
+    --grid: #dfe6f3; --axis: #9aa8c9; --cero: #6b7aa6; --neutral: #6b7799;
     --acento: #6cc4ff; --sobre-acento: #0a1230; --acento-texto: #0b5cad; --acento-suave: #dcecfb;
     --accion: #ffb81c; --sobre-accion: #0a1230; --foco: #0b5cad;
     --campo: #ffffff; --sobre-campo: #0a1230; --campo-ayuda: #56638a;
@@ -1051,7 +1055,7 @@ tr.nota-grupo td { background: var(--surface-0); color: var(--text-secondary); t
 .bmes-col.bmes-actual { fill: var(--acento); opacity: 1; }
 .bmes-col.bmes-ref { fill: var(--accion); opacity: 1; }   /* el año de "el más bajo/alto desde…": ni mejor ni peor, solo la referencia */
 .bmes-ref-txt { fill: var(--accion); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.bmes-cero { stroke: var(--axis); stroke-width: 1; shape-rendering: crispEdges; }
+.bmes-cero { stroke: var(--cero, var(--axis)); stroke-width: 1.5; shape-rendering: crispEdges; }
 .bmes-valor { fill: var(--text-primary); font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .bmes-rotulo { fill: var(--text-secondary); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .bmes-anio { fill: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }

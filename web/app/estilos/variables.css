@@ -19,6 +19,16 @@ button.info-btn:hover::before, button.info-btn:focus-visible::before { border-co
 button.info-btn:focus-visible { outline: none; }
 button.info-btn:focus-visible::before { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
 
+/* ---- ⓘ compacto para tablas y filas (tanda 9, V6): círculo de 18 px, borde fino, "i" chica, pegado al nombre. El botón sigue midiendo 44 px (zona
+   tocable invisible) pero con márgenes negativos de 13 px (= (44 - 18) / 2) no agranda la fila. El ⓘ del buscador de variables (`.modal li.vr-var`) queda en 28 px. */
+td.c-var button.info-btn, .elec-corr .elec-info-col button.info-btn, li.e1-serie > button.info-btn {
+  font-size: 11px; line-height: 1; margin: -13px -11px -13px -11px;
+}
+td.c-var button.info-btn { align-self: flex-start; }
+td.c-var button.info-btn::before, .elec-corr .elec-info-col button.info-btn::before, li.e1-serie > button.info-btn::before { width: 18px; height: 18px; }
+.elec-corr .elec-info-col button.info-btn { margin: -13px auto; }
+li.e1-serie > button.info-btn { margin: 0 -8px 0 0; }
+
 /* ---- Textos de ayuda (R16): lista de definiciones de una columna, nombre en negrita arriba y explicación debajo, ancho completo.
    Anula `.info-cat li { display: flex }` de globals.css (partía las palabras) y evita cualquier grilla/flex sobre las entradas. */
 .info-cat p, .info-larga p { margin: 0 0 var(--e-2); }
@@ -46,9 +56,12 @@ button.info-btn:focus-visible::before { outline: var(--linea) solid var(--foco);
 /* ---- Navegación del selector: ← y migas */
 .vr-nav { display: flex; align-items: center; gap: var(--e-2); margin-top: var(--e-2); min-width: 0; }
 .vr-nav .migas { margin-top: 0; flex: 1; min-width: 0; }
-.modal .vr-atras { flex: none; width: 44px; height: 44px; min-height: 44px; padding: 0; border: 0; border-radius: var(--r-pleno); background: var(--surface-2); color: var(--text-primary);
-  display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
-.modal .vr-atras:hover { background: var(--acento-suave); }
+/* B5 (tanda 9): píldora chica con flecha y la carpeta de arriba, sin círculo oscuro */
+.modal .vr-atras { flex: none; max-width: 45%; min-height: 44px; padding: 0 var(--e-3); gap: var(--e-1); border: 0; border-radius: var(--r-pleno); background: var(--relleno); color: var(--text-primary);
+  font-size: var(--t-sm); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.modal .vr-atras > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.modal .vr-atras > svg { flex: none; width: 16px; height: 16px; }
+.modal .vr-atras:hover { background: var(--relleno-hover); }
 .modal .vr-atras:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
 
 /* ---- Rótulos de la lista y renglones del mismo alto (variables, carpetas, resultados de búsqueda) */
@@ -72,7 +85,7 @@ button.info-btn:focus-visible::before { outline: var(--linea) solid var(--foco);
 .intro-cat p { margin: 0 0 var(--e-2); }
 .modal li .ver-mas { display: inline; width: auto; min-height: 0; padding: 0; background: none; border: 0; border-radius: 0; color: var(--acento-texto); text-decoration: underline; text-align: left; font: inherit; font-size: var(--t-xs); }
 .modal li .ver-mas:hover, .modal li .ver-mas:focus { background: none; }
-.vr-reco { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-1) var(--e-3); }
+.vr-reco { margin-top: var(--e-3); padding-top: var(--e-3); border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-1) var(--e-3); }
 .vr-reco-rotulo { font-size: var(--t-micro); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
 .modal li .vr-reco-btn { width: auto; max-width: 100%; min-height: 44px; padding: 0 var(--e-4); gap: var(--e-2); border: 0; border-radius: var(--r-pleno);
   background: var(--acento); color: var(--sobre-acento); font-weight: 700; font-size: var(--t-sm); text-align: left; align-items: center; justify-content: flex-start; cursor: pointer; }

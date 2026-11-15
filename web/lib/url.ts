@@ -69,7 +69,8 @@ export function useParams(): [URLSearchParams, (cambios: Record<string, string |
     ponerEscuchaPush();
     window.addEventListener(EVENTO_PUSH, alPush);
     window.addEventListener("popstate", alPop);
-    return () => { window.removeEventListener(EVENTO_PUSH, alPush); window.removeEventListener("popstate", alPop); };
+    window.addEventListener("pld-releer-url", alPop);   // EVENTO_RELEER de ui.tsx: al cerrar una capa, la URL repuesta
+    return () => { window.removeEventListener(EVENTO_PUSH, alPush); window.removeEventListener("popstate", alPop); window.removeEventListener("pld-releer-url", alPop); };
   }, []);
   const escribir = useCallback((cambios: Record<string, string | null | undefined>) => {
     const p = new URLSearchParams(actual.current);

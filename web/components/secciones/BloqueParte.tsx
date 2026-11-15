@@ -12,6 +12,16 @@ import { variableDe, type ClaveDiario, type Parte, type ResumenVariable } from "
 const CIFRAS: ClaveDiario[] = ["minorista", "reservas", "compras", "base", "tamar"];
 const ROTULO = "En vivo · Banco Central";
 
+/** Ícono propio del Banco Central (dibujo de línea, mismo trazo que los íconos del sitio): frontón, cuatro columnas y escalón. No es el logo oficial. */
+export function IconoBanco({ className = "" }: { className?: string }) {
+  return (
+    <svg className={`icono icono-banco ${className}`} viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true" focusable="false">
+      <path d="M2 8 10 3l8 5zM4 10v5M8 10v5M12 10v5M16 10v5M2 17.5h16" />
+    </svg>
+  );
+}
+
 export function BloqueParte() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -29,7 +39,7 @@ export function BloqueParte() {
     <div ref={ref} className="zocalo-sitio">
       {parte ? <Zocalo parte={parte} /> : (
         <div className="zocalo zocalo-espera">
-          <div className="ancho zocalo-in"><span className="zocalo-rotulo">{ROTULO}</span><p className="zocalo-nota" role="status">Cargando…</p></div>
+          <div className="ancho zocalo-in"><span className="zocalo-rotulo"><IconoBanco />{ROTULO}</span><p className="zocalo-nota" role="status">Cargando…</p></div>
         </div>
       )}
     </div>
@@ -44,7 +54,7 @@ function Zocalo({ parte }: { parte: Parte }) {
     <Link prefetch={false} href="/bcra/" className="zocalo" aria-label={`Abrir el parte del Banco Central del ${parte.fechaTxt}`}>
       <div className="ancho zocalo-in">
         <div className="zocalo-cab">
-          <span className="zocalo-rotulo">{ROTULO}</span>
+          <span className="zocalo-rotulo"><IconoBanco />{ROTULO}</span>
           <span className="zocalo-fecha">Datos del {parte.fechaTxt}</span>
         </div>
         <ul className="zocalo-cifras" ref={lista}>

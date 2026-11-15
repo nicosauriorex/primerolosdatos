@@ -1,8 +1,13 @@
+/* Tanda 9, E2: el ⓘ va pegado al final del nombre (en línea) y no agranda la fila. El botón mide 44 px (zona tocable) y el círculo 18 (V6); los márgenes
+   negativos hacen que en el diseño ocupe solo un renglón, así la unidad queda justo debajo del nombre. Vale en computadora y en celular. */
+.tablewrap.her-tabla td.c-var .c-var-arriba { align-items: flex-end; flex-wrap: nowrap; }
+.tablewrap.her-tabla td.c-var .c-var-arriba button.info-btn { align-self: flex-end; margin: -13px -11px -13px -9px; }
+
 /* Tanda 8, parte G1: herencia en el celular (ver docs/specs/ajustes-tanda-8.md).
    Cada fila: nombre de la variable en el tamaño de los títulos de fila, Recibió y Hoy en dos columnas y el Cambio debajo de Hoy (columna derecha). */
 @media (max-width: 639.98px) {
   .tablewrap.her-ap > table > tbody > tr > td.c-var .c-var-n { font-size: var(--t-md); font-weight: 700; line-height: 1.25; }
-  .tablewrap.her-ap > table > tbody > tr > td.c-var .c-var-arriba { align-items: center; }
+  .tablewrap.her-ap > table > tbody > tr > td.c-var .c-var-arriba { align-items: flex-end; }
   .tablewrap.her-ap > table > tbody > tr > td.c-var .c-var-u { white-space: normal; }
   /* el Cambio va en la columna de Hoy, en la fila de abajo */
   .tablewrap.her-ap > table > tbody > tr > td.cc { grid-column: 2; }

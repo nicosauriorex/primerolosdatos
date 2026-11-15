@@ -49,7 +49,9 @@ export const GRILLA_DATOS: { slug: string; nombre: string; metrica: MetricaGrill
   { slug: "riesgo-pais", nombre: "Riesgo país", metrica: "Variación" },
 ];
 
-export interface CeldaGrilla { texto: string; valor: number | null; tono: "bueno" | "malo" | null; href: string | null; desde?: string }
+export interface CeldaGrilla { texto: string; valor: number | null; tono: "bueno" | "malo" | null; href: string | null; desde?: string;
+  /** Intensidad del mapa de calor, de 0 a 1: el lugar de la celda entre los presidentes de su columna que quedaron del mismo lado (verde o rojo). Sin tono, no hay. */
+  calor?: number }
 export interface ColumnaGrilla { slug: string; nombre: string; metrica: MetricaGrilla; unidad: string }
 export interface FilaGrilla { pres: Pres; periodo: string; celdas: CeldaGrilla[] }
 export interface Grilla { columnas: ColumnaGrilla[]; filas: FilaGrilla[] }
@@ -100,6 +102,14 @@ export function grillaPresidentes(m: Motor, b: BaseCfg, S: Record<string, SerieM
       return { texto, valor, tono, href: hrefFijo(d.slug, { pd: x.id }), ...(desde ? { desde } : {}) };
     }));
   }
+  // Mapa de calor: dentro de cada columna y de cada lado (bueno o malo), el que más se aleja de la referencia (la mediana en la inflación, el cero en el resto) es 1.
+  porColumna.forEach((col, j) => {
+    const ref = columnas[j].metrica === "Acumulada" ? mediana(col.flatMap((ce) => (ce.valor != null && ce.tono ? [ce.valor] : []))) : 0;
+    for (const lado of ["bueno", "malo"] as const) {
+      const del = col.filter((ce) => ce.tono === lado && ce.valor != null).sort((a, b) => Math.abs((a.valor as number) - ref) - Math.abs((b.valor as number) - ref));
+      del.forEach((ce, k) => { ce.calor = (k + 1) / del.length; });
+    }
+  });
   const filas: FilaGrilla[] = pres.map((x, k) => ({ pres: x, periodo: periodoMandato(F, x), celdas: porColumna.map((col) => col[k]) }))
     .filter((f) => f.celdas.some((ce) => ce.href));
   return { columnas, filas };

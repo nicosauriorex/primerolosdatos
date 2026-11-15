@@ -85,6 +85,10 @@ const pilaAtras: EntradaAtras[] = [];
 let silencio = 0;
 /** La URL más nueva escrita mientras hay capas abiertas (ver `llevarUrl`). */
 let urlCapas: string | null = null;
+/** Evento con el que la capa pide a `useParams` que vuelva a leer la URL (ver el `popstate` de `instalarAtras`). */
+export const EVENTO_RELEER = "pld-releer-url";
+/** La URL que se repone después de un Atrás que cerró una capa (ver el `popstate` de `instalarAtras`). */
+let pendiente: string | null = null;
 /** Enlace que se tocó con capas abiertas y que se sigue cuando sus entradas del historial ya se consumieron. */
 let irA: HTMLAnchorElement | null = null;
 let atrasInstalado = false;
@@ -103,6 +107,17 @@ function instalarAtras() {
   };
   window.addEventListener("popstate", () => {
     llevarUrl();
+    // Next puede volver a escribir su URL vieja en su propio `popstate` (después de este) y `useParams` la lee en ese momento:
+    // en la vuelta siguiente del bucle se repone la URL de la capa y se avisa a `useParams` que la relea (sin subir la página).
+    // Si mientras tanto `useParams` escribe un filtro nuevo (un Selector que elige al cerrarse), esa URL pasa a ser la que se repone
+    // (ver `pendiente` en el `replaceState` de abajo); la de Next, que llega con su propio estado, no.
+    pendiente = urlCapas;
+    if (pendiente) setTimeout(() => {
+      const quiero = pendiente; pendiente = null;
+      if (!quiero || new URL(quiero).pathname !== window.location.pathname) return;
+      if (window.location.href !== quiero) original.call(window.history, window.history.state, "", quiero);
+      window.dispatchEvent(new Event(EVENTO_RELEER));
+    }, 0);
     if (silencio > 0) silencio--;
     else { const e = pilaAtras.pop(); if (e) e.alCerrar(); }
     if (!pilaAtras.length && !silencio) urlCapas = null;
@@ -125,13 +140,17 @@ function instalarAtras() {
     window.history.go(-capas.length);
   }, true);
   window.history.replaceState = function (this: History, estado: unknown, titulo: string, url?: string | URL | null) {
+    const deFiltros = estado == null;   // `useParams` escribe con estado null; Next, con el suyo
     const actual = window.history.state as { __capa?: number } | null;
     // `useParams` escribe con estado null: también ahí se conserva la marca de la capa
     if (actual && actual.__capa !== undefined && (estado == null || (typeof estado === "object" && (estado as { __capa?: number }).__capa === undefined))) {
       estado = { ...((estado as object | null) ?? {}), __capa: actual.__capa };
     }
     const r = original.call(this, estado, titulo, url);
-    if (pilaAtras.length) urlCapas = window.location.href;
+    // Solo cuenta si se escribió sobre la entrada de una capa. Next vuelve a escribir su URL "canónica" (la vieja) con su propio
+    // `replaceState` justo después de un Atrás, ya parado en la entrada de abajo: eso no es un filtro nuevo y pisaba la URL guardada.
+    if (pilaAtras.length && actual && actual.__capa !== undefined) urlCapas = window.location.href;
+    if (pendiente && deFiltros) pendiente = window.location.href;
     return r;
   };
 }

@@ -4,6 +4,7 @@ import { claseVariacion, etiqueta, type EstRows, type Fila } from "./estadistica
 import { MESES, fmtNum, mesNum, nf0, nf1, ok, redondeadoComo, restaLimpia, rotuloAnterior } from "./formato";
 import { ES_VAR, type Expr, type Motor, type SerieMeta } from "./motor";
 import { decExpr, lista as listaUrl, unoDe } from "./url";
+import type { DeltaProps } from "@/components/sistema/Delta";
 
 export const TODOS_MESES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 export const REFS_VALIDAS = ["ult", "prom", "med", "max", "min", "mk_ult", "mk_max", "mk_min"];
@@ -11,7 +12,7 @@ export const REFS_DEF = "ult,prom,mk_ult,mk_max,mk_min";   // sin mediana por de
 export const MAX_MISMA_UNIDAD = 4; // en modo valor: hasta 4 variables si todas tienen la misma unidad (si no, 2)
 
 /** Parámetros de cada gráfico. El 1.º usa estos nombres; del 2.º al 4.º llevan el número al final (`v2`, `m2`… `t4`). */
-export const PG = ["v", "m", "e", "bd", "ej", "r", "t", "pf"] as const;
+export const PG = ["v", "m", "e", "bd", "ej", "r", "t", "pf", "cero"] as const;
 export const MAX_GRAFICOS = 4;
 export const sfx = (k: number) => (k === 0 ? "" : String(k + 1));
 
@@ -20,6 +21,8 @@ export type Comun = {
 };
 export type GEst = {
   modo: "valor" | "b100"; exprs: Expr[]; todas: Expr[]; escala: "lin" | "log"; banda: "no" | "si"; eje: "propia" | "misma"; refs: Set<string>; tabla: "grafico" | "tabla"; pf: "1" | "0" | "";
+  /** Línea del cero (R20): prendida salvo `cero=0` en la URL (solo se escribe al apagarla). */
+  cero: boolean;
 };
 
 /** Lee un gráfico de la URL. `null` = ese gráfico no está en el link (el 1.º arranca con `def`; sin `def` y sin variables también da null). */
@@ -34,6 +37,7 @@ export function leerGrafico(p: URLSearchParams, k: number, existe: (id: string) 
     refs: new Set(listaUrl(p.has("r" + s) ? p.get("r" + s) : REFS_DEF).filter((x) => REFS_VALIDAS.includes(x))),
     tabla: unoDe(p.get("t" + s), ["grafico", "tabla"] as const, "grafico"),
     pf: unoDe(p.get("pf" + s), ["1", "0"] as const, "" as "1" | "0" | ""),
+    cero: p.get("cero" + s) !== "0",
   };
 }
 
@@ -150,6 +154,17 @@ export function comparacionesCabecera(o: {
   return out.filter((c): c is Comparacion => !!c);
 }
 
+/** Una comparación como `Delta` de la cabecera: el cambio con su signo, contra qué es ("vs un año atrás", "vs máximo (25,3 % · abr-24)") y el texto para lectores de pantalla.
+ *  `largo`: para las comparaciones extra (promedio, mediana, máximo, mínimo, inicio) la referencia lleva el valor comparado; las dos principales llevan solo la fecha.
+ *  Es el mismo número de la frase de la comparación (`deltaDeFrase`): no se recalcula nada. */
+export function deltaDeComparacion(c: Comparacion, mostrado: (v: number) => string, largo = false, dif?: { pct: boolean; ultimo: number }): DeltaProps {
+  const d = deltaDeFrase(c.frase), valor = mostrado(c.valor).replace(/^-/, "−");
+  // Diferencia absoluta (pedido de la tanda 7), solo en series que no son porcentaje: "vs promedio (2,04 M · dif. −104.682)"
+  const da = largo && dif ? difAbsoluta(dif.pct, c.valor, dif.ultimo, mostrado) : "";
+  const ref = largo ? `${c.titulo.toLowerCase()} (${valor}${c.fecha ? ` · ${c.fecha}` : ""}${da ? ` · dif. ${da}` : ""})` : c.fecha ?? c.titulo.toLowerCase();
+  return { texto: d.texto, tono: c.cls, dir: d.dir, contra: `vs ${ref}`, etiqueta: `${c.titulo}${c.fecha ? ` (${c.fecha})` : ""}: ${valor}. Cambio: ${d.texto}` };
+}
+
 /** Clase de color (bueno / malo / neutro) del cambio entre dos valores tal como se ven: si redondeados son iguales, neutro. */
 export function claseVariacionMostrada(dir: number | null | undefined, pct: boolean, desde: number | null | undefined, hasta: number | null | undefined, mostrado: (v: number) => string): "bueno" | "malo" | "neutro" {
   if (!ok(desde) || !ok(hasta)) return "neutro";
@@ -177,7 +192,7 @@ export function textoPeriodo(desde: string, hasta: string, meses: Set<number>): 
 const MESES_CAP = MESES.map((x) => x[0].toUpperCase() + x.slice(1));
 
 
-/** La diferencia absoluta entre el último dato y otro valor, en la unidad de la serie ("+103.163", "−45,2"), para la columna "Dif." de "Más comparaciones".
+/** La diferencia absoluta entre el último dato y otro valor, en la unidad de la serie ("+103.163", "−45,2"), para las comparaciones extra de la cabecera.
  *  Solo para series que no son porcentaje (en las de porcentaje la diferencia ya está en puntos). La cuenta sale de los valores tal como se ven
  *  (`mostrado`): un solo redondeo, así que cierra con las cifras de la tabla. Vacía si falta algún dato; "0" si dan igual ya redondeados. */
 export function difAbsoluta(pct: boolean, valor: number | null | undefined, hasta: number | null | undefined, mostrado: (v: number) => string): string {

@@ -4,20 +4,19 @@ import { esOculta } from "@/lib/nombres";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useSeccion } from "../useSeccion";
 import { Cargando, Selector, Seg, alternar } from "../ui";
-import { VentanaConfig } from "./VentanaConfig";
 import { BotonInfo, FilaVariable, RenglonVariable } from "../Variables";
 import { Sparkline } from "../Sparkline";
 import { Velas } from "../Velas";
 import { BotonCompartir } from "../PanelCompartir";
-import { IconoCompartir } from "../Iconos";
+import { IconoAjustes, IconoCompartir } from "../Iconos";
 import { ContextoMandato } from "./ContextoMandato";
+import { VentanaConfig } from "./VentanaConfig";
 import { INFO_CORTA } from "@/lib/info";
 import { CeldaVar, CeldasStats, COLS, Cabecera, LineaInicio, siguienteOrden, useBase, valorCol, type Orden, HojaListo } from "./comunes";
 import { Capitulo } from "../sistema/Capitulo";
-import { BarraVista } from "../sistema/BarraVista";
+import { FilaChips } from "../sistema/FilaChips";
 import { Hoja } from "../sistema/Hoja";
-import { CompartirHoja } from "../sistema/CompartirHoja";
-import { AjustesTabla, TablaMandatos } from "../sistema/TablaMandatos";
+import { TablaMandatos } from "../sistema/TablaMandatos";
 import { GrillaPresidentes } from "../sistema/GrillaPresidentes";
 import { grillaPresidentes, tablaPresidentes } from "@/lib/presidentes";
 import { fmtMes } from "@/lib/formato";
@@ -68,6 +67,7 @@ export function Presidentes() {
   const { config } = useConfig();
   const info = useBase(p, set, montado), b = info.b;
   const [hoja, setHoja] = useState(false);
+  const [hojaA, setHojaA] = useState(false);
   const [ordA, setOrdA] = useState<Orden>({ k: null, d: -1 });
   const [abiertos, setAbiertos] = useState<Set<string>>(() => new Set());   // al entrar, todos los grupos están contraídos
   const [tipo, setTipo] = useState("");
@@ -111,13 +111,25 @@ export function Presidentes() {
   const notaB = (dir ? "Verde = mejoró y rojo = empeoró; el signo también está escrito." : "Sin verde ni rojo: subir o bajar no es ni bueno ni malo en sí mismo.")
     + (niv ? "" : " En montos corrientes los niveles de épocas distintas no se pueden comparar (hay inflación de por medio): solo vale la variación.")
     + ` Unidad: ${c.unidad}.`;
+  // R19: un solo Ajustes por capítulo; lo elegido se lee como texto
+  const nMas = T.elegidas.filter((k) => T.extras.includes(k) && !T.porDefecto.includes(k)).length;
   const resumenB = [
-    { clave: "pres", texto: presSel.size === PRES.length ? "Todos los presidentes" : `${presSel.size} de ${PRES.length} presidentes` },
-    { clave: "inicio", texto: `Desde: ${inicioCorto(b)}` },
-  ];
+    presSel.size === PRES.length ? "Todos los presidentes" : `${presSel.size} de ${PRES.length} presidentes`,
+    `desde ${inicioCorto(b)}`,
+    ...(vista === "velas" ? ["velas"] : []),
+    ...(nMas > 0 ? [`${nMas} ${nMas === 1 ? "columna más" : "columnas más"}`] : []),
+  ].join(" · ");
+  const opcionesExtras: [string, string][] = T.extras.flatMap((k) => { const col = T.columnas.find((x) => x.clave === k); return col ? [[k, col.titulo] as [string, string]] : []; });
+  const tocarColumna = (k: string) => {
+    const n = new Set(T.elegidas); if (n.has(k)) n.delete(k); else n.add(k);
+    const claves = T.extras.filter((x) => n.has(x));   // en el orden de las columnas
+    set({ cl: [...new Set([...(T.principal ? [T.principal] : []), ...claves])].join(",") });
+  };
   const cambiarPres = (v: string) => { const n = [...alternar(presSel, v)]; set({ pr: n.length ? n.join(",") : "ninguno" }); };
+  const serB = m.SER[eB.id];
+  const medidaB = eB.rel || !serB ? "" : m.resumenMedida(serB, eB.med || m.medDefault(serB));
   const grilla = grillaPresidentes(m, b, m.SER);
-  const hrefPag = window.location.pathname + window.location.search;
+  const calor = p.get("gc") !== "0";   // mapa de calor de la grilla: prendido salvo `gc=0`
 
   // ---- tabla A: un presidente, todas las variables
   const paPres = PRES.find((x) => x.id === p.get("pap")) || PRES[PRES.length - 1];
@@ -162,6 +174,7 @@ export function Presidentes() {
     if (idsMis.has(e.id)) set({ pav: mis.filter((x) => x.id !== e.id).map((x) => encExpr(x)).join(",") || null });
     else if (mis.length < 10) set({ pav: [...mis, e].map((x) => encExpr(x)).join(",") });
   };
+  const todosAbiertos = GRUPOS.length > 0 && GRUPOS.every((g) => abiertos.has(g));
   const filasA: React.ReactNode[] = [];
   let total = 0;
   GRUPOS.forEach((g) => {
@@ -198,17 +211,23 @@ export function Presidentes() {
   return (
     <section>
       <Capitulo id="pres-grilla" titulo="Todos los presidentes, de un vistazo" bajada="Cómo cambió cada dato clave en cada mandato. Tocá una celda para ver el dato."
-        acciones={<CompartirHoja href={hrefPag} titulo="Datos clave por presidente" texto="Cómo cambió cada dato clave en cada mandato presidencial." />}>
+        acciones={<BotonCompartir className="btn" titulo="Primero los Datos: datos clave por presidente" href={() => window.location.href} deshabilitado={grilla.filas.length === 0}
+          title="Armar una imagen de esta grilla para compartir" aria-label="Compartir como imagen: todos los presidentes, de un vistazo"
+          crearVista={() => ({ tipo: "grilla", calor, base: b })}><IconoCompartir />Compartir</BotonCompartir>}>
         <LineaInicio info={info} F={F} />
-        <GrillaPresidentes grilla={grilla} />
+        <label className="comp-marca pres-colores"><input type="checkbox" checked={calor} onChange={(ev) => set({ gc: ev.target.checked ? null : "0" })} /> Colores</label>
+        <GrillaPresidentes grilla={grilla} calor={calor} />
       </Capitulo>
-      <Capitulo id="pres-variable" titulo="Una variable, todos los presidentes" bajada={bajadaB} acciones={<>
-        <AjustesTabla vista={vista} onVista={(v) => set({ pvista: v === "tabla" ? null : v })} columnas={T.columnas} extras={T.extras} porDefecto={T.porDefecto}
-          elegidas={T.elegidas} onElegidas={(claves) => set({ cl: [...new Set([...(T.principal ? [T.principal] : []), ...claves])].join(",") })} />
-        {compartirB}</>}>
-        <FilaVariable e={eB} onChange={(e) => e && set({ pv: encExpr(e) })} />
-        <BarraVista items={resumenB} onAbrir={() => setHoja(true)} />
-        <HojaListo titulo="Presidentes" abierta={hoja} onCerrar={() => setHoja(false)}>
+      <Capitulo id="pres-variable" titulo="Una variable, todos los presidentes" bajada={bajadaB} acciones={compartirB}>
+        <div className="pres-controles">
+          <VentanaConfig etiqueta={<span className="pres-pil-var"><b>{c.corto}</b>{medidaB ? <span> · {medidaB}</span> : null}</span>} titulo="Variable y cómo verla">
+            <FilaVariable e={eB} onChange={(e) => e && set({ pv: encExpr(e) })} />
+          </VentanaConfig>
+          <BotonInfo id={eB.id} />
+          <button type="button" className="vistabar-ajustes" aria-haspopup="dialog" aria-label={`Ajustes: ${resumenB}`} onClick={() => setHoja(true)}><IconoAjustes /><span>Ajustes</span></button>
+        </div>
+        <p className="pres-resumen pres-resumen-b">{resumenB}</p>
+        <HojaListo titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
           {(cerrar) => (
             <>
               <div className="pres-hoja-sec">
@@ -221,6 +240,16 @@ export function Presidentes() {
               <div className="pres-hoja-sec">
                 <LineaInicio info={info} F={F} />
               </div>
+              <div className="pres-aj-sec">
+                <span className="pres-aj-rot">Vista</span>
+                <FilaChips etiqueta="Vista" opciones={[["tabla", "Tabla"], ["velas", "Velas"]]} valor={vista} onElegir={(v) => set({ pvista: v === "tabla" ? null : v })} />
+              </div>
+              {vista === "tabla" && opcionesExtras.length > 0 && (
+                <div className="pres-aj-sec">
+                  <span className="pres-aj-rot">Sumar columnas</span>
+                  <FilaChips etiqueta="Más columnas" opciones={opcionesExtras} valor={new Set(T.elegidas)} onElegir={tocarColumna} />
+                </div>
+              )}
             </>
           )}
         </HojaListo>
@@ -240,28 +269,45 @@ export function Presidentes() {
         ) : <p className="note">Ningún presidente elegido tiene datos de esta variable.</p>}
         </div>
       </Capitulo>
-      <Capitulo id="pres-uno" titulo="Un presidente, todas las variables">
-        <div className="controls">
-          <Seg valor={modoA} opciones={[["todas", "Todas"], ["mis", "Mis variables"]]} onElegir={(v) => set({ pam2: v === "todas" ? null : v, pav: v === "mis" && !misPedidas.length ? recomendadas.map((e) => encExpr(e)).join(",") : undefined })} />
-        </div>
-        <div className="controls">
+      {/* R11: el Compartir de Mis variables va arriba a la derecha del capítulo, no debajo de la tabla */}
+      <Capitulo id="pres-uno" titulo="Un presidente, todas las variables" acciones={paPres && modoA === "mis" && !enEdicion && mis.length > 0
+        ? <BotonCompartir className="compartir" titulo={`Primero los Datos: ${paPres.n}`} href={() => window.location.href}
+            title="Armar una imagen de estas variables para compartir" aria-label={`Compartir como imagen: ${paPres.n}, variables elegidas`}
+            crearVista={() => ({ tipo: "variables", presId: paPres.id, exprs: mis, base: b })}><IconoCompartir />Compartir</BotonCompartir>
+        : undefined}>
+        <div className="pres-controles">
           <Selector etiqueta="Presidente" valor={paPres.id} opciones={PRES.slice().reverse().map((x) => [x.id, x.n] as [string, string])} onElegir={(v) => set({ pap: v === "milei" ? null : v })} />
-          <VentanaConfig etiqueta="Personalizar" titulo="Personalizar la tabla">
-            {modoA === "todas" && <div className="controls"><label>Moneda</label><Selector etiqueta="Medida" valor={paMed} opciones={medsArs.map((o) => [o[0], o[1]] as [string, string])} onElegir={(v) => set({ pam: paramSi(v, "real", medPref) })} /></div>}
-            {modoA === "todas" && <p className="note">La moneda cambia los montos en pesos y en dólares. Un índice de precios muestra cuánto subió en el mandato: en pesos reales, contra la inflación general; en corrientes, tal cual. Los porcentajes, las tasas y las cantidades no dependen de la moneda: la tabla lo avisa.</p>}
-            {columnas}
-          </VentanaConfig>
+          <button type="button" className="vistabar-ajustes" aria-haspopup="dialog" aria-label={`Ajustes: ${modoA === "mis" ? "Mis variables" : "todas las variables"}`} onClick={() => setHojaA(true)}><IconoAjustes /><span>Ajustes</span></button>
         </div>
+        <HojaListo titulo="Ajustes" abierta={hojaA} onCerrar={() => setHojaA(false)}>
+          {() => (
+            <>
+              <div className="pres-aj-sec">
+                <span className="pres-aj-rot">Variables</span>
+                <Seg valor={modoA} opciones={[["todas", "Todas"], ["mis", "Mis variables"]]} onElegir={(v) => set({ pam2: v === "todas" ? null : v, ...(v === "mis" && !misPedidas.length ? { pav: recomendadas.map((e) => encExpr(e)).join(",") } : {}) })} />
+              </div>
+              {modoA === "todas" && (
+                <>
+                  <div className="pres-aj-sec">
+                    <span className="pres-aj-rot">Moneda</span>
+                    <Selector etiqueta="Medida" valor={paMed} opciones={medsArs.map((o) => [o[0], o[1]] as [string, string])} onElegir={(v) => set({ pam: paramSi(v, "real", medPref) })} />
+                    <p className="note">La moneda cambia los montos en pesos y en dólares. Un índice de precios muestra cuánto subió en el mandato: en pesos reales, contra la inflación general; en corrientes, tal cual. Los porcentajes, las tasas y las cantidades no dependen de la moneda: la tabla lo avisa.</p>
+                  </div>
+                  <div className="pres-aj-sec">
+                    <span className="pres-aj-rot">Tipo de variable</span>
+                    <Selector etiqueta="Tipo de variable" valor={tipo} opciones={[["", "Todos los tipos"], ...GRUPOS.map((g) => [g, g] as [string, string])]} onElegir={setTipo} />
+                  </div>
+                </>
+              )}
+              <div className="pres-aj-sec">{columnas}</div>
+            </>
+          )}
+        </HojaListo>
         {modoA === "todas" && (
-          <>
-            <div className="controls pp-filtros">
-              <input type="search" aria-label="Buscar variable" placeholder="Buscar variable: asado, reservas, alquiler…" value={buscar} onChange={(ev) => setBuscar(ev.target.value)} />
-              <Selector etiqueta="Tipo de variable" valor={tipo} opciones={[["", "Todos los tipos"], ...GRUPOS.map((g) => [g, g] as [string, string])]} onElegir={setTipo} />
-              <button type="button" className="btn" onClick={() => setAbiertos(new Set(GRUPOS))}>Expandir todas</button>
-              <button type="button" className="btn" onClick={() => setAbiertos(new Set())}>Contraer todas</button>
-            </div>
-            <p className="note">Tocá un grupo para abrirlo y un encabezado para ordenar.</p>
-          </>
+          <div className="pres-busca">
+            <input type="search" aria-label="Buscar variable" placeholder="Buscar variable: asado, reservas, alquiler…" value={buscar} onChange={(ev) => setBuscar(ev.target.value)} />
+            <button type="button" className="btn" onClick={() => setAbiertos(todosAbiertos ? new Set() : new Set(GRUPOS))}>{todosAbiertos ? "Contraer todas" : "Expandir todas"}</button>
+          </div>
         )}
         <LineaInicio info={info} F={F} texto={textoPaPres} sinAviso />
         <ContextoMandato m={m} pres={paPres} />
@@ -295,9 +341,6 @@ export function Presidentes() {
               {enEdicion
                 ? <button type="button" className="btn primario" onClick={() => setEditando(false)}>Guardar</button>
                 : <button type="button" className="btn" onClick={() => setEditando(true)}>Editar mis variables</button>}
-              {!enEdicion && <BotonCompartir className="btn" titulo={`Primero los Datos: ${paPres.n}`} href={() => window.location.href} deshabilitado={mis.length === 0}
-                title="Armar una imagen de estas variables para compartir" aria-label={`Compartir como imagen: ${paPres.n}, variables elegidas`}
-                crearVista={() => ({ tipo: "variables", presId: paPres.id, exprs: mis, base: b })}><IconoCompartir />Compartir</BotonCompartir>}
             </div>
           </>
         ) : (

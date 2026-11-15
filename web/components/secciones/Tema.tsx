@@ -15,7 +15,7 @@ import { tituloVariable } from "@/lib/imagen-datos";
 import { medDefaultDe, type Expr, type SerieMeta } from "@/lib/motor";
 import { crearPlantillas, evaluar, plantillaSuelta, plantillasDeTema, type Evaluada } from "@/lib/plantillas";
 import { catListado, esNivelGeneralIpc, listables, ordenarListado } from "@/lib/regiones";
-import { hrefHistorico, idsDe, principalesDe, seriesDe, subgrupoDe, type Principal, type Tema } from "@/lib/temas";
+import { NOMBRE_OTROS_PAISES, esOtroPais, hrefHistorico, idsDe, principalesDe, seriesDe, subgrupoDe, type Principal, type Tema } from "@/lib/temas";
 import { decExpr, encExpr, enteroEn, unoDe, useParams } from "@/lib/url";
 
 const PESTANAS: ["principales" | "todos", string][] = [["principales", "Principales"], ["todos", "Todos los datos"]];
@@ -92,7 +92,9 @@ export function TemaPagina({ t }: { t: Tema }) {
   const delTemaTodas = useMemo(() => seriesDe(t, metas), [t, metas]);
   const catDe = useMemo(() => (s: SerieMeta) => catListado(s, delTemaTodas), [delTemaTodas]);
   // Una por rubro o producto, sin las series ocultas ni el IPC nivel general (es lo mismo que "Inflación"), con el orden de las listas (rubros por código, productos por categoría).
-  const series = useMemo(() => ordenarListado(listables(delTemaTodas).filter((s) => !esNivelGeneralIpc(s.id)), catDe), [delTemaTodas, catDe]);
+  const series = useMemo(() => ordenarListado(listables(delTemaTodas).filter((s) => !esNivelGeneralIpc(s.id) && !esOtroPais(s)), catDe), [delTemaTodas, catDe]);
+  // Series de otros países (CPI-U de EEUU…): fuera de los indicadores de la Argentina, en un bloque propio al final
+  const otrosPaises = useMemo(() => listables(delTemaTodas).filter(esOtroPais), [delTemaTodas]);
   const subgrupos = useMemo(() => {
     const mapa = new Map<string, SerieMeta[]>();
     series.forEach((s) => { const k = subgrupoDe(t, s); if (!mapa.has(k)) mapa.set(k, []); mapa.get(k)!.push(s); });
@@ -114,6 +116,8 @@ export function TemaPagina({ t }: { t: Tema }) {
   if (!listo || !m || !montado) return <Cargando />;
 
   const exprSerie = (s: SerieMeta): Expr => ({ id: s.id, med: medidaInicial(s.tipo, medDefaultDe(s), config), rel: null, modo: "compra", esc: "" });
+  /** Series de otros países: se abren en variación interanual, no como índice. */
+  const exprOtroPais = (s: SerieMeta): Expr => ({ id: s.id, med: "via", rel: null, modo: "compra", esc: "" });
   // Variable de la ficha del dato. Se guarda en la URL: `dv` (la variable, igual que `v` de Histórico). Un link viejo con `pt`
   // (posición entre los principales, de la tabla por presidente de antes) abre ese principal. Sin ninguno, el primer principal.
   const existe = (id: string) => metas.some((s) => s.id === id);
@@ -177,20 +181,25 @@ export function TemaPagina({ t }: { t: Tema }) {
         </div>
       ) : (
         <div role="tabpanel" id="tema-panel-todos" aria-labelledby="tema-tab-todos" className="e1-panel">
-          <p className="note">{series.length} series. Abrí un bloque para ver sus series y tocá una para verla abajo, igual que los principales.</p>
+          <p className="note">{series.length + otrosPaises.length} series. Abrí un bloque para ver sus series y tocá una para verla abajo, igual que los principales.</p>
           <ul className="lista-series raiz e1-bloques">
             {subgrupos.map(([nombre, ss]) => (
               <Desplegado key={nombre} titulo={nombre} cuenta={ss.length}>
                 <Series series={ss} nivel={2} onElegir={(s) => elegir(exprSerie(s))} elegida={principalElegido ? null : elegida?.id ?? null} cat={catDe} />
               </Desplegado>
             ))}
+            {otrosPaises.length > 0 && (
+              <Desplegado titulo={NOMBRE_OTROS_PAISES} cuenta={otrosPaises.length}>
+                <Series series={otrosPaises} nivel={2} onElegir={(s) => elegir(exprOtroPais(s))} elegida={principalElegido ? null : elegida?.id ?? null} cat={catDe} />
+              </Desplegado>
+            )}
           </ul>
         </div>
       )}
 
       {elegida && (
         <section aria-labelledby="ficha-tema-titulo" className="ficha-tema" ref={fichaRef}>
-          <FichaDato e={elegida} info={info} p={p} set={set} nivel={3} titulo={nombreFicha} tituloRef={tituloFicha} tituloId="ficha-tema-titulo" />
+          <FichaDato e={elegida} info={info} p={p} set={set} onComoVerlo={(x) => set({ dv: encExpr(x) })} nivel={3} titulo={nombreFicha} tituloRef={tituloFicha} tituloId="ficha-tema-titulo" />
         </section>
       )}
 

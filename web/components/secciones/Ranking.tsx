@@ -161,7 +161,10 @@ export function Ranking() {
       <HojaListo titulo="Filtrar grupos" abierta={hojaGrupos && !usaVars} onCerrar={() => setHojaGrupos(false)}>
         {() => (
           <div className="rk-hoja">
-            <Pildoras titulo="Grupos de indicadores" valor={grupos} onElegir={(v) => set({ rk: [...alternar(grupos, v)].join(",") })} opciones={I.GRUPOS_IND.map((g) => [g, g] as [string, string])} />
+            <Pildoras titulo="Grupos de indicadores" valor={grupos} opciones={I.GRUPOS_IND.map((g) => [g, g] as [string, string])}
+              onElegir={(v) => { const n = alternar(grupos, v); set({ rk: n.size === I.GRUPOS_IND.length ? null : [...n].join(",") }); }}
+              onTodos={() => set({ rk: null })} />
+            <p className="note">Tocá un grupo para sacarlo o volver a sumarlo; “Todos” los vuelve a elegir. Queda al menos uno.</p>
           </div>
         )}
       </HojaListo>
@@ -273,14 +276,21 @@ export function BarraResumen({ resumen, onAjustes, extras }: { resumen: string; 
 }
 
 /** Elección múltiple (R12): píldoras sueltas separadas; la elegida va rellena con un ✓ a la izquierda. */
-export function Pildoras({ titulo, opciones, valor, onElegir, bloqueadas }: {
+export function Pildoras({ titulo, opciones, valor, onElegir, onTodos, bloqueadas }: {
   titulo: string; opciones: [string, string][]; valor: Set<string>; onElegir: (v: string) => void;
+  /** Si se pasa, suma la píldora "Todos": vuelve a elegir todas las opciones (y queda marcada cuando ya están todas). */ onTodos?: () => void;
   /** Opciones que no se pueden elegir, con el motivo. */ bloqueadas?: Record<string, string>;
 }) {
+  const todas = opciones.every(([v]) => valor.has(v));
   return (
     <div className="rk-grupo" role="group" aria-label={titulo}>
       <span className="rk-rotulo">{titulo}</span>
       <div className="resbar-pildoras">
+        {onTodos && (
+          <button type="button" className="resbar-pil" aria-pressed={todas} onClick={onTodos}>
+            {todas && <span className="resbar-tilde" aria-hidden="true">✓</span>}Todos
+          </button>
+        )}
         {opciones.map(([v, t]) => (
           <button key={v} type="button" className="resbar-pil" aria-pressed={valor.has(v)} disabled={!!bloqueadas?.[v]} title={bloqueadas?.[v]} onClick={() => onElegir(v)}>
             {valor.has(v) && <span className="resbar-tilde" aria-hidden="true">✓</span>}{t}{bloqueadas?.[v] ? <small> (sin datos por rubro)</small> : null}

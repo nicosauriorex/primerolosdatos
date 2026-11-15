@@ -1,11 +1,11 @@
 "use client";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useSeccion } from "../useSeccion";
 import { Cargando, Selector, Seg, alternar } from "../ui";
 import { FilaVariable } from "../Variables";
 import { VentanaConfig } from "./VentanaConfig";
 import { BotonCompartir } from "../PanelCompartir";
-import { IconoCompartir } from "../Iconos";
+import { IconoAjustes, IconoCompartir } from "../Iconos";
 import { Capitulo } from "../sistema/Capitulo";
 import { CompartirHoja } from "../sistema/CompartirHoja";
 import { Grafico, type Fila, type SerieG } from "../Grafico";
@@ -78,22 +78,54 @@ export function Mandato() {
   const maxAnim = D ? D.rows.length - 1 : 0;
   const ms = Math.round(Math.max(6000 / Math.max(1, maxAnim), Math.min(150, 12000 / Math.max(1, maxAnim))));
   const play = !!anim?.play;
+  // Posición continua del dibujo (en meses, con decimales): el lápiz avanza entre un mes y el siguiente. `anim.t` es solo su parte entera.
+  const pos = useRef(0);
+  const envoltura = useRef<HTMLDivElement>(null);
+  const tsRef = useRef<number[]>([]);
+  tsRef.current = D ? D.rows.map((r) => r.t as number) : [];
+  /** Recorta el gráfico a la derecha del lápiz: el último tramo (ya dibujado hasta el mes siguiente) se descubre de a poco. */
+  const aplicarRecorte = () => {
+    const el = envoltura.current;
+    if (!el) return;
+    const ts = tsRef.current, fin = ts.length - 1;
+    const over = el.querySelector(".u-over");
+    if (!over || fin < 1 || pos.current >= fin) { el.style.clipPath = ""; return; }
+    const i = Math.max(0, Math.min(Math.floor(pos.current), fin - 1));
+    const tt = ts[i] + (ts[i + 1] - ts[i]) * (pos.current - i);
+    const fr = (tt - ts[0]) / ((ts[fin] - ts[0]) || 1);
+    const er = el.getBoundingClientRect(), or = over.getBoundingClientRect();
+    const x = or.left - er.left + Math.max(0, Math.min(1, fr)) * or.width;
+    el.style.clipPath = `inset(-12px ${Math.max(0, er.width - x)}px -12px 0)`;
+  };
   useEffect(() => {
     if (!play) return;
     // si el sistema pide reducir el movimiento (también si cambió con la animación andando), no avanza sola
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setAnim(null); return; }
-    const id = window.setInterval(() => {
-      setAnim((a) => (!a || !a.play ? a : a.t + 1 >= maxAnim ? { t: maxAnim, play: false } : { t: a.t + 1, play: true }));
-    }, ms);
-    return () => window.clearInterval(id);
+    let ultimo = performance.now(), raf = 0;
+    const paso = (ahora: number) => {
+      const dt = Math.min(100, ahora - ultimo);   // una pestaña en segundo plano no salta de golpe
+      ultimo = ahora;
+      pos.current = Math.min(maxAnim, pos.current + dt / ms);
+      const entero = Math.floor(pos.current), llego = pos.current >= maxAnim;
+      setAnim((a) => (!a || !a.play ? a : llego ? { t: maxAnim, play: false } : a.t === entero ? a : { t: entero, play: true }));
+      aplicarRecorte();
+      if (!llego) raf = requestAnimationFrame(paso);
+    };
+    raf = requestAnimationFrame(paso);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [play, ms, maxAnim]);
+  // al cambiar los cuadros (o cortarse la animación) el recorte se vuelve a poner donde corresponde
+  useLayoutEffect(() => { if (!anim) { if (envoltura.current) envoltura.current.style.clipPath = ""; return; } aplicarRecorte(); });
   const animar = () => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setAnim(null); return; }
+    pos.current = 0;
     setAnim({ t: 0, play: true });
   };
   // el cuadro actual nunca pasa del último mes visible: al achicar "Hasta" con la animación terminada, anim.t queda fuera de rango hasta que el efecto de arriba la corta
   const cuadro = anim ? Math.max(0, Math.min(anim.t, maxAnim)) : 0;
-  const rowsVista = D && anim ? D.rows.map((r, i) => (i <= cuadro ? r : { t: r.t })) : D?.rows;
+  // se dibuja un mes de más: el recorte deja ver solo hasta donde llegó el lápiz
+  const rowsVista = D && anim ? D.rows.map((r, i) => (i <= cuadro + 1 ? r : { t: r.t })) : D?.rows;
 
   if (sec.errorGeneral) return <p className="error" role="alert">{sec.errorGeneral}</p>;
   if (!m || !montado) return <Cargando />;
@@ -106,41 +138,49 @@ export function Mandato() {
     <section>
       <p className="sub">Cada línea arranca en el mes 0 de un presidente y sigue mes a mes durante su mandato.</p>
       <LineaInicio info={info} F={m.F} />
-      <div className="mand-barra" role="group" aria-label="Configuración del gráfico">
+      <div className="mand-barra mand-barra-2" role="group" aria-label="Configuración del gráfico">
         <VentanaConfig etiqueta={D ? D.c.corto : "Variable"} titulo="Variable">
           <FilaVariable e={eB} onChange={(e) => e && set({ mv: encExpr(e) })} />
         </VentanaConfig>
-        <VentanaConfig etiqueta="Cómo mostrar" titulo="Cómo mostrar">
-          <div className="modos" role="radiogroup" aria-label="Cómo mostrar">
-            {MODOS.filter(([k]) => !(D?.c.pct && k === "teorico")).map(([k, t]) => (
-              <div key={k} className="modo">
-                <label className="radio"><input type="radio" name="mmo" checked={modoEf === k} onChange={() => set({ mmo: k === "teorico" ? null : k })} /> {t}</label>
-                <p className="note">{AYUDA[k]}</p>
-                {k === "teorico" && modoEf === "teorico" && D && (
-                  <div className="sangria"><label>Partiendo de</label>
-                    <Selector etiqueta="Partiendo de" valor={D.anc} opciones={D.ancOpc.map((o) => [o[0], o[1]] as [string, string])} onElegir={(v) => set({ anc: v === "milei" ? null : v })} /></div>
-                )}
-                {k === "teorico" && modoEf === "teorico" && D && <p className="note">{`Ejemplo: si con Milei el dato arrancó en 1.000 (${D.c.unidad}) y en el mes 20 de CFK 2 había subido 50 %, CFK 2 marca 1.500 en el mes 20.`}</p>}
-              </div>
-            ))}
+        <VentanaConfig etiqueta={<><IconoAjustes /> Ajustes</>} titulo="Ajustes">
+          <div className="pres-aj-sec">
+            <span className="pres-aj-rot">Cómo mostrar</span>
+            <div className="modos" role="radiogroup" aria-label="Cómo mostrar">
+              {MODOS.filter(([k]) => !(D?.c.pct && k === "teorico")).map(([k, t]) => (
+                <div key={k} className="modo">
+                  <label className="radio"><input type="radio" name="mmo" checked={modoEf === k} onChange={() => set({ mmo: k === "teorico" ? null : k })} /> {t}</label>
+                  <p className="note">{AYUDA[k]}</p>
+                  {k === "teorico" && modoEf === "teorico" && D && (
+                    <div className="sangria"><label>Partiendo de</label>
+                      <Selector etiqueta="Partiendo de" valor={D.anc} opciones={D.ancOpc.map((o) => [o[0], o[1]] as [string, string])} onElegir={(v) => set({ anc: v === "milei" ? null : v })} /></div>
+                  )}
+                  {k === "teorico" && modoEf === "teorico" && D && <p className="note">{`Ejemplo: si con Milei el dato arrancó en 1.000 (${D.c.unidad}) y en el mes 20 de CFK 2 había subido 50 %, CFK 2 marca 1.500 en el mes 20.`}</p>}
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="controls"><label>Rango del mes</label><Seg valor={banda} opciones={[["no", "Solo promedio"], ["si", "Promedio + mín/máx"]]} onElegir={(v) => set({ mbd: v === "no" ? null : v })} /></div>
-        </VentanaConfig>
-        <VentanaConfig etiqueta="Presidentes" titulo="Presidentes">
-          <div className="controls"><Seg valor={selIds} opciones={PRES_T0.map((x) => [x.id, x.n] as [string, string])} onElegir={(v) => set({ mp: [...alternar(selIds, v)].join(",") })} /></div>
+          <div className="pres-aj-sec">
+            <span className="pres-aj-rot">Rango del mes</span>
+            <Seg valor={banda} opciones={[["no", "Solo promedio"], ["si", "Promedio + mín/máx"]]} onElegir={(v) => set({ mbd: v === "no" ? null : v })} />
+          </div>
+          <div className="pres-aj-sec">
+            <span className="pres-aj-rot">Presidentes</span>
+            <Seg valor={selIds} opciones={PRES_T0.map((x) => [x.id, x.n] as [string, string])} onElegir={(v) => set({ mp: [...alternar(selIds, v)].join(",") })} />
+          </div>
         </VentanaConfig>
       </div>
+      <p className="pres-resumen-mand">{TITULOS[modoEf]} · {selIds.size === PRES_T0.length ? "todos los presidentes" : `${selIds.size} de ${PRES_T0.length} presidentes`}{banda === "si" ? " · con mínimo y máximo" : ""}</p>
       {!D ? (errs.length ? null : <Cargando />) : (
         <>
           <Capitulo id="mand-grafico" titulo={`${D.c.corto}: ${TITULOS[modoEf]} por mes de mandato`}
             acciones={<BotonCompartir className="compartir" titulo={`Primero los Datos: ${D.c.corto} por mes de mandato`} href={() => window.location.href} deshabilitado={D.pres.length === 0}
               title="Armar una imagen de este gráfico para compartir" aria-label="Compartir como imagen: meses de mandato"
-              crearVista={() => ({ tipo: "mandato", expr: eB, modo: modoEf, presIds: D.pres.map((x) => x.id), anc: p.get("anc"), md: p.get("md"), mh: p.get("mh"), valorFinal, base: b })}><IconoCompartir />Compartir</BotonCompartir>}>
+              crearVista={() => ({ tipo: "mandato", expr: eB, modo: modoEf, presIds: D.pres.map((x) => x.id), anc: p.get("anc"), md: p.get("md"), mh: p.get("mh"), valorFinal, base: b, ...(resaltar ? { resaltados: [resaltar] } : {}) })}><IconoCompartir />Compartir</BotonCompartir>}>
             <div className="anim-barra">
               {!anim ? <button type="button" className="btn" onClick={animar}>▶ Animar</button>
                 : anim.play ? <button type="button" className="btn" onClick={() => setAnim({ ...anim, play: false })}>⏸ Pausa</button>
-                : <><button type="button" className="btn" onClick={() => setAnim(cuadro >= maxAnim ? { t: 0, play: true } : { t: cuadro, play: true })}>▶ Seguir</button>
-                  <button type="button" className="btn" onClick={() => setAnim({ t: 0, play: true })}>↺ Reiniciar</button></>}
+                : <><button type="button" className="btn" onClick={() => { pos.current = cuadro >= maxAnim ? 0 : pos.current; setAnim(cuadro >= maxAnim ? { t: 0, play: true } : { t: cuadro, play: true }); }}>▶ Seguir</button>
+                  <button type="button" className="btn" onClick={() => { pos.current = 0; setAnim({ t: 0, play: true }); }}>↺ Reiniciar</button></>}
               {anim && <span className="lbl" role="status">Mes {D.rows[cuadro]?.t as number}</span>}
             </div>
             {/* la leyenda es tocable: resalta la línea del presidente (y la vuelve a sacar al tocarla de nuevo) */}
@@ -151,7 +191,7 @@ export function Mandato() {
               ))}
             </div>
             {/* tocar el gráfico pausa la animación */}
-            <div onPointerDown={() => { if (play) setAnim((a) => (a ? { ...a, play: false } : a)); }}><Grafico rows={rowsVista || D.rows} series={D.series} opts={{ ...D.opts, resaltar }} /></div>
+            <div ref={envoltura} className="mand-lapiz" onPointerDown={() => { if (play) setAnim((a) => (a ? { ...a, play: false } : a)); }}><Grafico rows={rowsVista || D.rows} series={D.series} opts={{ ...D.opts, resaltar }} /></div>
             <div className="controls mand-meses">
               <label>Meses</label><label htmlFor="mm_desde">desde</label>
               <input type="range" id="mm_desde" min={0} max={D.maxMes - 1} step={1} value={D.desde} onChange={(ev) => { const d = +ev.target.value; set({ md: d ? String(d) : null, mh: d >= D.hasta ? String(d + 1) : undefined }); }} />

@@ -11,10 +11,9 @@ import { BotonInfo } from "../Variables";
 import { PanelCompartir, type VistaCompartir } from "../PanelCompartir";
 import { CabeceraDato } from "../sistema/CabeceraDato";
 import { Capitulo } from "../sistema/Capitulo";
-import { FilaChips } from "../sistema/FilaChips";
-import { BarraVista } from "../sistema/BarraVista";
 import { Hoja } from "../sistema/Hoja";
 import { CompartirHoja } from "../sistema/CompartirHoja";
+import { BarraResumen } from "./Ranking";
 import { CeldaVar, Valor } from "./comunes";
 import { crearPres, type Pres } from "@/lib/estadisticas";
 import { fmtMes } from "@/lib/formato";
@@ -30,7 +29,6 @@ import { unoDe, useParams } from "@/lib/url";
 import type { Motor } from "@/lib/motor";
 
 const IDS = idsHerencia();
-const VISTAS: [string, string][] = [["uno", "Un presidente"], ["traspasos", "Todos los traspasos"]];
 
 /** Celda de un dato: el valor y su mes; si no hay, "sin dato" y por qué. */
 function CeldaDato({ p, motivo, rotulo }: { p: Punto | null; motivo: string; rotulo?: string }) {
@@ -212,7 +210,7 @@ export function Herencia() {
     respTr = { titulo: ti.def.nombre, unidad: ti.def.unidad, ...r };
   }
   const textoFuente = "Fuente: datos oficiales (INDEC, Banco Central, Ministerio de Economía y otros); detalle en Primero los Datos.";
-  const resumen = vista === "uno" ? [{ clave: "p", texto: pres.n }] : [{ clave: "v", texto: opcionesVar.find(([v]) => v === clave)?.[1] ?? clave }];
+  const resumen = vista === "uno" ? `Un presidente · ${pres.n}` : `Todos los traspasos · ${opcionesVar.find(([v]) => v === clave)?.[1] ?? clave}`;
   const abrirImagen = () => {
     setImg({ tipo: "herencia", presId: pres.id, ids: IDS.filter((id) => !!m.SER[id]), base: BASE_HERENCIA, informes: datosInf, rn } as VistaCompartir);
   };
@@ -238,9 +236,10 @@ export function Herencia() {
         <CabeceraDato nivel={2} titulo={respTr.titulo} cifra={respTr.cifra} unidad={respTr.unidad} fecha={respTr.fecha} deltas={[]} frase={respTr.frase} />
       ) : null}
 
+      {/* R19: un solo renglón de controles: el resumen como texto, un botón propio para cambiar de vista y un solo Ajustes */}
       <div className="her-controles">
-        <FilaChips etiqueta="Qué ver" opciones={VISTAS} valor={vista} onElegir={(v) => set({ vista: v === "uno" ? null : v })} />
-        <BarraVista items={resumen} onAbrir={() => setHoja(true)} />
+        <BarraResumen resumen={resumen} onAjustes={() => setHoja(true)}
+          extras={<button type="button" className="vistabar-ajustes" onClick={() => set({ vista: vista === "uno" ? "traspasos" : null })}>{vista === "uno" ? "Todos los traspasos" : "Un presidente"}</button>} />
       </div>
       <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
         {(cerrar) => vista === "uno" ? (

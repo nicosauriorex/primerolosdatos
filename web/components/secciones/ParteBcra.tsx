@@ -8,12 +8,13 @@ import { Capitulo } from "../sistema/Capitulo";
 import { CabeceraDato } from "../sistema/CabeceraDato";
 import { CompartirHoja } from "../sistema/CompartirHoja";
 import { Delta } from "../sistema/Delta";
+import { IconoBanco } from "./BloqueParte";
 import { FilaChips } from "../sistema/FilaChips";
 import { Sparkline } from "../Sparkline";
 import { GraficoDiario } from "../GraficoDiario";
 import { PanelParte } from "../PanelParte";
 import {
-  aclaracionFila, cambiosDe, claveDePeriodo, diaDeIso, esClaveDiario, esPeriodoDiario, extremosTramo, fmtDia, isoDeDia, limitesSerie, lineaCompras, netoTxt, PERIODO_DEFECTO, PERIODOS_DIARIO, rangoDeUrl, rangoTxt, recorte, resumenRuedas, textoParte, variableDe,
+  aclaracionFila, cambiosDe, claveDePeriodo, diaDeIso, esClaveDiario, esPeriodoDiario, extremosTramo, fmtDia, inicioTramo, isoDeDia, limitesSerie, lineaCompras, netoTxt, PERIODO_DEFECTO, PERIODOS_DIARIO, rangoDeUrl, rangoTxt, recorte, resumenRuedas, textoParte, variableDe,
   type ClaveDiario, type Diario, type Parte, type PeriodoDiario, type PeriodoElegido, type RangoDiario, type ResumenVariable, type SerieDiaria,
 } from "@/lib/diario";
 import { MESES, nf0 } from "@/lib/formato";
@@ -69,10 +70,29 @@ function Cuerpo({ datos, parte }: { datos: Diario; parte: Parte }) {
     llevada.current = true;
     document.getElementById(`parte-fila-${claveUrl}`)?.scrollIntoView({ block: "nearest", behavior: "auto" });
   }, [claveUrl, montada]);
+  // Al cerrar el gráfico (con "Cerrar", tocando la fila o con Atrás) la página queda en la fila que se abrió (R23): con el panel ya plegado,
+  // si la fila no se ve entera se la lleva a la vista con suavidad; si ya está a la vista, no se mueve.
+  const abierta = useRef<ClaveDiario | null>(null);
+  useEffect(() => {
+    if (claveUrl) { abierta.current = claveUrl; return; }
+    const c = abierta.current;
+    if (!c) return;
+    abierta.current = null;
+    const id = setTimeout(() => {
+      const el = document.getElementById(`parte-fila-${c}`);
+      if (!el) return;
+      const r = el.getBoundingClientRect(), tope = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+      if (r.top >= tope && r.bottom <= window.innerHeight) return;
+      const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      el.scrollIntoView({ block: r.top < tope ? "start" : "nearest", behavior: quieto ? "auto" : "smooth" });
+    }, 300);   // un poco más que lo que tarda en plegarse el panel (--d-2)
+    return () => clearTimeout(id);
+  }, [claveUrl]);
   const alternar = (c: ClaveDiario) => { llevada.current = true; set(claveUrl === c ? { v: null, per: null, pd: null, ph: null } : { v: c }); };
 
   return (
     <section className="parte">
+      <p className="bcra-vivo"><IconoBanco /><span>En vivo · Banco Central</span></p>
       <CabeceraDato nivel={2} titulo={principal.nombre} cifra={principal.valorCorto} unidad={principal.unidad}
         fecha={principal.atrasada ? `Último dato: ${principal.fechaTxt}` : principal.fechaTxt}
         deltas={cambiosDe(principal)} frase={principal.frases[0]} info={principal.que} />
@@ -159,10 +179,16 @@ function ModalFechas({ serie, periodo, onCerrar, onAplicar }: { serie: SerieDiar
   return (
     <Modal titulo="Elegir fechas" onCerrar={onCerrar}>
       <form className="bcra-form-fechas" onSubmit={(ev) => { ev.preventDefault(); if (!error) onAplicar(desde, hasta); }}>
-        <label>Desde<input type="date" value={desde} min={isoDeDia(min)} max={isoDeDia(max)} onChange={(e) => setDesde(e.target.value)} /></label>
-        <label>Hasta<input type="date" value={hasta} min={isoDeDia(min)} max={isoDeDia(max)} onChange={(e) => setHasta(e.target.value)} /></label>
-        <p className="note" role="status">{error || `${datos} El gráfico y el resumen siguen este rango.`}</p>
-        <button type="submit" className="btn" disabled={!!error}>Aplicar</button>
+        <div className="bcra-campo">
+          <label htmlFor="bcra-desde">Desde</label>
+          <input id="bcra-desde" type="date" value={desde} min={isoDeDia(min)} max={isoDeDia(max)} onChange={(e) => setDesde(e.target.value)} />
+        </div>
+        <div className="bcra-campo">
+          <label htmlFor="bcra-hasta">Hasta</label>
+          <input id="bcra-hasta" type="date" value={hasta} min={isoDeDia(min)} max={isoDeDia(max)} onChange={(e) => setHasta(e.target.value)} />
+        </div>
+        <p className="note bcra-nota" role="status">{error || `${datos} El gráfico y el resumen siguen este rango.`}</p>
+        <button type="submit" className="btn primario" disabled={!!error}>Aplicar</button>
       </form>
     </Modal>
   );
@@ -192,10 +218,17 @@ function Ruedas({ serie, periodo }: { serie: SerieDiaria; periodo: PeriodoElegid
 function Extremos({ v, serie, periodo }: { v: ResumenVariable; serie: SerieDiaria; periodo: PeriodoElegido }) {
   const k = claveDePeriodo(periodo);
   const e = useMemo(() => extremosTramo(v.clave, recorte(v.clave, serie, periodo)), [v.clave, serie, k]); // eslint-disable-line react-hooks/exhaustive-deps
+  const i = useMemo(() => inicioTramo(v.clave, recorte(v.clave, serie, periodo)), [v.clave, serie, k]); // eslint-disable-line react-hooks/exhaustive-deps
+  const c = i.cambio;
   return (
     <dl className="parte-extremos">
       <div><dt>Más alto del período</dt><dd>{e.alto.valor}<small>{e.alto.fecha}</small></dd></div>
       <div><dt>Más bajo del período</dt><dd>{e.bajo.valor}<small>{e.bajo.fecha}</small></dd></div>
+      <div><dt>Al inicio del período</dt><dd>{i.valor}<small>{i.fecha}</small></dd></div>
+      {c && (
+        <div><dt>Variación desde el inicio</dt>
+          <dd><Delta texto={c.texto} tono={c.tono} dir={c.dir} contra={c.contra} etiqueta={c.etiqueta} />{c.pct && <small>{c.pct}</small>}</dd></div>
+      )}
     </dl>
   );
 }

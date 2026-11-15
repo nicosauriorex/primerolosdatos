@@ -5,6 +5,8 @@ import { Cargando, alternar } from "../ui";
 import { Capitulo } from "../sistema/Capitulo";
 import { Hoja } from "../sistema/Hoja";
 import { InfoPunto } from "../sistema/InfoPunto";
+import { BotonCompartir } from "../PanelCompartir";
+import { IconoCompartir } from "../Iconos";
 import { BotonInfo } from "../Variables";
 import { CeldaVar, LineaInicio, Valor, useBase, HojaListo } from "./comunes";
 import { BarraResumen, Pildoras } from "./Ranking";
@@ -14,18 +16,12 @@ import { CORTES_R, crearElec, crearPres, estimarVoto, METRICA_E, pearson, ultimo
 import { textoBusqueda } from "@/lib/catalogo";
 import type { Calculo, Expr, Serie } from "@/lib/motor";
 import { enteroEn, lista, unoDe, useParams } from "@/lib/url";
+import { filaCorr, graficoDisp, niceTicks, type VistaElec } from "@/lib/imagen-elecciones";
 
 const fmtR = (r: number) => (r > 0 ? "+" : "") + nf2.format(r);
+const MAX_DISP_IMG = 4;   // gráficos de dispersión que entran en la imagen
+const MAX_CORR_IMG = 12;  // variables de la imagen de correlación
 const esDetalle = (s: Serie) => ((s.cat[1] || "").startsWith("IPC INDEC") && s.cat[2] !== "Nacional") || ((s.cat[1] || "").startsWith("Precios promedio") && s.cat[2] !== "GBA");
-
-function niceTicks(min: number, max: number, n: number): number[] {
-  const span = max - min || Math.abs(max) || 1, step0 = span / n, mag = Math.pow(10, Math.floor(Math.log10(step0)));
-  const step = [1, 2, 2.5, 5, 10].map((f) => f * mag).find((s) => span / s <= n) || mag * 10;
-  const t: number[] = []; let v = Math.floor(min / step) * step;
-  t.push(v);
-  while (v < max - 1e-9) { v += step; t.push(+v.toPrecision(12)); }
-  return t;
-}
 
 interface Corr { s: Serie; ind: Expr; c: Calculo; pts: { e: ReturnType<typeof crearElec>[number]; x: number }[]; r: number; b: number; a: number; n: number }
 
@@ -200,6 +196,20 @@ export function Elecciones() {
   const textoRel = (o: Corr) => `Cuanto ${metrica === "nivel" ? "más alto" : "más subió"} → ${o.r > 0 ? "más" : "menos"} votos al oficialismo`;
 
   const rta = voto ? fraseVoto(voto, corte) : null;
+  // R11: Compartir con imagen en el título de cada capítulo con datos (V7); el link lleva al capítulo. La vista lleva lo que se ve, ya calculado.
+  const hrefCap = (id: string) => () => `${window.location.pathname}${window.location.search}#${id}`;
+  const medirTxt = METRICA_E[metrica][0].toLowerCase();
+  const vistaHoy = (): VistaElec | null => (rta ? {
+    tipo: "elec-hoy", cifra: rta.cifra, rotulo: rta.rotulo, frases: rta.frases, medir: medirTxt,
+    referencia: ultima ? `Como referencia, el último resultado real del oficialismo fue ${nf1.format(ultima.v)} % (${ultima.of}, ${fmtMes(ultima.f)}).` : null,
+  } : null);
+  const vistaDisp = (): VistaElec | null => (elegidos.length ? {
+    tipo: "elec-dispersion", graficos: elegidos.slice(0, MAX_DISP_IMG).map((o) => graficoDisp(o, metrica, hoyDe(o))), total: elegidos.length, elegidas: sel.length > 0, medir: medirTxt,
+  } : null);
+  const vistaCorr = (): VistaElec | null => {
+    const top = filas.slice().sort((a, c) => Math.abs(c.r) - Math.abs(a.r));
+    return top.length ? { tipo: "elec-correlacion", filas: top.slice(0, MAX_CORR_IMG).map(filaCorr), total: top.length, medir: medirTxt } : null;
+  };
   const tiposTxt = tipos.size === 2 ? "Presidenciales y legislativas" : tipos.has("pres") ? "Presidenciales" : tipos.has("leg") ? "Legislativas" : "Ninguna elección";
   const resumen = [tiposTxt, `Medir: ${METRICA_E[metrica][0].toLowerCase()}`, `|r| ≥ ${nf1.format(corte)}`, `${filas.length} variables · mín. ${minN} elecciones`, conIpc === "si" ? "Con detalle regional" : "Sin detalle regional"].join(" · ");
 
@@ -207,9 +217,12 @@ export function Elecciones() {
     <section>
       <Capitulo id="elec-hoy" titulo="¿Qué dicen los datos sobre el voto al oficialismo hoy?"
         bajada="Cada variable se compara con el % que sacó el oficialismo nacional en cada elección desde 1995."
-        acciones={<InfoPunto etiqueta="Cómo leer estos números">
-          <p>Para cada variable se calcula su valor en cada elección ({METRICA_E[metrica][1]}) y se lo compara con el % que sacó el oficialismo nacional. <b>r</b> es la correlación: +1 = se mueven juntos, −1 = al revés, 0 = nada que ver. Con tan pocas elecciones ({el.length}), una correlación alta puede ser casualidad; con menos de 8 puntos, |r| por debajo de ~0,7 no dice mucho. Los montos de toda la economía se miden como % del PIB y los montos en pesos, en pesos reales.</p>
-        </InfoPunto>}>
+        acciones={<>
+          <InfoPunto etiqueta="Cómo leer estos números">
+            <p>Para cada variable se calcula su valor en cada elección ({METRICA_E[metrica][1]}) y se lo compara con el % que sacó el oficialismo nacional. <b>r</b> es la correlación: +1 = se mueven juntos, −1 = al revés, 0 = nada que ver. Con tan pocas elecciones ({el.length}), una correlación alta puede ser casualidad; con menos de 8 puntos, |r| por debajo de ~0,7 no dice mucho. Los montos de toda la economía se miden como % del PIB y los montos en pesos, en pesos reales.</p>
+          </InfoPunto>
+          {voto && rta && <BotonCompartir className="compartir" titulo="Primero los Datos: voto al oficialismo hoy" href={hrefCap("elec-hoy")} crearVista={vistaHoy}><IconoCompartir />Compartir</BotonCompartir>}
+        </>}>
         {!voto ? <p className="note">Con las elecciones y la medida elegidas no hay suficientes variables para estimar nada (hacen falta al menos 3 con 8 elecciones o más).</p> : (
           <>
             {rta && rta.cifra && (
@@ -234,7 +247,8 @@ export function Elecciones() {
         <HojaListo titulo="Elecciones" abierta={hojaTipos} onCerrar={() => setHojaTipos(false)}>
           {() => (
             <div className="elec-hoja">
-              <Pildoras titulo="Elecciones" valor={tipos} onElegir={(v) => set({ et: [...alternar(tipos, v)].join(",") })}
+              <Pildoras titulo="Elecciones" valor={tipos} onElegir={(v) => { const n = alternar(tipos, v); set({ et: n.size === 2 ? null : [...n].join(",") }); }}
+                onTodos={() => set({ et: null })}
                 opciones={[["pres", "Presidenciales"], ["leg", "Legislativas"]]} />
             </div>
           )}
@@ -290,7 +304,10 @@ export function Elecciones() {
 
       <Capitulo id="elec-dispersion" titulo="Gráficos de dispersión"
         bajada={`${sel.length ? `${elegidos.length} variables elegidas.` : "Las 12 de correlación más fuerte (elegí otras con \"+ graficar\")."} Lleno = presidencial, vacío = legislativa; rombo = hoy.`}
-        acciones={sel.length > 0 ? <button type="button" className="btn elec-vuelta" onClick={() => setSel([])}>Volver a las 12 más fuertes</button> : undefined}>
+        acciones={<>
+          {sel.length > 0 && <button type="button" className="btn elec-vuelta" onClick={() => setSel([])}>Volver a las 12 más fuertes</button>}
+          {elegidos.length > 0 && <BotonCompartir className="compartir" titulo="Primero los Datos: gráficos de dispersión" href={hrefCap("elec-dispersion")} crearVista={vistaDisp}><IconoCompartir />Compartir</BotonCompartir>}
+        </>}>
         <div className="elec-disps">
           {elegidos.map((o, k) => (
             <div className="elec-disp" key={o.s.id}><div className="elec-disp-k">{o.s.n}</div><div className="elec-disp-d">r = {fmtR(o.r)} · {o.n} elecciones</div>
@@ -302,7 +319,8 @@ export function Elecciones() {
       </Capitulo>
 
       <Capitulo id="elec-correlacion" titulo="Correlación de cada variable con el voto al oficialismo"
-        bajada={`${filas.length} variables${filas.length > 300 ? " (se muestran las primeras 300)" : ""}. Tocá un encabezado para ordenar.`}>
+        bajada={`${filas.length} variables${filas.length > 300 ? " (se muestran las primeras 300)" : ""}. Tocá un encabezado para ordenar.`}
+        acciones={filas.length > 0 ? <BotonCompartir className="compartir" titulo="Primero los Datos: correlación con el voto" href={hrefCap("elec-correlacion")} crearVista={vistaCorr}><IconoCompartir />Compartir</BotonCompartir> : undefined}>
         <input type="search" className="elec-buscar" aria-label="Buscar variable" placeholder="Buscar variable: salario, inflación, dólar…" value={buscar} onChange={(ev) => setBuscar(ev.target.value)} />
         <div className="tablewrap alto fija elec-corr"><table>
           <thead><tr><th>Variable</th>{th("r", "r")}{th("abs", "Fuerza |r|")}{th("n", "Elecciones")}<th style={{ textAlign: "left" }}>Qué dice</th><th>Gráfico</th><th><span className="sr-solo">Qué es la variable</span></th></tr></thead>

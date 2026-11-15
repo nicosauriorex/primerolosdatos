@@ -16,7 +16,7 @@ import { PanelCompartir, type VistaCompartir } from "./PanelCompartir";
 import { IconoIr, IconoPausa, IconoSeguir } from "./Iconos";
 import { PALETA, vcolor } from "./util";
 import { LineaInicio, type InicioMandato } from "./secciones/comunes";
-import { CabeceraDato } from "./sistema/CabeceraDato";
+import { CabeceraDato, ComoVerlo } from "./sistema/CabeceraDato";
 import { Capitulo } from "./sistema/Capitulo";
 import { CompartirHoja } from "./sistema/CompartirHoja";
 import { FilaChips } from "./sistema/FilaChips";
@@ -27,7 +27,7 @@ import { unoDe } from "@/lib/url";
 import { baseDeConfig } from "@/lib/config";
 import { AYUDA_T, PRES_DEF, baseTxt, crearPres, etiqueta, franjasPres, nivelComparable, nombreCorto, statsMandato } from "@/lib/estadisticas";
 import { fmtMes } from "@/lib/formato";
-import { frecuenciaOrigen, textoTemporalidad } from "@/lib/historico";
+import { frecuenciaOrigen, opcionesComoVerlo, textoTemporalidad } from "@/lib/historico";
 import { datoFijoDe, hrefFijo } from "@/lib/datos-fijos";
 import { fmtEjeDe, notaInflacion, tituloVariable } from "@/lib/imagen-datos";
 import { fuentePublica } from "@/lib/fuente-publica";
@@ -52,8 +52,10 @@ const absoluto = (href: string) => new URL(href, window.location.origin).href;
  *  `info`: inicio de mandato de la página (`useBase`). `pd`: presidente que se resalta en la tabla y se suma a Meses de mandato.
  *  `nivel`: el de los títulos de los capítulos (2 en /dato/, 3 en los temas); el título del dato va un nivel más arriba.
  *  `titulo`: el nombre que se muestra (si no llega, el nombre público con la medida). `tituloRef`/`tituloId`: para enfocar el título. */
-export function FichaDato({ e, info, p, set, pd = null, nivel = 3, titulo, tituloRef, tituloId }: {
+export function FichaDato({ e, info, p, set, pd = null, nivel = 3, titulo, tituloRef, tituloId, onComoVerlo }: {
   e: Expr; info: InicioMandato; p: URLSearchParams; set: SetFn; pd?: string | null; nivel?: Nivel; titulo?: string; tituloRef?: Ref<HTMLHeadingElement>; tituloId?: string;
+  /** Si llega, la ficha muestra "Cómo verlo" (mensual, interanual, índice…) debajo de la cifra; al elegir llama con la variable con la otra medida y la página escribe su parámetro. */
+  onComoVerlo?: (x: Expr) => void;
 }) {
   const ids = useMemo(() => idsDe(e), [e]);
   const sec = useSeccion(ids);
@@ -72,19 +74,24 @@ export function FichaDato({ e, info, p, set, pd = null, nivel = 3, titulo, titul
       </div>
     );
   }
-  return <Ficha m={m} version={version} metas={metas} e={e} info={info} p={p} set={set} pd={pd} nivel={nivel} titulo={titulo} tituloRef={tituloRef} tituloId={tituloId} />;
+  return <Ficha m={m} version={version} metas={metas} e={e} info={info} p={p} set={set} pd={pd} nivel={nivel} titulo={titulo} tituloRef={tituloRef} tituloId={tituloId} onComoVerlo={onComoVerlo} />;
 }
 
-function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRef, tituloId }: {
+function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRef, tituloId, onComoVerlo }: {
   m: Motor; version: number; metas: SerieMeta[]; e: Expr; info: InicioMandato; p: URLSearchParams; set: SetFn; pd: string | null; nivel: Nivel;
-  titulo?: string; tituloRef?: Ref<HTMLHeadingElement>; tituloId?: string;
+  titulo?: string; tituloRef?: Ref<HTMLHeadingElement>; tituloId?: string; onComoVerlo?: (x: Expr) => void;
 }) {
+  const { config: cfg } = useConfig();
   const kE = `${e.id}~${e.med}~${e.rel}~${e.modo}~${e.esc}`;
   const S = useMemo(() => Object.fromEntries(metas.map((s) => [s.id, s])), [metas]);
   const c = m.calc(e);
   const nombre = titulo ?? tituloVariable(m, e, c);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const cab = useMemo(() => cabeceraFicha(m, e), [m, version, kE]);
+  const cab = useMemo(() => cabeceraFicha(m, e, cfg.desde), [m, version, kE, cfg.desde]);
+  // "Cómo verlo": las medidas con sentido de la variable (las mismas que ofrece Histórico); sin al menos dos, no hay control
+  const metaE = metas.find((x) => x.id === e.id);
+  const medE = e.med || (metaE ? m.medDefault(metaE) : "");
+  const comoVerlo = onComoVerlo && metaE && !e.rel ? opcionesComoVerlo(m, metaE, medE) : [];
   const inicio = paramsInicio(p);
   const b = info.b;
   const PRES = useMemo(() => crearPres(m.F), [m]);
@@ -103,9 +110,11 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
     <div className="fi">
       <CabeceraDato titulo={nombre} nivel={nivel === 2 ? 1 : 2} tituloRef={tituloRef} tituloId={tituloId}
         cifra={cab?.cifra ?? "–"} fecha={cab ? `${cab.fecha}${cab.ultimoDisponible ? " · Último dato disponible" : ""}` : ""}
-        deltas={cab?.deltas ?? []} secundarias={cab?.secundarias} frase={cab?.frase}
+        deltas={cab?.deltas ?? []} extras={cab?.extras} secundarias={cab?.secundarias} frase={cab?.frase}
         fuente={fuente} mesDato={cab?.fecha}
-        info={<>{c.serie.desc ? <p>{c.serie.desc}</p> : null}<p>Fuente: {fuente}.</p></>} />
+        info={<>{c.serie.desc ? <p>{c.serie.desc}</p> : null}<p>Fuente: {fuente}.</p></>}>
+        {comoVerlo.length > 0 && onComoVerlo && <ComoVerlo opciones={comoVerlo} valor={medE} onElegir={(v) => onComoVerlo({ ...e, med: v })} />}
+      </CabeceraDato>
       <CapViene m={m} e={e} nivel={nivel} set={set} V={V}
         compartir={<Compartir titulo={nombre} href={linkCompartir(e, hrefV, V.per ? { fper: V.per } : {})} texto={textoV}
           vista={() => ({ exprs: [e], modo: "valor", eje: "propia", desde: V.D.E.desde, hasta: V.D.E.hasta, meses: V.D.E.meses, freq: "M", ag: "promedio",

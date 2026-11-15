@@ -1,14 +1,16 @@
 "use client";
 // Compartir un link: menú del sistema si existe; si no, se copia al portapapeles.
 export type ResultadoCompartir = "compartido" | "copiado" | "cancelado" | "error";
-export async function compartir(url: string, titulo: string): Promise<ResultadoCompartir> {
+export async function compartir(url: string, titulo: string, armado = false): Promise<ResultadoCompartir> {
   const abs = new URL(url, window.location.origin).toString();
   if (typeof navigator.share === "function") {
-    try { await navigator.share({ title: titulo, url: abs }); return "compartido"; }
+    try { await navigator.share({ title: titulo, url: abs, ...(armado ? { text: TEXTO_ARMADO } : {}) }); return "compartido"; }
     catch (e) { if ((e as Error).name === "AbortError") return "cancelado"; /* si falla por otra razón, se intenta copiar */ }
   }
-  try { await navigator.clipboard.writeText(abs); return "copiado"; } catch { return "error"; }
+  try { await navigator.clipboard.writeText(armado ? `${TEXTO_ARMADO} ${abs}` : abs); return "copiado"; } catch { return "error"; }
 }
+/** R22: una vista armada a gusto (elegida por quien comparte) lo dice en el texto que se comparte o copia, junto al link. */
+export const TEXTO_ARMADO = "Armá el tuyo:";
 export const avisoCompartir = (r: ResultadoCompartir): string | null =>
   r === "copiado" ? "Link copiado" : r === "error" ? "No se pudo copiar el link" : null;
 
@@ -25,8 +27,8 @@ export const puedeCompartirArchivo = (f: File): boolean => typeof navigator.canS
 export const puedeCopiarImagen = (): boolean => typeof ClipboardItem !== "undefined" && !!navigator.clipboard?.write;
 
 export type ResultadoImagen = "compartida" | "copiada" | "descargada" | "cancelado" | "error";
-export async function compartirImagen(f: File, titulo: string, url: string): Promise<ResultadoImagen> {
-  try { await navigator.share({ files: [f], title: titulo, url: new URL(url, window.location.origin).toString() }); return "compartida"; }
+export async function compartirImagen(f: File, titulo: string, url: string, armado = false): Promise<ResultadoImagen> {
+  try { await navigator.share({ files: [f], title: titulo, url: new URL(url, window.location.origin).toString(), ...(armado ? { text: TEXTO_ARMADO } : {}) }); return "compartida"; }
   catch (e) { return (e as Error).name === "AbortError" ? "cancelado" : "error"; }
 }
 export async function copiarImagen(blob: Blob): Promise<ResultadoImagen> {

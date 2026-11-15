@@ -87,6 +87,33 @@ input[type=range].e1-rango-in {   /* pisa `input[type=range] { width: 220px }` d
 .bmes-guia-sel { stroke: var(--text-secondary); }
 .bmes-valor-top { font-size: 13px; }
 
+/* ---------- Tanda 9, A1 (R18): las comparaciones extra en la columna derecha de la cabecera del dato (ficha e Histórico).
+   Computadora: a la vista debajo de las dos variaciones, en dos columnas si entran. Celular: plegadas en "Más comparaciones", debajo de las variaciones. */
+.cabdato-extras { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--e-3) var(--e-5); min-width: 0; }
+.cabdato-extras .delta { font-size: var(--t-sm); white-space: normal; flex-wrap: wrap; row-gap: 0; }
+.cabdato-mas { margin: var(--e-1) 0 0; min-width: 0; }
+.cabdato-mas .plegable-interior { padding-top: var(--e-2); }
+@media (min-width: 900px) {
+  .cabdato-lado { justify-content: flex-start; }
+  .cabdato-deltas + .cabdato-extras { margin-top: var(--e-4); padding-top: var(--e-4); border-top: 1px solid var(--border); }
+}
+/* Tanda 9, V2: lo principal (título, cifra, fuente, frase) es lo más ancho; las comparaciones, secundarias: columna derecha de a lo sumo el 40 %,
+   extras en una sola columna y chicas. El título no parte palabras (baja de renglón entre palabras) y la cifra se achica antes de salirse. */
+.cabdato h1, .cabdato h2 { overflow-wrap: break-word; word-break: normal; hyphens: manual; text-wrap: balance; }
+@media (min-width: 900px) {
+  .cabdato, .hi-cab .cabdato { grid-template-columns: minmax(0, 1fr) minmax(14rem, 40%); }
+  .cabdato-izq { min-width: 0; }
+  .cabdato h1 { font-size: clamp(1.6rem, 2.7vw, 2.4rem); }
+  .cabdato-num { font-size: clamp(3.25rem, 5.4vw, 5.5rem); max-width: 100%; overflow-wrap: anywhere; }
+  .cabdato-lado { min-width: 0; padding-left: var(--e-4); }
+  .cabdato-deltas .delta { font-size: var(--t-sm); }
+  .cabdato-extras .delta { font-size: var(--t-xs, var(--t-sm)); }
+}
+
+/* ---------- Tanda 9, A5 (R20): la línea del cero con color propio (`--cero`, gris más fuerte que la grilla) en las barras de meses y en las barras por presidente */
+.bmes-cero.bmes-cero-marca { stroke: var(--cero, #8a93b8); stroke-width: 1.5; }
+.tmand2-riel::before { background: var(--cero, #8a93b8); width: 2px; margin-left: -1px; }
+
 /* ---------- Tanda 8, E1.4: "Cuenta desde …" bajo el período de un presidente al que se le cuenta otro inicio: ámbar con alerta (no el rojo de "peor") */
 .tmand-cuenta { display: inline-flex; align-items: flex-start; gap: 4px; margin-top: 2px; font-size: var(--v-rotulo, var(--t-xs)); line-height: 1.3; font-weight: 600; color: color-mix(in srgb, var(--accion) 62%, var(--text-primary)); }
 .tmand-cuenta svg { flex: none; margin-top: 1px; }

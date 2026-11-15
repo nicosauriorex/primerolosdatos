@@ -28,3 +28,34 @@
 .pres-barras-ref span::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: middle; background: var(--c); border-radius: 2px; }
 .pres-hm { text-align: right; font-variant-numeric: tabular-nums; }
 .pres-hm small { display: block; color: var(--text-muted); }
+
+/* ---- Tanda 9 (parte D) */
+/* Grilla: sin mapa de calor, el texto lleva el color (y el signo); con calor, el fondo y el texto normal */
+.gp-sin-calor .gp-bueno .gp-link { color: var(--bueno); }
+.gp-sin-calor .gp-malo .gp-link { color: var(--malo); }
+.gp-con-calor .gp-link { color: var(--text-primary); }
+/* Renglón de controles: la variable, el resumen como texto y un solo Ajustes */
+.pres-controles { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2) var(--e-3); margin: 0 0 var(--e-3); }
+.pres-controles > .pres-resumen { flex: 1 1 220px; min-width: 0; margin: 0; font-size: var(--t-sm); color: var(--text-secondary); overflow-wrap: anywhere; }
+.pres-controles > .vistabar-ajustes { margin-left: auto; }
+.pres-controles > .btn.drop { flex: 0 1 auto; min-width: 0; max-width: 100%; min-height: var(--alto-toque); }
+.pres-pil-var { display: inline-flex; min-width: 0; gap: .25em; overflow: hidden; white-space: nowrap; }
+.pres-pil-var > b { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pres-pil-var > span { flex: none; max-width: 60%; overflow: hidden; text-overflow: ellipsis; color: var(--text-secondary); font-weight: 400; }
+.pres-resumen-b { margin: calc(-1 * var(--e-2)) 0 var(--e-3); font-size: var(--t-sm); color: var(--text-secondary); overflow-wrap: anywhere; }
+.pres-busca { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); margin: 0 0 var(--e-3); }
+.pres-busca input[type="search"] { flex: 1 1 100%; min-width: 0; }
+.pres-busca .btn { margin-left: auto; min-height: var(--alto-toque); }
+.pres-aj-sec { display: flex; flex-direction: column; gap: var(--e-2); margin: 0 0 var(--e-4); min-width: 0; }
+.pres-aj-rot { font-size: var(--v-rotulo); font-weight: 600; color: var(--text-muted); }
+/* Meses de mandato: la variable y un solo Ajustes */
+.mand-barra.mand-barra-2 { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.mand-barra-2 + .pres-resumen, .pres-resumen-mand { margin: 0 0 var(--e-2); font-size: var(--t-sm); color: var(--text-secondary); }
+/* Meses de mandato: el dibujo avanza de forma continua (el recorte lo mueve Mandato.tsx) */
+.mand-lapiz { will-change: clip-path; }
+/* Contexto del mandato: el plegable usa el relleno de los del sistema */
+.pres-ctx .plegable-interior > * + * { margin-top: var(--e-2); }
+.pres-ctx ul { margin: 0; padding-left: var(--e-4); }
+.pres-ctx-resumen { font-weight: 700; }
+.pres-ctx-resumen .resumen { font-weight: 400; color: var(--text-secondary); }
+.pres-ctx-sub { color: var(--text-muted); }

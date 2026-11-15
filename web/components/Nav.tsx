@@ -10,6 +10,7 @@ import { BarraInferior, ITEMS_MENU } from "./sistema/BarraInferior";
 import { BuscadorGlobal } from "./sistema/BuscadorGlobal";
 import { Hoja } from "./sistema/Hoja";
 import { MenuMas } from "./sistema/MenuMas";
+import { IconoSeccion } from "./sistema/iconosTemas";
 import { ORGANISMOS } from "@/lib/fuentes";
 
 /** Subsecciones de Presidentes: [carpeta, ancla, nombre]. Las URLs son las de siempre. */
@@ -47,7 +48,7 @@ function LinksPresidentes({ carpeta, ancla, onIr }: { carpeta: string; ancla: st
     <>
       {SUBSECCIONES.map(([c, h, n]) => {
         const actual = carpeta === c;
-        return <Link key={c + h} prefetch={false} href={`/${c}/${h}`} aria-current={actual ? "page" : undefined} onClick={() => onIr(h)}>{n}</Link>;
+        return <Link key={c + h} prefetch={false} href={`/${c}/${h}`} aria-current={actual ? "page" : undefined} onClick={() => onIr(h)}><span className="nav-sec-ico"><IconoSeccion carpeta={c} /></span>{n}</Link>;
       })}
     </>
   );

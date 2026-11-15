@@ -11,7 +11,7 @@ import { FichaDato } from "../FichaDato";
 import { useBase } from "./comunes";
 import { PRES_DEF } from "@/lib/estadisticas";
 import { EXPR_DEFECTO } from "@/lib/ficha";
-import { decExpr, unoDe, useParams } from "@/lib/url";
+import { decExpr, encExpr, unoDe, useParams } from "@/lib/url";
 
 export function Dato({ fija }: { fija?: Expr } = {}) {
   const [p, set, montado] = useParams();
@@ -21,7 +21,8 @@ export function Dato({ fija }: { fija?: Expr } = {}) {
   const e = useMemo(() => {
     if (!listo || !montado || !metas.length) return null;
     const existe = (id: string) => metas.some((s) => s.id === id);
-    if (fija) return fija;
+    // En una página fija, `v` solo vale si es la misma serie con otra medida ("Cómo verlo"); si no, la variable de la página
+    if (fija) { const otra = decExpr(p.get("v"), existe); return otra && otra.id === fija.id ? otra : fija; }
     return decExpr(p.get("v"), existe) ?? (existe(EXPR_DEFECTO.id) ? EXPR_DEFECTO : { ...EXPR_DEFECTO, id: metas[0].id, med: undefined });
   }, [listo, montado, metas, p, fija]);
   const pd = unoDe(p.get("pd"), PRES_DEF.map((x) => x.id), "") || null;
@@ -31,7 +32,7 @@ export function Dato({ fija }: { fija?: Expr } = {}) {
   // El h1 es el título de la ficha (CabeceraDato): el nombre público con la medida ("Inflación (variación mensual)").
   return (
     <section>
-      <FichaDato e={e} info={info} p={p} set={set} pd={pd} nivel={2} />
+      <FichaDato e={e} info={info} p={p} set={set} pd={pd} nivel={2} onComoVerlo={(x) => set({ v: encExpr(x), fper: null })} />
     </section>
   );
 }
