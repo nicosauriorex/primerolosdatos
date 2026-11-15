@@ -8,6 +8,7 @@ Basado en la documentación oficial de Claude Code (code.claude.com/docs: best-p
 |---|---|---|
 | `CLAUDE.md` | Lo mínimo: comandos, trampas, convenciones | Siempre (por eso es corto) |
 | `docs/ESTADO.md` | Dónde estamos, qué sigue y qué quedó sin verificar | Al empezar cada sesión ("leé docs/ESTADO.md y seguí") |
+| `docs/HISTORIAL.md` | El detalle de cada tanda que salió de `ESTADO.md` | Solo cuando hace falta el detalle de algo viejo |
 | `.claude/rules/pipeline.md` | Reglas del Python | Solo al tocar `pipeline/` |
 | `.claude/rules/frontend.md` | Reglas del frontend y reglas de interfaz que salieron de tus pedidos | Solo al tocar `web/` |
 | `.claude/skills/spec` | `/spec <idea>`: te entrevista y escribe la spec | Cuando lo llamás |

@@ -27,7 +27,7 @@ Todo en español: código, comentarios, nombres de variables, commits y textos d
 - El formato de cada serie (`id, n, cat, tipo, u, dir...`) está documentado al principio de `pipeline/catalogo.py`.
 
 # Al empezar una sesión
-Leer `docs/ESTADO.md`: qué está hecho, qué sigue y qué quedó sin verificar. Actualizarlo al cerrar cada tanda de trabajo.
+Leer `docs/ESTADO.md`: qué está hecho, qué sigue y qué quedó sin verificar. Actualizarlo al cerrar cada tanda de trabajo, **sin pasar de ~1 página**: una línea por bloque con link a su spec; el detalle (verificación, revisor, medidas) va a la spec y lo viejo a `docs/HISTORIAL.md` (no se lee al empezar).
 
 # Cómo trabajamos
 - Features nuevas: primero spec en `docs/specs/<nombre>.md` (skill `/spec`), después implementar **en la misma sesión, orquestando subagentes** (cada subagente arranca limpio, solo con la spec y sus archivos). Sesión nueva solo si cambia el tema o la conversación ya es muy larga; antes de cerrarla, actualizar `docs/ESTADO.md`.
