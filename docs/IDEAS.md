@@ -96,3 +96,7 @@ Idea del usuario. Agregado el mismo día: ~~ver el presupuesto de cada entidad p
   - Los datos del BCRA diarios ya tienen fuente conocida; sumar compras de divisas y reservas como series nuevas (skill `nueva-serie`, agente `investigador-datos`) es el primer paso, y sirve también para el sitio.
   - Un bot que publica solo necesita un proceso programado (el workflow de GitHub Actions de actualización diaria podría disparar el post). Verlo con la spec `actualizacion-diaria`.
 - Las plantillas pueden ser la base de todo: la búsqueda guiada, la página de inicio y "otros gráficos interesantes" muestran plantillas.
+
+## Series de deuda y deuda consolidada (2026-11-15)
+→ spec: docs/specs/series-deuda.md
+- «no tenemos series para ver la evolución de las variables esas que están en herencia?» y «deuda consolidada»: la suma de los pasivos del Banco Central y los del Tesoro.

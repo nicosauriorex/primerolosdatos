@@ -71,6 +71,8 @@ const DEFS: Record<ClaveDiario, Def> = {
   depositos: { nombre: "Depósitos en los bancos", corto: "Depósitos", que: "Depósitos en pesos en efectivo en el sistema bancario", unidad: "billones de $", tipo: "nivel", dir: false, esc: 1e6, nf: nf2, dec: 2, pref: "$ ", suf: " billones", sinMaximo: true },
 };
 export const tipoDiario = (c: ClaveDiario): TipoDiario => DEFS[c].tipo;
+/** Nombre público de cada variable del parte, en el orden de la página (para el buscador). */
+export const nombresDiario = (): { clave: ClaveDiario; nombre: string }[] => CLAVES.map((c) => ({ clave: c, nombre: DEFS[c].nombre }));
 export const esClaveDiario = (s: string | null | undefined): s is ClaveDiario => !!s && (CLAVES as readonly string[]).includes(s);
 
 const signo = (d: number): string => (d > 0 ? "+" : d < 0 ? "−" : "");

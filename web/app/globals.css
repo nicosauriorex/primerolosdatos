@@ -2265,6 +2265,8 @@ a.zocalo:focus-visible { outline: var(--linea) solid var(--foco); outline-offset
 .her-controles { display: flex; flex-direction: column; gap: var(--e-3); margin: var(--e-4) 0 var(--e-5); min-width: 0; }
 .her-hoja-sec h3 { margin: 0 0 var(--e-2); font-size: var(--t-md); font-weight: 800; }
 .her-opc { display: flex; flex-wrap: wrap; gap: var(--e-2); }
+.her-var-grupo .plegable-interior { padding-block-start: var(--e-2); }
+.her-var-grupo-n { color: var(--text-secondary); font-weight: 400; margin-inline-start: var(--e-1); }
 .her-opc button { min-height: var(--toque); padding: var(--e-1) var(--e-3); border: 1px solid var(--border-fuerte); border-radius: var(--r-2); background: var(--surface-1);
   color: var(--text-primary); font: inherit; font-size: var(--t-sm); text-align: left; cursor: pointer; }
 .her-opc button:hover { border-color: var(--acento); }

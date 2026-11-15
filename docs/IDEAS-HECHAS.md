@@ -368,3 +368,7 @@ Crítica final de Impeccable: 26/40 (antes 21/40). El usuario eligió arreglar l
 
 ### Ajustes del Histórico (implementado 2026-11-09, spec ajustes-historico)
 - ~~Ventana "Configurar variable", referencias con hover, zoom que recalcula, precios corrientes neutros y franjas de presidentes con colores en la configuración global~~ ✅ 2026-11-09
+
+## ~~Ajustes pedidos al recorrer la página, tanda 10 (2026-11-15)~~ ✅ 2026-11-15
+→ spec: docs/specs/ajustes-tanda-10.md (bloque 5o).
+- ~~«hay datos que capaz están en herencia que no aparecen en la lupa. ponele deuda publica, deuda neta, etc.»~~ ✅ 2026-11-15 (deuda neta no existe en el sitio).

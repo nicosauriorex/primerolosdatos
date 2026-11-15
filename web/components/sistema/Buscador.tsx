@@ -14,7 +14,7 @@ import { crearPlantillas, evaluar, plantillaSuelta } from "@/lib/plantillas";
 import { TEMAS, idsDe } from "@/lib/temas";
 import { IconoBuscar, IconoCerrar } from "./iconos";
 
-const ETIQUETA_TIPO: Record<ResultadoBusqueda["tipo"], string> = { principal: "Dato", variable: "Variable", grafico: "Gráfico listo", seccion: "Sección" };
+const ETIQUETA_TIPO: Record<ResultadoBusqueda["tipo"], string> = { principal: "Dato", variable: "Variable", herencia: "Herencia", diario: "Diario", grafico: "Gráfico listo", seccion: "Sección" };
 
 /** Valor, fecha y minigráfico del primer resultado. La línea ocupa su lugar desde el principio para que nada salte. */
 function CifraViva({ r }: { r: ResultadoBusqueda }) {

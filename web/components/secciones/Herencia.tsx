@@ -2,10 +2,10 @@
 // Herencia (/herencia/, docs/specs/herencia.md): qué recibió cada presidente al asumir y qué entregó (o qué hay hoy), con valores, meses y fuente.
 // Los cálculos están en lib/herencia.ts y lib/herencia-informes.ts (datos de informes cargados a mano, fase 2); acá solo se dibuja. Estado en la URL: `p` (presidente), `vista` (uno / traspasos) y `v` (variable de "Todos los traspasos").
 import Link from "next/link";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSeccion } from "../useSeccion";
-import { Cargando, Modal } from "../ui";
+import { Cargando, Modal, Plegable } from "../ui";
 import { useHerenciaInformes, useReservasNetas } from "../useHerenciaInformes";
 import { BotonInfo } from "../Variables";
 import { PanelCompartir, type VistaCompartir } from "../PanelCompartir";
@@ -171,6 +171,19 @@ export function Herencia() {
   const [img, setImg] = useState<VistaCompartir | null>(null);
   const verCita: VerCita = (d, x) => { const c = cualRNPropia(d.clave); if (c) setVerRN(c); else setCita({ d, x }); };
   const PRES: Pres[] = useMemo(() => (m ? crearPres(m.F) : []), [m]);
+  const listo = !!m && montado && !sec.ocupado && !!inf.datos && rn !== undefined;
+  // Un link con ancla (por ejemplo desde el buscador: `#traspasos`) va al bloque una vez que llegaron los datos: antes los bloques no existen.
+  useEffect(() => {
+    const h = window.location.hash.slice(1);
+    if (!listo || !h) return;
+    let n = 0;
+    const t = window.setInterval(() => {   // el bloque puede tardar un poco más que los datos (la tabla se calcula después): hasta 3 s
+      const el = document.getElementById(h);
+      if (el) el.scrollIntoView();
+      if (el || ++n >= 30) window.clearInterval(t);
+    }, 100);
+    return () => window.clearInterval(t);
+  }, [listo]);
 
   if (sec.errorGeneral) return <p className="error" role="alert">{sec.errorGeneral}</p>;
   if (!m || !montado || sec.ocupado || !inf.datos || rn === undefined) return <Cargando />;
@@ -185,10 +198,17 @@ export function Herencia() {
   if (!tabla) return <Cargando />;
   const filasInf = filasInforme(datosInf, PRES, tabla.k).filter((f) => f.def.grupo !== "Estimaciones"), filasEst = filasEstimaciones(datosInf, rn, PRES, tabla.k);
   const faltan = FALTA_CARGAR.filter(([, , claves]) => !claves.every((c) => cargadas.has(c)));
-  const opcionesVar: [string, string][] = [
-    ...tabla.filas.map((f) => [f.def.clave, `${f.grupo}: ${f.nombre}`] as [string, string]),
-    ...FILAS_INFORME.filter((d) => cargadas.has(d.clave)).map((d) => [PREF_INF + d.clave, `${d.grupo}: ${d.nombre}${d.grupo === "Estimaciones" ? ` (${d.quien})` : " (informes)"}`] as [string, string]),
+  // Variables de "Todos los traspasos": [valor, nombre, grupo]. En Ajustes van agrupadas en plegables; el resumen usa "grupo: nombre".
+  const varsTraspaso: [string, string, string][] = [
+    ...tabla.filas.map((f) => [f.def.clave, f.nombre, f.grupo] as [string, string, string]),
+    ...FILAS_INFORME.filter((d) => cargadas.has(d.clave)).map((d) => {
+      // la aclaración de origen, salvo que el nombre ya la diga ("Deuda comercial de importadores (informes)", "Reservas netas según el FMI")
+      const extra = d.grupo === "Estimaciones" ? (d.quien && !d.nombre.includes(d.quien) ? ` (${d.quien})` : "") : d.nombre.includes("(informes)") ? "" : " (informes)";
+      return [PREF_INF + d.clave, d.nombre + extra, d.grupo] as [string, string, string];
+    }),
   ];
+  const opcionesVar: [string, string][] = varsTraspaso.map(([v, n, g]) => [v, `${g}: ${n}`]);
+  const gruposVar = [...new Set(varsTraspaso.map(([, , g]) => g))].map((g) => ({ g, ops: varsTraspaso.filter((x) => x[2] === g).map(([v, n]) => [v, n] as [string, string]) }));
   const enCurso = tabla.enCurso, finTxt = fmtMes(m.F[Math.min(pres.i1, m.F.length - 1)]);
   const colFin = enCurso ? "Hoy" : "Entregó";
   const query = p.toString(), hrefPag = `/herencia/${query ? "?" + query : ""}`;
@@ -251,7 +271,13 @@ export function Herencia() {
         ) : (
           <div className="her-hoja-sec">
             <h3>Variable</h3>
-            <Opciones etiqueta="Variable" valor={clave} opciones={opcionesVar} onElegir={(v) => { elegirVar(v); cerrar(); }} />
+            {/* agrupadas por tema, en plegables; abierto el grupo de la variable elegida */}
+            {gruposVar.map(({ g, ops }) => (
+              <Plegable key={g} className="her-var-grupo" inicial={ops.some(([v]) => v === clave)}
+                resumen={<>{g} <span className="her-var-grupo-n">{ops.length}</span></>}>
+                <Opciones etiqueta={g} valor={clave} opciones={ops} onElegir={(v) => { elegirVar(v); cerrar(); }} />
+              </Plegable>
+            ))}
           </div>
         )}
       </Hoja>
