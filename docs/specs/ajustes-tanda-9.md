@@ -1,6 +1,6 @@
 # Ajustes, tanda 9: cabecera del dato, ficha, Compartir, presidentes, herencia, Banco Central y menús
 
-Estado: implementada (2026-11-15), sin publicar
+Estado: implementada (2026-11-15), publicada en 82d40e5
 
 Pedidos del usuario al recorrer la página en la computadora (2026-11-15, 20 puntos, anotados en `docs/IDEAS.md`). Como siempre, cada pedido es un caso de una regla general: cada parte aplica las reglas en **todos** sus archivos y lo informa.
 
