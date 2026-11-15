@@ -1,6 +1,6 @@
 # Ajustes, tanda 11: Congreso en columnas con «leyes por apoyo», y resaltar un país en El mundo y la Argentina
 
-Estado: implementada (2026-11-15), sin publicar
+Estado: implementada (2026-11-15), publicada en 4c80be2 (corrida en verde)
 
 Pedido del usuario (2026-11-15):
 > «En Cada gobierno frente al Congreso cambia la forma de visualizar. que sea un gráfico de barras verticales con cada gobierno en el eje x y el % o el valor en el eje Y. y señala al que tuvo mayor apoyo y el que tuvo menos apoyo. y pone otro indicador de leyes por cantidad de diputados o algo asi. o sea que muestre que gobierno saco más leyes en base al apoyo que tenía.»
