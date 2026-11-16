@@ -16,11 +16,12 @@ paths:
 
 - **Las cuentas cierran**: una diferencia, variación o porcentaje se calcula con los valores redondeados que se muestran (1,9 y 2,1 → 0,2). Nunca "-0,0".
 - **Nada tapa un dato**: botones flotantes, etiquetas y encabezados fijos no se superponen a puntos, valores ni ítems de una lista.
-- **Toda ventana, panel o desplegable** tiene una cruz de 44 px, se cierra con el botón Atrás del celular (sin salir de la página) y Escape cierra solo la capa de arriba.
+- **Toda ventana, panel o desplegable** tiene una cruz de 44 px, se cierra con el botón Atrás del celular (sin salir de la página) y Escape cierra solo la capa de arriba. El título visible de una ventana va en el renglón de la cruz (`Modal` con `cabecera`), no debajo.
 - **Ningún texto se sale de su contenedor** a 360 px: baja de renglón o se corta con puntos suspensivos. La página nunca se desliza de costado; el deslizamiento horizontal ocurre dentro de la tabla o del renglón.
 - **Lo que se mueve solo** espera a estar en pantalla y quieto, se pausa al tocarlo y respeta "reducir movimiento".
 - **Acciones alineadas**: en una lista de filas, el mismo botón queda en la misma columna.
 - **Una sola vez cada cosa**: sin enlaces, títulos ni filas repetidos en la misma pantalla.
+- **Toda forma de ver un dato se alcanza desde el dato** (R28): moneda y escala, una al lado de la otra y con el mismo desplegable (`FormasDeVer`).
 - **El dato antes que la configuración**: el gráfico o la tabla se ve sin deslizar; los controles van en botones o plegados; las explicaciones largas, plegadas o detrás de un ícono de información.
 - **Lo que se ve se puede compartir**, en la forma en que se ve (gráfico, tabla, velas).
 - **Palabras del público**: nombres de `web/lib/nombres.ts`; sin siglas ni jerga a secas. En las imágenes compartibles, palabras neutras (nunca "bueno", "malo", "mejor", "peor") y sin veredicto (D-012).

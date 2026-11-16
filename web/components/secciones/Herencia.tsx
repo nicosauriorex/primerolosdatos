@@ -41,8 +41,7 @@ function CeldaDato({ p, motivo, rotulo }: { p: Punto | null; motivo: string; rot
 type VerCita = (d: DefInforme, x: DatoInforme) => void;
 function VentanaCita({ d, x, onCerrar }: { d: DefInforme; x: DatoInforme; onCerrar: () => void }) {
   return (
-    <Modal titulo={`De dónde sale: ${d.nombre}`} onCerrar={onCerrar}>
-      <h3 className="her-cita-t">{d.nombre}</h3>
+    <Modal titulo={`De dónde sale: ${d.nombre}`} cabecera={d.nombre} onCerrar={onCerrar}>
       <p className="note">{typeof x.valor === "number" ? `${puntoInforme(d, x).txt} ${d.unidad}` : x.valor}, al {x.fecha_dato.split("-").reverse().join("/")}.</p>
       <dl className="her-cita">
         <dt>Organismo</dt><dd>{x.organismo}</dd>
@@ -73,8 +72,7 @@ function VentanaEstimacion({ rn, cual, onCerrar }: { rn: ReservasNetas; cual: De
     ? (rn.controles_bcra ?? []).map((c) => ({ fecha: c.fecha, propia: c.propia, oficial: c.bcra, dif: c.dif, url: c.url }))
     : rn.controles.map((c) => ({ fecha: c.fecha, propia: c.propia, oficial: c.fmi, dif: c.dif, url: c.url }));
   return (
-    <Modal titulo={`Cómo se calcula: ${D.nombre}`} onCerrar={onCerrar}>
-      <h3 className="her-cita-t">{D.nombre}</h3>
+    <Modal titulo={`Cómo se calcula: ${D.nombre}`} cabecera={D.nombre} onCerrar={onCerrar}>
       <p className="note">Estimación de Primero los Datos, no un dato oficial: la cuenta {bcra ? "con la definición del Banco Central" : "del FMI"} hecha con lo que el Banco Central publica cada día. Al {fechaTxt(u.fecha)}, en millones de US$:</p>
       <dl className="her-cita">
         <dt>Reservas brutas</dt><dd>{fmtUS(u.brutas)} (Banco Central, variable 1)</dd>

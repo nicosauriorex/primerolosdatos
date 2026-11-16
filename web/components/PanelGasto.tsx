@@ -41,9 +41,8 @@ export function PanelGasto({ armar, titulo, href, onCerrar }: { armar: (formato:
   const puedeCompartir = !!archivo && puedeCompartirArchivo(archivo);
 
   return (
-    <Modal titulo="Compartir como imagen" onCerrar={onCerrar} ancho>
+    <Modal titulo="Compartir como imagen" cabecera="Compartir como imagen" onCerrar={onCerrar} ancho>
       <div className="comp-cuerpo">
-        <h2>Compartir como imagen</h2>
         <div className={`comp-previa${estado === "listo" && archivo ? " ampliable" : ""}`} ref={previa}
           {...(estado === "listo" && archivo ? {
             role: "button", tabIndex: 0, "aria-label": "Ver la vista previa a pantalla completa", title: "Tocá para ver la imagen entera",

@@ -219,6 +219,8 @@ input::placeholder { color: var(--text-muted); opacity: 1; }
 .punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
 .fila-var { display: flex; gap: 6px var(--e-2); align-items: center; flex-wrap: wrap; padding: var(--e-2) 10px; border: 1px solid var(--border);
   border-radius: var(--r-2); background: var(--surface-1); margin-bottom: var(--e-2); }
+/* El punto de color y el nombre van siempre juntos: el nombre se achica (con …) en vez de bajar solo de renglón (tanda 12) */
+.fila-var > .punto + .btn.var { flex: 1 1 10rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
 input[type=range] { accent-color: var(--acento); width: 220px; max-width: 100%; }
 input[type=radio], input[type=checkbox] { accent-color: var(--acento); }
 
@@ -346,7 +348,6 @@ td.unidad { color: var(--text-muted); text-align: left; font-size: var(--t-xs); 
 .info-cat ul { margin: 6px 0; padding-left: 18px; } .info-cat li { display: flex; align-items: center; margin-bottom: var(--e-1); }
 .tiene-info { color: var(--text-muted); font-weight: 400; font-size: var(--t-xs); }
 .info-cuerpo { padding: var(--e-4) 18px; overflow: auto; }
-.info-cuerpo h2 { margin: 0 0 2px; font-size: var(--t-lg); font-weight: 800; }
 .info-cuerpo details { margin: 10px 0 0; padding: 0; }
 table.ficha { width: auto; margin: var(--e-2) 0; } table.ficha td { text-align: left; white-space: normal; vertical-align: top; }
 table.ficha td:first-child { color: var(--text-muted); padding-right: var(--e-4); }
@@ -562,11 +563,7 @@ th small { display: block; font-size: var(--t-micro); font-weight: 400; color: v
 @media (min-width: 641px) { .barra-hist .desplegable { flex: 0 1 460px; } }
 
 /* Medida en pasos (FilaVariable) */
-.fila-var .med-desp { display: inline-block; }
-.fila-var .med-desp .panel { width: min(520px, calc(100vw - 52px)); }
-.fila-var .med-desp .seg + .seg { margin-top: var(--e-2); }
 .seg button.tenue { color: var(--text-muted); }
-@media (max-width: 640px) { .fila-var .med-desp { display: block; width: 100%; } .fila-var .med-desp .panel { width: 100%; } }
 /* Explicación corta y variable recomendada en el selector de variables */
 .info-cat .plegado { max-height: calc(1.45em * 2); overflow: hidden; }
 .intro-cat p { margin: 0 0 6px; }
@@ -582,7 +579,10 @@ th small { display: block; font-size: var(--t-micro); font-weight: 400; color: v
 .modal { position: relative; }
 .modal[tabindex="-1"]:focus { outline: none; }   /* R12: en táctil el foco inicial va a la ventana, sin recuadro */
 /* Cabecera fija de la ventana (tanda 8, A1): la cruz vive en su propia franja arriba y la zona que se desliza empieza debajo: la barra de desplazamiento nunca pasa por la cruz. */
-.modal-cab { flex: none; display: flex; justify-content: flex-end; height: var(--toque); }
+.modal-cab { flex: none; display: flex; justify-content: flex-end; align-items: center; min-height: var(--toque); }
+/* Con título (prop `cabecera` de Modal): el título va en el renglón de la cruz, centrado con ella; si es largo baja de renglón sin pisar la cruz. */
+.modal-cab.con-tit { justify-content: space-between; }
+.modal-tit { flex: 1 1 auto; min-width: 0; margin: 0; padding: var(--e-1) var(--e-2) var(--e-1) var(--e-4); font-size: var(--t-lg); font-weight: 800; line-height: 1.25; overflow-wrap: anywhere; }
 .modal-cruz { position: static; flex: none; }
 .panel-cruz { display: flex; justify-content: flex-end; margin: calc(-1 * var(--e-2)) calc(-1 * var(--e-2)) calc(-1 * var(--e-2)) 0; }
 
@@ -601,7 +601,6 @@ th small { display: block; font-size: var(--t-micro); font-weight: 400; color: v
 
 /* Configuración global */
 .config-cuerpo { padding: 14px var(--e-4); overflow: auto; }
-.config-cuerpo h2 { margin: 0 0 var(--e-2); font-size: var(--t-lg); font-weight: 800; }
 .config-cuerpo h3 { margin: var(--e-4) 0 6px; font-size: var(--t-base); }
 .config-cuerpo .controls label { min-width: 120px; }
 .cfg-pres { max-height: 240px; overflow: auto; padding-right: var(--e-1); }
@@ -692,13 +691,11 @@ th small { display: block; font-size: var(--t-micro); font-weight: 400; color: v
 .modal .seg, .desplegable .panel .seg { max-width: 100%; }
 .modal .controls, .modal .acciones-vista { min-width: 0; }
 .modal .config-cuerpo, .vp-cuerpo { overflow-x: hidden; overflow-y: auto; }
-.vp-cab h2 { margin: 0; font-size: var(--t-lg); font-weight: 800; }
 .cab-graf .btn { padding-inline: var(--e-2); }
 
 /* Panel de compartir como imagen */
 /* grid-auto-rows: max-content: al abrir las opciones las filas no se comprimen (la vista previa conserva su alto y la imagen no se sale de su recuadro) */
 .comp-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; gap: var(--e-3); padding: var(--e-4); overflow-y: auto; overflow-x: hidden; }
-.comp-cuerpo h2 { margin: 0; font-size: var(--t-lg); }
 .comp-previa { position: relative; display: flex; justify-content: center; align-items: center; height: min(46vh, 520px); background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }   /* alto fijo: la imagen (cuadrada, vertical u horizontal) se acomoda adentro y nunca se sale */
 .comp-previa canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; }
 .comp-previa.ampliable { cursor: zoom-in; }
@@ -1076,7 +1073,6 @@ tr.nota-grupo td { background: var(--surface-0); color: var(--text-secondary); t
 
 /* Gráfico grande */
 .parte-modal { display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; gap: var(--e-3); padding: var(--e-4); overflow-y: auto; overflow-x: hidden; min-width: 0; }
-.parte-modal h2 { margin: 0; font-size: var(--t-lg); font-weight: 800; }
 .parte-modal .note { margin: 0; }
 .parte-modal .seg button { min-height: var(--alto-toque); padding: 0 var(--e-3); }
 .parte-graf { width: 100%; min-width: 0; }
@@ -1160,7 +1156,6 @@ tr.nota-grupo td { background: var(--surface-0); color: var(--text-secondary); t
 /* datos de informes (fase 2): el valor es un botón que abre la cita; subrayado punteado para que se vea que se toca */
 .her-inf { all: unset; box-sizing: border-box; display: inline-flex; flex-direction: column; align-items: flex-end; min-height: var(--alto-toque); justify-content: center; cursor: pointer; text-align: right; text-decoration: underline dotted; text-underline-offset: 3px; color: inherit; max-width: 16ch; white-space: normal; }
 .her-inf small { text-decoration: none; }
-.her-cita-t { margin: 0 var(--e-6) var(--e-2) 0; }
 h4.her-cita-t { margin: var(--e-4) 0 var(--e-1); font-size: var(--t-md); }
 /* bloque de estimaciones (fase 3): separado de la tabla de datos oficiales por una línea */
 .her-est { margin-top: var(--e-5); padding-top: var(--e-3); border-top: var(--linea) solid var(--border-fuerte); }
@@ -1251,7 +1246,6 @@ h4.her-cita-t { margin: var(--e-4) 0 var(--e-1); font-size: var(--t-md); }
 .prov .seg button { min-height: var(--alto-toque); padding: 0 var(--e-3); }
 
 .prov-masa { max-width: 80ch; margin: 0 0 var(--e-3); }
-.prov-detalle h2, .prov-agregado h2 { overflow-wrap: anywhere; }
 
 .prov-sin td.prov-nombre { text-align: left; white-space: normal; min-width: 150px; max-width: 220px; padding: 0; }
 .prov-sin td.prov-nombre { padding: 6px var(--e-2); }
@@ -2408,7 +2402,6 @@ button.info-btn { background: none; padding: 0; }
 .hoja .seg button, .modal .seg button { white-space: normal; text-align: center; }
 /* Ventana "Configurar" global (R1, R4): grupos con título chico, filas con el rótulo en una columna fija desde 600 px, mismo espacio entre filas (--e-4) y grupos (--e-5), sin cajas */
 .cfgg-cuerpo { padding: var(--e-4); }
-.config-cuerpo.cfgg-cuerpo h2 { margin: 0 0 var(--e-4); }
 .cfgg-grupo { display: flex; flex-direction: column; gap: var(--e-4); min-width: 0; margin: 0 0 var(--e-5); }
 .cfgg-grupo:last-child { margin-bottom: 0; }
 .config-cuerpo.cfgg-cuerpo .cfgg-titulo { margin: 0; padding-bottom: var(--e-2); border-bottom: 1px solid var(--border); font-size: var(--t-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }

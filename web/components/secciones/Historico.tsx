@@ -11,7 +11,7 @@ import { IconoBuscar } from "../sistema/iconos";
 import { BarraVista } from "../sistema/BarraVista";
 import { Hoja, type CerrarHoja } from "../sistema/Hoja";
 import type { DeltaProps } from "../sistema/Delta";
-import { FilaVariable, Picker, RenglonVariable } from "../Variables";
+import { FilaVariable, Picker } from "../Variables";
 import { Grafico, hayDatos, type Fila, type Marca, type OpcionesG, type Ref, type SerieG, type TipoRef } from "../Grafico";
 import { PALETA, vcolor } from "../util";
 import { fmtMes, MESES, nf0, nf1, ok, redondeadoComo, restaLimpia } from "@/lib/formato";
@@ -50,8 +50,8 @@ interface Simple {
   acciones: (cerrarAntes: CerrarAntes) => ReactNode; agregar: (cerrarAntes: CerrarAntes) => ReactNode;   // los que cambian de pantalla o de vista cierran antes la ventana (D-016)
   alFabrica?: () => void;         // "Volver a lo de fábrica": solo si la vista cambió respecto de la de fábrica
 }
-/** Lo que agrega `BloqueGrafico` a la vista simple: las variables de la hoja (con una sola, la sección "Variable" no está: solo "Más variables"). */
-type SimpleCompleto = Simple & { variables: ReactNode; masVariables: ReactNode; unaSola: boolean; cambiar: (x: Expr) => void };
+/** Lo que agrega `BloqueGrafico` a la vista simple: las variables de la hoja (sección «Variables», con una o con varias) y si hay una sola. */
+type SimpleCompleto = Simple & { variables: ReactNode; unaSola: boolean; cambiar: (x: Expr) => void };
 
 export function Historico() {
   const [p, set, montado] = useParams();
@@ -220,7 +220,8 @@ function BloqueGrafico({ i, total, compacto, g, E, m, set, version, onQuitar, on
   const vars = (
     <div className="vars-graf">
       {usadas.map((e, k) => (
-        <RenglonVariable key={k} e={e} color={PALETA[k]} quitable={b100 ? g.exprs.length > 1 : k >= 1} onChange={(x) => setExpr(k, x)} />
+        // en línea (tanda 12): el nombre cambia el dato; moneda, escala y «en términos de» se eligen ahí mismo
+        <FilaVariable key={k} e={e} color={PALETA[k]} quitable={b100 ? g.exprs.length > 1 : k >= 1} onChange={(x) => setExpr(k, x)} />
       ))}
       {!b100 && usadas.length < 2 && <FilaVariable e={null} agregable onChange={(x) => x && guardarExprs([...base, x])} />}
       {!b100 && mismaU && usadas.length < MAX_MISMA_UNIDAD && (
@@ -232,19 +233,12 @@ function BloqueGrafico({ i, total, compacto, g, E, m, set, version, onQuitar, on
       {aviso && <p className="note" role="status">Con unidades distintas entran 2 variables.</p>}
     </div>
   );
-  // Con una sola variable, la hoja de ajustes no la lista (afecta a toda la página): solo ofrece sumar otra
+  // Con una sola variable, «Cambiar dato» muestra el dato actual primero (su ventana «Cómo verlo»)
   const unaSola = base.length === 1;
-  const masVariables = (
-    <div className="vars-graf">
-      {b100
-        ? g.exprs.length < 10 && <FilaVariable e={null} agregable textoAgregar={`+ Agregar variable (${g.exprs.length} de 10)`} onChange={(x) => x && guardarExprs([...g.todas, x])} />
-        : <FilaVariable e={null} agregable textoAgregar="+ Agregar una segunda variable" onChange={(x) => x && guardarExprs([...base, x])} />}
-    </div>
-  );
   const falla = hayError && !sec.ocupado ? <p className="error">Las variables elegidas no se pudieron cargar. Probá otra o recargá la página.</p> : <Cargando />;
   if (simple) {
     return disp.length > 0
-      ? <Principal m={m} E={Ed} set={setG} version={version} compacto={false} simple={{ ...simple, variables: vars, masVariables, unaSola, cambiar: (x) => guardarExprs([x, ...base.slice(1)]) }} />
+      ? <Principal m={m} E={Ed} set={setG} version={version} compacto={false} simple={{ ...simple, variables: vars, unaSola, cambiar: (x) => guardarExprs([x, ...base.slice(1)]) }} />
       : <div className={clase}>{vars}{falla}</div>;
   }
   return (
@@ -360,11 +354,10 @@ function ContenidoPers({ simple, opciones, tituloOpciones, abrir, cerrar }: {
   simple: SimpleCompleto; opciones: ReactNode; tituloOpciones: string; abrir: SecPers; cerrar: CerrarHoja;
 }) {
   const alIr: CerrarAntes = (luego) => cerrar(luego);
+  // Una sola sección «Variables» (tanda 12): el dato actual con todas sus formas de verlo y, debajo, sumar otra variable u otro gráfico
   return (
     <div className="hi-pers">
-      {simple.unaSola
-        ? <SeccionPers titulo="Más variables" abiertaInicial={abrir === "variable"}>{simple.masVariables}{simple.agregar(alIr)}</SeccionPers>
-        : <SeccionPers titulo="Variables" abiertaInicial={abrir === "variable"}>{simple.variables}{simple.agregar(alIr)}</SeccionPers>}
+      <SeccionPers titulo="Variables" abiertaInicial={abrir === "variable"}>{simple.variables}{simple.agregar(alIr)}</SeccionPers>
       <SeccionPers titulo={tituloOpciones} abiertaInicial={abrir === "opciones"}>{opciones}</SeccionPers>
       <SeccionPers titulo="Guardar y gráficos listos">{simple.acciones(alIr)}</SeccionPers>
     </div>
@@ -669,6 +662,7 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
         {cambiando && (
           <Picker onCerrar={() => setCambiando(false)} pedido={{
             titulo: "Buscá o navegá",
+            actual: simple.unaSola ? { e: E.exprs[0], onChange: simple.cambiar } : undefined,
             cb: (id, med, esc) => {
               const e0 = E.exprs[0], A = metas.find((x) => x.id === id);
               if (!A) return;

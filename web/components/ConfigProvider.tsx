@@ -121,9 +121,8 @@ function Panel({ onCerrar, guardado }: { onCerrar: () => void; guardado: boolean
     cambiar({ t0p });
   };
   return (
-    <Modal titulo="Configuración" onCerrar={onCerrar}>
+    <Modal titulo="Configuración" cabecera="Configuración" onCerrar={onCerrar}>
       <div className="config-cuerpo cfgg-cuerpo">
-        <h2>Configuración</h2>
         {!guardado && <p className="error" role="alert">No se pudo guardar en este navegador: se va a perder al cerrar.</p>}
         <Grupo titulo="Apariencia">
           <Fila rotulo="Tema"><Opciones etiqueta="Tema" valor={c.tema} opciones={TEMAS} onElegir={(tema) => cambiar({ tema })} /></Fila>

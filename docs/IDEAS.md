@@ -97,3 +97,6 @@ Idea del usuario. Agregado el mismo día: ~~ver el presupuesto de cada entidad p
   - Un bot que publica solo necesita un proceso programado (el workflow de GitHub Actions de actualización diaria podría disparar el post). Verlo con la spec `actualizacion-diaria`.
 - Las plantillas pueden ser la base de todo: la búsqueda guiada, la página de inicio y "otros gráficos interesantes" muestran plantillas.
 
+## Deuda en dólares a otra cotización (2026-11-15)
+- «o si la quiero ver en otra moneda al dolar CCL» y «no sería en dolares blue?»: la deuda ya está en dólares (Finanzas pasa los pesos al oficial de fin de mes), así que «al CCL» solo cambia la parte en pesos. Versión con sentido: deuda en moneda extranjera + deuda en pesos y pasivos del Banco Central pasados a dólares al CCL/MEP/blue (para la consolidada: `deuda_ac_me + deuda_ac_mn × oficial / CCL − letras + pasivos / CCL`). Sin decidir: lo pide el usuario si lo quiere.
+

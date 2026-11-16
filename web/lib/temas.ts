@@ -71,6 +71,8 @@ export const TEMAS: Tema[] = [
       { id: "dg_379_9_superavit_017_23_94", nombre: "Resultado fiscal primario (% del PIB)", corto: "el resultado primario", esc: "pib" },
       { id: "dg_379_9_resultado_017_18_38", nombre: "Resultado fiscal financiero (% del PIB)", corto: "el resultado financiero", esc: "pib" },
       { id: "deuda_ac_total", nombre: "Deuda pública bruta (% del PIB)", corto: "la deuda pública", esc: "pib" },
+      { id: "deuda_consolidada", nombre: "Deuda consolidada del Tesoro y el Banco Central (% del PIB)", corto: "la deuda consolidada", esc: "pib" },
+      { id: "bcra_cuasifiscal", nombre: "Déficit cuasifiscal del Banco Central (% del PIB)", corto: "el déficit cuasifiscal", esc: "pib" },
     ], grupos: ["Fiscal"], q: "fiscal", desc: "Resultado primario y financiero del sector público nacional, ingresos, gastos y deuda." },
   { slug: "finanzas", nombre: "Dinero, tasas y mercados", cats: ["Dinero y bancos (BCRA)", "Tasas de interés", "Mercados"],
     corto: "Reservas, tasas de interés y riesgo país: cómo están el dinero y los mercados.", largo: largoDe("Dinero y bancos (BCRA)", "Tasas de interés", "Mercados"),

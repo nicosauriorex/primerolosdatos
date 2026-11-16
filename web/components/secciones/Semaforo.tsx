@@ -175,9 +175,8 @@ function VentanaFila({ ind, onCerrar }: { ind: Indicador; onCerrar: () => void }
     return { med, texto: !admiteMedida(ind, med) ? "solo interanual" : m == null || v == null ? "sin dato" : `${txtVariacion(v)} % en ${txtMes(m)}` };
   });
   return (
-    <Modal titulo={ind.nombre} onCerrar={onCerrar} ancho>
+    <Modal titulo={ind.nombre} cabecera={ind.nombre} onCerrar={onCerrar} ancho>
       <div className="parte-modal">
-        <h2>{ind.nombre}</h2>
         <p className="note">{ind.fuente}. {ind.unidad}. Datos mensuales, últimos 5 años.</p>
         <GraficoSemaforo ind={ind} />
         <dl className="parte-extremos">

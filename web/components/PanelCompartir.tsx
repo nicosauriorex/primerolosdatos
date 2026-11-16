@@ -40,9 +40,8 @@ function ElegirTabla({ vista, href, titulo, onCerrar, onGrafico }: Props & { onG
     setAviso(avisoTabla(await copiarTexto(texto)));
   };
   return (
-    <Modal titulo="Compartir la tabla" onCerrar={onCerrar}>
+    <Modal titulo="Compartir la tabla" cabecera={`Compartir ${titulo}`} onCerrar={onCerrar}>
       <div className="comp-cuerpo comp-elegir">
-        <h2>Compartir {titulo}</h2>
         <p className="note" style={{ margin: 0 }}>Estás viendo la tabla. Elegí qué querés compartir.</p>
         <div className="comp-elegir-botones">
           <button type="button" className="btn primario" disabled={!cargado || !motor} onClick={copiar}>Copiar la tabla</button>
@@ -139,9 +138,8 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
   const puedeCompartir = !!archivo && puedeCompartirArchivo(archivo);
 
   return (
-    <Modal titulo="Compartir como imagen" onCerrar={onCerrar} ancho>
+    <Modal titulo="Compartir como imagen" cabecera="Compartir como imagen" onCerrar={onCerrar} ancho>
       <div className="comp-cuerpo">
-        <h2>Compartir como imagen</h2>
         <div className={`comp-previa${estado === "listo" && archivo ? " ampliable" : ""}`} ref={previa}
           {...(estado === "listo" && archivo ? {
             role: "button", tabIndex: 0, "aria-label": "Ver la vista previa a pantalla completa", title: "Tocá para ver la imagen entera",

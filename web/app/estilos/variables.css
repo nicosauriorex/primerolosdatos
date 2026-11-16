@@ -42,7 +42,8 @@ li.e1-serie > button.info-btn { margin: 0 -8px 0 0; }
 /* ---- Información de la variable (reemplaza `.modal li button` sobre la cruz y la tabla apretada de `table.ficha`).
    La ventana ahora se dibuja en <body> (BotonInfo); estas reglas quedan por si se abre anidada. */
 .modal .modal .modal-cruz, .modal li .modal-cruz { position: absolute; top: 0; right: 0; width: 44px; height: 44px; padding: 0; flex: none; }
-.modal .modal .modal-cruz svg, .modal li .modal-cruz svg { width: 20px; height: 20px; }
+.modal .modal .modal-tit, .modal li .modal-tit { padding-right: calc(var(--toque) + var(--e-2)); }   /* ventana dentro de ventana: la cruz va absoluta, el título le deja su lugar */
+.modal .modal .modal-cruz svg,.modal li .modal-cruz svg { width: 20px; height: 20px; }
 .modal table.ficha td:first-child { white-space: nowrap; min-width: 9em; overflow-wrap: normal; }
 .modal table.ficha td:last-child { overflow-wrap: anywhere; }
 @media (max-width: 520px) {
@@ -102,7 +103,6 @@ li.e1-serie > button.info-btn { margin: 0 -8px 0 0; }
 
 /* ---- Configurar variable: grupos con título chico, filas alineadas (R4), pie con línea arriba (R3). Reemplaza `.grupo-cfg`, `.grupo-cuerpo` y `.config-cuerpo h3` de globals.css. */
 .config-cuerpo .grupo-cfg { border-top: 0; padding: 0; margin-top: var(--e-4); display: block; }
-.config-cuerpo h2 + .grupo-cfg { margin-top: var(--e-4); }
 .config-cuerpo .grupo-cfg h3 { margin: 0 0 var(--e-2); font-size: var(--t-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
 .config-cuerpo .grupo-cuerpo { display: flex; flex-direction: column; align-items: flex-start; gap: var(--e-2); min-width: 0; }
 .config-cuerpo .grupo-cuerpo > * { max-width: 100%; }
@@ -120,3 +120,11 @@ li.e1-serie > button.info-btn { margin: 0 -8px 0 0; }
 
 /* Íconos del selector: la regla global `svg { width: 100% }` los estiraba (carpeta gigante) */
 .vr-ico { flex: none; width: 18px; height: 18px; }
+
+/* ---- Formas de ver el dato (R28, tanda 12): «Cómo ver el dato» de Ajustes y la ventana «Cómo verlo» del dato actual en el elegidor.
+   Moneda y escala una al lado de la otra, con el mismo desplegable (`Selector`); bajan de renglón si no entran. */
+.formas-ver { display: flex; flex-wrap: wrap; align-items: center; gap: 6px var(--e-2); min-width: 0; max-width: 100%; }
+.formas-ver .sel, .formas-ver .btn.var { max-width: 100%; min-width: 0; }
+.formas-ver-cuerpo { padding: 0 14px 14px; min-width: 0; }
+/* El renglón del dato actual en el elegidor: a la derecha, «Cómo verlo ›» en lugar de la insignia */
+.pk-actual-ver { display: inline-flex; align-items: center; gap: 4px; flex: none; font-size: var(--t-sm); color: var(--acento-texto); white-space: nowrap; }

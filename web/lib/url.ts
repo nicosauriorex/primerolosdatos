@@ -34,6 +34,10 @@ export const enteroEn = (s: string | null | undefined, min: number, max: number,
 export const unoDe = <T extends string>(s: string | null | undefined, validos: readonly T[], def: T): T =>
   s != null && (validos as readonly string[]).includes(s) ? (s as T) : def;   // sin el parámetro, siempre `def` (antes devolvía null si "" era válido)
 
+/** Marca en `window` mientras se procesa un Atrás que cierra una capa (la pone `instalarAtras` en components/ui.tsx). */
+export const CIERRA_CAPA = "__pldCierraCapa";
+/** Función en `window` que dice cuántas capas hay abiertas o por cerrar (la publica `instalarAtras`). */
+export const CAPAS_ABIERTAS = "__pldCapasAbiertas";
 const EVENTO_PUSH = "pd-pushstate";
 /** Avisa (una sola vez por página) cada vez que alguien hace `history.pushState`, como hace el `Link` de Next al navegar. */
 function ponerEscuchaPush() {
@@ -65,12 +69,26 @@ export function useParams(): [URLSearchParams, (cambios: Record<string, string |
       actual.current = np; setParams(np);
       if (nuevo) window.scrollTo(0, 0);
     };
-    const alPush = () => releer(true), alPop = () => releer(false);
+    // Al cerrar una ventana (un Atrás que consume una capa, ver `instalarAtras` en components/ui.tsx) la URL de la entrada de abajo
+    // puede ser la de antes: mandan los filtros que tiene la página, que se vuelven a escribir. Un Atrás de verdad (sin capas) relee.
+    const reescribir = () => {
+      if (window.location.pathname !== ruta) return;
+      const q = actual.current.toString();
+      if (window.location.search.replace(/^\?/, "") !== q) window.history.replaceState(null, "", window.location.pathname + (q ? "?" + q : "") + window.location.hash);
+    };
+    // ¿Este Atrás cierra una capa? Si el `popstate` de ui.tsx ya corrió, dejó la marca `CIERRA_CAPA`; si todavía no, la capa
+    // sigue contada en `CAPAS_ABIERTAS`.
+    const cierraCapa = () => {
+      const w = window as unknown as Record<string, unknown>;
+      const capas = w[CAPAS_ABIERTAS] as (() => number) | undefined;
+      return !!w[CIERRA_CAPA] || (!!capas && capas() > 0);
+    };
+    const alPush = () => releer(true), alPop = () => (cierraCapa() ? reescribir() : releer(false));
     ponerEscuchaPush();
     window.addEventListener(EVENTO_PUSH, alPush);
     window.addEventListener("popstate", alPop);
-    window.addEventListener("pld-releer-url", alPop);   // EVENTO_RELEER de ui.tsx: al cerrar una capa, la URL repuesta
-    return () => { window.removeEventListener(EVENTO_PUSH, alPush); window.removeEventListener("popstate", alPop); window.removeEventListener("pld-releer-url", alPop); };
+    window.addEventListener("pld-releer-url", reescribir);   // EVENTO_RELEER de ui.tsx: después de cerrar una capa, se reescriben los filtros
+    return () => { window.removeEventListener(EVENTO_PUSH, alPush); window.removeEventListener("popstate", alPop); window.removeEventListener("pld-releer-url", reescribir); };
   }, []);
   const escribir = useCallback((cambios: Record<string, string | null | undefined>) => {
     const p = new URLSearchParams(actual.current);

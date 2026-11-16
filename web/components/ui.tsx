@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { IconoAbajo } from "./Iconos";
+import { CAPAS_ABIERTAS, CIERRA_CAPA } from "@/lib/url";
 
 /** Grupo de botones. `valor` es un string (selección única) o un Set (múltiple).
  *  R12 (tanda 8): una sola opción = riel con la elegida en celeste; elección múltiple = píldoras sueltas separadas, la elegida con un ✓.
@@ -85,8 +86,9 @@ const pilaAtras: EntradaAtras[] = [];
 let silencio = 0;
 /** La URL más nueva escrita mientras hay capas abiertas (ver `llevarUrl`). */
 let urlCapas: string | null = null;
-/** Evento con el que la capa pide a `useParams` que vuelva a leer la URL (ver el `popstate` de `instalarAtras`). */
+/** Evento con el que, después de cerrar una capa, `useParams` vuelve a escribir sus filtros en la URL (ver el `popstate` de `instalarAtras`). */
 export const EVENTO_RELEER = "pld-releer-url";
+
 /** La URL que se repone después de un Atrás que cerró una capa (ver el `popstate` de `instalarAtras`). */
 let pendiente: string | null = null;
 /** Enlace que se tocó con capas abiertas y que se sigue cuando sus entradas del historial ya se consumieron. */
@@ -96,6 +98,9 @@ let atrasInstalado = false;
 function instalarAtras() {
   if (atrasInstalado || typeof window === "undefined") return;
   atrasInstalado = true;
+  // Para `useParams` (lib/url.ts): cuántas capas quedan por cerrar. Su `popstate` puede correr antes o después del de acá
+  // (el orden de los avisos no está garantizado), así que pregunta esto en vez de esperar la marca `CIERRA_CAPA`.
+  (window as unknown as Record<string, () => number>)[CAPAS_ABIERTAS] = () => pilaAtras.length + silencio;
   const original = window.history.replaceState;
   // Los filtros se guardan en la URL con `replaceState`. Si cambian con una capa abierta, quedan escritos en la entrada
   // de la capa; al volver a la entrada de abajo hay que llevarse esa URL, o el cambio se pierde del link.
@@ -106,6 +111,14 @@ function instalarAtras() {
     else if (urlCapas !== window.location.href) original.call(window.history, window.history.state, "", urlCapas);
   };
   window.addEventListener("popstate", () => {
+    // Este Atrás cierra una capa (no es una navegación): `useParams` no relee la URL (puede traer el link de antes, escrito por Next
+    // o guardado en la entrada de la capa) sino que vuelve a escribir los filtros que tiene la página; ver `CIERRA_CAPA` en lib/url.ts.
+    // Así lo elegido dentro de una ventana (por habitante, otra moneda, «en términos de») no se pierde al cerrarla (tanda 12).
+    const cierra = silencio > 0 || pilaAtras.length > 0;
+    if (cierra) {
+      (window as unknown as Record<string, boolean>)[CIERRA_CAPA] = true;
+      setTimeout(() => { (window as unknown as Record<string, boolean>)[CIERRA_CAPA] = false; window.dispatchEvent(new Event(EVENTO_RELEER)); }, 0);
+    }
     llevarUrl();
     // Next puede volver a escribir su URL vieja en su propio `popstate` (después de este) y `useParams` la lee en ese momento:
     // en la vuelta siguiente del bucle se repone la URL de la capa y se avisa a `useParams` que la relea (sin subir la página).
@@ -139,11 +152,24 @@ function instalarAtras() {
     for (const c of capas.reverse()) c.alCerrar();
     window.history.go(-capas.length);
   }, true);
+  // Una marca de capa que quedó en la entrada de la página (por un cierre desordenado, o porque el navegador la conserva al recargar)
+  // hacía que el siguiente cierre volviera a una entrada "de capa" y descartara lo elegido (el «en términos de» que no se guardaba
+  // al tocar Listo, tanda 12). Sin capas abiertas, la entrada actual no lleva marca.
+  const sinMarca = (s: unknown): unknown => {
+    if (!s || typeof s !== "object" || (s as { __capa?: number }).__capa === undefined) return s;
+    const { __capa: _fuera, ...resto } = s as { __capa?: number };
+    void _fuera;
+    return resto;
+  };
+  if (!pilaAtras.length && (window.history.state as { __capa?: number } | null)?.__capa !== undefined) {
+    original.call(window.history, sinMarca(window.history.state), "", window.location.href);
+  }
   window.history.replaceState = function (this: History, estado: unknown, titulo: string, url?: string | URL | null) {
     const deFiltros = estado == null;   // `useParams` escribe con estado null; Next, con el suyo
+    if (!pilaAtras.length) estado = sinMarca(estado);   // sin capas abiertas no se escribe ninguna marca (Next puede copiar un estado viejo que la trae)
     const actual = window.history.state as { __capa?: number } | null;
-    // `useParams` escribe con estado null: también ahí se conserva la marca de la capa
-    if (actual && actual.__capa !== undefined && (estado == null || (typeof estado === "object" && (estado as { __capa?: number }).__capa === undefined))) {
+    // `useParams` escribe con estado null: también ahí se conserva la marca de la capa (solo con capas abiertas)
+    if (pilaAtras.length && actual && actual.__capa !== undefined && (estado == null || (typeof estado === "object" && (estado as { __capa?: number }).__capa === undefined))) {
       estado = { ...((estado as object | null) ?? {}), __capa: actual.__capa };
     }
     const r = original.call(this, estado, titulo, url);
@@ -232,7 +258,7 @@ const CerrarModalCtx = createContext<(luego?: () => void) => void>(() => {});
 export const useCerrarModal = () => useContext(CerrarModalCtx);
 
 /** Ventana modal con foco, cruz de cerrar (44 px), Escape, clic en el fondo y botón Atrás para cerrar. */
-export function Modal({ titulo, onCerrar, children, ancho }: { titulo: string; onCerrar: () => void; children: ReactNode; ancho?: boolean }) {
+export function Modal({ titulo, cabecera, onCerrar, children, ancho }: { titulo: string; cabecera?: ReactNode; onCerrar: () => void; children: ReactNode; ancho?: boolean }) {
   const yo = useRef(Symbol("modal"));
   const luego = useRef<(() => void) | null>(null);
   const alCerrar = useRef(onCerrar);
@@ -255,7 +281,10 @@ export function Modal({ titulo, onCerrar, children, ancho }: { titulo: string; o
   return (
     <div className="modal-fondo" onMouseDown={(ev) => { if (ev.target === ev.currentTarget) cerrar(); }}>
       <div className="modal" role="dialog" aria-modal="true" aria-label={titulo} style={{ maxWidth: "100%", ...(ancho ? { width: "min(760px,100%)" } : null) }}>
-        <div className="modal-cab"><button type="button" className="cruz-capa modal-cruz" aria-label="Cerrar" onClick={() => cerrar()}><IconoCruz /></button></div>
+        <div className={`modal-cab${cabecera ? " con-tit" : ""}`}>
+          {cabecera ? <h2 className="modal-tit">{cabecera}</h2> : null}
+          <button type="button" className="cruz-capa modal-cruz" aria-label="Cerrar" onClick={() => cerrar()}><IconoCruz /></button>
+        </div>
         <CerrarModalCtx.Provider value={cerrar}>{children}</CerrarModalCtx.Provider>
       </div>
     </div>

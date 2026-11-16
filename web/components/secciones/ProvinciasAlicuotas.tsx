@@ -108,9 +108,8 @@ function Cuerpo({ d, c, p, set }: { d: DatosAlicuotas; c: Contexto; p: URLSearch
 /** Las aperturas de una provincia (por tamaño del contribuyente o por subactividad), como texto. */
 function Aperturas({ f, v, onCerrar }: { f: FilaA; v: VistaA; onCerrar: () => void }) {
   return (
-    <Modal titulo={`${f.n}: aperturas`} onCerrar={onCerrar} ancho>
+    <Modal titulo={`${f.n}: aperturas`} cabecera={`${f.n}: aperturas`} onCerrar={onCerrar} ancho>
       <div className="prov-detalle">
-        <h2>{f.n}: aperturas</h2>
         <p className="note">{v.actividad.n}, {v.anio}. Alícuota general: <b>{f.txt}</b>. Son las alícuotas teóricas que la planilla separa por tamaño del contribuyente o por subactividad.</p>
         <dl className="pc-ib-aper">
           {f.aperturas.map((a) => (<div key={a.n}><dt>{a.n}</dt><dd>{a.txt}</dd></div>))}

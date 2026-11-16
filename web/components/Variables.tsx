@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useDatos } from "./DatosProvider";
 import { useConfig } from "./ConfigProvider";
 import { medidaInicial } from "@/lib/config";
-import { Desplegable, Modal, Selector, Seg, useCerrarModal } from "./ui";
+import { Modal, Selector, Seg, useCerrarModal } from "./ui";
 import { IconoEditar } from "./Iconos";
 import { fmtMes, lastIdx, norm } from "@/lib/formato";
 import { ORDEN_RAIZ, textoBusqueda } from "@/lib/catalogo";
@@ -64,9 +64,8 @@ function Info({ id, onCerrar }: { id: string; onCerrar: () => void }) {
   const meds = motor.medidasDe(meta).map((m) => m[1]).join(" · ");
   void version;
   return (
-    <Modal titulo="Información de la variable" onCerrar={onCerrar}>
+    <Modal titulo="Información de la variable" cabecera={meta.n} onCerrar={onCerrar}>
       <div className="info-cuerpo">
-        <h2>{meta.n}</h2>
         <p className="note">{rutaPublica(meta.cat).join(" › ")}</p>
         <p>{meta.desc || ""}</p>
         <table className="ficha"><tbody>
@@ -128,7 +127,9 @@ function IntroCategoria({ nombre, reco, onReco }: { nombre: string; reco: { id: 
 /** R12: ¿el aparato tiene mouse/teclado? Solo ahí una ventana puede poner el foco en un campo de texto sin abrir el teclado de pantalla. */
 export const conPunteroFino = () => typeof window !== "undefined" && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
-export interface PickerPedido { cb: (id: string, med?: string, esc?: string) => void; filtro?: (s: SerieMeta) => boolean; titulo?: string }
+export interface PickerPedido { cb: (id: string, med?: string, esc?: string) => void; filtro?: (s: SerieMeta) => boolean; titulo?: string;
+  /** El dato que se está viendo: arriba de la lista, con todas sus formas de verlo (R28). Cambiar una forma lo aplica ya y la ventana sigue abierta. */
+  actual?: { e: Expr; onChange: (e: Expr) => void } }
 
 export function Picker({ pedido, onCerrar }: { pedido: PickerPedido; onCerrar: () => void }) {
   return <Modal titulo="Elegir variable" onCerrar={onCerrar}><PickerInterior pedido={pedido} /></Modal>;
@@ -140,6 +141,7 @@ function PickerInterior({ pedido }: { pedido: PickerPedido }) {
   const [camino, setCamino] = useState<string[]>([]);
   const [q, setQ] = useState("");
   const [todo, setTodo] = useState(false);
+  const [formas, setFormas] = useState(false);   // ventana «Cómo verlo» del dato actual
   const inp = useRef<HTMLInputElement>(null);
   const primero = useRef<string | undefined>(undefined);
   // R12: en pantallas táctiles el teclado no se abre solo; el foco queda en la ventana (la ventana del Modal), no en el buscador
@@ -229,6 +231,19 @@ function PickerInterior({ pedido }: { pedido: PickerPedido }) {
     );
     pie = camino.length ? `Escribí para buscar dentro de ${ultimo}. Esc para cerrar.` : "Elegí una categoría o escribí para buscar. Esc para cerrar.";
   }
+  // El dato actual (tanda 12): primer renglón de la lista, sin búsqueda ni carpeta abierta; tocarlo abre «Cómo verlo» con todas sus formas
+  const act = pedido.actual, metaAct = act ? metas.find((x) => x.id === act.e.id) : undefined;
+  const datoActual = act && metaAct && motor && !qn && !camino.length ? (
+    <>
+      <li className="vr-rotulo" role="presentation">Dato actual</li>
+      <li className="vr-var pk-actual">
+        <button type="button" aria-haspopup="dialog" onClick={() => setFormas(true)}>
+          <span><span className="vr-nombre">{metaAct.n}</span><span className="ruta">{resumenFormas(motor, metas, metaAct, act.e)}</span></span>
+          <span className="pk-actual-ver">Cómo verlo <IconoChevron /></span>
+        </button>
+      </li>
+    </>
+  ) : null;
   return (
     <>
       <header>
@@ -243,44 +258,42 @@ function PickerInterior({ pedido }: { pedido: PickerPedido }) {
           <div className="migas">{migas}</div>
         </div>
       </header>
-      <ul>{cuerpo}</ul>
+      <ul>{datoActual}{cuerpo}</ul>
       <footer>{pie}</footer>
+      {formas && act && metaAct && (
+        <Modal titulo="Cómo verlo" cabecera={metaAct.n} onCerrar={() => setFormas(false)}>
+          <div className="formas-ver-cuerpo">
+            <div className="formas-ver"><FormasDeVer e={act.e} onChange={act.onChange} /></div>
+          </div>
+        </Modal>
+      )}
     </>
   );
 }
 
-/** Medida en pasos: un botón con lo elegido que abre un panel con los grupos (Pesos / Dólares / Variaciones...) y, debajo, las opciones del grupo activo. */
-function SelectorMedida({ A, med, motor, onElegir }: { A: SerieMeta; med: string; motor: Motor; onElegir: (m: string) => void }) {
-  const grupos = motor.gruposMedida(A);
-  const act = motor.ubicarMedida(A, med) ?? motor.ubicarMedida(A, motor.medDefault(A)) ?? { g: grupos[0], v: grupos[0].dims.map((d) => d.opciones[0][0]) };
-  const { config } = useConfig();
-  // Al cambiar de grupo se arranca en la primera opción de cada fila; la cotización es el dólar preferido.
-  const porDefecto = (g: (typeof grupos)[number]) => g.unir(g.dims.map((d) => d.opciones.find((o) => o[0] === config.dolar)?.[0] ?? d.opciones[0][0]));
-  const medActual = act.g.unir(act.v);
-  return (
-    <Desplegable className="med-desp" etiqueta={motor.etiquetaMedida(A, medActual + sufijoMM(med))}>
-      {grupos.length > 1 && (
-        <div className="seg" role="group" aria-label="Tipo de medida">
-          {grupos.map((g) => <button key={g.k} type="button" aria-pressed={g === act.g || g.k === act.g.k} onClick={() => { if (g.k !== act.g.k) onElegir(porDefecto(g)); }}>{g.nombre}</button>)}
-        </div>
-      )}
-      {act.g.dims.map((d, i) => (
-        <div className="seg med-fila" role="group" aria-label={act.g.nombre || "Medida"} key={act.g.k + i}>
-          {d.opciones.map(([v, t]) => (
-            <button key={v} type="button" className={d.tenue === v ? "tenue" : undefined} aria-pressed={act.v[i] === v}
-              onClick={() => { const nv = act.v.slice(); nv[i] = v; onElegir(act.g.unir(nv)); }}>{t}</button>
-          ))}
-        </div>
-      ))}
-    </Desplegable>
-  );
+/** «Dólares corrientes · Total», «% del PIB», «Pesos reales · en términos de Salario…»: cómo se está viendo el dato, para el renglón del dato actual. */
+function resumenFormas(motor: Motor, metas: SerieMeta[], A: SerieMeta, e: Expr): string {
+  const escs = motor.escPermitidas(A), esc = escs.find((o) => o[0] === (e.esc || ""));
+  if (e.esc && esc) return esc[1];
+  const med = motor.etiquetaMedida(A, e.med === "vac" ? "via" : e.med || motor.medDefault(A)) || A.u;
+  const B = e.rel ? metas.find((x) => x.id === e.rel) : null;
+  return [med, B ? `en términos de ${B.n}` : escs.length ? (esc?.[1] ?? escs[0][1]) : ""].filter(Boolean).join(" · ");
 }
+
+/** Medida como lista plana, con el mismo desplegable que la escala (tanda 12: la moneda y la escala, una al lado de la otra y con el mismo desplegable, en todos lados): todas las medidas de la serie
+ *  (moneda, cotización, variaciones) con su nombre. Si la actual no está en la lista (por ejemplo, con promedio móvil), va primera. */
+function SelectorMedidaPlano({ A, med, motor, onElegir }: { A: SerieMeta; med: string; motor: Motor; onElegir: (m: string) => void }) {
+  const ops = motor.medidasDe(A).map((o) => [o[0], o[1]] as [string, string]);
+  if (!ops.some((o) => o[0] === med)) ops.unshift([med, motor.etiquetaMedida(A, med) || med]);
+  return <Selector etiqueta="Moneda o medida" valor={med} opciones={ops} onElegir={onElegir} />;
+}
+
 
 /** Fila de controles de una variable: [variable] [medida] [en términos de] [modo] [quitar] */
 export function FilaVariable({ e, onChange, color, quitable, agregable, textoAgregar, sinRel }: {
   e: Expr | null; onChange: (e: Expr | null) => void; color?: string; quitable?: boolean; agregable?: boolean; textoAgregar?: string; sinRel?: boolean;
 }) {
-  const { motor, metas, errores } = useDatos();
+  const { motor, metas } = useDatos();
   const { config } = useConfig();
   const [picker, setPicker] = useState<PickerPedido | null>(null);
   if (!motor) return null;
@@ -300,12 +313,6 @@ export function FilaVariable({ e, onChange, color, quitable, agregable, textoAgr
   }
   const A = meta(e.id);
   if (!A) return null;
-  const escs = motor.escPermitidas(A), escV = escs.some((o) => o[0] === e.esc) ? (e.esc || "") : "";
-  const regiones = otrasRegiones(metas, A.id);
-  const nMed = motor.cantMedidas(motor.gruposMedida(A));
-  const relOk = motor.relPermitido(A) && !escV && !sinRel;
-  const conRel = relOk && !!e.rel;
-  const B = e.rel ? meta(e.rel) : null;
   return (
     <div className="fila-var">
       {color && <span className="punto" style={{ ["--c" as string]: `var(${color})` }} />}
@@ -313,20 +320,44 @@ export function FilaVariable({ e, onChange, color, quitable, agregable, textoAgr
         cb: (id, med, esc) => { const nuevo: Expr = { ...e, id, med: med ?? medidaInicial(meta(id)!.tipo, motor.medDefault(meta(id)!), config), esc: esc ?? "" }; if (!motor.relPermitido(meta(id)!)) nuevo.rel = null; onChange(nuevo); },
       })}>{A.n}</button>
       <BotonInfo id={A.id} />
+      <FormasDeVer e={e} onChange={onChange} sinRel={sinRel} />
+      {quitable && <button type="button" className="btn quitar" title="Quitar esta variable" onClick={() => onChange(null)}>✕</button>}
+      {modal}
+    </div>
+  );
+}
+
+/** Todas las formas de ver una variable ya elegida (R28): región, medida y moneda con su cotización, escala (total, por habitante, % del PIB) y "en términos de".
+ *  Son fragmentos para poner dentro de un renglón `.fila-var`; la usan `FilaVariable`, el elegidor ("Dato actual"), la hoja Ajustes y la ficha. */
+export function FormasDeVer({ e, onChange, sinRel }: { e: Expr; onChange: (e: Expr) => void; sinRel?: boolean }) {
+  const { motor, metas, errores } = useDatos();
+  const [picker, setPicker] = useState<PickerPedido | null>(null);
+  if (!motor) return null;
+  const meta = (id: string) => metas.find((m) => m.id === id);
+  const A = meta(e.id);
+  if (!A) return null;
+  const escs = motor.escPermitidas(A), escV = escs.some((o) => o[0] === e.esc) ? (e.esc || "") : "";
+  const regiones = otrasRegiones(metas, A.id);
+  const nMed = motor.cantMedidas(motor.gruposMedida(A));
+  const relOk = motor.relPermitido(A) && !escV && !sinRel;
+  const conRel = relOk && !!e.rel;
+  const B = e.rel ? meta(e.rel) : null;
+  return (
+    <>
       {regiones.length > 1 && (
         <Selector etiqueta="Región" valor={A.id} opciones={regiones.map((r) => [r.id, r.region] as [string, string])} onElegir={(id) => onChange({ ...e, id })} />
       )}
       {(errores[A.archivo] || (B && errores[B.archivo])) && <span className="error" role="alert">No se pudieron bajar los datos de esta variable.</span>}
       {conRel || escV === "pib" ? null : nMed < 2
         ? <span className="lbl">{motor.esIndice(A) ? "Índice: se ve tal cual" : A.u}</span>
-        : <SelectorMedida A={A} med={e.med === "vac" ? "via" : e.med || motor.medDefault(A)} motor={motor} onElegir={(v) => onChange({ ...e, med: v })} />}
+        : <SelectorMedidaPlano A={A} med={e.med === "vac" ? "via" : e.med || motor.medDefault(A)} motor={motor} onElegir={(v) => onChange({ ...e, med: v })} />}
       {escs.length > 0 && !conRel && (
         <Selector etiqueta="Total, por habitante o como % del PIB" valor={escV} opciones={escs.map((o) => [o[0], o[1]] as [string, string])} onElegir={(v) => onChange({ ...e, esc: v, rel: v ? null : e.rel })} />
       )}
       {relOk && (
         <>
           <span className="lbl">en términos de</span>
-          <button type="button" className="btn var" onClick={() => abrir({
+          <button type="button" className="btn var" onClick={() => setPicker({
             cb: (id) => onChange({ ...e, rel: id, modo: e.modo || "compra" }), filtro: motor.relDestino, titulo: "En términos de: salario, dólar, canasta, otro precio…",
           })}>{B ? B.n : "ninguna (elegir…)"}</button>
           {B && (
@@ -338,9 +369,8 @@ export function FilaVariable({ e, onChange, color, quitable, agregable, textoAgr
           )}
         </>
       )}
-      {quitable && <button type="button" className="btn quitar" title="Quitar esta variable" onClick={() => onChange(null)}>✕</button>}
-      {modal}
-    </div>
+      {picker && <Picker pedido={picker} onCerrar={() => setPicker(null)} />}
+    </>
   );
 }
 
@@ -455,9 +485,8 @@ function ConfigurarVariable({ e0, sinRel, onAceptar, onCerrar }: { e0: Expr; sin
   const regiones = otrasRegiones(metas, A.id);   // otras regiones del mismo rubro o producto (el IPC y los precios promedio vienen por región)
   return (
     <>
-      <Modal titulo="Configurar variable" onCerrar={onCerrar}>
+      <Modal titulo="Configurar variable" cabecera="Configurar variable" onCerrar={onCerrar}>
         <div className="config-cuerpo">
-          <h2>Configurar variable</h2>
           <Grupo titulo="Variable">
             <button type="button" className="btn var" title={A.n} onClick={pickVar}>{A.n}</button>
             <BotonInfo id={A.id} />

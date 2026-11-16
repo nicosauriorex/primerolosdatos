@@ -8,7 +8,8 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-15.
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
 Últimos bloques (todos publicados, corrida en verde, salvo el primero):
-- Series de deuda (Finanzas, mensual desde 2019) y deuda consolidada Tesoro + Banco Central (cuenta propia, D-024) — 2026-11-15, sin publicar — [spec](specs/series-deuda.md)
+- Tanda 12: el dato actual primero (Cambiar dato, Ajustes con una sección «Variables»), moneda y escala en desplegables, títulos de ventanas junto a la cruz, arreglo de las ventanas que no guardaban lo elegido al cerrarse, consolidada y cuasifiscal en Cuentas públicas — 2026-11-15, sin publicar — [spec](specs/ajustes-tanda-12.md)
+- Series de deuda (Finanzas, mensual desde 2019) y deuda consolidada Tesoro + Banco Central (cuenta propia, D-024) — 2026-11-15, 931167d — [spec](specs/series-deuda.md)
 - Tanda 11: Congreso en columnas con «Leyes por apoyo»; resaltar un país (y su imagen) en Otros países y «¿Cómo viene?» — 2026-11-15, 4c80be2 — [spec](specs/ajustes-tanda-11.md)
 - Tanda 10: la lupa encuentra Herencia y el parte del Banco Central; selector de Herencia agrupado — 2026-11-15, b296c75 — [spec](specs/ajustes-tanda-10.md)
 - EE.UU. (BLS) y Chile (INE) en precios contra el mundo, productos de EE.UU. desde el BLS y aviso de presidente sin dato — 2026-11-15, 4078c3e — [spec](specs/precios-mundo-bls-ine.md)

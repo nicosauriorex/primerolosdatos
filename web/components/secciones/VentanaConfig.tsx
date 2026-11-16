@@ -15,8 +15,7 @@ export function VentanaConfig({ etiqueta, titulo, children }: { etiqueta: ReactN
     <>
       <button type="button" className="btn drop" aria-haspopup="dialog" aria-expanded={abierta} onClick={() => setAbierta(true)}><span className="et">{etiqueta}</span></button>
       {abierta && (
-        <Modal titulo={titulo} onCerrar={() => setAbierta(false)}>
-          <header className="vp-cab"><h2>{titulo}</h2></header>
+        <Modal titulo={titulo} cabecera={titulo} onCerrar={() => setAbierta(false)}>
           <div className="config-cuerpo vp-cuerpo">{children}</div>
           <footer><Listo /></footer>
         </Modal>

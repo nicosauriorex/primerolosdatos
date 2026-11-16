@@ -48,9 +48,8 @@ export function LineaInicio({ info, F, children, texto, sinAviso }: { info: Inic
         <p className="aviso-link" role="status">Estás viendo el inicio de mandato del link · <button type="button" className="enlace" onClick={info.usarMio}>Usar el mío</button></p>
       )}
       {abierto && (
-        <Modal titulo="Mes inicial de cada presidente" onCerrar={() => setAbierto(false)}>
+        <Modal titulo="Mes inicial de cada presidente" cabecera="Mes inicial de cada presidente" onCerrar={() => setAbierto(false)}>
           <div className="info-cuerpo">
-            <h2>Mes inicial de cada presidente</h2>
             <p>{AYUDA_T}</p>
             <p>Ahora: <b>{baseTxt(b)}</b>{F && milei ? <>; para Milei, {fmtMes(F[baseIdx(F, milei, b)])}</> : null}.</p>
             <ul>
