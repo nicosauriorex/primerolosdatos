@@ -112,8 +112,11 @@ def _fila(d, r0, cols, prueba, todas=False):
         raise RuntimeError("no encontré la fila pedida")
     if not todas:
         filas = filas[:1]
-    v = {f: sum(float(pd.to_numeric(d.iat[r, c], errors="coerce") or 0) for r in filas) for c, f in cols.items()}
-    return pd.Series(v).sort_index()
+    def celda(c):
+        """Suma de las filas en esa columna; una celda vacía cuenta 0 (sin adelantos ese mes) y solo sin ningún número queda sin dato."""
+        nums = [x for x in (pd.to_numeric(d.iat[r, c], errors="coerce") for r in filas) if pd.notna(x)]
+        return float(sum(nums)) if nums else float("nan")
+    return pd.Series({f: celda(c) for c, f in cols.items()}).sort_index()
 
 
 def leer_mensual(b):

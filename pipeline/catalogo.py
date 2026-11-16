@@ -233,9 +233,9 @@ def bcra(idx):
     try:
         inter = red.cacheado("bcra_55", lambda: _bcra(55))
         cuasi = _mes(inter, idx, "sum")
-        out.append(S("bcra_cuasifiscal", "Déficit cuasifiscal del BCRA (intereses de pases, LELIQ y LEFI)", ["Fiscal"], "ars", "millones de $",
+        out.append(S("bcra_cuasifiscal", "Déficit cuasifiscal del BCRA (intereses de pases y LELIQ)", ["Fiscal"], "ars", "millones de $",
                      cuasi, -1, "BCRA, API (variable 55: efecto monetario de intereses de pases y LELIQ)",
-                     "Pesos que emitió el BCRA para pagar intereses de sus deudas en pesos (pases, LELIQ, LEFI). Es déficit del Banco Central, fuera del presupuesto. Casi cero desde mediados de 2024, cuando se desarmaron esas deudas. No incluye los intereses de las LEBAC (2002-2017), que el BCRA no publica por separado: en esos años el cuasifiscal real fue mayor.",
+                     "Pesos que emitió el BCRA para pagar intereses de sus deudas en pesos (pases y LELIQ). Es déficit del Banco Central, fuera del presupuesto. Casi cero desde mediados de 2024, cuando se desarmaron esas deudas; las LEFI que las reemplazaron (jul-24 a jul-25) no están en esta variable. No incluye los intereses de las LEBAC (2002-2017), que el BCRA no publica por separado: en esos años el cuasifiscal real fue mayor.",
                      agg=True, flujo=True))
     except Exception as e:  # noqa: BLE001
         print(f"  BCRA cuasifiscal: {e}")

@@ -44,7 +44,7 @@ export const NOMBRES: Record<string, string> = {
   deuda_ac_mn: "Deuda pública en moneda nacional",
   deuda_fmi: "Deuda con el FMI",
   deuda_letras_bcra: "Deuda del Tesoro con el Banco Central (letras y adelantos)",
-  deuda_pib: "Deuda pública bruta / PIB (cifra de Finanzas, fin de año)",
+  deuda_pib: "Deuda pública bruta / PIB (cifra de Finanzas)",
   deuda_consolidada: "Deuda consolidada del Tesoro y el Banco Central",
   soja_ratio_oficial: "Brecha de la soja: Rosario contra Chicago (dólar oficial)",
   soja_ratio_blue: "Brecha de la soja: Rosario contra Chicago (dólar blue)",
