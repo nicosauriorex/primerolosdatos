@@ -185,7 +185,7 @@ function PickerInterior({ pedido }: { pedido: PickerPedido }) {
     migas = camino.length ? (todo
       ? <>Buscando en todas las variables · <button type="button" onClick={() => setTodo(false)}>buscar solo en {camino[camino.length - 1]}</button></>
       : <>Buscando en <b>{camino.join(" › ")}</b> · <button type="button" onClick={() => setTodo(true)}>buscar en todo</button></>) : null;
-    pie = res.length ? `${res.length} resultados${res.length > 150 ? " (se muestran 150)" : ""}. Enter elige el primero.` : "Sin resultados. Probá con otra palabra" + (camino.length && !todo ? " o buscá en todo." : ".");
+    pie = res.length ? `${res.length} ${res.length === 1 ? "resultado" : "resultados"}${res.length > 150 ? " (se muestran 150)" : ""}. Enter elige el primero.` : "Sin resultados. Probá con otra palabra" + (camino.length && !todo ? " o buscá en todo." : ".");
     primero.current = res[0]?.[1].id;
   } else {
     let nodo = raiz;

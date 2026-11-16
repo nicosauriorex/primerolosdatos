@@ -30,6 +30,7 @@ bcra_7
 bcra_78
 bcra_cuasifiscal
 bcra_pasivos_rem
+becas
 brecha_blue
 brecha_ccl
 brecha_mep
@@ -44,6 +45,7 @@ ctx_petroleo
 ctx_soja
 ctx_terminos
 ctx_trigo
+demanda_electrica
 deuda_ac_me
 deuda_ac_mn
 deuda_ac_total
@@ -111,13 +113,19 @@ dg_saldo_comercial
 empleo_publico_apn
 empleo_publico_empresas
 empleo_publico_nacional
+femicidios
 fx_blue
 fx_ccl
 fx_mep
 fx_oficial
 gasto_aaff
 gasto_auh
+gasto_ciencia
+gasto_defensa
+gasto_educacion
 gasto_pnc
+gasto_salud
+gasto_seguridad
 homicidios_hechos_tasa
 homicidios_tasa
 homicidios_victimas
@@ -451,6 +459,7 @@ mk_teo
 mk_tgs
 mk_ypf
 mortalidad_infantil
+patentamientos
 pib_nom
 pib_nom_anual
 pnc_invalidez
@@ -602,6 +611,9 @@ rec_retenciones
 rec_seguridad_social
 riesgo
 ripte
+seguro_desempleo
+siniestros_viales
+siniestros_viales_tasa
 sipa_med
 sipa_prom
 smvm
@@ -611,6 +623,11 @@ soja_ratio_ccl
 soja_ratio_mep
 soja_ratio_oficial
 soja_ros
+sub_transporte
 tcrm
+transf_prov
+transf_prov_capital
+transf_prov_corrientes
+transferencias_autos
 turismo_emisivo
 turismo_receptivo

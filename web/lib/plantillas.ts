@@ -104,6 +104,20 @@ export function crearPlantillas(metas: SerieMeta[]): Plantilla[] {
     ["homicidios", "asesinatos", "inseguridad", "crimen", "delitos", "seguridad"], [E("homicidios_tasa", { med: "asis" })]);
   manual("empleados-publicos-nacionales", "Empleados públicos nacionales", "Empleo y pobreza", "Administración pública nacional más empresas y sociedades del Estado, desde julio de 2022",
     ["empleo publico", "empleados publicos", "estado", "despidos", "motosierra", "empleo estatal"], [E("empleo_publico_nacional", { med: "asis" })]);
+  manual("transferencias-a-provincias-en-pesos-de-hoy", "Transferencias a provincias en pesos de hoy", "Fiscal",
+    "Lo que el gobierno nacional transfiere a las provincias por decisión propia (no incluye la coparticipación): corrientes y de capital, ajustado por inflación",
+    ["provincias", "gobernadores", "transferencias", "fondos discrecionales", "atn", "obras"],
+    ["transf_prov_corrientes", "transf_prov_capital"].map((id) => E(id, { med: "real" })));
+  manual("gasto-salud-educacion-ciencia-pib", "Gasto en salud, educación y ciencia (% del PIB)", "Fiscal",
+    "Gasto devengado de la administración pública nacional en cada función, como % del PIB del año (no incluye provincias ni municipios)",
+    ["salud", "educacion", "ciencia", "conicet", "presupuesto", "gasto publico"],
+    ["gasto_salud", "gasto_educacion", "gasto_ciencia"].map((id) => E(id, { med: "asis" })));
+  manual("patentamientos", "Patentamientos de autos 0 km", "Actividad", "Automotores 0 km (autos, utilitarios y otros; la fuente no los separa) inscriptos por primera vez en el Registro del Automotor, por mes",
+    ["autos", "0 km", "ventas de autos", "automotores", "usados"], [E("patentamientos", { med: "asis" })]);
+  manual("subsidios-transporte-y-energia-en-pesos-de-hoy", "Subsidios: transporte y energía en pesos de hoy", "Fiscal",
+    "Subsidios económicos al transporte (mensual) y a la energía (trimestral, repartido en los 3 meses), ajustados por inflación",
+    ["subsidios", "colectivos", "trenes", "transporte", "energia", "luz", "gas", "tarifas"],
+    ["sub_transporte", "dg_452_2_energiagia_0_t_7_79"].map((id) => E(id, { med: "real" })));
   manual("viajes-al-exterior", "Viajes al exterior en avión", "Sector externo", "Argentinos que salen por Ezeiza y Aeroparque, en miles de pasajeros",
     ["turismo", "viajes", "exterior", "chile", "compras afuera"], [E("turismo_emisivo", { med: "asis" })]);
 

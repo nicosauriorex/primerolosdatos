@@ -35,7 +35,9 @@ export const INFO_CAT: Record<string, string> = {
   "Actividad": `<dl>
     <dt>EMAE</dt><dd>Estimador mensual de la actividad (anticipa el PIB).</dd>
     <dt>PIB</dt><dd>Trimestral, a precios de 2004 (ya es real).</dd>
-    <dt>ISAC</dt><dd>Construcción.</dd></dl>
+    <dt>ISAC</dt><dd>Construcción.</dd>
+    <dt>Patentamientos y autos usados</dt><dd>Autos inscriptos por primera vez (0 km) y transferencias de autos usados, suma de todas las provincias (Registro del Automotor, Ministerio de Justicia).</dd>
+    <dt>Demanda de electricidad</dt><dd>Energía pedida al sistema mayorista (CAMMESA), en GWh. Depende del clima: conviene comparar contra el mismo mes de otros años.</dd></dl>
     <p>Son índices o cantidades: no se pasan a dólares ni a pesos reales.</p>`,
   "Empleo, pobreza e ingresos": `<dl>
     <dt>Desocupación, empleo e informalidad</dt><dd>EPH, trimestral, 31 aglomerados urbanos.</dd>
@@ -50,11 +52,15 @@ export const INFO_CAT: Record<string, string> = {
     <dt>Resultado primario</dt><dd>Ingresos menos gastos sin contar intereses de la deuda.</dd>
     <dt>Resultado financiero</dt><dd>Después de pagar intereses.</dd>
     <dt>Deuda pública</dt><dd>Secretaría de Finanzas, mensual desde 2019 y en dólares. La deuda consolidada del Tesoro y el Banco Central es una cuenta propia que suma lo que ambos deben a terceros.</dd>
+    <dt>Subsidios al transporte</dt><dd>Plata del Estado nacional para que colectivos y trenes cobren menos de lo que cuestan; base caja, mensual. Los subsidios a la energía están aparte y son trimestrales.</dd>
+    <dt>Transferencias a provincias</dt><dd>Las que decide el gobierno nacional (no automáticas): no incluye la coparticipación. Las corrientes son para gastos del día a día; las de capital, para obras.</dd>
+    <dt>Gasto por función</dt><dd>Gasto devengado de la administración nacional en salud, educación, ciencia, seguridad y defensa, en % del PIB del año. No incluye lo que gastan provincias y municipios. Dato anual, ubicado en diciembre.</dd>
     <dt>Recaudación por impuesto</dt><dd>Lo que ARCA (ex AFIP) recaudó cada mes por IVA, Ganancias, retenciones a las exportaciones, Bienes Personales, impuesto PAIS, impuesto al cheque y aportes a la seguridad social. Va en pesos de cada mes: se ve mejor en pesos de hoy o como % del PIB.</dd></dl>
     <p>Las cifras mensuales son muy estacionales: conviene verlas como % del PIB (suma de 12 meses) o por año.</p>`,
   "Sociedad": `<dl>
     <dt>Homicidios dolosos</dt><dd>Sistema Nacional de Información Criminal (Ministerio de Seguridad), anual. La <b>tasa de víctimas</b> es la que cita el Gobierno; la de <b>hechos</b> cuenta casos (un hecho puede tener varias víctimas).</dd>
     <dt>Mortalidad infantil</dt><dd>Muertes de menores de un año cada 1.000 nacidos vivos (Ministerio de Salud). Anual; el último año sale con unos dos años de atraso.</dd>
+    <dt>Muertes en siniestros viales</dt><dd>Muertes en hechos de tránsito registradas por las fuerzas de seguridad (SNIC, Ministerio de Seguridad). Puede diferir de la Agencia Nacional de Seguridad Vial, que cuenta también a quienes mueren hasta 30 días después. Anual.</dd>
     <dt>Personas presas</dt><dd>Presos en cárceles provinciales y federales a fin de cada año (SNEEP, Ministerio de Justicia). No incluye a los detenidos en comisarías.</dd></dl>
     <p>Son datos anuales, ubicados en diciembre de cada año.</p>`,
   "Contexto internacional": `<p>Lo que pasa afuera y la Argentina no controla.</p><dl>
@@ -80,7 +86,7 @@ export const INFO_CORTA: Record<string, { texto: string; reco: Recomendada }> = 
   "Empleo, pobreza e ingresos": { texto: "Cuánta gente trabaja, cuánta es pobre y cuánto necesita una familia para vivir.", reco: { id: "dg_42_3_eph_puntuatal_0_m_30", nombre: "Desocupación" } },
   "Sector externo": { texto: "Lo que Argentina vende y compra al mundo: exportaciones, importaciones y su saldo.", reco: { id: "dg_saldo_comercial", nombre: "Saldo comercial (% del PIB)", esc: "pib" } },
   "Fiscal": { texto: "Cuánto gasta y cuánto recauda el Estado nacional, y si le sobra o le falta plata.", reco: { id: "dg_379_9_superavit_017_23_94", nombre: "Resultado fiscal primario (% del PIB)", esc: "pib" } },
-  "Sociedad": { texto: "Seguridad y salud: homicidios, mortalidad infantil y personas presas.", reco: { id: "homicidios_tasa", nombre: "Homicidios dolosos cada 100.000 habitantes" } },
+  "Sociedad": { texto: "Seguridad y salud: homicidios, mortalidad infantil, personas presas y muertes en siniestros viales.", reco: { id: "homicidios_tasa", nombre: "Homicidios dolosos cada 100.000 habitantes" } },
   "Contexto internacional": { texto: "Precios de la soja, el maíz, el trigo y el petróleo, términos de intercambio y tasa de la Fed.", reco: { id: "ctx_soja", nombre: "Soja (Banco Mundial)", med: "usdr" } },
   "Opinión pública (UTDT)": { texto: "Qué opina la gente: confianza del consumidor y confianza en el gobierno (Universidad Di Tella).", reco: { id: "dg_380_3_icc_nacionnal_0_t_12", nombre: "Confianza del consumidor" } },
 };

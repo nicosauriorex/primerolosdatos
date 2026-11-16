@@ -1,0 +1,139 @@
+<title>Subsidios y provincias</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@700&display=swap">
+<style>
+/* Lista de control: una columna, secciones en el orden del menú del sitio, cada cambio con su link directo */
+:root {
+  --bg: #f3f5fb; --sup: #ffffff; --tinta: #0b1230; --sec: #4a5478; --borde: #d9deee;
+  --acento: #1f6fd1; --sobre-acento: #ffffff; --accion: #f5b81c; --sobre-accion: #0b1230; --hecho: #1d8a55; --propio: #9a5400;
+  --f-txt: "Archivo", system-ui, sans-serif; --f-tit: "Archivo Narrow", "Archivo", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--tinta); font-family: var(--f-txt); font-size: 15px; line-height: 1.5; margin: 0 }
+.envoltura { max-width: 760px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+h1 { font-family: var(--f-tit); font-size: 30px; text-transform: uppercase; letter-spacing: .01em; margin: 0 0 6px; text-wrap: balance }
+.bajada { color: var(--sec); margin: 0 0 18px; max-width: 62ch }
+.barra { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--borde); margin-bottom: 8px }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.riel { display: inline-flex; background: var(--sup); border-radius: 999px; padding: 4px; gap: 2px }
+.riel button { border: 0; background: transparent; color: var(--tinta); font: 600 14px var(--f-txt); padding: 8px 14px; border-radius: 999px; cursor: pointer }
+.riel button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento) }
+.progreso { color: var(--sec); font-size: 14px; font-variant-numeric: tabular-nums; margin-left: auto }
+.aviso { font-size: 13px; color: var(--sec); margin: 6px 0 0; width: 100% }
+.aviso code { background: var(--sup); padding: 1px 6px; border-radius: 6px; font-size: 12px; user-select: all }
+section { padding-top: 22px }
+h2 { font-family: var(--f-tit); font-size: 19px; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline }
+h2 .n { color: var(--acento); font-variant-numeric: tabular-nums; min-width: 1.6em }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px }
+li { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; background: var(--sup); border-radius: 12px; padding: 10px 12px }
+li.visto { opacity: .55 }
+li.visto .que { text-decoration: line-through; text-decoration-color: var(--sec) }
+input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--hecho); margin: 0 }
+.que { min-width: 0 }
+.num { font-weight: 800; color: var(--acento); font-variant-numeric: tabular-nums; margin-right: 4px }
+.origen { display: block; font-size: 13px; margin-top: 2px; color: var(--sec) }
+.origen.propio { color: var(--propio) }
+.que small { display: block; color: var(--sec); font-size: 12.5px; word-break: break-all }
+a.ir { background: var(--accion); color: var(--sobre-accion); text-decoration: none; font-weight: 800; font-size: 13px; padding: 8px 12px; border-radius: 999px; white-space: nowrap }
+a.ir:focus-visible, .riel button:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px }
+.fuera { margin-top: 28px; padding: 14px; border: 1px dashed var(--borde); border-radius: 12px; color: var(--sec); font-size: 14px }
+@media (max-width: 480px) { li { grid-template-columns: 24px 1fr; } a.ir { grid-column: 2; justify-self: start } }
+</style>
+
+<div class="envoltura">
+  <h1>Subsidios, provincias, autos, gasto y femicidios: dónde verlo</h1>
+  <p class="bajada">Cada renglón abre la página justo donde está el cambio. Para comentar uno, citá su número (por ejemplo 4.2). Debajo de cada cambio: lo que pediste, con tus palabras, o por qué lo agregué yo. Marcá la casilla cuando lo revisaste.</p>
+
+  <div class="barra">
+    <div class="riel" role="group" aria-label="Dónde abrir">
+      <button type="button" id="b-local" aria-pressed="true">En mi máquina</button>
+      <button type="button" id="b-sitio" aria-pressed="false">Sitio publicado</button>
+    </div>
+    <span class="progreso" id="progreso">0 de 0 vistos</span>
+    <p class="aviso" id="aviso"></p>
+  </div>
+
+  <div id="lista"></div>
+
+  <div class="fuera"><b>Quedó afuera</b> (en <code>docs/specs/datos-calientes-2.md</code>): robos (la serie oficial termina en 2022), obra pública por inciso, motos, mayoristas, vacunas.</div>
+</div>
+
+<script>
+// Cada cambio: [qué cambió, ruta, origen]. Origen: P("palabras del pedido") = lo pediste vos; Y("por qué") = lo agregué yo (regla general o barrido).
+const P = (t) => ({ tipo: "pedido", t }), Y = (t) => ({ tipo: "propio", t });
+const Pd = () => P(PED); const PED = "capaz hay cosas que va a haber que traer mas manual pero mientras pongamos la fuente esta bien";
+const SECCIONES = [
+  ["Buscar", [
+    ["La lupa encuentra colectivos, gobernadores, patentamientos, Progresar, luz, Conicet, accidentes de tránsito, femicidios (tocá la lupa y escribí «colectivos»)", "/", Y("regla general: cada dato nuevo con sus sinónimos de búsqueda")],
+    ["El buscador dice «1 resultado» en vez de «1 resultados» (también en Cambiar dato)", "/", Y("bug encontrado al verificar")],
+  ]],
+  ["Histórico", [
+    ["Transferencias a provincias en pesos de hoy, corrientes y de capital (gráfico listo)", "/plantillas/?q=provincias", Pd()],
+    ["Subsidios al transporte y a la energía en pesos de hoy (gráfico listo)", "/plantillas/?q=subsidios", Pd()],
+    ["Gasto nacional en salud, educación y ciencia como % del PIB, 2004 a 2025 (gráfico listo); también seguridad interior y defensa", "/plantillas/?q=ciencia", Pd()],
+    ["Gasto en becas (Progresar) y en seguro de desempleo", "/historico/?v=becas~real~~compra~", Y("salen de la misma fuente oficial sin esfuerzo y están en el debate del gasto social")],
+    ["Ventas de autos usados (transferencias del Registro del Automotor)", "/historico/?v=transferencias_autos~asis~~compra~", Y("viene en el mismo archivo que los patentamientos")],
+  ]],
+  ["Ficha del dato", [
+    ["Subsidios al transporte en pesos de hoy (mensual desde 2016)", "/dato/subsidios-transporte/", Pd()],
+    ["Transferencias no automáticas a provincias (sin coparticipación) en pesos de hoy", "/dato/transferencias-provincias/", Pd()],
+    ["Patentamientos de 0 km: 46.390 en oct-26 (desde 2000)", "/dato/patentamientos/", Pd()],
+    ["Demanda de electricidad (CAMMESA): 11.210 GWh en sep-26", "/dato/demanda-electrica/", Pd()],
+    ["Gasto nacional en ciencia y técnica (% del PIB)", "/dato/gasto-ciencia/", Pd()],
+    ["Muertes en siniestros viales cada 100.000 habitantes: 7,72 en 2025", "/dato/siniestros-viales/", Pd()],
+    ["Víctimas directas de femicidio, 2014 a 2025 (200 en 2025), cargadas a mano de los informes de la Corte Suprema con su página", "/historico/?v=femicidios~asis~~compra~", Pd()],
+  ]],
+  ["Temas", [
+    ["Cuentas públicas: transferencias a provincias y subsidios al transporte entre los principales", "/tema/fiscal/", Y("para encontrarlos desde el tema")],
+    ["Actividad: patentamientos entre los principales", "/tema/actividad/", Y("para encontrarlo desde el tema")],
+    ["Seguridad y salud: muertes en siniestros viales entre los principales", "/tema/sociedad/", Y("para encontrarlo desde el tema")],
+  ]],
+  ["Por presidente", [
+    ["Transferencias a provincias por presidente (en pesos de hoy): Macri +78,0 %, Alberto F. +5,7 %, Milei −78,1 %", "/dato/transferencias-provincias/#fi-pres", Pd()],
+    ["Subsidios al transporte por presidente", "/dato/subsidios-transporte/#fi-pres", Pd()],
+  ]],
+  ["Gráficos listos", [
+    ["Cuatro nuevos: transferencias a provincias, subsidios, gasto en salud, educación y ciencia, patentamientos", "/plantillas/?q=provincias", Y("los mismos gráficos, a un toque")],
+  ]],
+];
+const BASES = { local: "http://localhost:3100", sitio: "https://primerolosdatos.com.ar" };
+const leer = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
+const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} };
+let base = leer("dc2-base", "local"), vistos = leer("dc2-vistos", {});
+
+function dibujar() {
+  const cont = document.getElementById("lista"); cont.innerHTML = "";
+  let total = 0, hechos = 0;
+  SECCIONES.forEach(([nombre, items], i) => {
+    const s = document.createElement("section");
+    s.innerHTML = `<h2><span class="n">${i + 1}</span>${nombre}</h2>`;
+    const ul = document.createElement("ul");
+    items.forEach(([que, ruta, origen], j) => {
+      const id = `${i}-${j}`, url = BASES[base] + ruta, ok = !!vistos[id];
+      total++; if (ok) hechos++;
+      const li = document.createElement("li"); if (ok) li.className = "visto";
+      li.innerHTML = `<input type="checkbox" id="c${id}" ${ok ? "checked" : ""} aria-label="Visto">
+        <label class="que" for="c${id}"><span class="num">${i + 1}.${j + 1}</span> ${que}<span class="origen ${origen.tipo}">${origen.tipo === "pedido" ? "Pediste: «" + origen.t + "»" : "Agregado por mí: " + origen.t}</span><small>${ruta}</small></label>
+        <a class="ir" href="${url}" target="_blank" rel="noopener">Ver →</a>`;
+      li.querySelector("input").addEventListener("change", (e) => { vistos[id] = e.target.checked; guardar("dc2-vistos", vistos); dibujar(); });
+      ul.appendChild(li);
+    });
+    s.appendChild(ul); cont.appendChild(s);
+  });
+  document.getElementById("progreso").textContent = `${hechos} de ${total} vistos`;
+  document.getElementById("b-local").setAttribute("aria-pressed", base === "local");
+  document.getElementById("b-sitio").setAttribute("aria-pressed", base === "sitio");
+  document.getElementById("aviso").innerHTML = base === "local"
+    ? 'Necesita la vista local andando. Si no abre, corré en la carpeta del proyecto: <code>python -m http.server 3100 --directory web/out</code>'
+    : "Solo muestra los cambios después del commit, el push y la corrida en verde (corrida completa, unos 10 minutos).";
+}
+document.getElementById("b-local").onclick = () => { base = "local"; guardar("dc2-base", base); dibujar(); };
+document.getElementById("b-sitio").onclick = () => { base = "sitio"; guardar("dc2-base", base); dibujar(); };
+dibujar();
+</script>

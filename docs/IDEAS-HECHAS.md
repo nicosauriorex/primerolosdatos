@@ -387,3 +387,6 @@ Crítica final de Impeccable: 26/40 (antes 21/40). El usuario eligió arreglar l
 - ~~«En historico el "Cambiar dato" debería mostrar primero la variable actual por si quiero modificar la forma de verlo y también dentro de "Ajustes"… ponele si quiero ver deuda consolidada en % del PBI o si la quiero ver en otra moneda al dolar CCL ponele».~~ ✅ 2026-11-15
 - ~~«no encuentro donde se ve % del pib» (en la ficha de la deuda consolidada).~~ ✅ 2026-11-15
 - ~~«ahi podrias tambien agregar la consolidada / pbi, el deficit cuasifiscal» (principales del tema Cuentas públicas).~~ ✅ 2026-11-15
+
+## Datos calientes que faltan (2026-11-16)
+- ~~Segunda investigación (`docs/investigaciones/datos-nuevos-2-2026-11-16.md`): subsidios al transporte, transferencias a provincias, patentamientos, demanda eléctrica, gasto por función, siniestros viales y femicidios (a mano) → spec: docs/specs/datos-calientes-2.md~~ ✅ 2026-11-16

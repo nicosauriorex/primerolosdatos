@@ -9,6 +9,7 @@ export function fuentePublica(f: string): string {
   if (/^ver fuentes$/i.test(f.trim())) return `ver ${SITIO_FUENTES}`;
   return f
     .replace(/,\s*API\b[^;]*/g, "")                       // ", API ipc_nacional", ", API de estadísticas (variable 1)", ", API (variables …)"
+    .replace(/,\s*series\s+[^;)]*/g, "")                  // ", series 452.2_…, 452.3_…" (una serie armada con varias)
     .replace(/,\s*serie\s+[^\s,;)]+/g, "")                // ", serie 3.2_OGP_D_2004_T_17"
     .replace(/\s*\([\w.]*_[\w.]*\)/g, "")                 // "(4.4_OGP_2004_T_17)"
     .replace(/\s+/g, " ").trim();

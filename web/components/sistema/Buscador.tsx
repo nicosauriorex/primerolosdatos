@@ -94,7 +94,7 @@ export function Buscador({ autoFoco, onElegido, sinAtajos, flotante }: { autoFoc
       </form>
 
       <div className="busq-estado" role="status" aria-live="polite">
-        {sinResultados ? `No encontramos «${q.trim()}»` : resultados.length ? `${resultados.length} resultados` : ""}
+        {sinResultados ? `No encontramos «${q.trim()}»` : resultados.length ? `${resultados.length} ${resultados.length === 1 ? "resultado" : "resultados"}` : ""}
       </div>
 
       {mostrarMas && (

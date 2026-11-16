@@ -1,0 +1,89 @@
+{
+ "fuente": "Corte Suprema de Justicia de la Nación, Oficina de la Mujer, Registro Nacional de Femicidios de la Justicia Argentina: informes anuales 2014 a 2025 (cifras de 2017 a 2020 y de 2025 del informe 2025, que las revisó), en om.csjn.gov.ar",
+ "anios": [
+  {
+   "anio": 2014,
+   "victimas": 225,
+   "documento": "https://www.csjn.gov.ar/omrecopilacion/docs/informeFemicidios2014.pdf",
+   "pagina": 11,
+   "cita": "El total de víctimas asciende a 225."
+  },
+  {
+   "anio": 2015,
+   "victimas": 235,
+   "documento": "https://om.csjn.gov.ar/consultaTalleresWeb/public/documentoConsulta/verDocumentoById?idDocumento=166",
+   "pagina": 6,
+   "cita": "El total de víctimas asciende a 235."
+  },
+  {
+   "anio": 2016,
+   "victimas": 254,
+   "documento": "https://om.csjn.gov.ar/consultaTalleresWeb/public/documentoConsulta/verDocumentoById?idDocumento=167",
+   "pagina": 7,
+   "cita": "El total de víctimas asciende a 254."
+  },
+  {
+   "anio": 2017,
+   "victimas": 252,
+   "documento": "https://om.csjn.gov.ar/consultaTalleresWeb/public/documentoConsulta/verDocumentoById?idDocumento=384",
+   "pagina": 5,
+   "cita": "pasó de 252 víctimas directas de femicidio registrado en 2017 a 200 víctimas en 2025"
+  },
+  {
+   "anio": 2018,
+   "victimas": 257,
+   "documento": "https://om.csjn.gov.ar/consultaTalleresWeb/public/documentoConsulta/verDocumentoById?idDocumento=384",
+   "pagina": 6,
+   "cita": "Distribución de víctimas directas de femicidio y de víctimas de femicidio vinculado por año. Total país. Años 2017-2025 (gráfico: 257 en 2018)"
+  },
+  {
+   "anio": 2019,
+   "victimas": 260,
+   "documento": "https://om.csjn.gov.ar/consultaTalleresWeb/public/documentoConsulta/verDocumentoById?idDocumento=384",
+   "pagina": 5,
+   "cita": "A partir del pico de casos de 260 víctimas en 2019"
+  },
+  {
+   "anio": 2020,
+   "victimas": 254,
+   "documento": "https://om.csjn.gov.ar/consultaTalleresWeb/public/documentoConsulta/verDocumentoById?idDocumento=384",
+   "pagina": 6,
+   "cita": "Distribución de víctimas directas de femicidio y de víctimas de femicidio vinculado por año. Total país. Años 2017-2025 (gráfico: 254 en 2020)"
+  },
+  {
+   "anio": 2021,
+   "victimas": 231,
+   "documento": "https://om.csjn.gov.ar/consultaTalleresWeb/public/documentoConsulta/verDocumentoById?idDocumento=115",
+   "pagina": 53,
+   "cita": "Las 231 víctimas directas de femicidio incluyen 5 víctimas de travesticidio/transfemicidio"
+  },
+  {
+   "anio": 2022,
+   "victimas": 226,
+   "documento": "https://om.csjn.gov.ar/consultaTalleresWeb/public/documentoConsulta/verDocumentoById?idDocumento=170",
+   "pagina": 60,
+   "cita": "Las 226 víctimas directas de femicidio incluyen 7"
+  },
+  {
+   "anio": 2023,
+   "victimas": 250,
+   "documento": "https://om.csjn.gov.ar/consultaTalleresWeb/public/documentoConsulta/verDocumentoById?idDocumento=242",
+   "pagina": 5,
+   "cita": "Las 250 víctimas directas de femicidio incluyen 245"
+  },
+  {
+   "anio": 2024,
+   "victimas": 228,
+   "documento": "https://om.csjn.gov.ar/consultaTalleresWeb/public/documentoConsulta/verDocumentoById?idDocumento=333",
+   "pagina": 10,
+   "cita": "Las 228 víctimas directas de femicidio incluyen 220"
+  },
+  {
+   "anio": 2025,
+   "victimas": 200,
+   "documento": "https://om.csjn.gov.ar/consultaTalleresWeb/public/documentoConsulta/verDocumentoById?idDocumento=384",
+   "pagina": 3,
+   "cita": "se contabilizaron 200 víctimas directas y 19 víctimas de posible femicidio vinculado"
+  }
+ ]
+}

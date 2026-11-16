@@ -41,6 +41,8 @@ export const DATOS_FIJOS: DatoFijo[] = [
   { slug: "pib", e: ex("dg_3_2_ogp_d_2004_t_17", "asis") },
   { slug: "pib-por-habitante", e: ex("dg_3_2_ogp_d_2004_t_17", "asis", { esc: "pc" }) },
   { slug: "produccion-industrial", e: ex("dg_453_1_serie_deseada_0_0_24_58", "asis") },
+  { slug: "patentamientos", e: ex("patentamientos", "asis") },
+  { slug: "demanda-electrica", e: ex("demanda_electrica", "asis") },
   // Empleo y pobreza
   { slug: "desocupacion", e: ex("dg_42_3_eph_puntuatal_0_m_30", "asis") },
   { slug: "pobreza", e: ex("pob_tasa_pobreza_personas", "asis") },
@@ -61,11 +63,15 @@ export const DATOS_FIJOS: DatoFijo[] = [
   { slug: "deuda-consolidada-pib", e: ex("deuda_consolidada", "corr", { esc: "pib" }) },
   { slug: "deficit-cuasifiscal-pib", e: ex("bcra_cuasifiscal", "real", { esc: "pib" }) },
   { slug: "retenciones", e: ex("rec_retenciones", "real") },
+  { slug: "subsidios-transporte", e: ex("sub_transporte", "real") },
+  { slug: "transferencias-provincias", e: ex("transf_prov", "real") },
+  { slug: "gasto-ciencia", e: ex("gasto_ciencia", "asis") },
   // Seguridad y salud
   { slug: "homicidios", e: ex("homicidios_tasa", "asis") },
   { slug: "mortalidad-infantil", e: ex("mortalidad_infantil", "asis") },
   { slug: "presos-por-habitante", e: ex("presos_tasa", "asis") },
   { slug: "presos", e: ex("presos", "asis") },
+  { slug: "siniestros-viales", e: ex("siniestros_viales_tasa", "asis") },
   // Dinero, tasas y mercados
   { slug: "reservas", e: ex("bcra_1", "usdr") },
   { slug: "riesgo-pais", e: ex("riesgo", "asis") },

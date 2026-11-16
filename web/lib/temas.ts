@@ -52,6 +52,7 @@ export const TEMAS: Tema[] = [
       { id: "dg_3_2_ogp_d_2004_t_17", nombre: "PIB (producción total del país)", corto: "el PIB" },
       { id: "dg_3_2_ogp_d_2004_t_17", nombre: "PIB por habitante", corto: "el PIB por habitante", esc: "pc" },
       { id: "dg_453_1_serie_deseada_0_0_24_58", nombre: "Producción industrial", corto: "la producción industrial" },
+      { id: "patentamientos", nombre: "Patentamientos de autos 0 km", corto: "los patentamientos", med: "asis" },
     ], grupos: ["Actividad"], q: "actividad", desc: "Actividad económica mensual (EMAE), PIB, producción industrial y construcción de Argentina." },
   { slug: "empleo", nombre: "Empleo y pobreza", cats: ["Empleo, pobreza e ingresos"], corto: INFO_CORTA["Empleo, pobreza e ingresos"].texto, largo: largoDe("Empleo, pobreza e ingresos"),
     principales: [
@@ -78,14 +79,17 @@ export const TEMAS: Tema[] = [
       { id: "deuda_consolidada", nombre: "Deuda consolidada del Tesoro y el Banco Central (% del PIB)", corto: "la deuda consolidada", esc: "pib" },
       { id: "bcra_cuasifiscal", nombre: "Déficit cuasifiscal del Banco Central (% del PIB)", corto: "el déficit cuasifiscal", esc: "pib" },
       { id: "rec_retenciones", nombre: "Retenciones a las exportaciones (en pesos de hoy)", corto: "las retenciones a las exportaciones", med: "real" },
+      { id: "transf_prov", nombre: "Transferencias no automáticas a provincias (en pesos de hoy)", corto: "las transferencias a provincias", med: "real" },
+      { id: "sub_transporte", nombre: "Subsidios al transporte (en pesos de hoy)", corto: "los subsidios al transporte", med: "real" },
     ], grupos: ["Fiscal"], q: "fiscal", desc: "Resultado primario y financiero del sector público nacional, ingresos, gastos, deuda y recaudación por impuesto." },
   { slug: "sociedad", nombre: "Seguridad y salud", cats: ["Sociedad"], corto: INFO_CORTA["Sociedad"].texto, largo: largoDe("Sociedad"),
     principales: [
       { id: "homicidios_tasa", nombre: "Homicidios dolosos cada 100.000 habitantes", corto: "los homicidios", med: "asis" },
       { id: "mortalidad_infantil", nombre: "Mortalidad infantil", corto: "la mortalidad infantil", med: "asis" },
+      { id: "siniestros_viales_tasa", nombre: "Muertes en siniestros viales cada 100.000 habitantes", corto: "las muertes en siniestros viales", med: "asis" },
       { id: "presos_tasa", nombre: "Presos cada 100.000 habitantes", corto: "los presos por habitante", med: "asis" },
       { id: "presos", nombre: "Personas presas", corto: "las personas presas", med: "asis" },
-    ], grupos: ["Sociedad"], porCat: true, q: "homicidios", desc: "Homicidios dolosos, mortalidad infantil y personas presas en Argentina, con datos oficiales." },
+    ], grupos: ["Sociedad"], porCat: true, q: "homicidios", desc: "Homicidios dolosos, mortalidad infantil, muertes en siniestros viales y personas presas en Argentina, con datos oficiales." },
   { slug: "finanzas", nombre: "Dinero, tasas y mercados", cats: ["Dinero y bancos (BCRA)", "Tasas de interés", "Mercados"],
     corto: "Reservas, tasas de interés y riesgo país: cómo están el dinero y los mercados.", largo: largoDe("Dinero y bancos (BCRA)", "Tasas de interés", "Mercados"),
     principales: [

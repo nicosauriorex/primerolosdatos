@@ -7,7 +7,8 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-16.
 ## Dónde estamos
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
-Últimos bloques (todos publicados, corrida en verde):
+Últimos bloques (todos publicados, corrida en verde, salvo el primero):
+- Subsidios al transporte, transferencias no automáticas a provincias, patentamientos y autos usados, demanda eléctrica, becas, seguro de desempleo, gasto nacional por función (% del PIB), siniestros viales y femicidios (a mano, Corte Suprema): 17 series; además «1 resultado» en el buscador — 2026-11-16, **sin publicar** — [spec](specs/datos-calientes-2.md)
 - Recaudación por impuesto, homicidios, mortalidad infantil, presos, empleo público nacional, turismo e importaciones de consumo: 20 series y tema «Seguridad y salud»; además, las series anuales dicen el año («2025») en vez de «dic-25» en todo el sitio — 2026-11-16, 9da1c52 (corrida completa en verde, run 43873660350) — [spec](specs/datos-sociedad-recaudacion.md)
 - AUH, Tarjeta Alimentar, cobertura de la canasta (cuenta de Capital Humano y de la UCA) y pensiones por invalidez: 11 series; además, enteros exactos en los JSON, fuente de las dos series cuando un dato se mide en otro y cierre de mandato en series anuales — 2026-11-16, 1c926a3 (corrida completa en verde, run 43857957032) — [spec](specs/auh-pensiones.md)
 - Revisión de 931167d y 91aec1b (sin bugs graves): cuasifiscal sin «LEFI» en el nombre (la variable 55 solo tiene pases y LELIQ; el 0,0 % desde ago-24 es correcto), deuda / PIB sin «fin de año», celda vacía de adelantos no borra el mes de la consolidada — 2026-11-16, 5eaf7e0
@@ -24,7 +25,7 @@ Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes
 
 ## Qué sigue, en orden
 1. **El primer bloque no hecho de la tabla "Próximos bloques" de `docs/ROADMAP.md`** (la única lista de bloques). Hoy: Contar los Compartir (9a), spec pendiente. De la spec de deuda queda opcional la fase 3 (tarifa eléctrica de CAMMESA).
-2. **Datos nuevos «calientes»:** hechos AUH y pensiones, y recaudación / seguridad / empleo público. Segunda investigación (sin verificar por la sesión principal) en [investigaciones/datos-nuevos-2-2026-11-16.md](investigaciones/datos-nuevos-2-2026-11-16.md): subsidios al transporte, transferencias a provincias, patentamientos, demanda eléctrica, gasto por finalidad (ya en el pipeline), femicidios, siniestros viales. Falta que el usuario elija qué pasa a spec.
+2. **Datos nuevos «calientes»:** hechos AUH y pensiones, recaudación / seguridad / empleo público y la segunda investigación ([spec](specs/datos-calientes-2.md)). Quedan afuera robos (la serie oficial termina en 2022), obra pública por inciso, motos, mayoristas y vacunas.
 3. **Mantenimiento a mano cuando salgan datos nuevos:** herencia (`datos/manual/herencia.json`; nivel de reservas netas del FMI en la 3ª revisión, dic-2026, y saldos de DEG cada mes en `reservas_netas_supuestos.json`); Congreso (cada 1 de marzo, cortes de las dos cámaras y vetos del año); provincias (el III trimestre de la DNAP entra solo: mirar que pase el control).
 4. **Pendientes sin fuente o sin decidir:** semáforo (desestacionalizado X-13; CAME, patentamientos, Construya, escrituras, leche, petróleo); gasto (empresas públicas sin fuente; universidades: estudiantes antes de 2023 y las 8 sin datos en el PIU); Congreso (leyes del Ejecutivo de Menem a CFK 1); herencia (cepo de 2003 y 2007, FMI de 1995 a 2002).
 5. **Lupa:** el semáforo todavía no está en el buscador (sus indicadores salen de su archivo de datos).
@@ -42,6 +43,8 @@ A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunid
   - Banco Central: unos cinco días hábiles de atraso en todas las fuentes legibles; falta saber si es lo normal.
   - Precios contra el mundo: "La región" puede quedar con un mes viejo (ropa: dic-23); México corta comunicación, recreación y varios en jul-24; Chile, comunicación y recreación en dic-23; EE.UU. sin oct-25 (cierre del gobierno).
   - Deuda: el % del PIB de la web (dólar promedio, PIB de 12 meses) difiere unas décimas del de Finanzas (lo dice la ficha); imagen para compartir de las fichas nuevas sin mirar.
+  - Cantidades enteras menores de 1.000 se ven con un decimal («200,0» femicidios): el formato general no distingue cantidades.
+  - Femicidios 2018 y 2020 salen del gráfico del informe 2025 (sin frase textual).
   - Las estimaciones propias de reservas netas dependen de supuestos fijos (swaps 20.000, SEDESA 2.000).
 
 ## Avisos y decisiones abiertas
