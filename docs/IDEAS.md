@@ -100,3 +100,7 @@ Idea del usuario. Agregado el mismo día: ~~ver el presupuesto de cada entidad p
 ## Deuda en dólares a otra cotización (2026-11-15)
 - «o si la quiero ver en otra moneda al dolar CCL» y «no sería en dolares blue?»: la deuda ya está en dólares (Finanzas pasa los pesos al oficial de fin de mes), así que «al CCL» solo cambia la parte en pesos. Versión con sentido: deuda en moneda extranjera + deuda en pesos y pasivos del Banco Central pasados a dólares al CCL/MEP/blue (para la consolidada: `deuda_ac_me + deuda_ac_mn × oficial / CCL − letras + pasivos / CCL`). Sin decidir: lo pide el usuario si lo quiere.
 
+
+## Datos calientes que faltan (2026-11-16)
+Idea del usuario: sumar datos que mencionan seguido el gobierno, los ministros y la oposición, que le importan a la gente y que el sitio no tiene. Ejemplos suyos: AUH y asignaciones en términos reales y cuánto cubren de la canasta (la cuenta de Capital Humano); pensiones por invalidez por gobierno; qué hizo cada gobierno por Malvinas (y la ley de sanciones a las petroleras); en qué gastan las universidades (licitaciones, si no presentan presupuesto); empleados públicos por provincia y municipio.
+Investigado: fuentes, IDs, ranking y qué no se puede en `docs/investigaciones/datos-nuevos-2026-11-16.md`. Falta elegir qué pasa a spec.
