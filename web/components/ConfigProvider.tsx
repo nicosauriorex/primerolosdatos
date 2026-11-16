@@ -158,6 +158,11 @@ function Panel({ onCerrar, guardado }: { onCerrar: () => void; guardado: boolean
             <button type="button" className="btn" disabled={!Object.keys(c.colPres).length} onClick={() => cambiar({ colPres: {} })}>Volver a los colores de fábrica</button>
           </div>
         </Grupo>
+        <Grupo titulo="Compartir">
+          <Fila rotulo="Preguntar por qué compartís" ayuda="Contamos cuántas veces se comparte cada dato y vista, sin guardar quién sos.">
+            <Opciones etiqueta="Preguntar por qué compartís" valor={c.preguntarPorque ? "si" : "no"} opciones={[["si", "Sí"], ["no", "No"]]} onElegir={(v) => cambiar({ preguntarPorque: v === "si" })} />
+          </Fila>
+        </Grupo>
       </div>
       <PieConfig reiniciar={reiniciar} />
     </Modal>

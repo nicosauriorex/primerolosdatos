@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { IconoCompartir } from "./Iconos";
 import { avisoCompartir, compartir } from "@/lib/compartir";
+import { contarCompartir } from "@/lib/conteo";
 
 export function BotonLink({ id, titulo }: { id: string; titulo: string }) {
   const [aviso, setAviso] = useState<string | null>(null);
@@ -10,7 +11,9 @@ export function BotonLink({ id, titulo }: { id: string; titulo: string }) {
   useEffect(() => () => window.clearTimeout(t.current), []);
   const accion = async () => {
     const url = `${window.location.origin}${window.location.pathname}${window.location.search}#${id}`;
-    const msg = avisoCompartir(await compartir(url, titulo));
+    const r = await compartir(url, titulo);
+    if (r === "compartido" || r === "copiado") contarCompartir({ accion: r === "compartido" ? "link_compartido" : "link_copiado", dato: id, href: url });
+    const msg = avisoCompartir(r);
     setAviso(msg);
     window.clearTimeout(t.current);
     if (msg) t.current = window.setTimeout(() => setAviso(null), 3000);

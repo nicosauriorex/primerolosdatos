@@ -2,6 +2,7 @@
 // Botón "Compartir" que abre una hoja con tres acciones grandes: imagen, link y texto.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { IconoCompartir } from "@/components/Iconos";
+import { contarCompartir } from "@/lib/conteo";
 import { Hoja } from "./Hoja";
 import { IconoCopiar, IconoImagen, IconoTexto } from "./iconos";
 
@@ -33,8 +34,8 @@ export function CompartirHoja({ href, titulo, onImagen, texto, variante = "texto
   useEffect(() => { if (!abierta) { setMensaje(""); setManual(null); } }, [abierta]);
   useEffect(() => { if (manual !== null) { campo.current?.focus(); campo.current?.select(); } }, [manual]);
 
-  const copiarY = async (t: string, ok: string) => {
-    if (await copiar(t)) { setManual(null); setMensaje(ok); }
+  const copiarY = async (t: string, ok: string, accion: "link_copiado" | "texto") => {
+    if (await copiar(t)) { setManual(null); setMensaje(ok); contarCompartir({ accion, href: accion === "link_copiado" ? t : href }); }
     else { setManual(t); setMensaje("No se pudo copiar solo: copialo desde el campo."); }
   };
 
@@ -53,8 +54,8 @@ export function CompartirHoja({ href, titulo, onImagen, texto, variante = "texto
         {(cerrar) => (
           <div className="comphoja">
             {onImagen && <Accion icono={<IconoImagen />} titulo="Imagen" desc="Una imagen del gráfico, lista para mandar o subir." onClick={() => cerrar(onImagen)} />}
-            <Accion icono={<IconoCopiar />} titulo="Link" desc="Copia el link a esta vista, tal como la ves." onClick={() => copiarY(absoluto(), "Link copiado")} />
-            {texto && <Accion icono={<IconoTexto />} titulo="Texto" desc="Copia el dato en una frase, para pegar en un mensaje." onClick={() => copiarY(texto, "Texto copiado")} />}
+            <Accion icono={<IconoCopiar />} titulo="Link" desc="Copia el link a esta vista, tal como la ves." onClick={() => copiarY(absoluto(), "Link copiado", "link_copiado")} />
+            {texto && <Accion icono={<IconoTexto />} titulo="Texto" desc="Copia el dato en una frase, para pegar en un mensaje." onClick={() => copiarY(texto, "Texto copiado", "texto")} />}
             {manual !== null && <input ref={campo} className="comphoja-campo" readOnly value={manual} aria-label="Texto para copiar" onFocus={(e) => e.currentTarget.select()} />}
             <p className="comphoja-aviso" role="status">{mensaje}</p>
           </div>

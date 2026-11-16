@@ -139,9 +139,35 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages project create duelo-de-datos --production-branch=main
 
-      - name: Publicar en Cloudflare Pages
+      - name: ¿Está creada la base?
+        # Mientras web/wrangler.toml tenga el marcador (falta `wrangler d1 create`), se publica sin la base:
+        # se saca el bloque [[d1_databases]] y no se corren migraciones. Las funciones responden 503 y el sitio sigue igual.
+        id: base
+        working-directory: web
+        run: |
+          if grep -q '^database_id *= *"PENDIENTE' wrangler.toml; then
+            sed -i '/^\[\[d1_databases\]\]/,$d' wrangler.toml
+            echo "lista=no" >> "$GITHUB_OUTPUT"
+            echo "- Base de conteos: sin crear (se publica sin ella)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "lista=si" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Migraciones de la base
+        # Idempotente: corre en los dos modos, si la base existe. Necesita "D1: Edit" en CLOUDFLARE_API_TOKEN.
+        if: steps.base.outputs.lista == 'si'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy web/out --project-name=duelo-de-datos --branch=main
+          workingDirectory: web
+          command: d1 migrations apply pld-compartir --remote
+
+      - name: Publicar en Cloudflare Pages
+        # Desde web/ para que tome functions/ y wrangler.toml (también en el modo rápido).
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: web
+          command: pages deploy out --project-name=duelo-de-datos --branch=main

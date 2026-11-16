@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "tipos": "tsc --noEmit",
-    "previas": "tsx scripts/generar-previas.ts"
+    "tipos:funciones": "tsc -p functions",
+    "previas": "tsx scripts/generar-previas.ts",
+    "conteos": "node scripts/conteos.mjs",
+    "funciones": "wrangler d1 migrations apply pld-compartir --local && wrangler pages dev out --port 8788"
   },
   "dependencies": {
     "next": "^16.4.5",
@@ -15,11 +18,13 @@
     "uplot": "^1.6.32"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261116.1",
     "@napi-rs/canvas": "^1.1.1",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "wrangler": "^4.163.0"
   }
 }

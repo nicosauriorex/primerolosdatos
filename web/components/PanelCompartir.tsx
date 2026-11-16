@@ -17,8 +17,16 @@ import { dibujarImagen, esperarFuentes } from "@/lib/imagen";
 import { admitePersonalizar, armarImagen, MAX_COMENTARIO, mesesDisponibles, tablaTextoDeVista, type VistaImg } from "@/lib/imagen-datos";
 import { armarImagenPres, esVistaPres, idsDeVistaPres, type VistaPres } from "@/lib/imagen-presidentes";
 import { leerPaleta } from "@/lib/imagen-paleta";
+import { contarCompartir } from "@/lib/conteo";
 
 export type VistaCompartir = VistaImg | VistaPres;
+/** Qué dato se comparte, para el conteo: el id de la serie si la vista tiene una; si no, el tipo de vista (ranking, herencia, precios del mundo…). */
+const datoDeVista = (v: VistaCompartir): string | undefined => {
+  if (!esVistaPres(v)) return v.exprs[0]?.id;
+  if ("expr" in v && v.expr) return v.expr.id;
+  if (v.tipo === "variables") return v.exprs[0]?.id;
+  return v.tipo.startsWith("ctx-") ? "precios-mundo" : v.tipo;
+};
 interface Props { vista: VistaCompartir; href: string; titulo: string; onCerrar: () => void }
 
 /** Con la vista en Tabla se ofrece copiar la tabla o, si se prefiere, compartir el gráfico; con cualquier otra vista va directo a la imagen. */
@@ -37,7 +45,9 @@ function ElegirTabla({ vista, href, titulo, onCerrar, onGrafico }: Props & { onG
     if (esVistaPres(vista) || !motor) return;
     const texto = tablaTextoDeVista(motor, { ...vista, exprs: exprsUsadas(motor, vista) }, new URL(href, window.location.origin).toString());
     if (!texto) { setAviso("No hay datos para copiar"); return; }
-    setAviso(avisoTabla(await copiarTexto(texto)));
+    const r = await copiarTexto(texto);
+    if (r === "copiado") contarCompartir({ accion: "tabla", dato: datoDeVista(vista), href });
+    setAviso(avisoTabla(r));
   };
   return (
     <Modal titulo="Compartir la tabla" cabecera={`Compartir ${titulo}`} onCerrar={onCerrar}>
@@ -134,7 +144,11 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
   }, [cargado, motor, version, vista, formato, per?.desde, per?.hasta, periodoValido, periodoEnTitulo, JSON.stringify(img), comentarioAplicado, kBase, config.colPres, resaltados]);
 
   const mostrar = (t: string | null) => { setAviso(t); if (t) setTimeout(() => setAviso(null), 4000); };
-  const alResultado = (r: ResultadoImagen) => mostrar(avisoImagen(r));
+  const alResultado = (r: ResultadoImagen) => {
+    if (r === "descargada") contarCompartir({ accion: "imagen_descargada", dato: datoDeVista(vista), formato, href });
+    else if (r === "copiada") contarCompartir({ accion: "imagen_copiada", dato: datoDeVista(vista), formato, href });
+    mostrar(avisoImagen(r));
+  };
   const puedeCompartir = !!archivo && puedeCompartirArchivo(archivo);
 
   return (
@@ -212,11 +226,15 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
       <footer>
         {puedeCompartir && (
           <button type="button" className="btn primario" disabled={!archivo}
-            onClick={async () => { const r = await compartirImagen(archivo!, titulo, href, armado); mostrar(r === "error" ? "No se pudo compartir la imagen" : avisoImagen(r)); }}>Compartir imagen</button>
+            onClick={async () => { const r = await compartirImagen(archivo!, titulo, href, armado); if (r === "compartida") contarCompartir({ accion: "imagen_compartida", dato: datoDeVista(vista), formato, href }); mostrar(r === "error" ? "No se pudo compartir la imagen" : avisoImagen(r)); }}>Compartir imagen</button>
         )}
         <button type="button" className={`btn${puedeCompartir ? "" : " primario"}`} disabled={!archivo} onClick={() => alResultado(descargarImagen(archivo!))}>Descargar</button>
         {puedeCopiarImagen() && <button type="button" className="btn" disabled={!archivo} onClick={async () => alResultado(await copiarImagen(archivo!))}>Copiar imagen</button>}
-        <button type="button" className="btn" onClick={async () => mostrar(avisoCompartir(await compartir(href, titulo, armado)))}>Copiar link</button>
+        <button type="button" className="btn" onClick={async () => {
+          const r = await compartir(href, titulo, armado);
+          if (r === "compartido" || r === "copiado") contarCompartir({ accion: r === "compartido" ? "link_compartido" : "link_copiado", dato: datoDeVista(vista), href });
+          mostrar(avisoCompartir(r));
+        }}>Copiar link</button>
       </footer>
     </Modal>
   );

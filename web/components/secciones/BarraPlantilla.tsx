@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDatos } from "../DatosProvider";
 import { avisoCompartir, compartir } from "@/lib/compartir";
+import { contarCompartir } from "@/lib/conteo";
 import { MAX_NOMBRE, useMisPlantillas } from "@/lib/misPlantillas";
 import { crearPlantillas, type Plantilla, type Vista } from "@/lib/plantillas";
 
@@ -51,7 +52,11 @@ export function BarraPlantilla({ p, set, info, simple, cerrarAntes }: {
     setNombre(null);
     mostrar(r.aviso ?? "Guardado en Mis gráficos");
   };
-  const abrirCompartir = async () => mostrar(avisoCompartir(await compartir(window.location.href, titulo ?? "Primero los Datos: Histórico")));
+  const abrirCompartir = async () => {
+    const r = await compartir(window.location.href, titulo ?? "Primero los Datos: Histórico");
+    if (r === "compartido" || r === "copiado") contarCompartir({ accion: r === "compartido" ? "link_compartido" : "link_copiado", href: window.location.href });
+    mostrar(avisoCompartir(r));
+  };
   const guardarEnMis = !de && pn && !yaGuardada && nombre == null
     ? <p style={{ margin: "4px 0 0" }}><button type="button" className="btn" onClick={() => setNombre(pn)}>Guardar en Mis gráficos</button></p> : null;
 

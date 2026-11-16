@@ -25,6 +25,7 @@ import { useConfig } from "../ConfigProvider";
 import { baseDeConfig, medidaInicial, medidaPreferida } from "@/lib/config";
 import { encExpr, useParams } from "@/lib/url";
 import { avisoTabla, copiarTexto } from "@/lib/compartir";
+import { contarCompartir } from "@/lib/conteo";
 import { filasDeTabla, tablaATexto, type ColTabla } from "@/lib/tabla-texto";
 import { IconoCompartir } from "../Iconos";
 import { fuentePublica } from "@/lib/fuente-publica";
@@ -386,6 +387,7 @@ function CardGrafico({ titulo, temporal, nota, leyenda, visibles, config, rows, 
   const copiarTabla = async () => {
     const cols: ColTabla[] = series.map((se) => ({ key: se.key, name: se.name, unidad: unidades?.[se.key], fmt: se.fmt || opts.fmtTip }));
     const r = await copiarTexto(tablaATexto(cols, filasDeTabla(rows, cols), window.location.href));
+    if (r === "copiado") contarCompartir({ accion: "tabla", dato: series.length === 1 ? series[0].key : undefined, href: window.location.href });
     setAvisoT(avisoTabla(r)); setTimeout(() => setAvisoT(null), 4000);
   };
   const botonExpandir = (

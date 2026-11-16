@@ -1,0 +1,21 @@
+# Proyecto de Cloudflare Pages "duelo-de-datos": sitio estático (out/) + funciones (functions/).
+#
+# Pasos manuales, una sola vez (requisito 8 de docs/specs/contar-compartir.md):
+#   1. cd web && npx wrangler login
+#   2. npx wrangler d1 create pld-compartir
+#      y copiar el "database_id" que imprime a la línea database_id de más abajo
+#      (reemplaza el marcador PENDIENTE-wrangler-d1-create).
+#   3. Si la corrida de GitHub Actions falla por permisos, agregar "D1: Edit"
+#      a la clave CLOUDFLARE_API_TOKEN en el panel de Cloudflare.
+# Mientras el marcador siga puesto, el workflow publica sin la base (saca el bloque de abajo) y las funciones responden 503.
+# El bloque [[d1_databases]] tiene que quedar último en el archivo: el workflow lo borra desde ahí hasta el final.
+
+name = "duelo-de-datos"
+pages_build_output_dir = "out"
+compatibility_date = "2026-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pld-compartir"
+database_id = "PENDIENTE-wrangler-d1-create"
+migrations_dir = "db"

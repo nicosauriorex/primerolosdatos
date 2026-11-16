@@ -11,9 +11,11 @@ import "./estilos/presidentes.css";
 import "./estilos/herencia.css";
 import "./estilos/elecciones.css";
 import "./estilos/contexto.css";
+import "./estilos/porque.css";
 import { DatosProvider, Errores } from "@/components/DatosProvider";
 import { Barra, CabeceraPagina, NavegacionGlobal, PieSitio } from "@/components/Nav";
 import { ConfigProvider } from "@/components/ConfigProvider";
+import { PreguntaPorque } from "@/components/sistema/PreguntaPorque";
 import { SCRIPT_TEMA } from "@/lib/config";
 import { DESCRIPCION_SITIO, IMAGEN_SITIO, NOMBRE_SITIO, SITIO_URL, metaCompartir } from "@/lib/previas";
 
@@ -44,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <DatosProvider><Errores /><CabeceraPagina />{children}<NavegacionGlobal /></DatosProvider>
           </main>
           <PieSitio />
+          <PreguntaPorque />
         </ConfigProvider>
       </body>
     </html>

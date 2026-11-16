@@ -24,7 +24,7 @@ Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes
 - Mantenimiento del pipeline (`pipeline/red.py`) — 2026-11-14 — [spec](specs/mantenimiento-pipeline.md)
 
 ## Qué sigue, en orden
-1. **El primer bloque no hecho de la tabla "Próximos bloques" de `docs/ROADMAP.md`** (la única lista de bloques). Hoy: Contar los Compartir (9a), spec pendiente. De la spec de deuda queda opcional la fase 3 (tarifa eléctrica de CAMMESA).
+1. **El primer bloque no hecho de la tabla "Próximos bloques" de `docs/ROADMAP.md`** (la única lista de bloques). Hoy: Novedades y calendario (9b), sin spec. Contar los Compartir (9a) está implementado ([spec](specs/contar-compartir.md)); para que guarde, falta crear la base D1: `cd web && npx wrangler login`, `npx wrangler d1 create pld-compartir`, pegar el id en `web/wrangler.toml` y dar «D1: Edit» al token. Sin la base se publica igual. De la spec de deuda queda opcional la fase 3 (tarifa eléctrica de CAMMESA).
 2. **Datos nuevos «calientes»:** hechos AUH y pensiones, recaudación / seguridad / empleo público y la segunda investigación ([spec](specs/datos-calientes-2.md)). Quedan afuera robos (la serie oficial termina en 2022), obra pública por inciso, motos, mayoristas y vacunas.
 3. **Mantenimiento a mano cuando salgan datos nuevos:** herencia (`datos/manual/herencia.json`; nivel de reservas netas del FMI en la 3ª revisión, dic-2026, y saldos de DEG cada mes en `reservas_netas_supuestos.json`); Congreso (cada 1 de marzo, cortes de las dos cámaras y vetos del año); provincias (el III trimestre de la DNAP entra solo: mirar que pase el control).
 4. **Pendientes sin fuente o sin decidir:** semáforo (desestacionalizado X-13; CAME, patentamientos, Construya, escrituras, leche, petróleo); gasto (empresas públicas sin fuente; universidades: estudiantes antes de 2023 y las 8 sin datos en el PIU); Congreso (leyes del Ejecutivo de Menem a CFK 1); herencia (cepo de 2003 y 2007, FMI de 1995 a 2002).
@@ -53,6 +53,7 @@ A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunid
 - Al retirar una serie del catálogo: `gh workflow run actualizar.yml -f aceptar_menos_series=true`.
 
 ## Herramientas
+- Conteos de compartir: `cd web && npm run conteos` (necesita `wrangler login`); local con funciones y D1: vista `web-funciones` (`npm run funciones`, puerto 8788).
 - `python pipeline/ver_cache.py <nombre> [--clave …]`: única forma permitida de mirar `datos/cache/`.
 - Barridos después de cada tanda: `cd web && npx tsx scripts/barrido-cuentas.ts` y `web/scripts/barrido-navegador.js` (instrucciones en su encabezado; pedir cada ruta con `fetch(ruta, { cache: "reload" })` antes de medir).
 - Chequeos de los datos aparte del motor: `npx tsx scripts/chequeo-diario.ts`, `npx tsx scripts/chequeo-semaforo.ts`, `python pipeline/reservas_netas.py --bajar`, `python pipeline/semaforo.py --bajar`.

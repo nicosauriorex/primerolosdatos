@@ -7,6 +7,7 @@ import { VistaCompleta } from "./PanelCompartir";
 import { useConfig } from "./ConfigProvider";
 import { FORMATOS_IMG, type FormatoImg } from "@/lib/config";
 import { archivoPng, avisoImagen, compartirImagen, copiarImagen, descargarImagen, puedeCompartirArchivo, puedeCopiarImagen, type ResultadoImagen } from "@/lib/compartir";
+import { contarCompartir } from "@/lib/conteo";
 import { esperarFuentes } from "@/lib/imagen";
 import { armarImagenSemaforo, dibujarImagenSemaforo } from "@/lib/imagen-semaforo";
 import { leerPaleta } from "@/lib/imagen-paleta";
@@ -37,7 +38,11 @@ export function PanelSemaforo({ tabla, titulo, href, onCerrar }: { tabla: Tabla;
   }, [tabla, formato, config.colPres]);
 
   const mostrar = (t: string | null) => { setAviso(t); if (t) setTimeout(() => setAviso(null), 4000); };
-  const alResultado = (r: ResultadoImagen) => mostrar(avisoImagen(r));
+  const alResultado = (r: ResultadoImagen) => {
+    if (r === "descargada") contarCompartir({ accion: "imagen_descargada", dato: "semaforo", formato, href });
+    else if (r === "copiada") contarCompartir({ accion: "imagen_copiada", dato: "semaforo", formato, href });
+    mostrar(avisoImagen(r));
+  };
   const puedeCompartir = !!archivo && puedeCompartirArchivo(archivo);
 
   return (
@@ -62,7 +67,7 @@ export function PanelSemaforo({ tabla, titulo, href, onCerrar }: { tabla: Tabla;
       <footer>
         {puedeCompartir && (
           <button type="button" className="btn primario" disabled={!archivo}
-            onClick={async () => { const r = await compartirImagen(archivo!, titulo, href); mostrar(r === "error" ? "No se pudo compartir la imagen" : avisoImagen(r)); }}>Compartir imagen</button>
+            onClick={async () => { const r = await compartirImagen(archivo!, titulo, href); if (r === "compartida") contarCompartir({ accion: "imagen_compartida", dato: "semaforo", formato, href }); mostrar(r === "error" ? "No se pudo compartir la imagen" : avisoImagen(r)); }}>Compartir imagen</button>
         )}
         <button type="button" className={`btn${puedeCompartir ? "" : " primario"}`} disabled={!archivo} onClick={() => alResultado(descargarImagen(archivo!))}>Descargar</button>
         {puedeCopiarImagen() && <button type="button" className="btn" disabled={!archivo} onClick={async () => alResultado(await copiarImagen(archivo!))}>Copiar imagen</button>}

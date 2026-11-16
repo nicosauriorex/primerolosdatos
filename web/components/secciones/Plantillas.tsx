@@ -13,6 +13,7 @@ import { useConfig } from "../ConfigProvider";
 import { vistaDeParams } from "@/lib/imagen-datos";
 import { IconoCompartir } from "../Iconos";
 import { avisoCompartir, compartir } from "@/lib/compartir";
+import { contarCompartir } from "@/lib/conteo";
 import { useMisPlantillas } from "@/lib/misPlantillas";
 import { GRUPOS, crearPlantillas, evaluar, filtrar, hrefPlantilla, plantillaPropia, type Plantilla } from "@/lib/plantillas";
 import { unoDe, useParams } from "@/lib/url";
@@ -66,7 +67,11 @@ export const Tarjeta = memo(function Tarjeta({ pl, onAviso, onRenombrar, onBorra
       {pl.href || !pl.e ? (
         // las que abren otra sección (Precios en el mundo, Congreso) no tienen imagen: se comparte el link
         <button type="button" className="btn comp" title="Copiar el link de este gráfico" aria-label={`Compartir: ${pl.titulo}`}
-          onClick={async () => onAviso(avisoCompartir(await compartir(href, pl.titulo)))}><IconoCompartir /></button>
+          onClick={async () => {
+            const r = await compartir(href, pl.titulo);
+            if (r === "compartido" || r === "copiado") contarCompartir({ accion: r === "compartido" ? "link_compartido" : "link_copiado", dato: pl.id, href });
+            onAviso(avisoCompartir(r));
+          }}><IconoCompartir /></button>
       ) : (
         <BotonCompartir className="btn comp" title="Compartir este gráfico como imagen" aria-label={`Compartir: ${pl.titulo}`} titulo={pl.titulo} href={href}
           crearVista={() => (motor ? vistaDeParams(motor, new URLSearchParams(ev?.vista ?? pl.vista), (id) => metas.some((x) => x.id === id), config.desde, pl.titulo) : null)}>
