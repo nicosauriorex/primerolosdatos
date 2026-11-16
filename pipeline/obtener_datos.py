@@ -28,6 +28,7 @@ import precios_mundo
 import red
 import salarios
 import semaforo
+import novedades
 import universidades
 import provincias
 import provincias_dnap
@@ -274,6 +275,16 @@ def escribir_json_web(datos, ctx=None, pm=None, cap=None, con_red=True):
         (destino / "semaforo.json").write_text(txt, encoding="utf-8")
     except Exception as e:
         print(f"Semáforo de actividad: no se pudo armar, se sigue sin semaforo.json ({e}).")
+    # Novedades y calendario (bloque 9b): con red suma al registro datos/novedades.json lo que llegó en esta corrida y baja el calendario del
+    # INDEC (respaldo datos/cache/calendario_indec.json); sin red (--solo-json) solo escribe el JSON desde el registro y la copia.
+    # Va fuera del hash. Si falla, la corrida sigue sin novedades.json.
+    try:
+        if con_red:
+            novedades.registrar(datos)
+        txt = json.dumps(novedades.construir_json(datos, con_red=con_red), ensure_ascii=False, separators=(",", ":"))
+        (destino / "novedades.json").write_text(txt, encoding="utf-8")
+    except Exception as e:
+        print(f"Novedades: no se pudo armar, se sigue sin novedades.json ({e}).")
     # Gasto de la Nación (Presupuesto Abierto): con red baja los años que faltan (respaldos en datos/cache/gasto_nacion_*); sin red usa solo los respaldos.
     # Va fuera del hash. Si falla, la corrida sigue sin gasto_nacion*.json.
     try:

@@ -11,6 +11,7 @@ import type { Calculo, Expr, Motor } from "./motor";
 import { comparaciones, plantillaSuelta, type Comparacion } from "./plantillas";
 import { datosDesde, periodoMandato, variacionMostrada } from "./tablas";
 import { encExpr } from "./url";
+import type { VistaImg } from "./imagen-datos";
 import type { VelaDato } from "@/components/Velas";
 import type { DeltaProps } from "@/components/sistema/Delta";
 import type { CeldaMandato, ColumnaMandato, FilaMandato } from "@/components/sistema/TablaMandatos";
@@ -117,7 +118,7 @@ export const hrefMandatoDe = (e: Expr, o: { mp: string | null; anc: string | nul
   `/mandato/?${qs({ mv: encExpr(e), mp: o.mp, anc: o.anc, ...inicio })}`;
 
 // ------------------------------------------------------------ Capítulo "Ahora": la cabecera de la ficha
-const MESES_LARGOS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+export const MESES_LARGOS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 /** Dirección de un texto de variación ya formateado: "+0,3 p.p." sube, "−1,2 %" baja, "0,0" igual. */
 const dirDe = (t: string): 1 | -1 | 0 => (/^\+/.test(t) ? 1 : /^[−-]/.test(t) ? -1 : 0);
 const deltaDe = (c: Comparacion | null, rotulo: string): DeltaProps | null =>
@@ -165,6 +166,13 @@ export function cabeceraFicha(m: Motor, e: Expr, desdeCfg?: DesdePref): Cabecera
   const extras = desdeCfg ? comparacionesExtra(m, c, desdeCfg) : [];
   return { cifra: ctx.valor, fecha: ctx.mes, deltas, secundarias, frase: frase ?? undefined, fraseClave, ultimoDisponible: ctx.ultimoDisponible, extras };
 }
+
+/** La vista que se comparte como imagen desde la cabecera de la ficha: el gráfico de la variable con el período `E` y las mismas frases de contexto que muestra la cabecera.
+ *  La usan la ficha y la página de novedades (una sola definición: lo que se comparte es lo que muestra la ficha). */
+export const vistaCompartirFicha = (e: Expr, E: Pick<Comun, "desde" | "hasta" | "meses">, cab: Pick<CabeceraFicha, "fraseClave" | "frase"> | null): VistaImg => ({
+  exprs: [e], modo: "valor", eje: "propia", desde: E.desde, hasta: E.hasta, meses: E.meses, freq: "M", ag: "promedio",
+  frases: cab?.fraseClave ? [cab.fraseClave] : [], fraseFija: cab?.frase,
+});
 
 /** Las comparaciones extra del último dato (inicio del período, promedio, mediana, máximo, mínimo) con el período de la ficha (el de la vista simple de Histórico):
  *  la misma función y el mismo formato que usa Histórico (`comparacionesCabecera`, `deltaDeComparacion`). */

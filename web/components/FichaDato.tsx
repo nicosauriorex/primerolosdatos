@@ -36,7 +36,7 @@ import { fuentesCalc } from "@/lib/motor";
 import { hrefDato, hrefHistorico, idsDe } from "@/lib/temas";
 import {
   cabeceraFicha, filasMandatosFicha, historicoFicha, hrefMandatoDe, hrefPresidentesDe, mandatoFicha, mesesIguales, paramsInicio, periodosFicha,
-  bajadaTablaMandatos, sinMandatoTxt, velasDe, type CabeceraFicha, type PeriodoFicha,
+  bajadaTablaMandatos, sinMandatoTxt, velasDe, vistaCompartirFicha, type CabeceraFicha, type PeriodoFicha,
 } from "@/lib/ficha";
 
 type SetFn = (cambios: Record<string, string | null | undefined>) => void;
@@ -118,9 +118,7 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
       </CabeceraDato>
       <CapViene m={m} e={e} nivel={nivel} set={set} V={V}
         compartir={<Compartir titulo={nombre} href={linkCompartir(e, hrefV, V.per ? { fper: V.per } : {})} texto={textoV}
-          vista={() => ({ exprs: [e], modo: "valor", eje: "propia", desde: V.D.E.desde, hasta: V.D.E.hasta, meses: V.D.E.meses, freq: "M", ag: "promedio",
-            // la imagen lleva las mismas frases de contexto que la cabecera (F4): la que se ve, o ninguna si la cabecera no muestra
-            frases: cab?.fraseClave ? [cab.fraseClave] : [], fraseFija: cab?.frase })} />} />
+          vista={() => vistaCompartirFicha(e, V.D.E, cab)} />} />
       <CapMeses key={kE} m={m} e={e} version={version} nivel={nivel} nombre={nombre} />
       <CapPresidentes m={m} e={e} info={info} nivel={nivel} pd={pd} inicio={inicio} nombre={nombre}
         velas={unoDe(p.get("pvista"), ["tabla", "velas"] as const, "tabla") === "velas"} onVista={(v) => set({ pvista: v ? "velas" : null })} />
@@ -140,7 +138,7 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
 }
 
 /** Compartir: la hoja con imagen (si hay `vista`), link y texto; la imagen abre el panel de siempre. Es el mismo botón en todos los capítulos (R11). */
-function Compartir({ href, titulo, texto, vista }: { href: string; titulo: string; texto?: string; vista?: () => VistaCompartir | null }) {
+export function Compartir({ href, titulo, texto, vista }: { href: string; titulo: string; texto?: string; vista?: () => VistaCompartir | null }) {
   const [abierto, setAbierto] = useState<VistaCompartir | null>(null);
   return (
     <>

@@ -27,6 +27,7 @@ export const SECCIONES: Seccion[] = [
   S("gasto", "En qué gasta la Nación", "Cuánto gastó el Estado nacional cada año: para qué, quién, en qué y dónde, presupuestado y ejecutado.", "estado", "Cuánto gastó la Nación: para qué, quién, en qué y dónde."),
   S("provincias", "Las provincias", "El gasto que la Nación declara en cada provincia, por habitante y en pesos de hoy.", "estado", "El gasto de la Nación en cada provincia, por habitante."),
   S("universidades", "Universidades", "Lo que la Nación transfiere a cada universidad nacional, año por año, y cómo se controla.", "estado", "Lo que recibe cada universidad nacional, año por año."),
+  S("novedades", "Novedades y calendario", "Qué datos oficiales salieron en los últimos días, con su cifra, y cuándo sale el próximo.", "herramientas", "Lo último que salió y cuándo sale lo próximo."),
   S("historico", "Histórico", "Elegí cualquier dato y mirá cómo cambió en el tiempo, solo o comparado con otros.", "herramientas", "Cualquier dato en el tiempo, solo o comparado."),
   S("semaforo", "Semáforo de actividad", "Los indicadores de actividad en una tabla: cuáles subieron y cuáles bajaron cada mes.", "herramientas", "Qué indicadores de actividad subieron y cuáles bajaron."),
   S("bcra", "Parte del Banco Central", "Los datos del día del Banco Central, cada uno con su fecha.", "herramientas", "Los datos del día del Banco Central, con su fecha."),

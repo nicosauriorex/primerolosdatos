@@ -57,8 +57,8 @@ Uso central: alguien escribe en redes "Milei fundió la economía" y otra person
 - Rankings: lo más debatido del mes y de la historia, ranking de ratios, lo más votado en contra, etc.
 
 ## Novedades, calendario y predicciones
-- Sección con los datos nuevos que van entrando, para que la gente opine.
-- Calendario de próximas publicaciones con fecha (INDEC tiene calendario; para el resto, el día promedio en que suele salir).
+- Sección con los datos nuevos que van entrando, para que la gente opine. → spec: docs/specs/novedades-calendario.md
+- Calendario de próximas publicaciones con fecha (INDEC tiene calendario; para el resto, el día promedio en que suele salir). → spec: docs/specs/novedades-calendario.md
 - La gente deja su predicción (ej. inflación de noviembre) y la página muestra la **mediana** (un valor absurdo no la mueve). Limitar valores imposibles (ej. 1.000.000% de inflación).
 
 ## Precios en términos de salarios

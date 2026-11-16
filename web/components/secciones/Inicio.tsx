@@ -9,6 +9,7 @@ import { IconoDerecha, IconoIzquierda, IconoPausa, IconoSeguir } from "../Iconos
 import { Redireccion } from "../Redireccion";
 import { Oraciones } from "./Oraciones";
 import { BloqueParte } from "./BloqueParte";
+import { BloqueNovedades } from "./BloqueNovedades";
 import { Buscador } from "../sistema/Buscador";
 import { Capitulo } from "../sistema/Capitulo";
 import { Delta } from "../sistema/Delta";
@@ -340,6 +341,8 @@ export function Inicio() {
       </header>
 
       {errorGeneral ? <div className="ancho"><p className="error" role="alert">{errorGeneral}</p></div> : <Carrusel plantillas={plantillas} />}
+
+      <BloqueNovedades />
 
       <div className="bloque ancho">
         <Capitulo id="temas" titulo="¿Qué datos te interesan?">
