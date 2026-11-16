@@ -1,6 +1,6 @@
 # Ajustes, tanda 12: el dato actual primero, todas las formas de verlo, y la deuda en Cuentas públicas
 
-Estado: implementada (2026-11-15)
+Estado: implementada (2026-11-15), publicada en 91aec1b (corrida en verde, run 43794669814; en el sitio: Cambiar dato › Cómo verlo › Por habitante se guarda al cerrar)
 
 Pedido del usuario (2026-11-15, después de las series de deuda):
 > «En historico el "Cambiar dato" debería mostrar primero la variable actual por si quiero modificar la forma de verlo y también dentro de "Ajustes". ponele si quiero ver deuda consolidada en % del PBI o si la quiero ver en otra moneda al dolar CCL ponele»
