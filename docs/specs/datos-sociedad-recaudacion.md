@@ -1,6 +1,6 @@
 # Recaudación por impuesto, seguridad, salud, presos, empleo público y turismo
 
-Estado: implementada (2026-11-16), sin publicar
+Estado: implementada (2026-11-16), publicada en 9da1c52 (corrida completa en verde, run 43873660350; /dato/homicidios/ y /tema/sociedad/ comprobadas en el sitio)
 
 Pedido del usuario (2026-11-16): «seguí por lo de datos. todo esos y manda a investigar si hay otra cosa interesante para mostrar. capaz hay cosas que va a haber que traer mas manual pero mientras pongamos la fuente esta bien». «Todos esos» son los de la lista que siguen en el ranking de `docs/investigaciones/datos-nuevos-2026-11-16.md`: homicidios, empleados públicos nacionales, recaudación por impuesto, turismo al exterior, mortalidad infantil y presos. Se suma la importación de bienes de consumo (#12 del ranking, el mismo debate que el turismo). El gasto en AUH y pensiones ya está (spec `auh-pensiones.md`).
 
