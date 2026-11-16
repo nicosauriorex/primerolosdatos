@@ -1,6 +1,6 @@
 # Predicciones (bloque 9c)
 
-Estado: implementada (2026-11-16), sin publicar. Para que guarde en el sitio faltan la base D1 y Turnstile (requisito 15)
+Estado: implementada (2026-11-16), publicada en bb22f77 (corrida completa en verde, run 43939206761); `/api/predicciones` responde 503 hasta crear la base. Para que guarde en el sitio faltan la base D1 y Turnstile (requisito 15)
 Ideas: Novedades, calendario y predicciones (segunda parte)
 
 Pedido del usuario (2026-11-16): «Sí, la spec» (de 9c). Decisiones que tomó al escribirla:

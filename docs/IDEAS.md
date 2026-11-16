@@ -56,11 +56,6 @@ Uso central: alguien escribe en redes "Milei fundió la economía" y otra person
 - Si un comentario tiene más votos que el post, es un **ratio**.
 - Rankings: lo más debatido del mes y de la historia, ranking de ratios, lo más votado en contra, etc.
 
-## Novedades, calendario y predicciones
-(Novedades y calendario: hechos el 2026-11-16, en `docs/IDEAS-HECHAS.md`.)
-- La gente deja su predicción (ej. inflación de noviembre) y la página muestra la **mediana** (un valor absurdo no la mueve). Limitar valores imposibles (ej. 1.000.000% de inflación).
-  (→ spec: docs/specs/predicciones.md)
-
 ## Precios en términos de salarios
 - Ver índices de precios medidos en salarios: cuántos bienes / servicios se compran con un salario, etc.
   (→ spec: docs/specs/plantillas-y-vistas.md, como plantillas "cuánto compra un salario"; los índices del IPC medidos en salarios quedan pendientes.)

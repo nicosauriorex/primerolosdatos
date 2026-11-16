@@ -395,3 +395,7 @@ Crítica final de Impeccable: 26/40 (antes 21/40). El usuario eligió arreglar l
 → spec: docs/specs/novedades-calendario.md
 - ~~Sección con los datos nuevos que van entrando, para que la gente opine.~~ ✅ 2026-11-16
 - ~~Calendario de próximas publicaciones con fecha (INDEC tiene calendario; para el resto, el día promedio en que suele salir).~~ ✅ 2026-11-16 (las fechas estimadas aparecen cuando cada fuente tenga dos meses registrados)
+
+## ~~Novedades, calendario y predicciones (segunda parte)~~ ✅ 2026-11-16
+→ spec: docs/specs/predicciones.md
+- ~~La gente deja su predicción (ej. inflación de noviembre) y la página muestra la **mediana** (un valor absurdo no la mueve). Limitar valores imposibles (ej. 1.000.000% de inflación).~~ ✅ 2026-11-16 (solo inflación mensual, rango −5 a 30 %; para que guarde en el sitio faltan la base D1 y Turnstile)
