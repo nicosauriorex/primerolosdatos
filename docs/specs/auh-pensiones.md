@@ -1,6 +1,6 @@
 # AUH, Tarjeta Alimentar, canasta y pensiones por invalidez
 
-Estado: implementada (2026-11-16), verificada en local; sin commitear
+Estado: implementada (2026-11-16), publicada en 1c926a3 (corrida completa en verde, run 43857957032; /dato/auh-real/ y /dato/pensiones-por-invalidez/ comprobadas en el sitio)
 
 Pedido del usuario (2026-11-16): «el AUH o las asignaciones familiares que se entregaban en términos reales, digamos, cuánto entregó cada gobierno y cuánto cubre lo que entregó de la canasta básica. Esto es un cálculo que ya hacía el Ministerio de Capital Humano […]. Otra cosa […] las pensiones por invalidez […]. ¿Qué cantidad dio cada gobierno?» Después eligió este bloque entre los de la investigación (`docs/investigaciones/datos-nuevos-2026-11-16.md`).
 

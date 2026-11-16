@@ -7,8 +7,8 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-16.
 ## Dónde estamos
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
-Últimos bloques (todos publicados, corrida en verde, salvo el primero):
-- AUH, Tarjeta Alimentar, cobertura de la canasta (cuenta de Capital Humano y de la UCA) y pensiones por invalidez: 11 series; además, enteros exactos en los JSON, fuente de las dos series cuando un dato se mide en otro y cierre de mandato en series anuales — 2026-11-16, sin commitear — [spec](specs/auh-pensiones.md)
+Últimos bloques (todos publicados, corrida en verde):
+- AUH, Tarjeta Alimentar, cobertura de la canasta (cuenta de Capital Humano y de la UCA) y pensiones por invalidez: 11 series; además, enteros exactos en los JSON, fuente de las dos series cuando un dato se mide en otro y cierre de mandato en series anuales — 2026-11-16, 1c926a3 (corrida completa en verde, run 43857957032) — [spec](specs/auh-pensiones.md)
 - Revisión de 931167d y 91aec1b (sin bugs graves): cuasifiscal sin «LEFI» en el nombre (la variable 55 solo tiene pases y LELIQ; el 0,0 % desde ago-24 es correcto), deuda / PIB sin «fin de año», celda vacía de adelantos no borra el mes de la consolidada — 2026-11-16, 5eaf7e0
 - Tanda 12: el dato actual primero (Cambiar dato, Ajustes con una sección «Variables»), moneda y escala en desplegables, títulos de ventanas junto a la cruz, arreglo de las ventanas que no guardaban lo elegido al cerrarse, consolidada y cuasifiscal en Cuentas públicas — 2026-11-15, 91aec1b — [spec](specs/ajustes-tanda-12.md)
 - Series de deuda (Finanzas, mensual desde 2019) y deuda consolidada Tesoro + Banco Central (cuenta propia, D-024) — 2026-11-15, 931167d — [spec](specs/series-deuda.md)
