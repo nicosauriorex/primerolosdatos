@@ -26,5 +26,5 @@ compatibility_date = "2026-11-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "pld-compartir"
-database_id = "PENDIENTE-wrangler-d1-create"
+database_id = "44e3446b-a266-42df-bb74-e6f231ff0abb"
 migrations_dir = "db"

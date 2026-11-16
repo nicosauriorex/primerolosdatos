@@ -120,7 +120,7 @@ export function guardarRonda(ronda: string, g: Guardado): boolean {
 /** Clave de prueba de Cloudflare que siempre pasa (solo en localhost). */
 export const TURNSTILE_PRUEBA = "1x00000000000000000000AA";
 /** Clave pública del widget de producción. Pendiente: crear el widget en Cloudflare y pegarla acá (requisito 15 de docs/specs/predicciones.md). */
-export const TURNSTILE_SITEKEY = "PENDIENTE-turnstile";
+export const TURNSTILE_SITEKEY = "0x4AAAAAAGEFfLV0asoltrTI";
 /** La clave que corresponde a este host; null si todavía no está cargada la de producción (el formulario dice que no está disponible). */
 export function claveTurnstile(): string | null {
   if (window.location.hostname === "localhost") return TURNSTILE_PRUEBA;
