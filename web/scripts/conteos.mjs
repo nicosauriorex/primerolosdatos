@@ -1,6 +1,9 @@
 // Muestra en la terminal los conteos de compartidos (base D1 pld-compartir, remota).
 // Uso: npm run conteos [-- --dias N]   (por defecto 30). Necesita `npx wrangler login` una vez.
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+const WRANGLER = fileURLToPath(new URL("../node_modules/wrangler/bin/wrangler.js", import.meta.url));
 
 const num = new Intl.NumberFormat("es-AR");
 const pct = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1 });
@@ -13,12 +16,15 @@ function argDias() {
 const dias = argDias();
 
 function consulta(sql) {
-  const r = spawnSync("npx", ["wrangler", "d1", "execute", "pld-compartir", "--remote", "--json", "--command", sql], {
+  const r = spawnSync(process.execPath, [WRANGLER, "d1", "execute", "pld-compartir", "--remote", "--json", "--command", sql], {
     encoding: "utf8",
-    shell: true,
     cwd: new URL("..", import.meta.url),
   });
   const salida = `${r.stdout ?? ""}\n${r.stderr ?? ""}`;
+  // En Windows wrangler a veces termina con un error de libuv («UV_HANDLE_CLOSING») después de responder bien:
+  // si la salida trae resultados legibles, se usan igual.
+  const filas = leerResultados(r.stdout);
+  if (filas) return filas;
   if (r.status !== 0) {
     if (/not authenticated|wrangler login|CLOUDFLARE_API_TOKEN|authentication/i.test(salida))
       fallar("Wrangler no está logueado: corré `npx wrangler login` (una vez) y probá de nuevo.");
@@ -26,12 +32,19 @@ function consulta(sql) {
       fallar("Falta el database_id real en web/wrangler.toml (ver el encabezado del archivo).");
     fallar("No se pudo consultar la base: " + (salida.trim().split("\n").filter(Boolean).slice(-1)[0] ?? "error desconocido"));
   }
+  fallar("La respuesta de wrangler no se pudo leer.");
+}
+
+/** Filas de la respuesta de wrangler, o null si no trae un resultado exitoso legible. */
+function leerResultados(stdout) {
   try {
-    const ini = r.stdout.indexOf("[");
-    const json = JSON.parse(r.stdout.slice(ini));
-    return json[0]?.results ?? [];
+    const ini = (stdout ?? "").indexOf("[");
+    if (ini < 0) return null;
+    const json = JSON.parse(stdout.slice(ini));
+    if (!Array.isArray(json) || json[0]?.success !== true) return null;
+    return json[0].results ?? [];
   } catch {
-    fallar("La respuesta de wrangler no se pudo leer.");
+    return null;
   }
 }
 
@@ -114,15 +127,9 @@ else {
 }
 
 function consultaOpcional(sql) {
-  const r = spawnSync("npx", ["wrangler", "d1", "execute", "pld-compartir", "--remote", "--json", "--command", sql], {
+  const r = spawnSync(process.execPath, [WRANGLER, "d1", "execute", "pld-compartir", "--remote", "--json", "--command", sql], {
     encoding: "utf8",
-    shell: true,
     cwd: new URL("..", import.meta.url),
   });
-  if (r.status !== 0) return null;
-  try {
-    return JSON.parse(r.stdout.slice(r.stdout.indexOf("[")))[0]?.results ?? [];
-  } catch {
-    return null;
-  }
+  return leerResultados(r.stdout);
 }

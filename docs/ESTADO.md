@@ -28,7 +28,7 @@ Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes
 - Mantenimiento del pipeline (`pipeline/red.py`) — 2026-11-14 — [spec](specs/mantenimiento-pipeline.md)
 
 ## Qué sigue, en orden
-1. **Base D1 y Turnstile: hechos** (2026-11-16, c6aa266; corrida en verde, run 43958334535). `/api/predicciones` responde 200. `/api/compartir` responde 405 a GET (normal; falta probar un Compartir real en el sitio). El paso «crear proyecto» falla sin efecto porque el proyecto ya existe (`continue-on-error`). La tabla "Próximos bloques" de `docs/ROADMAP.md` quedó toda hecha: lo que sigue sale de esta lista o de un pedido nuevo. De la spec de deuda queda opcional la fase 3 (tarifa eléctrica de CAMMESA).
+1. **Base D1 y Turnstile: hechos** (2026-11-16, c6aa266; corrida en verde, run 43958334535). Probado en producción el 2026-11-16: hay una predicción real guardada con Turnstile (ipc-2026-11, 1,5 %, desde un celular) y un Compartir de prueba (`link_copiado` en `/dato/inflacion-mensual/`, con «¿Por qué?» = curiosidad) entró a la base; `npm run conteos` arreglado (corría `npx` por shell sin comillas y la consulta se cortaba; ahora llama a wrangler con node). El paso «crear proyecto» falla sin efecto porque el proyecto ya existe (`continue-on-error`). La tabla "Próximos bloques" de `docs/ROADMAP.md` quedó toda hecha: lo que sigue sale de esta lista o de un pedido nuevo. De la spec de deuda queda opcional la fase 3 (tarifa eléctrica de CAMMESA).
 2. **Datos nuevos «calientes»:** hechos AUH y pensiones, recaudación / seguridad / empleo público y la segunda investigación ([spec](specs/datos-calientes-2.md)). Quedan afuera robos (la serie oficial termina en 2022), obra pública por inciso, motos, mayoristas y vacunas.
 3. **Mantenimiento a mano cuando salgan datos nuevos:** herencia (`datos/manual/herencia.json`; nivel de reservas netas del FMI en la 3ª revisión, dic-2026, y saldos de DEG cada mes en `reservas_netas_supuestos.json`); Congreso (cada 1 de marzo, cortes de las dos cámaras y vetos del año); provincias (el III trimestre de la DNAP entra solo: mirar que pase el control).
 4. **Pendientes sin fuente o sin decidir:** semáforo (desestacionalizado X-13; CAME, patentamientos, Construya, escrituras, leche, petróleo); gasto (empresas públicas sin fuente; universidades: estudiantes antes de 2023 y las 8 sin datos en el PIU); Congreso (leyes del Ejecutivo de Menem a CFK 1); herencia (cepo de 2003 y 2007, FMI de 1995 a 2002).
@@ -38,15 +38,14 @@ Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes
 A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunidad) y 7c-3 (relatos, posts y video), en `docs/ROADMAP.md`.
 
 ## Sin verificar (lo que sigue abierto)
-- **Predicciones:** guardar en el sitio (ahora con base y Turnstile), Turnstile con un token fallido, el primer cierre real (15 de diciembre) y el paso a «resultado» cuando entre el dato.
+- **Predicciones:** Turnstile con un token fallido, el primer cierre real (15 de diciembre) y el paso a «resultado» cuando entre el dato.
 - **Tanda 13:** un .ics abierto en un calendario real; la imagen 4:5 con las comparaciones; el foco del teclado al abrir y cerrar ventanas (`Modal` no lo mueve, en todo el sitio).
 - **Novedades:** el bloque de la portada (no se vio: panel oculto), las fechas estimadas (aparecen cuando cada fuente tenga dos meses registrados, hacia enero) y la primera entrada nueva del registro en una corrida (la del push dio 0, sin datos nuevos).
-- **Conteos:** que se guarde en el sitio (base D1 creada 2026-11-16; falta probar un Compartir real) y la pregunta con el menú de compartir de un celular real.
+- **Conteos:** el botón de Compartir real hasta la base (se probó el pedido al servidor, no el clic: el portapapeles falla con el panel oculto) y la pregunta con el menú de compartir de un celular real.
 - **En general:** tema claro, celular real (Atrás, teclado, safe-area de la barra inferior) y aspecto en capturas de casi todas las páginas: el panel del navegador suele estar oculto y se verifica midiendo.
 - **Imágenes compartidas** sin mirar dentro del panel: «¿Cómo viene?» (sin puntos medidos); formatos 1:1/4:5/16:9 de gasto, provincias, universidades y herencia; meses y barras con variación de la ficha; aviso "Sin <presidente>" en la imagen de precios por presidente.
 - **Animaciones:** Mes a mes con lápiz, despliegue del parte del Banco Central, carrusel de la portada (con el panel oculto no corren).
 - **Datos:**
-  - Herencia: "Pasivos remunerados del Banco Central" pasa de 106.150.927 a 233.216 (millones de $ de oct-26, −99,8 %): parece un salto de unidad en la serie, sin revisar.
   - Universidades: lo que declaran en la Cuenta de Inversión 2024 no cierra con lo transferido (la página lo dice).
   - Banco Central: unos cinco días hábiles de atraso en todas las fuentes legibles; falta saber si es lo normal.
   - Precios contra el mundo: "La región" puede quedar con un mes viejo (ropa: dic-23); México corta comunicación, recreación y varios en jul-24; Chile, comunicación y recreación en dic-23; EE.UU. sin oct-25 (cierre del gobierno).

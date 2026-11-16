@@ -43,9 +43,9 @@ export const FILAS_HERENCIA: DefFila[] = [
   // Banco Central
   { clave: "reservas", grupo: "Banco Central", id: "bcra_1", medidas: [{ med: "usdr" }], nombre: "Reservas brutas" },
   { clave: "pasivos", grupo: "Banco Central", id: "bcra_pasivos_rem", medidas: [{ med: "real" }], nombre: "Pasivos remunerados del Banco Central", neutra: true,
-    nota: "Letras y pases por los que el Banco Central paga interés (Lebac, pases, Leliq, Lefi). Más o menos pasivos no se califica: sin color." },
+    nota: "Letras y pases por los que el Banco Central paga interés (Lebac, pases, Leliq, Lefi). La caída de agosto de 2025 es real: al terminar las Lefi (julio de 2025), esa deuda pasó al Tesoro y en el Banco Central quedó un resto chico. Más o menos pasivos no se califica: sin color." },
   {
-    clave: "pasivos_base", grupo: "Banco Central", id: "bcra_pasivos_rem", medidas: [{ med: "corr" }], nombre: "Pasivos remunerados / base monetaria", neutra: true, nota: "Cuenta propia: pasivos remunerados dividido la base monetaria, en pesos de cada mes.",
+    clave: "pasivos_base", grupo: "Banco Central", id: "bcra_pasivos_rem", medidas: [{ med: "corr" }], nombre: "Pasivos remunerados / base monetaria", neutra: true, nota: "Cuenta propia: pasivos remunerados dividido la base monetaria, en pesos de cada mes. Desde agosto de 2025 es casi cero: las Lefi terminaron y esa deuda pasó al Tesoro.",
     cociente: { id: "bcra_15", nombre: "base monetaria", unidad: "% de la base monetaria" },
   },
   {
