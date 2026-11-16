@@ -5,7 +5,7 @@ import { NOMBRES, SINONIMOS, catPublica, esOculta, rutaPublica } from "./nombres
 import { colapsarRegiones } from "./regiones";
 
 export const ORDEN_RAIZ = ["Salarios", "Precios", "Dólar y tipo de cambio", "Mercados", "Tasas de interés", "Dinero y bancos (BCRA)",
-  "Actividad", "Empleo, pobreza e ingresos", "Sector externo", "Fiscal", "Opinión pública (UTDT)", "Contexto internacional"];
+  "Actividad", "Empleo, pobreza e ingresos", "Sector externo", "Fiscal", "Sociedad", "Opinión pública (UTDT)", "Contexto internacional"];
 
 // Sinónimos coloquiales para la búsqueda
 const ALIAS: [RegExp, string][] = [

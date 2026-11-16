@@ -3,16 +3,17 @@
 // "contra el promedio / el inicio del período", que usan el período que se pasa en `periodo`.
 // Devuelve TODAS las frases calculables (cada una con su clave) y cuáles son las dos que salen solas.
 // Reutiliza `distanciaRecord` e `interanualTxt` (los mismos números de la portada y de las plantillas).
-import { fmtMes, lastIdx, mesNum, nf1, ok, redondeadoComo, restaLimpia } from "./formato";
+import { fechaDeDato, fmtMes, lastIdx, mesNum, nf1, ok, redondeadoComo, restaLimpia } from "./formato";
 import { claseVariacion } from "./estadisticas";
 import type { ClaveFrase } from "./config";
 import type { Expr, Motor } from "./motor";
+import { frecuenciaOrigen } from "./historico";
 import { distanciaRecord, interanualTxt } from "./plantillas";
 
 export interface Frase { texto: string; cls: "bueno" | "malo" | "neutro" | null; clave?: ClaveFrase }
 export interface ContextoDato {
   valor: string;                // último dato, formateado
-  mes: string;                  // mes del último dato (ej. "oct-26")
+  mes: string;                  // fecha del último dato: el mes ("oct-26") o, si la serie es anual, el año ("2025")
   fecha: string;                // el mismo mes como "2026-10"
   ultimoDisponible: boolean;    // la fuente dejó de publicar hace más de 6 meses
   frases: Frase[];              // las que se muestran: las elegidas o, sin elección, las dos por defecto (0 a 2)
@@ -46,7 +47,7 @@ export function contextoDato(m: Motor, e: Expr, conFrases = true, opc: OpcionesC
   // Las diferencias se calculan con los valores redondeados como se muestran (R1: 1,9 y 2,1 → 0,2 y nunca "0,0")
   const red = (x: number) => redondeadoComo((v) => m.fmtC(c, v), x);
   const out: ContextoDato = {
-    valor: m.fmtC(c, ultV), mes: fmtMes(F[u]), fecha: F[u],
+    valor: m.fmtC(c, ultV), mes: fechaDeDato(F[u], frecuenciaOrigen(c.v)), fecha: F[u],
     ultimoDisponible: mesNum(F[F.length - 1]) - mesNum(F[u]) > 6, frases: [], todas: [], defecto: [],
   };
   const idx: number[] = [];

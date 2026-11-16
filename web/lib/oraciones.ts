@@ -2,9 +2,10 @@
 import { FX_KEYS, FX_NOM, type Calculo, type Expr, type Motor, type SerieMeta, type Vals } from "./motor";
 import { PRES_DEF, claseVariacion, crearPres, statsMandato } from "./estadisticas";
 import type { BaseCfg } from "./config";
-import { fmtMes, lastIdx, nf0, nf1, ok, r1 } from "./formato";
+import { fechaDeDato, fmtMes, lastIdx, nf0, nf1, ok, r1 } from "./formato";
 import type { DeltaProps } from "@/components/sistema/Delta";
 import { encExpr } from "./url";
+import { frecuenciaOrigen } from "./historico";
 import { todosLosPrincipales, hrefDato, hrefHistorico, type Principal } from "./temas";
 
 export type Opcion = [string, string];
@@ -122,7 +123,7 @@ export function respuestaCompra(m: Motor, producto: string, salario: string): Re
     const cifra = (Math.abs(x) >= 100 ? nf0 : nf1).format(x) + (unidad && unidad.length <= 8 && !/^\d/.test(unidad) ? " " + unidad : "");
     const uni = unidad && unidad.length <= 8 && !/^\d/.test(unidad) ? " " + unidad : "";
     return {
-      cifra, fecha: fmtMes(m.F[u]), detalle: c.unidad, v: c.v, desde: m.idxDe("2003-01"),
+      cifra, fecha: fechaDeDato(m.F[u], frecuenciaOrigen(c.v)), detalle: c.unidad, v: c.v, desde: m.idxDe("2003-01"),
       F: m.F, fmt: (y) => (Math.abs(y) >= 100 ? nf0 : nf1).format(y) + uni, cmp: ok(ant) ? u - 12 : undefined,
       deltas: ok(ant) ? [deltaDe(m, c, ant, c.v[u] as number, "vs hace un año")] : undefined,
     };
@@ -174,7 +175,7 @@ export function respuestaMedida(m: Motor, monto: string, med: string): Respuesta
     const cifra = /^(US\$|\$)/.test(unidad) ? `${unidad} ${(Math.abs(x) >= 100 ? nf0 : nf1).format(x)}` : m.fmtC(c, x);
     const fmt = (y: number) => (/^(US\$|\$)/.test(unidad) ? `${unidad} ${(Math.abs(y) >= 100 ? nf0 : nf1).format(y)}` : m.fmtC(c, y));
     return {
-      cifra, fecha: fmtMes(m.F[u]), detalle: c.unidad, v: c.v, desde: m.idxDe("2003-01"), F: m.F, fmt, cmp: ok(ant) ? u - 12 : undefined,
+      cifra, fecha: fechaDeDato(m.F[u], frecuenciaOrigen(c.v)), detalle: c.unidad, v: c.v, desde: m.idxDe("2003-01"), F: m.F, fmt, cmp: ok(ant) ? u - 12 : undefined,
       deltas: ok(ant) ? [deltaDe(m, c, ant, c.v[u] as number, "vs hace un año")] : undefined,
     };
   } catch { return null; }

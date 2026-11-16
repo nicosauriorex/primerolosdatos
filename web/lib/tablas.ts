@@ -1,6 +1,7 @@
 // Reglas comunes de las tablas del sitio: período del mandato, marcas "mejor" / "peor" y barras de magnitud.
 // Los componentes solo dibujan lo que sale de acá.
-import { fmtMes, nf1, ok } from "./formato";
+import { fechaDeDato, fmtMes, nf1, ok } from "./formato";
+import { frecuenciaOrigen } from "./historico";
 import { claseVariacion, rankScores, type Pres } from "./estadisticas";
 
 /** "dic-15 a nov-19"; el mandato en curso termina en "hoy". */
@@ -10,7 +11,7 @@ export const periodoMandato = (F: string[], x: Pres): string => `${mesSinCorte(x
 
 /** "datos desde ene-95" cuando la serie empieza después del inicio del mandato; si no, null. */
 export function datosDesde(F: string[], arr: ArrayLike<number | null | undefined>, x: Pres): string | null {
-  for (let i = x.i0; i <= x.i1 && i < arr.length; i++) if (ok(arr[i])) return i > x.i0 ? `datos desde ${fmtMes(F[i])}` : null;
+  for (let i = x.i0; i <= x.i1 && i < arr.length; i++) if (ok(arr[i])) return i > x.i0 ? `datos desde ${fechaDeDato(F[i], frecuenciaOrigen(Array.from(arr, (v) => v ?? null)))}` : null;
   return null;
 }
 

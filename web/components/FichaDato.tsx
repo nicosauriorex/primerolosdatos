@@ -174,7 +174,7 @@ function useViene(m: Motor, e: Expr, version: number, p: URLSearchParams) {
     const { E, rows } = historicoFicha(m, c, config.desde, per);
     const fmt = (v: number) => m.fmtC(c, v);
     const series: SerieG[] = [{ key: "s0", name: c.corto, color: PALETA[0], fmt }];
-    const opts: OpcionesG = { fmtAxis: fmtEjeDe(c), fmtTip: fmt, tipTitle: etiqueta, label: c.corto,
+    const opts: OpcionesG = { fmtAxis: fmtEjeDe(c), fmtTip: fmt, tipTitle: (r: Fila) => etiqueta(r, frecuenciaOrigen(c.v)), label: c.corto,
       marcas: [{ key: "s0", color: PALETA[0], fmt, tipos: new Set(["ult", "max", "min"]) }] };
     const temporal = textoTemporalidad({ freq: "M", ag: "promedio", meses: E.meses, suma: !!c.flujo, origen: frecuenciaOrigen(c.v) });
     return { c, E, rows, series, opts, temporal };

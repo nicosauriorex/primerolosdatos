@@ -1,15 +1,16 @@
 // Plantillas: gráficos ya armados de Histórico. Las curadas se escriben a mano (o vienen de Datos curiosos y de los indicadores);
 // las generadas salen solas del catálogo. Una plantilla es un conjunto de parámetros de Histórico (`vista`) más texto para buscarla.
-import { fmtMes, lastIdx, norm, ok, rotuloAnterior } from "./formato";
+import { fechaDeDato, fmtMes, lastIdx, norm, ok, rotuloAnterior } from "./formato";
 import { NOMBRE_LEGADO, crearIndicadoresDe, palabrasBusqueda, textoBusqueda } from "./catalogo";
 import { defCurios, type DefCurio } from "./curiosidades";
 import { claseVariacion } from "./estadisticas";
+import { frecuenciaOrigen } from "./historico";
 import { FX_KEYS, FX_NOM, type Expr, type Motor, type SerieMeta, type Vals } from "./motor";
 import { decExpr, encExpr, lista as listaUrl } from "./url";
 import { PM_RUBROS } from "./preciosMundo";
 
 export const GRUPOS = ["Mis gráficos", "Destacados", "Poder de compra", "Precios contra la inflación", "Salarios", "Dólar y mercados",
-  "Actividad", "Empleo y pobreza", "Sector externo", "Fiscal", "En el mundo", "Gobierno y Congreso"] as const;
+  "Actividad", "Empleo y pobreza", "Sector externo", "Fiscal", "Sociedad", "En el mundo", "Gobierno y Congreso"] as const;
 export type Vista = Record<string, string>;
 
 export interface Plantilla {
@@ -94,6 +95,17 @@ export function crearPlantillas(metas: SerieMeta[]): Plantilla[] {
     ["auh", "asignacion universal", "asignacion por hijo", "plan social"], [E("auh", { med: "real" })]);
   manual("pensiones-por-invalidez", "Pensiones por invalidez", "Empleo y pobreza", "Cantidad de pensiones no contributivas por invalidez vigentes a diciembre de cada año",
     ["pension", "discapacidad", "andis", "pensiones no contributivas"], [E("pnc_invalidez", { med: "asis" })]);
+  manual("recaudacion-por-impuesto-pib", "Recaudación por impuesto (% del PIB)", "Fiscal", "IVA, Ganancias, retenciones e impuesto al cheque, como % del PIB (suma de 12 meses)",
+    ["impuestos", "recaudacion", "iva", "ganancias", "retenciones", "cheque", "arca", "afip"],
+    ["rec_iva", "rec_ganancias", "rec_retenciones", "rec_cheque"].map((id) => E(id, { med: "real", esc: "pib" })));
+  manual("retenciones-en-pesos-de-hoy", "Retenciones a las exportaciones en pesos de hoy", "Fiscal", "Recaudación mensual de derechos de exportación, ajustada por inflación",
+    ["retenciones", "derechos de exportacion", "campo", "soja", "impuestos"], [E("rec_retenciones", { med: "real" })]);
+  manual("homicidios-cada-100-mil", "Homicidios cada 100.000 habitantes", "Sociedad", "Tasa de víctimas de homicidios dolosos por año (Ministerio de Seguridad)",
+    ["homicidios", "asesinatos", "inseguridad", "crimen", "delitos", "seguridad"], [E("homicidios_tasa", { med: "asis" })]);
+  manual("empleados-publicos-nacionales", "Empleados públicos nacionales", "Empleo y pobreza", "Administración pública nacional más empresas y sociedades del Estado, desde julio de 2022",
+    ["empleo publico", "empleados publicos", "estado", "despidos", "motosierra", "empleo estatal"], [E("empleo_publico_nacional", { med: "asis" })]);
+  manual("viajes-al-exterior", "Viajes al exterior en avión", "Sector externo", "Argentinos que salen por Ezeiza y Aeroparque, en miles de pasajeros",
+    ["turismo", "viajes", "exterior", "chile", "compras afuera"], [E("turismo_emisivo", { med: "asis" })]);
 
   // ---- generadas
   const tieneSal = !!S.sipa_med;
@@ -198,7 +210,7 @@ export function evaluar(m: Motor, p: Plantilla): Evaluada | null {
   try {
     const c = m.calc(e), u = lastIdx(c.v);
     if (u < 0) return null;
-    const fecha = fmtMes(m.F[u]);
+    const fecha = fechaDeDato(m.F[u], frecuenciaOrigen(c.v));
     if (p.def) {
       const r = p.def.ev(m, c);
       if (r) return { v: r.v ?? c.v, val: r.val, fecha, texto: r.d, cls: null, vista: r.e ? unaVista(r.e) : undefined };
@@ -247,7 +259,7 @@ export function comparaciones(m: Motor, p: Plantilla): Comparaciones | null {
       if (j < 0 || !ok(antes)) return null;
       const variacion = m.variacionTxt(c, antes as number, ahora);
       if (variacion === "–") return null;
-      return { rotulo, fecha: fmtMes(m.F[j]), valor: m.fmtC(c, antes as number), variacion, cls: claseVariacion(c.dir, c.pct, antes as number, ahora) };
+      return { rotulo, fecha: fechaDeDato(m.F[j], frecuenciaOrigen(c.v)), valor: m.fmtC(c, antes as number), variacion, cls: claseVariacion(c.dir, c.pct, antes as number, ahora) };
     };
     let j = u - 1;
     while (j >= 0 && !ok(c.v[j])) j--;

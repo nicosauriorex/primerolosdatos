@@ -15,7 +15,8 @@ import { InfoPunto } from "../sistema/InfoPunto";
 import { CompartirHoja } from "../sistema/CompartirHoja";
 import { CeldaPres, CeldaVar, LineaInicio, Valor, useBase, HojaListo } from "./comunes";
 import { columnaComparable, periodoMandato, variacionMostrada } from "@/lib/tablas";
-import { fmtMes, nf0, nf1, ok } from "@/lib/formato";
+import { fechaDeDato, fmtMes, nf0, nf1, ok } from "@/lib/formato";
+import { frecuenciaOrigen } from "@/lib/historico";
 import { crearPres, mejorPeor, rankingPresidentes, tablasIndicadores, type CritRk, type FilaMP, type IndRk, type Pres, type TablaInd } from "@/lib/estadisticas";
 import { crearIndicadores } from "@/lib/catalogo";
 import { fraseRanking, ordenPorIndicador } from "@/lib/ranking";
@@ -36,7 +37,7 @@ function MejorPeor({ m, tablas, PRES, pres, crit }: { m: Motor; tablas: TablaInd
   const [todos, setTodos] = useState(false);
   const { mejores, peores } = useMemo(() => mejorPeor(tablas, PRES, pres, crit), [tablas, PRES, pres, crit]);
   const F = m.F;
-  const mesC = (i?: number) => (i != null && i >= 0 ? <small>{fmtMes(F[i])}</small> : null);
+  const mesC = (i: number | undefined, v: (number | null)[]) => (i != null && i >= 0 ? <small>{fechaDeDato(F[i], frecuenciaOrigen(v))}</small> : null);
   const pu = (x?: number, de?: number, pct?: number) => ok(x) ? <Valor tono={(pct as number) > 50 ? "bueno" : (pct as number) < 50 ? "malo" : null}>{x}º de {de}</Valor> : <td style={{ color: "var(--text-muted)" }} title="El nivel no se puede comparar entre épocas">–</td>;
   const tabla = (titulo: string, filas: FilaMP[], bueno: boolean, vacio: string) => (
     <div>
@@ -47,7 +48,7 @@ function MejorPeor({ m, tablas, PRES, pres, crit }: { m: Motor; tablas: TablaInd
           {(todos ? filas : filas.slice(0, 5)).map((f) => (
             <tr key={f.grupo + f.nombre}>
               <CeldaVar nombre={<Link prefetch={false} href={hrefHist(f.ind)} title={f.nombre}>{f.nombre}</Link>} unidad={`${f.grupo} · ${f.c.unidad}`} />
-              <td>{m.fmtC(f.c, f.d.st.ini)}{mesC(f.d.st.iniI)}</td><td>{m.fmtC(f.c, f.d.st.fin)}{mesC(f.d.st.finI)}</td>
+              <td>{m.fmtC(f.c, f.d.st.ini)}{mesC(f.d.st.iniI, f.c.v)}</td><td>{m.fmtC(f.c, f.d.st.fin)}{mesC(f.d.st.finI, f.c.v)}</td>
               <Valor tono={bueno ? "bueno" : "malo"} sub={<>
                 {m.difAbsTxt(f.c, f.d.st.ini ?? null, f.d.st.fin ?? null) ? <small>{m.difAbsTxt(f.c, f.d.st.ini ?? null, f.d.st.fin ?? null)}</small> : null}
                 {f.d.enPuntos ? (f.d.st.ini! > 0 && f.d.st.fin! >= 0 ? <small>{nf0.format((f.d.st.fin! / f.d.st.ini! - 1) * 100)} % relativo</small> : null) : <small>{nf1.format(f.d.mejora * 100)} % anual</small>}</>}>{menos(variacionMostrada(m, f.c, f.d.st.ini, f.d.st.fin))}</Valor>
@@ -223,8 +224,8 @@ export function Ranking() {
                           <tbody>{f.items.map((i) => (
                             <tr key={i.grupo + i.nombre}>
                               <CeldaVar nombre={i.nombre} unidad={usaVars ? i.c.unidad : i.grupo} />
-                              <td>{m.fmtC(i.c, i.d.st.ini)}<small>{i.d.st.iniI != null ? fmtMes(F[i.d.st.iniI]) : ""}</small></td>
-                              <td>{m.fmtC(i.c, i.d.st.fin)}<small>{i.d.st.finI != null ? fmtMes(F[i.d.st.finI]) : ""}</small></td>
+                              <td>{m.fmtC(i.c, i.d.st.ini)}<small>{i.d.st.iniI != null ? fechaDeDato(F[i.d.st.iniI], frecuenciaOrigen(i.c.v)) : ""}</small></td>
+                              <td>{m.fmtC(i.c, i.d.st.fin)}<small>{i.d.st.finI != null ? fechaDeDato(F[i.d.st.finI], frecuenciaOrigen(i.c.v)) : ""}</small></td>
                               <Valor tono={i.d.bueno ? "bueno" : i.d.malo ? "malo" : null}
                                 sub={m.difAbsTxt(i.c, i.d.st.ini ?? null, i.d.st.fin ?? null) ? <small>{m.difAbsTxt(i.c, i.d.st.ini ?? null, i.d.st.fin ?? null)}</small> : null}>{menos(variacionMostrada(m, i.c, i.d.st.ini, i.d.st.fin))}</Valor>
                               <Valor tono={i.pct > 50 ? "bueno" : i.pct < 50 ? "malo" : null}>{i.puesto}º de {i.de}</Valor>

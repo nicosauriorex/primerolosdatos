@@ -3,7 +3,7 @@
 // cada presidente y mes a mes desde que asumió. Funciones puras (sin React): la ficha y las imágenes usan las mismas.
 // Ver docs/specs/ajustes-tanda-5.md y docs/specs/remodelacion-fichas.md.
 import { baseIdx, calcularMandato, pasoDatos, claseVariacion, crearPres, estadisticasRows, filasGrafico, mesInicioTxt, statsMandato, varNum, type BaseCfg, type Fila, type ModoMandato, type Pres, type StatsM } from "./estadisticas";
-import { fmtMes, lastIdx, mesNum, nf1, ok, redondeadoComo, r1 } from "./formato";
+import { fechaDeDato, fmtMes, lastIdx, mesNum, nf1, ok, redondeadoComo, r1 } from "./formato";
 import { TODOS_MESES, comparacionesCabecera, deltaDeComparacion, frecuenciaOrigen, leerComun, type Comun, type FrecOrigen } from "./historico";
 import type { ClaveFrase, DesdePref } from "./config";
 import { contextoDato, type ContextoDato } from "./contexto-dato";
@@ -62,7 +62,7 @@ export function velasDe(m: Motor, c: Calculo, filas: { x: Pres; st: StatsM }[]):
   filas.forEach(({ x, st }) => {
     if (!st.n || st.ini == null || st.fin == null || st.min == null || st.max == null) { sin.push(x.n); return; }
     velas.push({
-      id: x.id, nombre: x.n, periodo: `${fmtMes(m.F[st.iniI as number])} a ${fmtMes(m.F[st.finI as number])}`, ini: st.ini, fin: st.fin, min: st.min, max: st.max,
+      id: x.id, nombre: x.n, periodo: `${fechaDeDato(m.F[st.iniI as number], frecuenciaOrigen(c.v))} a ${fechaDeDato(m.F[st.finI as number], frecuenciaOrigen(c.v))}`, ini: st.ini, fin: st.fin, min: st.min, max: st.max,
       iniTxt: m.fmtC(c, st.ini), finTxt: m.fmtC(c, st.fin), minTxt: m.fmtC(c, st.min), maxTxt: m.fmtC(c, st.max),
       variacion: varNum(c, st) == null ? "–" : menos(variacionMostrada(m, c, st.ini, st.fin)), cls: claseVariacion(c.dir, c.pct, st.ini, st.fin), nota: datosDesde(m.F, c.v, x),
     });
@@ -94,7 +94,7 @@ const PLURAL: Record<FrecOrigen, string> = { M: "mensuales", T: "trimestrales", 
 /** Por qué no hay gráfico por mes de mandato: desde cuándo hay datos y, si no es mensual, de qué frecuencia. */
 export function sinMandatoTxt(m: Motor, c: Calculo, frec: FrecOrigen): string {
   const i0 = c.v.findIndex((x) => ok(x));
-  const desde = i0 >= 0 ? `Hay datos desde ${fmtMes(m.F[i0])}` : "No hay datos";
+  const desde = i0 >= 0 ? `Hay datos desde ${fechaDeDato(m.F[i0], frec)}` : "No hay datos";
   return frec !== "M"
     ? `${desde} y son ${PLURAL[frec]}: no hay un valor por mes para seguir cada mandato desde su mes 0.`
     : `${desde}: ningún presidente de la comparación tiene dato en su mes 0.`;
@@ -130,7 +130,7 @@ function masBajoDesde(m: Motor, c: Calculo): string | null {
   const hoy = c.v[u] as number;
   for (let k = u - 1; k >= 0; k--) {
     const x = c.v[k];
-    if (ok(x) && x <= hoy) return mesNum(m.F[u]) - mesNum(m.F[k]) >= 12 ? `El valor más bajo desde ${fmtMes(m.F[k])}.` : null;
+    if (ok(x) && x <= hoy) return mesNum(m.F[u]) - mesNum(m.F[k]) >= 12 ? `El valor más bajo desde ${fechaDeDato(m.F[k], frecuenciaOrigen(c.v))}.` : null;
   }
   return null;   // es el mínimo de la serie: eso ya lo dice "desde que hay datos"
 }
@@ -170,7 +170,7 @@ export function cabeceraFicha(m: Motor, e: Expr, desdeCfg?: DesdePref): Cabecera
  *  la misma función y el mismo formato que usa Histórico (`comparacionesCabecera`, `deltaDeComparacion`). */
 function comparacionesExtra(m: Motor, c: Calculo, desdeCfg: DesdePref): DeltaProps[] {
   const F = m.F, { E, rows } = historicoFicha(m, c, desdeCfg);
-  const est = estadisticasRows(rows, "s0");
+  const est = estadisticasRows(rows, "s0", frecuenciaOrigen(c.v));
   if (!est) return [];
   const col = [{ key: "s0", c, flujo: !!c.flujo, ultimo: !!c.ultimo }];
   const hist = filasGrafico(F, col, { desde: F[0], hasta: E.hasta, meses: new Set(TODOS_MESES), freq: "M", cierre: false, banda: false });
@@ -261,7 +261,7 @@ export function cuentaDesde(F: string[], arr: ArrayLike<number | null | undefine
   const comun = baseIdx(F, x, { t0: b.t0, t0p: {} });   // dónde arrancaría con la regla general
   if (st.iniI === comun) return undefined;
   const propia = baseIdx(F, x, b);
-  const desde = fmtMes(F[st.iniI]);
+  const desde = fechaDeDato(F[st.iniI], frecuenciaOrigen(Array.from(arr, (v) => v ?? null)));
   if (st.iniI === propia && ok(arr[propia])) return `Cuenta desde ${desde} (${mesInicioTxt(b.t0p[x.id] ?? b.t0).replace(/^el /, "")})`;
   // Serie anual o semestral con datos antes: el primero del mandato llega después de asumir.
   if (pasoDatos(arr) >= 6) for (let i = 0; i < st.iniI; i++) if (ok(arr[i])) return `Cuenta desde ${desde} (primer dato del mandato: la serie no es mensual)`;

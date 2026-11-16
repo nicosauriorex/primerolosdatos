@@ -19,7 +19,8 @@ import { Hoja } from "../sistema/Hoja";
 import { TablaMandatos } from "../sistema/TablaMandatos";
 import { GrillaPresidentes } from "../sistema/GrillaPresidentes";
 import { grillaPresidentes, tablaPresidentes } from "@/lib/presidentes";
-import { fmtMes } from "@/lib/formato";
+import { fechaDeDato, fmtMes } from "@/lib/formato";
+import { frecuenciaOrigen } from "@/lib/historico";
 import { baseIdx, claseMandato, crearPres, resumenClases, type BaseCfg, type ClaseMandato, nivelComparable, ordenar, statsMandato, type Pres } from "@/lib/estadisticas";
 import { bajadaTablaMandatos, velasDe } from "@/lib/ficha";
 import { grupoDe, ordenarGrupos, textoBusqueda } from "@/lib/catalogo";
@@ -138,10 +139,11 @@ export function Presidentes() {
   const paBi = baseIdx(F, paPres, b), paFin = Math.min(paPres.i1, F.length - 1), paCierra = paPres.i1 < F.length - 1;
   const textoPaPres = `${paPres.n}: de ${fmtMes(F[paBi])} (mes inicial) ${paCierra ? `a ${fmtMes(F[paFin])} (fin del mandato)` : "a hoy (último dato de cada variable)"}`;
   /** Cuando los datos de la variable no cubren todo el período, la fila lo dice. */
-  const rango = (st: ReturnType<typeof statsMandato>) => {
+  const rango = (st: ReturnType<typeof statsMandato>, v: (number | null)[]) => {
     if (!st.n) return null;
+    const fd = (i: number) => fechaDeDato(F[i], frecuenciaOrigen(v));
     const desde = st.iniI != null && st.iniI > paBi, hasta = st.finI != null && st.finI < paFin;
-    return desde || hasta ? <small className="c-per">{desde && hasta ? `datos de ${fmtMes(F[st.iniI as number])} a ${fmtMes(F[st.finI as number])}` : desde ? `datos desde ${fmtMes(F[st.iniI as number])}` : `datos hasta ${fmtMes(F[st.finI as number])}`}</small> : null;
+    return desde || hasta ? <small className="c-per">{desde && hasta ? `datos de ${fd(st.iniI as number)} a ${fd(st.finI as number)}` : desde ? `datos desde ${fd(st.iniI as number)}` : `datos hasta ${fd(st.finI as number)}`}</small> : null;
   };
   const paMed = medsArs.some((o) => o[0] === p.get("pam")) ? (p.get("pam") as string) : medPref;
   const modoA = unoDe(p.get("pam2"), ["todas", "mis"] as const, "todas");
@@ -198,7 +200,7 @@ export function Presidentes() {
     if (grupoSinMoneda) filasA.push(<tr key={"n" + g} className="nota-grupo"><td colSpan={nc}><small className="c-per">La moneda elegida no cambia estas variables: se muestran tal cual.</small></td></tr>);
     items.forEach(({ s, c: cc, st, aplica }) => filasA.push(
       <tr key={s.id}><CeldaVar nombre={s.n} unidad={cc.unidad} info={<BotonInfo id={s.id} />}
-        extra={<>{rango(st)}{!aplica && !grupoSinMoneda && <small className="c-per">la moneda no aplica a esta variable</small>}</>} /><CeldasStats m={m} c={cc} st={st} cols={cols} />
+        extra={<>{rango(st, cc.v)}{!aplica && !grupoSinMoneda && <small className="c-per">la moneda no aplica a esta variable</small>}</>} /><CeldasStats m={m} c={cc} st={st} cols={cols} />
         <td><div className="spark"><Sparkline v={cc.v.slice(0, paPres.i1 + 1)} color={paPres.color} desde={paBi} /></div></td>
         <td className="pres-estrella-celda"><Estrella activa={idsMis.has(s.id)} nombre={s.n} deshabilitada={!idsMis.has(s.id) && mis.length >= 10}
           onClick={() => sacarOPoner({ id: s.id, med: mo0(s, paMed), rel: null, modo: "compra", esc: "" })} /></td></tr>,
@@ -328,7 +330,7 @@ export function Presidentes() {
                 );
                 return (
                   <tr key={k + e.id}>
-                    <CeldaVar nombre={cc.corto} unidad={cc.unidad} info={<BotonInfo id={e.id} />} extra={rango(st)} />
+                    <CeldaVar nombre={cc.corto} unidad={cc.unidad} info={<BotonInfo id={e.id} />} extra={rango(st, cc.v)} />
                     <CeldasStats m={m} c={cc} st={st} cols={cols} />
                     <td><div className="spark"><Sparkline v={cc.v.slice(0, paPres.i1 + 1)} color={paPres.color} desde={paBi} /></div></td>
                     <td className="pres-estrella-celda"><Estrella activa nombre={cc.corto} onClick={() => setMis(mis.filter((_, j) => j !== k))} /></td>

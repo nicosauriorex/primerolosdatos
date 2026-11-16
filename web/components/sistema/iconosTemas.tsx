@@ -25,6 +25,8 @@ const TEMAS_ICONO: Record<string, ReactNode> = {
   externo: <><path d="M2 12h16l-3 5H5z" /><path d="M10 3v9M10 4l5 6h-5" /></>,
   // cuentas públicas: edificio público
   fiscal: <><path d="M10 2.5 2.5 7h15z" /><path d="M4.5 9.5v5.5M8 9.5v5.5M12 9.5v5.5M15.5 9.5v5.5M2.5 17.5h15" /></>,
+  // seguridad y salud: escudo con cruz
+  sociedad: <><path d="M10 2.5 3.5 5v5c0 3.6 2.7 6.2 6.5 7.5 3.8-1.3 6.5-3.9 6.5-7.5V5z" /><path d="M10 7v6M7 10h6" /></>,
   // dinero, tasas y mercados: velas
   finanzas: <><path d="M5 3v14M3 7h4v6H3zM14 4v13M12 8h4v5h-4z" /></>,
   // opinión pública: globo de diálogo

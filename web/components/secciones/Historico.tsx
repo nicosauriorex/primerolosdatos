@@ -401,7 +401,7 @@ function CardGrafico({ titulo, temporal, nota, leyenda, visibles, config, rows, 
       <div className="tablewrap tabla-graf"><table>
         <thead><tr><th>Período</th>{series.map((se) => <th key={se.key}>{se.name}{unidades?.[se.key] && <small>{unidades[se.key]}</small>}</th>)}</tr></thead>
         <tbody>{rows.slice().reverse().map((r) => (
-          <tr key={r.fecha + (r.per || "")}><td>{etiqueta(r)}</td>{series.map((se) => <td key={se.key}>{ok(r[se.key]) ? (se.fmt || opts.fmtTip)(r[se.key]) : "–"}</td>)}</tr>
+          <tr key={r.fecha + (r.per || "")}><td>{opts.tipTitle ? opts.tipTitle(r, 0) : etiqueta(r)}</td>{series.map((se) => <td key={se.key}>{ok(r[se.key]) ? (se.fmt || opts.fmtTip)(r[se.key]) : "–"}</td>)}</tr>
         ))}</tbody>
       </table></div></>
     ) : <p className="note">Sin datos para esta selección.</p>)
@@ -479,7 +479,7 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     if (b100) { const bases = aBase100(rows, lista.map((o) => o.key)); lista.forEach((o) => { o.base = bases[o.key]; }); }
     const puedeLog = rows.every((r) => lista.every((o) => !ok(r[o.key]) || r[o.key] > 0));
     const cruzaCero = !b100 && rows.some((r) => lista.some((o) => ok(r[o.key]) && r[o.key] < 0));   // R20: con valores negativos se ofrece la "Línea del cero"
-    const st = lista.map((o) => estadisticasRows(rows, o.key));
+    const st = lista.map((o) => estadisticasRows(rows, o.key, frecuenciaOrigen(o.c.v)));
     // Toda la historia de la primera variable (misma frecuencia, todos los meses) para el período anterior y el año atrás de la cabecera
     const hist: Fila[] = b100 || !lista.length ? [] : filasGrafico(F, lista.slice(0, 1), { desde: F[0], hasta: E.hasta, meses: new Set(TODOS_MESES), freq: E.freq, cierre: E.ag === "cierre", banda: false });
     const fmtDe = (o: { c: Calculo }) => b100 ? (v: number) => nf1.format(v) : (v: number) => m.fmtC(o.c, v);
@@ -498,7 +498,7 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     const series: SerieG[] = lista.map((o) => ({ key: o.key, name: o.c.corto, short: o.c.corto.length > 18 ? o.c.corto.slice(0, 17) + "…" : o.c.corto, color: o.color, axis: o.axis, band: bd && !!o.c.lo, fmt: fmtDe(o) }));
     const opts = {
       log: E.escala === "log" && puedeLog, log2: E.escala === "log" && puedeLog, refs, marcas, mismaEscala: misma, refLine: b100 ? 100 : null, endLabels: b100 && lista.length > 1,
-      fmtAxis: b100 ? (v: number) => nf0.format(v) : ejeFmt(lista[0].c), fmtAxis2: dos ? ejeFmt(lista[1].c) : null, fmtTip: fmtDe(lista[0]), tipTitle: etiqueta,
+      fmtAxis: b100 ? (v: number) => nf0.format(v) : ejeFmt(lista[0].c), fmtAxis2: dos ? ejeFmt(lista[1].c) : null, fmtTip: fmtDe(lista[0]), tipTitle: (r: Fila) => etiqueta(r, frecuenciaOrigen(lista[0].c.v)),
       height: compacto ? 260 : undefined,
       label: lista.map((o) => o.c.corto).join(", "),
       cero: E.cero,

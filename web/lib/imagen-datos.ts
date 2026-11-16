@@ -197,7 +197,7 @@ export function armarImagen(m: Motor, v: VistaImg, o: OpcionesImg): DatosImagen 
 
   // ----- lo personalizable (solo con una variable en valores)
   const simple = unico && !b100, c0 = calcs[0];
-  const est = simple && pers ? estadisticasRows(rows, "s0") : null;
+  const est = simple && pers ? estadisticasRows(rows, "s0", frecuenciaOrigen(calcs[0].v)) : null;
   const conNegativos = rows.some((r) => ok(r.s0) && (r.s0 as number) < 0);
   const fmt0 = (x: number) => m.fmtC(c0, x);
   const lineasRef: NonNullable<DatosImagen["lineasRef"]> = [];

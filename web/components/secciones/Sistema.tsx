@@ -24,6 +24,7 @@ import { baseDeConfig } from "@/lib/config";
 import { contextoDato } from "@/lib/contexto-dato";
 import { PRES_DEF, crearPres, etiqueta, statsMandato } from "@/lib/estadisticas";
 import { nf1, ok, r1 } from "@/lib/formato";
+import { frecuenciaOrigen } from "@/lib/historico";
 import { historicoFicha } from "@/lib/ficha";
 import { datosDesde, periodoMandato } from "@/lib/tablas";
 import { fmtEjeDe } from "@/lib/imagen-datos";
@@ -62,7 +63,7 @@ export function Sistema() {
     const corte = periodo === "todo" ? rows : rows.slice(-Number(periodo));
     const fmt = (v: number) => m.fmtC(c, v);
     const series: SerieG[] = [{ key: "s0", name: c.corto, color: PALETA[0], fmt }];
-    const opts: OpcionesG = { fmtAxis: fmtEjeDe(c), fmtTip: fmt, tipTitle: etiqueta, label: c.corto,
+    const opts: OpcionesG = { fmtAxis: fmtEjeDe(c), fmtTip: fmt, tipTitle: (r) => etiqueta(r, frecuenciaOrigen(c.v)), label: c.corto,
       marcas: [{ key: "s0", color: PALETA[0], fmt, tipos: new Set(["ult", "max", "min"]) }] };
     const ctx = contextoDato(m, e);
     const comp = comparaciones(m, plantillaSuelta("sis-" + med, c.corto, e));

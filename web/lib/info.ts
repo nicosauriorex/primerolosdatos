@@ -43,13 +43,20 @@ export const INFO_CAT: Record<string, string> = {
     <dt>Pobreza e indigencia</dt><dd>EPH, semestral (se ubica en enero y julio).</dd>
     <dt>Canastas</dt><dd>Lo que una familia necesita para no ser pobre (CBT) o indigente (CBA).</dd>
     <dt>AUH y Prestación Alimentar: cuántas canastas cubren</dt><dd>Hay dos cuentas, y comparan cosas distintas. <b>La del Ministerio de Capital Humano</b> suma la AUH completa y la Prestación Alimentar de un hijo, y la compara con la canasta alimentaria de <b>un adulto</b>. <b>La de la UCA</b> (Universidad Católica Argentina) toma lo que cobra en mano un hogar con dos hijos de 6 y 8 años y lo compara con la canasta alimentaria de <b>toda la familia</b> (hogar de 4); no incluye otros ingresos. Por eso dan resultados muy distintos.</dd>
-    <dt>Pensiones no contributivas</dt><dd>Se publica la cantidad vigente a diciembre de cada año, no las altas: la diferencia entre dos diciembres es altas menos bajas.</dd></dl>`,
-  "Sector externo": `<p>Exportaciones e importaciones de bienes (INDEC, en dólares), saldo comercial, términos del intercambio (precio de lo que vendemos vs. lo que compramos) y soja.</p>`,
+    <dt>Pensiones no contributivas</dt><dd>Se publica la cantidad vigente a diciembre de cada año, no las altas: la diferencia entre dos diciembres es altas menos bajas.</dd>
+    <dt>Empleo público nacional</dt><dd>Empleados de la administración pública nacional y de las empresas y sociedades del Estado (INDEC). Empieza en julio de 2022: no compara con gobiernos anteriores. El empleo público de cada provincia está en la sección Provincias.</dd></dl>`,
+  "Sector externo": `<p>Exportaciones e importaciones de bienes (INDEC, en dólares), saldo comercial, términos del intercambio (precio de lo que vendemos vs. lo que compramos) y soja. También las importaciones de bienes de consumo y los viajes al exterior en avión (pasajeros por Ezeiza y Aeroparque, INDEC).</p>`,
   "Fiscal": `<p>Sector público nacional, base caja.</p><dl>
     <dt>Resultado primario</dt><dd>Ingresos menos gastos sin contar intereses de la deuda.</dd>
     <dt>Resultado financiero</dt><dd>Después de pagar intereses.</dd>
-    <dt>Deuda pública</dt><dd>Secretaría de Finanzas, mensual desde 2019 y en dólares. La deuda consolidada del Tesoro y el Banco Central es una cuenta propia que suma lo que ambos deben a terceros.</dd></dl>
+    <dt>Deuda pública</dt><dd>Secretaría de Finanzas, mensual desde 2019 y en dólares. La deuda consolidada del Tesoro y el Banco Central es una cuenta propia que suma lo que ambos deben a terceros.</dd>
+    <dt>Recaudación por impuesto</dt><dd>Lo que ARCA (ex AFIP) recaudó cada mes por IVA, Ganancias, retenciones a las exportaciones, Bienes Personales, impuesto PAIS, impuesto al cheque y aportes a la seguridad social. Va en pesos de cada mes: se ve mejor en pesos de hoy o como % del PIB.</dd></dl>
     <p>Las cifras mensuales son muy estacionales: conviene verlas como % del PIB (suma de 12 meses) o por año.</p>`,
+  "Sociedad": `<dl>
+    <dt>Homicidios dolosos</dt><dd>Sistema Nacional de Información Criminal (Ministerio de Seguridad), anual. La <b>tasa de víctimas</b> es la que cita el Gobierno; la de <b>hechos</b> cuenta casos (un hecho puede tener varias víctimas).</dd>
+    <dt>Mortalidad infantil</dt><dd>Muertes de menores de un año cada 1.000 nacidos vivos (Ministerio de Salud). Anual; el último año sale con unos dos años de atraso.</dd>
+    <dt>Personas presas</dt><dd>Presos en cárceles provinciales y federales a fin de cada año (SNEEP, Ministerio de Justicia). No incluye a los detenidos en comisarías.</dd></dl>
+    <p>Son datos anuales, ubicados en diciembre de cada año.</p>`,
   "Contexto internacional": `<p>Lo que pasa afuera y la Argentina no controla.</p><dl>
     <dt>Precios de la soja, el maíz, el trigo y el petróleo</dt><dd>Banco Mundial vía FRED, en dólares: se pueden ver en dólares de hoy.</dd>
     <dt>Términos de intercambio</dt><dd>INDEC: precio de lo que exportamos contra el de lo que importamos.</dd>
@@ -73,6 +80,7 @@ export const INFO_CORTA: Record<string, { texto: string; reco: Recomendada }> = 
   "Empleo, pobreza e ingresos": { texto: "Cuánta gente trabaja, cuánta es pobre y cuánto necesita una familia para vivir.", reco: { id: "dg_42_3_eph_puntuatal_0_m_30", nombre: "Desocupación" } },
   "Sector externo": { texto: "Lo que Argentina vende y compra al mundo: exportaciones, importaciones y su saldo.", reco: { id: "dg_saldo_comercial", nombre: "Saldo comercial (% del PIB)", esc: "pib" } },
   "Fiscal": { texto: "Cuánto gasta y cuánto recauda el Estado nacional, y si le sobra o le falta plata.", reco: { id: "dg_379_9_superavit_017_23_94", nombre: "Resultado fiscal primario (% del PIB)", esc: "pib" } },
+  "Sociedad": { texto: "Seguridad y salud: homicidios, mortalidad infantil y personas presas.", reco: { id: "homicidios_tasa", nombre: "Homicidios dolosos cada 100.000 habitantes" } },
   "Contexto internacional": { texto: "Precios de la soja, el maíz, el trigo y el petróleo, términos de intercambio y tasa de la Fed.", reco: { id: "ctx_soja", nombre: "Soja (Banco Mundial)", med: "usdr" } },
   "Opinión pública (UTDT)": { texto: "Qué opina la gente: confianza del consumidor y confianza en el gobierno (Universidad Di Tella).", reco: { id: "dg_380_3_icc_nacionnal_0_t_12", nombre: "Confianza del consumidor" } },
 };

@@ -108,6 +108,9 @@ dg_74_3_iit_0_m_25
 dg_balanza_energetica
 dg_gasto_total
 dg_saldo_comercial
+empleo_publico_apn
+empleo_publico_empresas
+empleo_publico_nacional
 fx_blue
 fx_ccl
 fx_mep
@@ -115,6 +118,10 @@ fx_oficial
 gasto_aaff
 gasto_auh
 gasto_pnc
+homicidios_hechos_tasa
+homicidios_tasa
+homicidios_victimas
+imp_consumo
 inflacion
 inflacion_ia
 ipc_cuyo_01_1_1_coicop
@@ -443,6 +450,7 @@ mk_supv
 mk_teo
 mk_tgs
 mk_ypf
+mortalidad_infantil
 pib_nom
 pib_nom_anual
 pnc_invalidez
@@ -582,6 +590,16 @@ pp_patagonia_leche_fresca_entera_sachet
 pp_patagonia_pan_frances
 pp_patagonia_papa
 pp_patagonia_pollo_entero
+presos
+presos_tasa
+rec_bienes_personales
+rec_cheque
+rec_ganancias
+rec_importacion
+rec_iva
+rec_pais
+rec_retenciones
+rec_seguridad_social
 riesgo
 ripte
 sipa_med
@@ -594,3 +612,5 @@ soja_ratio_mep
 soja_ratio_oficial
 soja_ros
 tcrm
+turismo_emisivo
+turismo_receptivo

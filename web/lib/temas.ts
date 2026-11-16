@@ -61,12 +61,14 @@ export const TEMAS: Tema[] = [
       { id: "dg_151_1_aariadotac_2012_m_26", nombre: "Empleo privado registrado", corto: "el empleo privado registrado" },
       { id: "auh", nombre: "AUH real", corto: "la AUH real", med: "real" },
       { id: "pnc_invalidez", nombre: "Pensiones por invalidez", corto: "las pensiones por invalidez", med: "asis" },
+      { id: "empleo_publico_nacional", nombre: "Empleados públicos nacionales", corto: "los empleados públicos nacionales", med: "asis" },
     ], grupos: ["Empleo y pobreza"], q: "empleo", desc: "Desocupación, empleo, informalidad, pobreza e indigencia en Argentina." },
   { slug: "externo", nombre: "Comercio exterior", cats: ["Sector externo"], corto: INFO_CORTA["Sector externo"].texto, largo: largoDe("Sector externo"),
     principales: [
       { id: "dg_saldo_comercial", nombre: "Saldo comercial (% del PIB)", corto: "el saldo comercial", esc: "pib" },
       { id: "dg_160_2_tl_cuennte_0_t_22", nombre: "Cuenta corriente (% del PIB)", corto: "la cuenta corriente", esc: "pib" },
       { id: "dg_74_3_iet_0_m_16", nombre: "Exportaciones de bienes", corto: "las exportaciones" },
+      { id: "turismo_emisivo", nombre: "Viajes al exterior", corto: "los viajes al exterior", med: "asis" },
     ], grupos: ["Sector externo"], q: "externo", desc: "Exportaciones, importaciones, saldo comercial, cuenta corriente y soja." },
   { slug: "fiscal", nombre: "Cuentas públicas", cats: ["Fiscal"], corto: INFO_CORTA["Fiscal"].texto, largo: largoDe("Fiscal"),
     principales: [
@@ -75,7 +77,15 @@ export const TEMAS: Tema[] = [
       { id: "deuda_ac_total", nombre: "Deuda pública bruta (% del PIB)", corto: "la deuda pública", esc: "pib" },
       { id: "deuda_consolidada", nombre: "Deuda consolidada del Tesoro y el Banco Central (% del PIB)", corto: "la deuda consolidada", esc: "pib" },
       { id: "bcra_cuasifiscal", nombre: "Déficit cuasifiscal del Banco Central (% del PIB)", corto: "el déficit cuasifiscal", esc: "pib" },
-    ], grupos: ["Fiscal"], q: "fiscal", desc: "Resultado primario y financiero del sector público nacional, ingresos, gastos y deuda." },
+      { id: "rec_retenciones", nombre: "Retenciones a las exportaciones (en pesos de hoy)", corto: "las retenciones a las exportaciones", med: "real" },
+    ], grupos: ["Fiscal"], q: "fiscal", desc: "Resultado primario y financiero del sector público nacional, ingresos, gastos, deuda y recaudación por impuesto." },
+  { slug: "sociedad", nombre: "Seguridad y salud", cats: ["Sociedad"], corto: INFO_CORTA["Sociedad"].texto, largo: largoDe("Sociedad"),
+    principales: [
+      { id: "homicidios_tasa", nombre: "Homicidios dolosos cada 100.000 habitantes", corto: "los homicidios", med: "asis" },
+      { id: "mortalidad_infantil", nombre: "Mortalidad infantil", corto: "la mortalidad infantil", med: "asis" },
+      { id: "presos_tasa", nombre: "Presos cada 100.000 habitantes", corto: "los presos por habitante", med: "asis" },
+      { id: "presos", nombre: "Personas presas", corto: "las personas presas", med: "asis" },
+    ], grupos: ["Sociedad"], porCat: true, q: "homicidios", desc: "Homicidios dolosos, mortalidad infantil y personas presas en Argentina, con datos oficiales." },
   { slug: "finanzas", nombre: "Dinero, tasas y mercados", cats: ["Dinero y bancos (BCRA)", "Tasas de interés", "Mercados"],
     corto: "Reservas, tasas de interés y riesgo país: cómo están el dinero y los mercados.", largo: largoDe("Dinero y bancos (BCRA)", "Tasas de interés", "Mercados"),
     principales: [

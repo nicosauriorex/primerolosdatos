@@ -38,13 +38,14 @@ export function agrupar(rows: Fila[], freq: string, meses: Set<number>, sumar = 
   });
 }
 
-import { fmtMes } from "./formato";
-export const etiqueta = (r: Fila): string => r.per || fmtMes(r.fecha);
+import { fechaDeDato, fmtMes } from "./formato";
+/** Rótulo de una fila: su período ("2024", "T1 24") o, si no tiene, el mes; `origen` = frecuencia de la serie original ("A" → el año). */
+export const etiqueta = (r: Fila, origen?: string): string => r.per || fechaDeDato(r.fecha, origen);
 
 export type Par = [number, string];
 export interface EstRows { ult: Par; pri: Par; prom: number; med: number; min: Par; max: Par; n: number }
-export function estadisticasRows(rows: Fila[], key: string): EstRows | null {
-  const vals = rows.map((r) => [r[key], etiqueta(r)] as [number, string]).filter((c) => ok(c[0]));
+export function estadisticasRows(rows: Fila[], key: string, origen?: string): EstRows | null {
+  const vals = rows.map((r) => [r[key], etiqueta(r, origen)] as [number, string]).filter((c) => ok(c[0]));
   if (!vals.length) return null;
   const ord = vals.map((v) => v[0]).sort((a, b) => a - b), h = Math.floor(ord.length / 2);
   return {

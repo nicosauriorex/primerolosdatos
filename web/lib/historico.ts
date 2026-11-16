@@ -1,7 +1,7 @@
 // Cómo se lee Histórico desde la URL: parámetros de cada gráfico y del período. Lo usan la sección y la imagen de compartir.
 import { desdePreferido, type DesdePref } from "./config";
 import { claseVariacion, etiqueta, type EstRows, type Fila } from "./estadisticas";
-import { MESES, fmtNum, mesNum, nf0, nf1, ok, redondeadoComo, restaLimpia, rotuloAnterior } from "./formato";
+import { MESES, fechaDeDato, fmtNum, mesNum, nf0, nf1, ok, redondeadoComo, restaLimpia, rotuloAnterior } from "./formato";
 import { ES_VAR, type Expr, type Motor, type SerieMeta } from "./motor";
 import { decExpr, lista as listaUrl, unoDe } from "./url";
 import type { DeltaProps } from "@/components/sistema/Delta";
@@ -140,10 +140,10 @@ export function comparacionesCabecera(o: {
     while (j >= 0 && !ok(hist[j][key])) j--;
     const normal = freq === "A" ? ANTERIOR.A : freq === "T" ? ANTERIOR.T : ANTERIOR[origen];
     const paso = freq === "A" ? 12 : freq === "T" ? 3 : { M: 1, T: 3, S: 6, A: 12 }[origen];
-    if (j >= 0) out.push(fila(hist[j][key], "anterior", rotuloAnterior(hist[j].fecha, ultima.fecha, normal, paso), etiqueta(hist[j])));
+    if (j >= 0) out.push(fila(hist[j][key], "anterior", rotuloAnterior(hist[j].fecha, ultima.fecha, normal, paso), etiqueta(hist[j], origen)));
     if (freq !== "A") {
       const hace = hist.find((r) => mesNum(r.fecha) === mesNum(ultima.fecha) - 12 && ok(r[key]));
-      if (hace) out.push(fila(hace[key], "anio", "Un año atrás", etiqueta(hace)));
+      if (hace) out.push(fila(hace[key], "anio", "Un año atrás", etiqueta(hace, origen)));
     }
   }
   out.push(fila(est.pri[0], "inicio", "Inicio del período", est.pri[1]));

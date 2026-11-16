@@ -5,6 +5,9 @@ export const fmtMes = (s: string | null | undefined): string => {
   const [y, m] = s.split("-");
   return MESES[+m - 1] + "-" + y.slice(2);
 };
+/** Fecha de un dato según la frecuencia de su serie original: "2025" si es anual ("A"), si no el mes ("oct-26").
+ *  Una sola fuente para nombrar la fecha de un dato (la frecuencia sale de `frecuenciaOrigen` de lib/historico.ts). */
+export const fechaDeDato = (s: string | null | undefined, frec?: string): string => (frec === "A" && s ? s.slice(0, 4) : fmtMes(s));
 export const nf0 = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 });
 export const nf1 = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
 export const nf2 = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
