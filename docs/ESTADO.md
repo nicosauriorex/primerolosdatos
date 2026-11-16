@@ -7,7 +7,8 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-15.
 ## Dónde estamos
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
-Últimos bloques (todos publicados, corrida en verde):
+Últimos bloques (todos publicados, corrida en verde, salvo el primero):
+- Series de deuda (Finanzas, mensual desde 2019) y deuda consolidada Tesoro + Banco Central (cuenta propia, D-024) — 2026-11-15, sin publicar — [spec](specs/series-deuda.md)
 - Tanda 11: Congreso en columnas con «Leyes por apoyo»; resaltar un país (y su imagen) en Otros países y «¿Cómo viene?» — 2026-11-15, 4c80be2 — [spec](specs/ajustes-tanda-11.md)
 - Tanda 10: la lupa encuentra Herencia y el parte del Banco Central; selector de Herencia agrupado — 2026-11-15, b296c75 — [spec](specs/ajustes-tanda-10.md)
 - EE.UU. (BLS) y Chile (INE) en precios contra el mundo, productos de EE.UU. desde el BLS y aviso de presidente sin dato — 2026-11-15, 4078c3e — [spec](specs/precios-mundo-bls-ine.md)
@@ -18,7 +19,7 @@ Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes
 - Mantenimiento del pipeline (`pipeline/red.py`) — 2026-11-14 — [spec](specs/mantenimiento-pipeline.md)
 
 ## Qué sigue, en orden
-1. **El primer bloque no hecho de la tabla "Próximos bloques" de `docs/ROADMAP.md`** (la única lista de bloques). Hoy: Series de deuda y deuda consolidada (5p, spec lista); después Contar los Compartir (9a), spec pendiente.
+1. **El primer bloque no hecho de la tabla "Próximos bloques" de `docs/ROADMAP.md`** (la única lista de bloques). Hoy: Contar los Compartir (9a), spec pendiente. De la spec de deuda queda opcional la fase 3 (tarifa eléctrica de CAMMESA).
 2. **Mantenimiento a mano cuando salgan datos nuevos:** herencia (`datos/manual/herencia.json`; nivel de reservas netas del FMI en la 3ª revisión, dic-2026, y saldos de DEG cada mes en `reservas_netas_supuestos.json`); Congreso (cada 1 de marzo, cortes de las dos cámaras y vetos del año); provincias (el III trimestre de la DNAP entra solo: mirar que pase el control).
 3. **Pendientes sin fuente o sin decidir:** semáforo (desestacionalizado X-13; CAME, patentamientos, Construya, escrituras, leche, petróleo); gasto (empresas públicas sin fuente; universidades: estudiantes antes de 2023 y las 8 sin datos en el PIU); Congreso (leyes del Ejecutivo de Menem a CFK 1); herencia (cepo de 2003 y 2007, FMI de 1995 a 2002).
 4. **Lupa:** el semáforo todavía no está en el buscador (sus indicadores salen de su archivo de datos).
@@ -35,6 +36,7 @@ A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunid
   - Universidades: lo que declaran en la Cuenta de Inversión 2024 no cierra con lo transferido (la página lo dice).
   - Banco Central: unos cinco días hábiles de atraso en todas las fuentes legibles; falta saber si es lo normal.
   - Precios contra el mundo: "La región" puede quedar con un mes viejo (ropa: dic-23); México corta comunicación, recreación y varios en jul-24; Chile, comunicación y recreación en dic-23; EE.UU. sin oct-25 (cierre del gobierno).
+  - Deuda: el % del PIB de la web (dólar promedio, PIB de 12 meses) difiere unas décimas del de Finanzas (lo dice la ficha); imagen para compartir de las fichas nuevas sin mirar.
   - Las estimaciones propias de reservas netas dependen de supuestos fijos (swaps 20.000, SEDESA 2.000).
 
 ## Avisos y decisiones abiertas

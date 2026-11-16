@@ -53,6 +53,7 @@ export const DATOS_FIJOS: DatoFijo[] = [
   // Cuentas públicas
   { slug: "resultado-fiscal-primario", e: ex("dg_379_9_superavit_017_23_94", "real", { esc: "pib" }) },
   { slug: "resultado-fiscal-financiero", e: ex("dg_379_9_resultado_017_18_38", "real", { esc: "pib" }) },
+  { slug: "deuda-publica-pib", e: ex("deuda_ac_total", "corr", { esc: "pib" }) },
   // Dinero, tasas y mercados
   { slug: "reservas", e: ex("bcra_1", "usdr") },
   { slug: "riesgo-pais", e: ex("riesgo", "asis") },

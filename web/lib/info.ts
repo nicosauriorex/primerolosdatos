@@ -45,7 +45,8 @@ export const INFO_CAT: Record<string, string> = {
   "Sector externo": `<p>Exportaciones e importaciones de bienes (INDEC, en dólares), saldo comercial, términos del intercambio (precio de lo que vendemos vs. lo que compramos) y soja.</p>`,
   "Fiscal": `<p>Sector público nacional, base caja.</p><dl>
     <dt>Resultado primario</dt><dd>Ingresos menos gastos sin contar intereses de la deuda.</dd>
-    <dt>Resultado financiero</dt><dd>Después de pagar intereses.</dd></dl>
+    <dt>Resultado financiero</dt><dd>Después de pagar intereses.</dd>
+    <dt>Deuda pública</dt><dd>Secretaría de Finanzas, mensual desde 2019 y en dólares. La deuda consolidada del Tesoro y el Banco Central es una cuenta propia que suma lo que ambos deben a terceros.</dd></dl>
     <p>Las cifras mensuales son muy estacionales: conviene verlas como % del PIB (suma de 12 meses) o por año.</p>`,
   "Contexto internacional": `<p>Lo que pasa afuera y la Argentina no controla.</p><dl>
     <dt>Precios de la soja, el maíz, el trigo y el petróleo</dt><dd>Banco Mundial vía FRED, en dólares: se pueden ver en dólares de hoy.</dd>

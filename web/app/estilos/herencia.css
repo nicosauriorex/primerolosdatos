@@ -15,3 +15,6 @@
   /* si la celda de Hoy no tiene dato, el texto largo del motivo no empuja al Cambio hacia afuera */
   .tablewrap.her-ap > table > tbody > tr > td { min-width: 0; }
 }
+
+/* Series de deuda: link «Ver la evolución» bajo la unidad de una fila de informe (color de link del sitio, 44 px de zona tocable). */
+.her-evo { display: inline-flex; align-items: center; min-height: var(--alto-toque); font-size: var(--t-xs); }

@@ -89,6 +89,8 @@ export function crearIndicadoresDe(SER: Record<string, SerieMeta>) {
     X("dg_379_9_superavit_017_23_94", "Fiscal", `${N("dg_379_9_superavit_017_23_94")} (% del PIB)`, { esc: "pib" }),
     X("dg_379_9_resultado_017_18_38", "Fiscal", `${N("dg_379_9_resultado_017_18_38")} (% del PIB)`, { esc: "pib" }),
     X("bcra_cuasifiscal", "Fiscal", `${N("bcra_cuasifiscal")} (% del PIB)`, { esc: "pib" }),
+    X("deuda_ac_total", "Fiscal", "Deuda pública bruta (% del PIB)", { esc: "pib" }),
+    X("deuda_consolidada", "Fiscal", N("deuda_consolidada")),
   ].filter(Boolean) as Indic[];
   const series = Object.values(SER);
   const INDIC_IPC: Indic[] = series.filter((s) => s.cat[1] && s.cat[1].startsWith("IPC INDEC") && s.cat[2] === "Nacional" && s.cat.length === 4 && s.id !== "ipc_nacional")

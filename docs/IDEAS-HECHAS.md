@@ -377,3 +377,7 @@ Crítica final de Impeccable: 26/40 (antes 21/40). El usuario eligió arreglar l
 → spec: docs/specs/ajustes-tanda-11.md
 - ~~«En Cada gobierno frente al Congreso … que sea un gráfico de barras verticales con cada gobierno en el eje x», marcar el de más y el de menos apoyo, y un indicador de leyes según el apoyo que tenía cada gobierno.~~ ✅ 2026-11-15
 - ~~«que en El mundo y la Argentina se pueda resaltar a un pais como hacemos en meses de mandato (tambien para la imagen)».~~ ✅ 2026-11-15
+
+## ~~Series de deuda y deuda consolidada (2026-11-15)~~ ✅ 2026-11-15
+→ spec: docs/specs/series-deuda.md
+- ~~«no tenemos series para ver la evolución de las variables esas que están en herencia?» y «deuda consolidada»: la suma de los pasivos del Banco Central y los del Tesoro.~~ ✅ 2026-11-15 (fases 1 y 2; la tarifa eléctrica, fase 3 opcional, sigue abierta en la spec)

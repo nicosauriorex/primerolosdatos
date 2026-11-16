@@ -25,6 +25,7 @@ import {
   FILAS_INFORME, PREF_INF, clavesCargadas, cualRNPropia, defRNPropia, dosDefiniciones, filasEstimaciones, filasInforme, puntoInforme, rangoControles, traspasosInforme,
   type DatoInforme, type DefInforme, type DefinicionRN, type FilaInforme, type PuntoInforme, type ReservasNetas,
 } from "@/lib/herencia-informes";
+import { hrefDato } from "@/lib/temas";
 import { unoDe, useParams } from "@/lib/url";
 import type { Motor } from "@/lib/motor";
 
@@ -127,10 +128,21 @@ function CeldaInforme({ d, p, verCita, motivo, rotulo }: { d: DefInforme; p: Pun
   );
 }
 
-function FilaInf({ f, verCita, fin }: { f: FilaInforme; verCita: VerCita; fin: string }) {
+/** Link «Ver la evolución» a la ficha de la serie del catálogo con el mismo dato (solo si la serie está cargada). */
+function hrefEvolucion(m: Motor, d: DefInforme): string | null {
+  const s = d.serie ? m.SER[d.serie] : undefined;
+  return s ? hrefDato({ id: s.id, med: m.medDefault(s), rel: null, modo: "compra", esc: "" }) : null;
+}
+/** Si la serie está en otra unidad que la fila (FMI en DEG, moneda extranjera en % de la deuda), el link lo dice. */
+function LinkEvolucion({ href, m, d }: { href: string | null; m: Motor; d: DefInforme }) {
+  const u = d.serie ? m.SER[d.serie]?.u : undefined;
+  return href ? <Link prefetch={false} className="her-evo" href={href}>Ver la evolución{u && u !== d.unidad ? ` (en ${u})` : ""}</Link> : null;
+}
+
+function FilaInf({ f, verCita, fin, m }: { f: FilaInforme; verCita: VerCita; fin: string; m: Motor }) {
   return (
     <tr>
-      <CeldaVar nombre={f.def.nombre} unidad={f.def.unidad} />
+      <CeldaVar nombre={f.def.nombre} unidad={f.def.unidad} extra={<LinkEvolucion href={hrefEvolucion(m, f.def)} m={m} d={f.def} />} />
       <CeldaInforme d={f.def} p={f.recibio} verCita={verCita} rotulo="Recibió" />
       <CeldaInforme d={f.def} p={f.entrego} verCita={verCita} motivo={f.sinEntrego} rotulo={fin} />
       <Valor tono={null} data-rotulo="Cambio" sub={f.cambioAbs ? <small>{f.cambioAbs}</small> : null}>{f.cambio}</Valor>
@@ -297,7 +309,7 @@ export function Herencia() {
                     <Fragment key={g}>
                       <tr className="her-grupo"><td colSpan={4}>{g}</td></tr>
                       {filas.map((f) => <FilaTabla key={f.def.clave} f={f} fin={colFin} />)}
-                      {fi.map((f) => <FilaInf key={f.def.clave} f={f} verCita={verCita} fin={colFin} />)}
+                      {fi.map((f) => <FilaInf key={f.def.clave} f={f} verCita={verCita} fin={colFin} m={m} />)}
                     </Fragment>
                   );
                 })}
@@ -327,7 +339,7 @@ export function Herencia() {
               })()}
               <div className="tablewrap fija her-tabla her-ap"><table>
                 <thead><tr><th>Variable</th><th>Recibió</th><th>{colFin}</th><th>Cambio</th></tr></thead>
-                <tbody>{filasEst.map((f) => <FilaInf key={f.def.clave} f={f} verCita={verCita} fin={colFin} />)}</tbody>
+                <tbody>{filasEst.map((f) => <FilaInf key={f.def.clave} f={f} verCita={verCita} fin={colFin} m={m} />)}</tbody>
               </table></div>
               {rn && filasEst.some((f) => cualRNPropia(f.def.clave) && f.entrego)
                 ? <p className="note">Las estimaciones propias se apartaron {rangoControles(rn, "fmi")} de las cifras del FMI y {rangoControles(rn, "bcra")} de las del Banco Central, en las fechas en que cada uno publicó. Tocá su valor para ver la cuenta.</p>
@@ -370,6 +382,7 @@ export function Herencia() {
         <Capitulo id="traspasos" titulo="Cada traspaso presidencial" acciones={<CompartirHoja href={hrefPag} titulo={`${ti.def.nombre} en cada traspaso presidencial`} texto={`${respTr?.frase ?? ""} ${textoFuente}`} />}>
           <p className="note">
             {ti.def.nombre} ({ti.def.unidad}): el dato de cada traspaso, copiado a mano de un documento oficial. Tocá un valor para ver de cuál.{ti.def.nota ? ` ${ti.def.nota}` : ""}
+            {hrefEvolucion(m, ti.def) ? <> <LinkEvolucion href={hrefEvolucion(m, ti.def)} m={m} d={ti.def} /></> : null}
           </p>
           <div className="tablewrap fija her-tabla"><table>
             <thead><tr><th>Traspaso</th><th>Entregó → recibió</th><th>Valor</th></tr></thead>

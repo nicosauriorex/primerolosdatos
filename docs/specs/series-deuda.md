@@ -1,6 +1,6 @@
 # Series de deuda pública y deuda consolidada Tesoro + Banco Central
 
-Estado: spec lista (2026-11-15), sin implementar
+Estado: implementada (2026-11-15), fases 1 y 2; la fase 3 (tarifa eléctrica, opcional) queda para después
 
 Pedido del usuario (2026-11-15): «no tenemos series para ver la evolución de las variables esas que están en herencia? y deuda neta porque tampoco tenemos… arma una propia que sea la suma de los pasivos del bcra + los pasivos del tesoro» y después «en realidad era deuda consolidada no neta».
 
@@ -47,5 +47,19 @@ Serie mensual «Parte del costo de la electricidad que pagan las tarifas» (prec
 - Ficha de cada serie nueva en `/dato/?v=deuda_ac_total~…`; Herencia con link «Ver la evolución»; lupa con «deuda publica» y «deuda consolidada».
 - Consolidada a jun-26 cerca de 474.198 − ~33.000 + pasivos remunerados en dólares; la cuenta paso a paso se ve en la ficha.
 
+## Cómo quedó (2026-11-15)
+- `pipeline/deuda.py` (registrado en `catalogo.construir`): 7 series en «Fiscal › Deuda pública»: `deuda_ac_total`, `deuda_ac_me`, `deuda_ac_mn`, `deuda_fmi`, `deuda_letras_bcra` (letras «LETRA BCRA…» + adelantos transitorios), `deuda_pib` y `deuda_consolidada` (D-024). Respaldos `datos/cache/deuda_mensual.xlsx` y `deuda_trimestral.xlsx`. Controles que cortan: moneda local + extranjera = deuda en pago normal, pago normal ≥ 95 % de la bruta, FMI y letras ≤ 30 %, deuda/PIB entre 10 % y 300 %.
+- La moneda nacional/extranjera es la de la deuda en pago normal (hoja A.3); por eso el dato a mano de Herencia (% de la deuda bruta) difiere 0,15 a 0,23 p.p.
+- Consolidada: pasivos remunerados del último día hábil del mes al A3500 de ese día; una variable que deja de publicarse (último dato distinto de 0 con más de 10 días) deja el mes sin dato en vez de arrastrarse. El % del PIB sale de la escala «% del PIB» de la web.
+- Herencia: link «Ver la evolución» (con la unidad si es otra) en deuda bruta, / PIB, moneda extranjera y FMI. `herencia_informes.construir_json(datos)` compara desde 2019 lo cargado a mano con las series (1 % en montos, 0,5 p.p.; FMI no, porque el informe está en DEG): solo avisa.
+- Web: nombres y sinónimos (`nombres.ts`), «Deuda pública» en la info de Fiscal, principal del tema Cuentas públicas y dato fijo `deuda-publica-pib`, indicadores en `catalogo.ts`.
+
+**Verificado (2026-11-15):** corrida completa sin error (585 series); cifras de control a jun-26 iguales (474.198; FMI 57.705,5; moneda extranjera 246.535,6; letras 30.306 en may-26); consolidada jun-26 = 474.198 − 33.069 + 143 = 441.273; salto de jul-25 explicado (fin de las Lefi en el Banco Central y suba del dólar de 1.194 a 1.352). Control de Herencia con tolerancia cero: 8 comparaciones, todas dentro de la tolerancia. `npm run tipos`, `previas` y `build` sin error; en el navegador: fichas, botón de información con la cuenta, Herencia con los 4 links, lupa con «deuda publica»; sin desborde a 375 px en 6 rutas, sin errores de consola. Revisor: sin bloqueantes; los menores (unidad del link, aviso del % del PIB propio, pasivos que se arrastraban) corregidos.
+**Sin verificar:** aspecto en capturas (el panel del navegador estaba oculto: se midió); la imagen para compartir de las fichas nuevas.
+
 ## Dónde ver los cambios
-(se completa al implementar)
+Página con links y casillas: `docs/cambios/series-deuda.html`. Local `http://localhost:3100<ruta>` (vista `web-out`); publicado recién después del commit, el push y la corrida completa en verde (toca `pipeline/`: unos 10 minutos).
+1. Menús › Lupa: «deuda publica», «deuda consolidada» — `/`
+2. Ficha: `/dato/?v=deuda_ac_total`, `deuda_ac_me`, `deuda_ac_mn`, `deuda_fmi`, `deuda_pib`, `deuda_consolidada`, `deuda_letras_bcra`
+3. Temas › Cuentas públicas: principal «Deuda pública bruta (% del PIB)» — `/tema/fiscal/`, `/dato/deuda-publica-pib/`
+4. Presidentes › Herencia: links «Ver la evolución» en las filas de deuda — `/herencia/`

@@ -548,7 +548,7 @@ def construir(m: pd.DataFrame, token: str | None):
     series = propias(m)
     for nombre, f in [("IPC INDEC", lambda: ipc_indec(token, idx)), ("BCRA", lambda: bcra(idx)),
                       ("datos.gob.ar", lambda: datos_gob(idx, m["ipc_ar"])), ("INDEC social", lambda: indec_social(token, idx)),
-                      ("Mercados", lambda: mercados(idx))]:
+                      ("Mercados", lambda: mercados(idx)), ("Deuda (Finanzas)", lambda: __import__("deuda").series(idx))]:
         try:
             nuevas = f()
             print(f"  {nombre}: {len(nuevas)} series")

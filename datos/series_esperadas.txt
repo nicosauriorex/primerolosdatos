@@ -39,6 +39,13 @@ ctx_petroleo
 ctx_soja
 ctx_terminos
 ctx_trigo
+deuda_ac_me
+deuda_ac_mn
+deuda_ac_total
+deuda_consolidada
+deuda_fmi
+deuda_letras_bcra
+deuda_pib
 dg_143_3_no_pr_2004_a_31
 dg_149_1_sor_priado_octu_0_25
 dg_149_1_sor_priado_octu_0_28

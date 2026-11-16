@@ -19,9 +19,11 @@ export interface DatosInformes { actualizado?: string; datos: DatoInforme[] }
 
 /** Cómo se muestra y se compara un dato: monto (cambio en %), porcentaje (cambio en puntos) o texto (sin cambio). */
 type Tipo = "monto" | "pct" | "texto";
-/** `grupo` "Estimaciones": va en el bloque aparte, debajo de la tabla (fase 3). `dec`: decimales de un monto (0 si falta). */
+/** `grupo` "Estimaciones": va en el bloque aparte, debajo de la tabla (fase 3). `dec`: decimales de un monto (0 si falta).
+ *  `serie`: id de la serie del catálogo con la evolución del mismo dato (link «Ver la evolución»). Las cifras de cada traspaso siguen saliendo
+ *  del informe cargado a mano (cubre desde 1989); la serie solo existe desde 2019 (desde 2000 la de la deuda / PIB). */
 export type GrupoInforme = GrupoHerencia | "Estimaciones";
-export interface DefInforme { clave: string; grupo: GrupoInforme; nombre: string; unidad: string; tipo: Tipo; nota?: string; dec?: number; quien?: string; sinDato?: string; oficial?: boolean }
+export interface DefInforme { clave: string; grupo: GrupoInforme; nombre: string; unidad: string; tipo: Tipo; nota?: string; dec?: number; quien?: string; sinDato?: string; oficial?: boolean; serie?: string }
 
 /** Filas de informes, en el orden en que se intercalan al final de cada grupo de la tabla. */
 export const FILAS_INFORME: DefInforme[] = [
@@ -37,10 +39,10 @@ export const FILAS_INFORME: DefInforme[] = [
     nota: "Parte de los precios que releva el INDEC para el IPC del Gran Buenos Aires que estaban dentro de programas de precios acordados entre el Estado y las empresas. Es parte de la muestra, no de la canasta ponderada." },
   { clave: "importaciones_pendientes", grupo: "Deuda y sector externo", nombre: "Importaciones pendientes de pago", unidad: "millones de US$", tipo: "monto",
     nota: "Deuda de importadores de bienes y servicios con el exterior estimada por el Banco Central al 12-12-2023, con la que se armaron los BOPREAL." },
-  { clave: "deuda_bruta_usd", grupo: "Deuda y sector externo", nombre: "Deuda pública bruta", unidad: "millones de US$", tipo: "monto" },
-  { clave: "deuda_bruta_pib", grupo: "Deuda y sector externo", nombre: "Deuda pública bruta / PIB", unidad: "% del PIB", tipo: "pct" },
-  { clave: "deuda_moneda_ext", grupo: "Deuda y sector externo", nombre: "Deuda pública en moneda extranjera", unidad: "% de la deuda bruta", tipo: "pct" },
-  { clave: "fmi_deuda", grupo: "Deuda y sector externo", nombre: "Deuda con el FMI", unidad: "millones de DEG (moneda del FMI)", tipo: "monto",
+  { clave: "deuda_bruta_usd", grupo: "Deuda y sector externo", nombre: "Deuda pública bruta", unidad: "millones de US$", tipo: "monto", serie: "deuda_ac_total" },
+  { clave: "deuda_bruta_pib", grupo: "Deuda y sector externo", nombre: "Deuda pública bruta / PIB", unidad: "% del PIB", tipo: "pct", serie: "deuda_pib" },
+  { clave: "deuda_moneda_ext", grupo: "Deuda y sector externo", nombre: "Deuda pública en moneda extranjera", unidad: "% de la deuda bruta", tipo: "pct", serie: "deuda_ac_me" },
+  { clave: "fmi_deuda", grupo: "Deuda y sector externo", nombre: "Deuda con el FMI", unidad: "millones de DEG (moneda del FMI)", tipo: "monto", serie: "deuda_fmi",
     nota: "En DEG (derechos especiales de giro), la moneda de cuenta del FMI, que es como lo publica el Fondo en su página de cada país. No se pasa a dólares para no mezclar el tipo de cambio de cada fecha." },
   { clave: "fmi_acuerdo", grupo: "Deuda y sector externo", nombre: "Acuerdo vigente con el FMI", unidad: "tipo, año y monto", tipo: "texto" },
   { clave: "deuda_importadores", grupo: "Deuda y sector externo", nombre: "Deuda comercial de importadores (informes)", unidad: "millones de US$", tipo: "monto",

@@ -316,7 +316,7 @@ def escribir_json_web(datos, ctx=None, pm=None, cap=None, con_red=True):
     # Herencia, fase 2: datos de informes cargados a mano (datos/manual/herencia.json), sin red. Va fuera del hash.
     # Un dato sin cita completa corta solo este archivo: la corrida sigue y la página muestra las series sin los datos de informes.
     try:
-        inf = herencia_informes.construir_json()
+        inf = herencia_informes.construir_json(datos)
         if inf is not None:
             (destino / "herencia_informes.json").write_text(json.dumps(inf, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     except Exception as e:
