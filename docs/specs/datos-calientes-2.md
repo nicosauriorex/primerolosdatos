@@ -1,6 +1,6 @@
 # Subsidios al transporte, transferencias a provincias, patentamientos, demanda eléctrica, gasto por función y siniestros viales
 
-Estado: implementada (2026-11-16), sin publicar
+Estado: implementada (2026-11-16), publicada en 438ea3c (corrida completa en verde, run 43896968685; /dato/transferencias-provincias/ y /dato/siniestros-viales/ comprobadas en el sitio)
 
 Pedido del usuario (2026-11-16): «manda a investigar si hay otra cosa interesante para mostrar. capaz hay cosas que va a haber que traer mas manual pero mientras pongamos la fuente esta bien» y, al abrir esta sesión, «seguí con la spec de los datos de docs/investigaciones/datos-nuevos-2-2026-11-16.md». Se toma la recomendación de la investigación (1, 2, 3, 6 y 7, después 4) más los que salen de la misma API sin esfuerzo (becas, seguro de desempleo, siniestros viales).
 
