@@ -1,0 +1,126 @@
+<title>Predicciones</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@700&display=swap">
+<style>
+/* Lista de control: una columna, secciones en el orden del menú del sitio, cada cambio con su link directo */
+:root {
+  --bg: #f3f5fb; --sup: #ffffff; --tinta: #0b1230; --sec: #4a5478; --borde: #d9deee;
+  --acento: #1f6fd1; --sobre-acento: #ffffff; --accion: #f5b81c; --sobre-accion: #0b1230; --hecho: #1d8a55; --propio: #9a5400;
+  --f-txt: "Archivo", system-ui, sans-serif; --f-tit: "Archivo Narrow", "Archivo", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--tinta); font-family: var(--f-txt); font-size: 15px; line-height: 1.5; margin: 0 }
+.envoltura { max-width: 760px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+h1 { font-family: var(--f-tit); font-size: 30px; text-transform: uppercase; letter-spacing: .01em; margin: 0 0 6px; text-wrap: balance }
+.bajada { color: var(--sec); margin: 0 0 18px; max-width: 62ch }
+.barra { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--borde); margin-bottom: 8px }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.riel { display: inline-flex; background: var(--sup); border-radius: 999px; padding: 4px; gap: 2px }
+.riel button { border: 0; background: transparent; color: var(--tinta); font: 600 14px var(--f-txt); padding: 8px 14px; border-radius: 999px; cursor: pointer }
+.riel button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento) }
+.progreso { color: var(--sec); font-size: 14px; font-variant-numeric: tabular-nums; margin-left: auto }
+.aviso { font-size: 13px; color: var(--sec); margin: 6px 0 0; width: 100% }
+.aviso code { background: var(--sup); padding: 1px 6px; border-radius: 6px; font-size: 12px; user-select: all }
+section { padding-top: 22px }
+h2 { font-family: var(--f-tit); font-size: 19px; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline }
+h2 .n { color: var(--acento); font-variant-numeric: tabular-nums; min-width: 1.6em }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px }
+li { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; background: var(--sup); border-radius: 12px; padding: 10px 12px }
+li.visto { opacity: .55 }
+li.visto .que { text-decoration: line-through; text-decoration-color: var(--sec) }
+input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--hecho); margin: 0 }
+.que { min-width: 0 }
+.num { font-weight: 800; color: var(--acento); font-variant-numeric: tabular-nums; margin-right: 4px }
+.origen { display: block; font-size: 13px; margin-top: 2px; color: var(--sec) }
+.origen.propio { color: var(--propio) }
+.que small { display: block; color: var(--sec); font-size: 12.5px; word-break: break-all }
+a.ir { background: var(--accion); color: var(--sobre-accion); text-decoration: none; font-weight: 800; font-size: 13px; padding: 8px 12px; border-radius: 999px; white-space: nowrap }
+a.ir:focus-visible, .riel button:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px }
+.fuera { margin-top: 28px; padding: 14px; border: 1px dashed var(--borde); border-radius: 12px; color: var(--sec); font-size: 14px }
+@media (max-width: 480px) { li { grid-template-columns: 24px 1fr; } a.ir { grid-column: 2; justify-self: start } }
+</style>
+
+<div class="envoltura">
+  <h1>Predicciones: dónde verlo</h1>
+  <p class="bajada">Cada renglón abre la página donde se ve el cambio. En tu máquina, con la vista <code>web-funciones</code> (puerto 8788; en la 3100 se ve sin la parte de la gente); en el sitio, recién después del commit, el push y la corrida en verde. Para comentar un cambio, citá su número (por ejemplo 3.1). Debajo de cada uno: lo que pediste o por qué lo agregué yo. Marcá la casilla cuando lo revisaste.</p>
+
+  <div class="barra">
+    <div class="riel" role="group" aria-label="Dónde abrir">
+      <button type="button" id="b-local" aria-pressed="true">En mi máquina</button>
+      <button type="button" id="b-sitio" aria-pressed="false">Sitio publicado</button>
+    </div>
+    <span class="progreso" id="progreso">0 de 0 vistos</span>
+    <p class="aviso" id="aviso"></p>
+  </div>
+
+  <div id="lista"></div>
+
+  <div class="fuera"><b>Para que funcione en el sitio</b> hacen falta tres pasos tuyos en Cloudflare: crear la base D1 (pendiente desde el bloque 9a), crear el widget de Turnstile y guardar su secreto (pasos en el encabezado de <code>web/wrangler.toml</code>). Sin eso la página se publica igual, con el REM y la historia, y dice que lo de la gente no está disponible.<br><br><b>Quedó afuera</b> (en <code>docs/specs/predicciones.md</code>): otros datos (dólar, desocupación), ranking, avisos e imagen para compartir.</div>
+</div>
+
+<script>
+// Cada cambio: [qué cambió, ruta, origen]. Origen: P("palabras del pedido") = lo pediste vos; Y("por qué") = lo agregué yo (regla general o barrido).
+const P = (t) => ({ tipo: "pedido", t }), Y = (t) => ({ tipo: "propio", t });
+const IDEA = "La gente deja su predicción (ej. inflación de noviembre) y la página muestra la mediana";
+const SECCIONES = [
+  ["Menús", [
+    ["«Predicciones» en Herramientas, después de Novedades; la encuentra la lupa (probá «predicciones») y entra al sitemap", "/predicciones/", P("Sí, la spec")],
+  ]],
+  ["Ficha del dato", [
+    ["Debajo de la cifra de la inflación mensual, una línea «Predecí la inflación de noviembre 2026» mientras la ronda está abierta", "/dato/inflacion-mensual/", Y("que se llegue desde el dato que se predice")],
+  ]],
+  ["Predicciones", [
+    ["Ronda abierta: «¿Cuánto va a dar la inflación de noviembre 2026?», con la fecha y hora en que publica el INDEC (martes 15 de diciembre, 16:00) y un campo con − y + de a 0,1", "/predicciones/#pred-abierta", P(IDEA)],
+    ["Al predecir: la mediana de la gente, cuántos son, la mitad del medio y un histograma con tu barra destacada (la mediana se muestra desde 10 predicciones)", "/predicciones/#pred-abierta", P("Solo después de predecir")],
+    ["«Ver sin predecir» muestra lo mismo sin contarte", "/predicciones/#pred-abierta", P("Solo después de predecir")],
+    ["Al lado, la mediana del REM del Banco Central para ese mes (1,7 % para noviembre, 45 analistas)", "/predicciones/#pred-abierta", Y("la spec: comparar contra los analistas")],
+    ["Tu predicción guardada en tu navegador, con «Cambiar» hasta el cierre; Compartir: texto y link para copiar", "/predicciones/#pred-abierta", P("Solo tu propio acierto")],
+    ["Resultado del último mes: «dio 2,2 %; el REM esperaba 1,8 % (0,4 p.p. menos)», sin decir quién ganó", "/predicciones/#pred-resultado", Y("sin veredicto (D-012)")],
+    ["Historia: 24 meses de REM contra el dato real, con el error medio; cuando haya rondas con gente, suma su columna y la tuya", "/predicciones/#pred-historia", Y("que la página tenga contenido desde el primer día")],
+    ["Contra bots: Turnstile de Cloudflare, que solo se carga al tocar el campo; sin nombre, IP ni cookies", "/predicciones/", Y("la spec, con la base del bloque 9a")],
+  ]],
+  ["Novedades y calendario", [
+    ["En «Lo próximo», el renglón de la inflación lleva «Predecí» mientras la ronda está abierta", "/novedades/", Y("que se llegue desde el calendario")],
+  ]],
+];
+const BASES = { local: "http://localhost:8788", sitio: "https://primerolosdatos.com.ar" };
+const leer = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
+const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} };
+let base = leer("pr-base", "local"), vistos = leer("pr-vistos", {});
+
+function dibujar() {
+  const cont = document.getElementById("lista"); cont.innerHTML = "";
+  let total = 0, hechos = 0;
+  SECCIONES.forEach(([nombre, items], i) => {
+    const s = document.createElement("section");
+    s.innerHTML = `<h2><span class="n">${i + 1}</span>${nombre}</h2>`;
+    const ul = document.createElement("ul");
+    items.forEach(([que, ruta, origen], j) => {
+      const id = `${i}-${j}`, url = BASES[base] + ruta, ok = !!vistos[id];
+      total++; if (ok) hechos++;
+      const li = document.createElement("li"); if (ok) li.className = "visto";
+      li.innerHTML = `<input type="checkbox" id="c${id}" ${ok ? "checked" : ""} aria-label="Visto">
+        <label class="que" for="c${id}"><span class="num">${i + 1}.${j + 1}</span> ${que}<span class="origen ${origen.tipo}">${origen.tipo === "pedido" ? "Pediste: «" + origen.t + "»" : "Agregado por mí: " + origen.t}</span><small>${ruta}</small></label>
+        <a class="ir" href="${url}" target="_blank" rel="noopener">Ver →</a>`;
+      li.querySelector("input").addEventListener("change", (e) => { vistos[id] = e.target.checked; guardar("pr-vistos", vistos); dibujar(); });
+      ul.appendChild(li);
+    });
+    s.appendChild(ul); cont.appendChild(s);
+  });
+  document.getElementById("progreso").textContent = `${hechos} de ${total} vistos`;
+  document.getElementById("b-local").setAttribute("aria-pressed", base === "local");
+  document.getElementById("b-sitio").setAttribute("aria-pressed", base === "sitio");
+  document.getElementById("aviso").innerHTML = base === "local"
+    ? 'Necesita la vista local con funciones (vista <code>web-funciones</code>). Si no abre, corré en la carpeta web: <code>npm run build && npm run funciones</code>'
+    : "Solo después del commit, el push y la corrida en verde (corrida completa, unos 10 minutos). La parte de la gente, además, necesita la base D1 y Turnstile.";
+}
+document.getElementById("b-local").onclick = () => { base = "local"; guardar("pr-base", base); dibujar(); };
+document.getElementById("b-sitio").onclick = () => { base = "sitio"; guardar("pr-base", base); dibujar(); };
+dibujar();
+</script>

@@ -29,6 +29,7 @@ import red
 import salarios
 import semaforo
 import novedades
+import predicciones
 import universidades
 import provincias
 import provincias_dnap
@@ -285,6 +286,14 @@ def escribir_json_web(datos, ctx=None, pm=None, cap=None, con_red=True):
         (destino / "novedades.json").write_text(txt, encoding="utf-8")
     except Exception as e:
         print(f"Novedades: no se pudo armar, se sigue sin novedades.json ({e}).")
+    # Predicciones (bloque 9c): rondas de la inflación mensual con el REM del Banco Central. Con red baja el REM (respaldo
+    # datos/cache/rem_ipc_mensual.csv) y registra el primer valor publicado de cada mes en datos/predicciones.json; sin red solo lee copias.
+    # Va fuera del hash. Si falla, la corrida sigue sin predicciones.json.
+    try:
+        txt = json.dumps(predicciones.construir_json(datos, con_red=con_red), ensure_ascii=False, separators=(",", ":"))
+        (destino / "predicciones.json").write_text(txt, encoding="utf-8")
+    except Exception as e:
+        print(f"Predicciones: no se pudo armar, se sigue sin predicciones.json ({e}).")
     # Gasto de la Nación (Presupuesto Abierto): con red baja los años que faltan (respaldos en datos/cache/gasto_nacion_*); sin red usa solo los respaldos.
     # Va fuera del hash. Si falla, la corrida sigue sin gasto_nacion*.json.
     try:

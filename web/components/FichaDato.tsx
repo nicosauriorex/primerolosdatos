@@ -4,6 +4,7 @@
 // ¿Cómo le fue con cada presidente? (tabla o velas), Mes a mes desde que asumió, Gráficos listos y, plegado al final, Cómo se mide.
 // Cada capítulo tiene su Compartir (imagen, link y texto) arriba a la derecha de su título, siempre el último botón (R11) y, si corresponde, "Abrir completo" con la variable ya cargada en esa sección.
 // La usan la página de cada tema y la ruta /dato/.
+import { LineaPredecir } from "./secciones/Predicciones";
 import { useEffect, useMemo, useRef, useState, type ReactNode, type Ref } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -116,6 +117,7 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
         info={<>{c.serie.desc ? <p>{c.serie.desc}</p> : null}<p>Fuente: {fuente}.</p></>}>
         {comoVerlo.length > 0 && onComoVerlo && <ComoVerlo opciones={comoVerlo} valor={medE} onElegir={(v) => onComoVerlo({ ...e, med: v })} />}
       </CabeceraDato>
+      {e.id === "ipc_empalme" && !e.rel && medE === "vm" && <LineaPredecir />}
       <CapViene m={m} e={e} nivel={nivel} set={set} V={V}
         compartir={<Compartir titulo={nombre} href={linkCompartir(e, hrefV, V.per ? { fper: V.per } : {})} texto={textoV}
           vista={() => vistaCompartirFicha(e, V.D.E, cab)} />} />

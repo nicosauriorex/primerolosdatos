@@ -94,3 +94,35 @@ for (const f of datos) {
     .map(([k, v]) => `${k} ${num.format(v)}`);
   console.log(`  ${String(f.dato).padEnd(34)} ${num.format(f.n).padStart(6)}  ${partes.join(", ")}`);
 }
+
+// Predicciones (bloque 9c): por ronda, cantidad, mediana y cuántas se cambiaron. Si la tabla no existe todavía, se omite.
+console.log("\nPredicciones");
+const filasPred = consultaOpcional("SELECT ronda, valor, cambiado IS NOT NULL AS cambio FROM predicciones ORDER BY ronda DESC, valor");
+if (!filasPred || !filasPred.length) console.log("  (sin datos)");
+else {
+  const porRonda = new Map();
+  for (const f of filasPred) {
+    if (!porRonda.has(f.ronda)) porRonda.set(f.ronda, []);
+    porRonda.get(f.ronda).push(f);
+  }
+  for (const [ronda, filas] of porRonda) {
+    const v = filas.map((f) => f.valor).sort((a, b) => a - b);
+    const m = v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2;
+    const cambiadas = filas.filter((f) => f.cambio).length;
+    console.log(`  ${ronda.padEnd(34)} ${num.format(v.length).padStart(6)}  mediana ${pct.format(m)} %, cambiadas ${num.format(cambiadas)}`);
+  }
+}
+
+function consultaOpcional(sql) {
+  const r = spawnSync("npx", ["wrangler", "d1", "execute", "pld-compartir", "--remote", "--json", "--command", sql], {
+    encoding: "utf8",
+    shell: true,
+    cwd: new URL("..", import.meta.url),
+  });
+  if (r.status !== 0) return null;
+  try {
+    return JSON.parse(r.stdout.slice(r.stdout.indexOf("[")))[0]?.results ?? [];
+  } catch {
+    return null;
+  }
+}

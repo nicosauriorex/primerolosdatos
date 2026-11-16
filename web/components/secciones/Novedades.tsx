@@ -9,6 +9,7 @@ import { Cargando } from "../ui";
 import { Capitulo } from "../sistema/Capitulo";
 import { Delta } from "../sistema/Delta";
 import { Compartir } from "../FichaDato";
+import { rondaAbierta, RUTA_PREDICCIONES, usePredicciones } from "@/lib/predicciones";
 import { MESES } from "@/lib/formato";
 import type { Expr, SerieMeta } from "@/lib/motor";
 import {
@@ -36,6 +37,7 @@ function Cuerpo({ datos }: { datos: DatosNovedades }) {
   const anio = anioDe(datos);
   const dias = agruparPorDia(datos.publicaciones), fechas = agruparCalendario(proximas);
   const act = actualizadoTxt(datos.generado);
+  const abierta = rondaAbierta(usePredicciones().datos);   // «Predecí» en el renglón del IPC mientras hay una ronda abierta
   if (!listo) return <Cargando texto="Cargando las novedades…" />;
 
   return (
@@ -56,7 +58,7 @@ function Cuerpo({ datos }: { datos: DatosNovedades }) {
           <section key={`${d.fecha}|${d.estimado}`} className="nov-dia" aria-labelledby={`nov-p-${d.fecha}-${d.estimado ? "e" : "o"}`}>
             <h3 className="nov-dia-titulo" id={`nov-p-${d.fecha}-${d.estimado ? "e" : "o"}`}>{etiquetaDia(d.fecha, d.estimado, anio)}</h3>
             <ul className="nov-lista">
-              {d.items.map((c) => <li key={`${c.principal}|${c.periodo}|${c.hora ?? ""}`}><FilaProxima c={c} d={dato(c.principal, c.periodo)} expr={expr} nombreMeta={meta(c.principal)?.n} /></li>)}
+              {d.items.map((c) => <li key={`${c.principal}|${c.periodo}|${c.hora ?? ""}`}><FilaProxima predecir={abierta != null && c.principal === "ipc_empalme" && c.periodo === abierta.periodo} c={c} d={dato(c.principal, c.periodo)} expr={expr} nombreMeta={meta(c.principal)?.n} /></li>)}
             </ul>
           </section>
         ))}
@@ -116,7 +118,7 @@ function FilaPublicacion({ p, d, resto, expr, nombreMeta }: { p: Publicacion; d:
   );
 }
 
-function FilaProxima({ c, d, expr, nombreMeta }: { c: ProximaFecha; d: DatoNovedad | null; expr: (id: string) => Expr | null; nombreMeta?: string }) {
+function FilaProxima({ c, d, expr, nombreMeta, predecir }: { predecir: boolean; c: ProximaFecha; d: DatoNovedad | null; expr: (id: string) => Expr | null; nombreMeta?: string }) {
   const nombre = d?.nombre ?? nombreMeta ?? c.principal, periodo = d?.periodoTxt ?? periodoDe(null, { id: c.principal }, c.periodo);
   const e = d?.e ?? expr(c.principal), href = d?.href ?? (e ? hrefFicha(e) : null);
   return (
@@ -125,7 +127,10 @@ function FilaProxima({ c, d, expr, nombreMeta }: { c: ProximaFecha; d: DatoNoved
         <p className="nov-titulo"><b>{nombre}</b><span className="nov-periodo"> · {periodo}</span></p>
       </div>
       <div className="nov-cifra">{c.estimado ? <span className="nov-etiqueta">Estimado</span> : c.hora ? <b className="nov-hora">{c.hora}</b> : null}</div>
-      <div className="nov-acciones">{href && <Link prefetch={false} href={href} className="chip-c" aria-label={`Ver ${nombre}`}>Ver</Link>}</div>
+      <div className="nov-acciones">
+        {href && <Link prefetch={false} href={href} className="chip-c" aria-label={`Ver ${nombre}`}>Ver</Link>}
+        {predecir && <Link prefetch={false} href={RUTA_PREDICCIONES} className="chip-c" aria-label={`Predecí la inflación de ${periodo}`}>Predecí</Link>}
+      </div>
     </div>
   );
 }

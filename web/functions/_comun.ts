@@ -3,6 +3,10 @@
 
 export interface Env {
   DB: D1Database;
+  /** Secreto de Turnstile (variable secreta de Pages; en local, web/.dev.vars). */
+  TURNSTILE_SECRET?: string;
+  /** Archivos estáticos del sitio (para leer /datos/predicciones.json). */
+  ASSETS: Fetcher;
 }
 
 export const MAX_BYTES = 2048;
@@ -35,10 +39,10 @@ export function origenPermitido(origen: string | null): boolean {
   return /^https:\/\/([a-z0-9-]+\.)*duelo-de-datos\.pages\.dev$/.test(origen);
 }
 
-export function metodoNoPermitido(): Response {
+export function metodoNoPermitido(permitido = "POST"): Response {
   return new Response("Método no permitido", {
     status: 405,
-    headers: { allow: "POST", "content-type": "text/plain; charset=utf-8" },
+    headers: { allow: permitido,"content-type": "text/plain; charset=utf-8" },
   });
 }
 
@@ -64,4 +68,91 @@ export async function leerCuerpo(
 /** UTC redondeado a la hora hacia abajo: AAAA-MM-DDTHH:00Z */
 export function horaRedondeada(fecha: Date): string {
   return fecha.toISOString().slice(0, 13) + ":00Z";
+}
+
+// ---- Predicciones (bloque 9c) ----
+
+export const MIN_PARA_MEDIANA = 10;
+
+export interface RondaPrediccion {
+  id: string;
+  abre: string;
+  cierra: string | null;
+  real: number | null;
+}
+
+/** Lee /datos/predicciones.json de los estáticos del sitio. null si no se pudo leer. */
+export async function leerRondas(env: Env, request: Request): Promise<RondaPrediccion[] | null> {
+  try {
+    const r = await env.ASSETS.fetch(new URL("/datos/predicciones.json", request.url));
+    if (!r.ok) return null;
+    const j = (await r.json()) as { rondas?: RondaPrediccion[] };
+    return Array.isArray(j.rondas) ? j.rondas : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Abierta: sin dato real, ya abrió y todavía no cerró (cierra null = sigue abierta). */
+export function rondaAbierta(r: RondaPrediccion, ahora: number): boolean {
+  if (r.real !== null && r.real !== undefined) return false;
+  if (Date.parse(r.abre) > ahora) return false;
+  return r.cierra === null || ahora < Date.parse(r.cierra);
+}
+
+export async function verificarTurnstile(secreto: string, token: string): Promise<boolean> {
+  try {
+    const form = new FormData();
+    form.append("secret", secreto);
+    form.append("response", token); // sin remoteip: no mandamos la IP
+    const r = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form });
+    if (!r.ok) return false;
+    const j = (await r.json()) as { success?: boolean };
+    return j.success === true;
+  } catch {
+    return false;
+  }
+}
+
+function percentil(orden: number[], p: number): number {
+  const pos = (orden.length - 1) * p;
+  const i = Math.floor(pos);
+  const f = pos - i;
+  const v = i + 1 < orden.length ? orden[i] + (orden[i + 1] - orden[i]) * f : orden[i];
+  return Math.round(v * 10) / 10;
+}
+
+export interface ResumenRonda {
+  ronda: string;
+  n: number;
+  mediana?: number;
+  p25?: number;
+  p75?: number;
+  histograma?: [number, number][];
+}
+
+/** Resumen de una ronda a partir de los valores ordenados de menor a mayor. Con n < 10, solo ronda y n. */
+export function resumir(ronda: string, orden: number[]): ResumenRonda {
+  const n = orden.length;
+  if (n < MIN_PARA_MEDIANA) return { ronda, n };
+  const cuenta = new Map<number, number>();
+  for (const v of orden) cuenta.set(v, (cuenta.get(v) ?? 0) + 1);
+  return {
+    ronda,
+    n,
+    mediana: percentil(orden, 0.5),
+    p25: percentil(orden, 0.25),
+    p75: percentil(orden, 0.75),
+    histograma: [...cuenta.entries()],
+  };
+}
+
+export async function resumenDeRonda(env: Env, ronda: string): Promise<ResumenRonda> {
+  const { results } = await env.DB.prepare("SELECT valor FROM predicciones WHERE ronda = ? ORDER BY valor")
+    .bind(ronda)
+    .all<{ valor: number }>();
+  return resumir(
+    ronda,
+    results.map((f) => f.valor),
+  );
 }

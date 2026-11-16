@@ -7,6 +7,15 @@
 #      (reemplaza el marcador PENDIENTE-wrangler-d1-create).
 #   3. Si la corrida de GitHub Actions falla por permisos, agregar "D1: Edit"
 #      a la clave CLOUDFLARE_API_TOKEN en el panel de Cloudflare.
+#
+# Turnstile (predicciones, requisito 15 de docs/specs/predicciones.md), una sola vez:
+#   4. Panel de Cloudflare -> Turnstile: crear un widget "primerolosdatos" para primerolosdatos.com.ar
+#      y duelo-de-datos.pages.dev, modo Gestionado.
+#   5. Copiar la clave del sitio a TURNSTILE_SITEKEY en web/lib/predicciones.ts.
+#   6. npx wrangler pages secret put TURNSTILE_SECRET --project-name=duelo-de-datos
+#      (en local, web/.dev.vars trae la clave secreta de prueba que siempre pasa).
+# Sin la base o sin el secreto, la página publica igual y las predicciones dicen que no están disponibles.
+#
 # Mientras el marcador siga puesto, el workflow publica sin la base (saca el bloque de abajo) y las funciones responden 503.
 # El bloque [[d1_databases]] tiene que quedar último en el archivo: el workflow lo borra desde ahí hasta el final.
 

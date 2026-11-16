@@ -11,7 +11,7 @@ const RUTA_COMPARTIR = "/api/compartir";
 const RUTA_PORQUE = "/api/compartir/porque";
 
 /** Solo se manda desde el sitio publicado, sus vistas previas y `wrangler pages dev` (puerto 8788). */
-function mandaAlServidor(): boolean {
+export function mandaAlServidor(): boolean {
   const { hostname, port } = window.location;
   return hostname === "primerolosdatos.com.ar" || hostname.endsWith(".duelo-de-datos.pages.dev") || (hostname === "localhost" && port === "8788");
 }

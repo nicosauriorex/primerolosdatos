@@ -2564,3 +2564,49 @@ nav.tabs .con-menu { align-self: stretch; align-items: center; }
   .nov-portada { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-6); }
   .nov-fila-link { grid-template-columns: minmax(0, 1fr) auto; gap: var(--e-3); }
 }
+
+/* Predicciones (/predicciones/, docs/specs/predicciones.md). Prefijo .pred-: no repite nombres de otras secciones. */
+.pred, .pred-ronda { min-width: 0; }
+.pred-error, .pred-vacio { padding-block: var(--e-4); }
+.pred-ronda { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--e-4); }
+.pred-bloque { min-width: 0; padding-bottom: var(--e-3); border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.pred-bloque:last-child { border-bottom: 0; }
+.pred-sub { margin: 0 0 var(--e-2); font-size: var(--t-base); font-weight: 700; color: var(--text-secondary); }
+.pred-cifra { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--e-1) var(--e-2); margin: 0 0 var(--e-1); }
+.pred-num { font-size: var(--t-xl); font-variant-numeric: tabular-nums; }
+.pred-bloque .note, .pred-form .note { margin: 0 0 var(--e-1); }
+.pred-form { min-width: 0; max-width: 40rem; }
+.pred-label { display: block; margin-bottom: var(--e-2); font-size: var(--t-sm); font-weight: 700; color: var(--text-secondary); }
+.pred-campo { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); min-width: 0; }
+.pred-input { flex: 0 1 6rem; min-width: 4.5rem; width: 6rem; min-height: 44px; padding: 0 var(--e-3); border: 1px solid var(--border-fuerte); border-radius: var(--r-pleno);
+  background: var(--surface-1); color: var(--text-primary); font: inherit; font-size: var(--t-md); font-variant-numeric: tabular-nums; text-align: center; }
+.pred-input:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.pred-input[aria-invalid="true"] { border-color: var(--neg); }
+.pred-paso { min-width: 44px; justify-content: center; font-size: var(--t-md); }
+.pred-enviar { min-height: 44px; padding-inline: var(--e-4); }
+.pred-msj { margin: var(--e-2) 0 0; }
+.pred-turnstile { margin-top: var(--e-2); min-width: 0; max-width: 100%; }
+.pred-estado { min-height: 1.4em; margin: var(--e-1) 0 0; }
+.pred-ver-sin { display: inline-block; min-height: 44px; padding: 0; background: none; border: 0; color: var(--text-secondary); font: inherit; font-size: var(--t-sm); text-decoration: underline; cursor: pointer; }
+.pred-ver-sin:hover { color: var(--acento-texto); }
+.pred-ver-sin:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.pred-tu { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-3); }
+.pred-hist { margin: var(--e-3) 0 0; min-width: 0; }
+.pred-hist svg { display: block; width: 100%; height: 96px; }
+.pred-barra { fill: var(--acento); }
+.pred-barra-tu { fill: var(--accion); }
+.pred-hist-eje { display: flex; justify-content: space-between; align-items: baseline; gap: var(--e-2); margin-top: var(--e-1); font-size: var(--t-sm); font-variant-numeric: tabular-nums; }
+.pred-hist-eje .note { margin: 0; text-align: center; min-width: 0; }
+.pred-texto-comp { margin: 0 0 var(--e-2); padding: var(--e-3); background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; font-size: var(--t-sm); overflow-wrap: anywhere; }
+.pred-acciones { display: flex; flex-wrap: wrap; gap: var(--e-2); }
+.pred-resultado { margin: 0; max-width: 60ch; font-size: var(--t-md); overflow-wrap: anywhere; }
+.pred-mae { margin: 0 0 var(--e-3); max-width: 60ch; }
+.pred-tabla-sc { max-width: 100%; overflow-x: auto; }
+.pred-tabla { border-collapse: collapse; width: 100%; font-size: var(--t-sm); font-variant-numeric: tabular-nums; }
+.pred-tabla th, .pred-tabla td { padding: var(--e-2) var(--e-3) var(--e-2) 0; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; white-space: nowrap; }
+.pred-tabla thead th { color: var(--text-secondary); font-weight: 700; }
+.pred-tabla tbody th { font-weight: 600; }
+.pred-d, .pred-n, .pred-nd { color: var(--text-muted); }
+.pred-linea { margin: var(--e-2) 0 var(--e-3); }
+.pred-pie { margin-top: var(--e-5); padding-top: var(--e-3); border-top: 1px solid var(--border); max-width: 72ch; }
+.pred-pie-titulo { margin: 0 0 var(--e-2); font-size: var(--t-base); }

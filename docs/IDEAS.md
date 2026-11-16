@@ -59,6 +59,7 @@ Uso central: alguien escribe en redes "Milei fundió la economía" y otra person
 ## Novedades, calendario y predicciones
 (Novedades y calendario: hechos el 2026-11-16, en `docs/IDEAS-HECHAS.md`.)
 - La gente deja su predicción (ej. inflación de noviembre) y la página muestra la **mediana** (un valor absurdo no la mueve). Limitar valores imposibles (ej. 1.000.000% de inflación).
+  (→ spec: docs/specs/predicciones.md)
 
 ## Precios en términos de salarios
 - Ver índices de precios medidos en salarios: cuántos bienes / servicios se compran con un salario, etc.
