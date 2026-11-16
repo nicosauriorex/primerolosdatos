@@ -1,0 +1,133 @@
+<title>Tanda 13 Novedades</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@700&display=swap">
+<style>
+/* Lista de control: una columna, secciones en el orden del menú del sitio, cada cambio con su link directo */
+:root {
+  --bg: #f3f5fb; --sup: #ffffff; --tinta: #0b1230; --sec: #4a5478; --borde: #d9deee;
+  --acento: #1f6fd1; --sobre-acento: #ffffff; --accion: #f5b81c; --sobre-accion: #0b1230; --hecho: #1d8a55; --propio: #9a5400;
+  --f-txt: "Archivo", system-ui, sans-serif; --f-tit: "Archivo Narrow", "Archivo", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--tinta); font-family: var(--f-txt); font-size: 15px; line-height: 1.5; margin: 0 }
+.envoltura { max-width: 760px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+h1 { font-family: var(--f-tit); font-size: 30px; text-transform: uppercase; letter-spacing: .01em; margin: 0 0 6px; text-wrap: balance }
+.bajada { color: var(--sec); margin: 0 0 18px; max-width: 62ch }
+.barra { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--borde); margin-bottom: 8px }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.riel { display: inline-flex; background: var(--sup); border-radius: 999px; padding: 4px; gap: 2px }
+.riel button { border: 0; background: transparent; color: var(--tinta); font: 600 14px var(--f-txt); padding: 8px 14px; border-radius: 999px; cursor: pointer }
+.riel button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento) }
+.progreso { color: var(--sec); font-size: 14px; font-variant-numeric: tabular-nums; margin-left: auto }
+.aviso { font-size: 13px; color: var(--sec); margin: 6px 0 0; width: 100% }
+.aviso code { background: var(--sup); padding: 1px 6px; border-radius: 6px; font-size: 12px; user-select: all }
+section { padding-top: 22px }
+h2 { font-family: var(--f-tit); font-size: 19px; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline }
+h2 .n { color: var(--acento); font-variant-numeric: tabular-nums; min-width: 1.6em }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px }
+li { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; background: var(--sup); border-radius: 12px; padding: 10px 12px }
+li.visto { opacity: .55 }
+li.visto .que { text-decoration: line-through; text-decoration-color: var(--sec) }
+input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--hecho); margin: 0 }
+.que { min-width: 0 }
+.num { font-weight: 800; color: var(--acento); font-variant-numeric: tabular-nums; margin-right: 4px }
+.origen { display: block; font-size: 13px; margin-top: 2px; color: var(--sec) }
+.origen.propio { color: var(--propio) }
+.que small { display: block; color: var(--sec); font-size: 12.5px; word-break: break-all }
+a.ir { background: var(--accion); color: var(--sobre-accion); text-decoration: none; font-weight: 800; font-size: 13px; padding: 8px 12px; border-radius: 999px; white-space: nowrap }
+a.ir:focus-visible, .riel button:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px }
+.fuera { margin-top: 28px; padding: 14px; border: 1px dashed var(--borde); border-radius: 12px; color: var(--sec); font-size: 14px }
+@media (max-width: 480px) { li { grid-template-columns: 24px 1fr; } a.ir { grid-column: 2; justify-self: start } }
+</style>
+
+<div class="envoltura">
+  <h1>Tanda 13 (Novedades): dónde verlo</h1>
+  <p class="bajada">Cada renglón abre la página donde se ve el cambio. En tu máquina, con la vista <code>web-out</code> (puerto 3100); en el sitio, recién después del commit, el push y la corrida en verde. Para comentar un cambio, citá su número (por ejemplo 3.1). Debajo de cada uno: lo que pediste o por qué lo agregué yo. Marcá la casilla cuando lo revisaste.</p>
+
+  <div class="barra">
+    <div class="riel" role="group" aria-label="Dónde abrir">
+      <button type="button" id="b-local" aria-pressed="true">En mi máquina</button>
+      <button type="button" id="b-sitio" aria-pressed="false">Sitio publicado</button>
+    </div>
+    <span class="progreso" id="progreso">0 de 0 vistos</span>
+    <p class="aviso" id="aviso"></p>
+  </div>
+
+  <div id="lista"></div>
+
+  <div class="fuera"><b>Reglas nuevas</b>: R30 (un dato compartido trae mes anterior y hace un año, con sus variaciones) y R31 (los títulos de grupo se distinguen sin leer). <b>Sin ver</b>: el .ics abierto en un calendario de verdad y la vista a 1280 px. Para que se vea en el sitio hace falta commit y push.</div>
+</div>
+
+<script>
+// Cada cambio: [qué cambió, ruta, origen]. Origen: P("palabras del pedido") = lo pediste vos; Y("por qué") = lo agregué yo (regla general o barrido).
+const P = (t) => ({ tipo: "pedido", t }), Y = (t) => ({ tipo: "propio", t });
+const DIAS = "no se distingue mucho los dias en los que salio el dato xq tiene mismo color y fuente";
+const GRILLA = "una vista de calendario con los dias y con un numerito tipo notificacion de cada dia";
+const V2 = "segunda vuelta";
+const COMP = "que ponga el mes anterior y variacion intermensual y el dato del año anterior y la interanual";
+const SECCIONES = [
+  ["Ficha del dato", [
+    ["Compartir → Texto: suma «Mes anterior (sep-26): 1,9 % (+0,3 p.p.). Hace un año (oct-25): 2,3 % (−0,1 p.p.)»", "/dato/inflacion-mensual/", P(COMP)],
+    ["Compartir → Imagen: «Mes anterior» y «Hace un año», con su variación, al lado de la cifra grande (en la horizontal, debajo, porque al lado no entran grandes). Ya no son tarjetas", "/dato/inflacion-mensual/", P("yo decia de ponerla ahi al lado de la etiqueta del 2.2 grande")],
+    ["Personalizar imagen → «Mes anterior y hace un año»: se prende y se apaga, sin tocar las tarjetas", "/dato/inflacion-mensual/", P("se pueda prender y apagar desde la personalizacion asi no compite con las otras tarjetas")],
+    ["En series trimestrales o anuales dice «Período anterior» en vez de «Mes anterior»", "/dato/actividad-economica/", Y("regla general R30: que valga para cualquier frecuencia")],
+  ]],
+  ["Novedades y calendario", [
+    ["Dos pestañas: «Novedades» y «Calendario»; la pestaña queda en el link", "/novedades/?vista=calendario", P("Lo ultimo y que salio debería ser como dos pestañas de novedades y calendario")],
+    ["La grilla sin flechas cuando hay un solo mes", "/novedades/", P("dos cruces al costado que no tienen uso")],
+    ["En la computadora, la grilla chica a la izquierda y, a la derecha, el resumen del día elegido (cifra, cambio y «Ver»); tocar otro día cambia el resumen, sin hueco al costado", "/novedades/", P("queda feo el calendario tan grande. de ultima busca otro grafico para pc")],
+    ["El resumen del costado tiene el mismo alto que la grilla; si hay muchas publicaciones, la lista se desliza por dentro", "/novedades/", P("no deberia ir mas profundo que la grilla. de ultima tener slicer")],
+    ["En el celular, tocar un día abre una ventana con ese resumen; «Ir al día en la lista ↓» la cierra y baja a ese día", "/novedades/", P("al apretar las casillas del calendario te muestra resumido los datos que hay tipo pop up")],
+    ["Arriba de cada pestaña, la grilla del mes con un numerito por día: cuántas publicaciones salieron o salen (el IPC con sus 432 series cuenta 1). Tocar un día baja a ese día", "/novedades/", P(GRILLA)],
+    ["Cada día de la lista con fondo, franja de color y el número grande; queda fijo arriba mientras bajás por ese día", "/novedades/", P(DIAS)],
+    ["Cada día es un desplegable grande: abierto el más reciente (o el más próximo en Calendario); cerrados, dicen cuántas publicaciones y cuáles", "/novedades/", P("que los dias se puedan contraer y sean como desplegables grandes")],
+    ["«y N datos más» agrupado por tipo (indicadores de inflación, IPC por región, precios promedio…), sin viñetas, en una caja que se desliza por dentro (el título de cada grupo queda fijo arriba); la cifra y los botones quedan arriba, alineados con el nombre", "/novedades/", P("se ve feo cuando hay muchos datos. de ultima pone un deslizador")],
+    ["«Agendar» en cada fecha del calendario: Google Calendar o bajar el evento (.ics, sirve para el celular, Outlook y Apple). Hora argentina, 30 minutos", "/novedades/?vista=calendario", P("se podría agendar un dato?")],
+    ["Al abrir «y N datos más», las series ocupan todo el ancho del renglón (no quedan apretadas a la izquierda de la cifra)", "/novedades/", P("el dato y la variacion no permiten que al expandir los otros datos esos datos ocupen el espacio a la derecha")],
+    ["El título de cada día y de cada grupo de series, en el azul del sitio en vez del casi negro", "/novedades/", P("no me gusta el negro ese para el titulo")],
+    ["El panel de Agendar sin espacio arriba: la cruz en la esquina", "/novedades/?vista=calendario", P("se ve feo xq tiene espaci arriba")],
+    ["Hora, «Ver» y «Agendar» en un mismo renglón en el celular", "/novedades/?vista=calendario", Y("en el celular Agendar ocupaba todo el ancho y quedaba debajo de Ver")],
+    ["Compartir desde Novedades trae lo mismo que la ficha (mes anterior, hace un año)", "/novedades/", P(COMP)],
+  ]],
+];
+const BASES = { local: "http://localhost:3100", sitio: "https://primerolosdatos.com.ar" };
+const leer = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
+const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} };
+let base = leer("t13-base", "local"), vistos = leer("t13-vistos", {});
+
+function dibujar() {
+  const cont = document.getElementById("lista"); cont.innerHTML = "";
+  let total = 0, hechos = 0;
+  SECCIONES.forEach(([nombre, items], i) => {
+    const s = document.createElement("section");
+    s.innerHTML = `<h2><span class="n">${i + 1}</span>${nombre}</h2>`;
+    const ul = document.createElement("ul");
+    items.forEach(([que, ruta, origen], j) => {
+      const id = `${i}-${j}`, url = BASES[base] + ruta, ok = !!vistos[id];
+      total++; if (ok) hechos++;
+      const li = document.createElement("li"); if (ok) li.className = "visto";
+      li.innerHTML = `<input type="checkbox" id="c${id}" ${ok ? "checked" : ""} aria-label="Visto">
+        <label class="que" for="c${id}"><span class="num">${i + 1}.${j + 1}</span> ${que}<span class="origen ${origen.tipo}">${origen.tipo === "pedido" ? "Pediste: «" + origen.t + "»" : "Agregado por mí: " + origen.t}</span><small>${ruta}</small></label>
+        <a class="ir" href="${url}" target="_blank" rel="noopener">Ver →</a>`;
+      li.querySelector("input").addEventListener("change", (e) => { vistos[id] = e.target.checked; guardar("t13-vistos", vistos); dibujar(); });
+      ul.appendChild(li);
+    });
+    s.appendChild(ul); cont.appendChild(s);
+  });
+  document.getElementById("progreso").textContent = `${hechos} de ${total} vistos`;
+  document.getElementById("b-local").setAttribute("aria-pressed", base === "local");
+  document.getElementById("b-sitio").setAttribute("aria-pressed", base === "sitio");
+  document.getElementById("aviso").innerHTML = base === "local"
+    ? 'Necesita la vista local con funciones (vista <code>web-funciones</code>). Si no abre, corré en la carpeta web: <code>npm run build && npm run funciones</code>'
+    : "Solo muestra los cambios después del commit, el push y la corrida en verde (corrida completa, unos 10 minutos) y de crear la base con <code>npx wrangler d1 create pld-compartir</code>.";
+}
+document.getElementById("b-local").onclick = () => { base = "local"; guardar("t13-base", base); dibujar(); };
+document.getElementById("b-sitio").onclick = () => { base = "sitio"; guardar("t13-base", base); dibujar(); };
+dibujar();
+</script>

@@ -72,6 +72,9 @@ export type Lienzo =
   | { tipo: "meses"; filas: FilaMes[] }
   | { tipo: "grilla"; columnas: ColumnaGrillaImg[]; filas: FilaGrillaImg[]; calor: boolean };
 
+/** Una comparación que va al lado de la cifra grande: «Mes anterior (sep-26)» y «1,9 % · +0,3 p.p.». */
+export interface ComparacionImg { rotulo: string; fecha: string; valor: string; variacion: string }
+
 export interface DatosImagen {
   formato: FormatoImg;
   titulo: string;
@@ -85,6 +88,7 @@ export interface DatosImagen {
   inicioTxt: string | null;
   presidentes?: null;                // sin uso (lo dejaron las imágenes de presidentes); las tarjetas van en `tarjetas`
   tarjetas?: { tipo: "pres" | "gen"; items: TarjetaImg[] };
+  comparaciones?: ComparacionImg[];  // al lado de la cifra grande (o debajo si no entran)
   lineasRef?: LineaRef[];            // líneas horizontales con nombre y valor
   marcasExt?: MarcaExt[];            // máximo y mínimo marcados sobre la serie
   marcaUltimo?: boolean;             // marcar el último dato de cada serie (por defecto sí)
@@ -1048,6 +1052,61 @@ function dibujarTarjetas(ctx: Ctx, pal: Paleta, P: PlanTarjetas, x0: number, y0:
   });
 }
 
+// ---------------------------------------------------------------- comparaciones al lado de la cifra
+interface PlanComp { tamRot: number; tamVal: number; alto: number }
+const textoComp = (c: ComparacionImg) => ({ rot: `${c.rotulo} (${c.fecha})`, val: `${c.valor} · ${c.variacion}` });
+
+/** Mide el bloque de comparaciones para ponerlo al lado de la cifra: cada una, su rótulo (texto secundario) y debajo su valor y variación (peso fuerte).
+ *  Devuelve null si no entra en `ancho` ni con el tamaño más chico. */
+/** `altoMax`: el alto de la cifra grande; se elige el tamaño más grande que entre en el ancho libre y no la pase (con un poco de aire). */
+function planearComparaciones(ctx: Ctx, pal: Paleta, comp: ComparacionImg[], ancho: number, S: (n: number) => number, altoMax = Infinity): PlanComp | null {
+  if (ancho <= 0) return null;
+  for (const [r, v] of [[26, 40], [24, 36], [22, 33], [20, 30]] as const) {
+    const tamRot = px(S(r)), tamVal = px(S(v));
+    if (tamRot < 13) break;
+    let w = 0;
+    for (const c of comp) {
+      const t = textoComp(c);
+      ctx.font = fuenteDe(pal, 600, tamRot); w = Math.max(w, ctx.measureText(t.rot).width);
+      ctx.font = fuenteDe(pal, 800, tamVal); w = Math.max(w, ctx.measureText(t.val).width);
+    }
+    const alto = comp.length * (tamRot * 1.2 + tamVal * 1.2) + (comp.length - 1) * S(10);
+    if (w <= ancho && (alto <= altoMax * 1.25 || r === 20)) return { tamRot, tamVal, alto };
+  }
+  return null;
+}
+function dibujarComparaciones(ctx: Ctx, pal: Paleta, comp: ComparacionImg[], p: PlanComp, x: number, y: number) {
+  const gap = (p.alto - comp.length * (p.tamRot * 1.2 + p.tamVal * 1.2)) / Math.max(1, comp.length - 1);
+  comp.forEach((c, k) => {
+    const t = textoComp(c), yy = y + k * (p.tamRot * 1.2 + p.tamVal * 1.2 + gap);
+    ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.font = fuenteDe(pal, 600, p.tamRot); ctx.fillStyle = pal.tintaSec; ctx.fillText(t.rot, x, yy);
+    ctx.font = fuenteDe(pal, 800, p.tamVal); ctx.fillStyle = pal.tinta; ctx.fillText(t.val, x, yy + p.tamRot * 1.2);
+  });
+}
+interface PlanCompBajo { tam: number; juntas: boolean; alto: number }
+/** Si no entran al lado de la cifra: las dos en un renglón («Mes anterior (sep-26) 1,9 % · +0,3 p.p.   Hace un año …»); si tampoco, una por renglón. */
+function planearComparacionesBajo(ctx: Ctx, pal: Paleta, comp: ComparacionImg[], ancho: number, S: (n: number) => number): PlanCompBajo {
+  const gap = S(32), ancho1 = (tam: number, c: ComparacionImg) => { const t = textoComp(c); ctx.font = fuenteDe(pal, 600, tam); const a = ctx.measureText(t.rot + " ").width; ctx.font = fuenteDe(pal, 800, tam); return a + ctx.measureText(t.val).width; };
+  for (let tam = px(S(26)); tam >= px(S(16)); tam -= 2) {
+    const w = comp.reduce((s, c) => s + ancho1(tam, c), 0) + gap * (comp.length - 1);
+    if (w <= ancho) return { tam, juntas: true, alto: tam * 1.25 };
+  }
+  let tam = px(S(24));
+  while (tam > px(S(14)) && Math.max(...comp.map((c) => ancho1(tam, c))) > ancho) tam -= 2;
+  return { tam, juntas: false, alto: comp.length * tam * 1.3 };
+}
+function dibujarComparacionesBajo(ctx: Ctx, pal: Paleta, comp: ComparacionImg[], p: PlanCompBajo, x: number, y: number) {
+  let xx = x;
+  comp.forEach((c, k) => {
+    const t = textoComp(c), yy = p.juntas ? y : y + k * p.tam * 1.3;
+    if (!p.juntas) xx = x;
+    ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.font = fuenteDe(pal, 600, p.tam); ctx.fillStyle = pal.tintaSec; ctx.fillText(t.rot + " ", xx, yy); xx += ctx.measureText(t.rot + " ").width;
+    ctx.font = fuenteDe(pal, 800, p.tam); ctx.fillStyle = pal.tinta; ctx.fillText(t.val, xx, yy); xx += ctx.measureText(t.val).width + px(p.tam * 1.2);
+  });
+}
+
 // ---------------------------------------------------------------- composición
 interface Resultado { holgura: number }
 export const ALTO_MARCA = 64, MARGEN = 56;
@@ -1111,11 +1170,28 @@ function componer(ctx: Ctx, d: DatosImagen, pal: Paleta, esc: number, pintar: bo
   if (d.cifra) {
     const aCifra = ajustar(ctx, pal, d.cifra.valor, { peso: 900, max: S(horiz ? 104 : 124), min: S(56), ancho: wCol, lineas: 1 });
     if (pintar) texto(ctx, pal, aCifra, 900, xCol, y, pal.acento, 1);
-    y += aCifra.tam * 1.0 + S(4);
+    // comparaciones (mes anterior, hace un año): al lado de la cifra si entran; si no, debajo de la fecha, en un renglón
+    const comp = d.comparaciones?.length ? d.comparaciones : null;
+    let hCifra = aCifra.tam * 1.0;
+    let plan: PlanComp | null = null, debajo: PlanCompBajo | null = null;
+    if (comp) {
+      ctx.font = fuenteDe(pal, 900, aCifra.tam);
+      const wCifra = ctx.measureText(aCifra.lineas[0] ?? "").width;
+      plan = planearComparaciones(ctx, pal, comp, wCol - wCifra - S(36), S, hCifra);
+      if (plan) {
+        hCifra = Math.max(hCifra, plan.alto);
+        if (pintar) dibujarComparaciones(ctx, pal, comp, plan, xCol + wCifra + S(36), y + (hCifra - plan.alto) / 2);
+      } else debajo = planearComparacionesBajo(ctx, pal, comp, wCol, S);
+    }
+    y += hCifra + S(4);
     const mes = d.cifra.aviso ? `${d.cifra.mes} · Último dato disponible` : d.cifra.mes;
     const aMes = ajustar(ctx, pal, mes, { peso: 600, max: S(32), min: S(20), ancho: wCol, lineas: 1 });
     if (pintar) texto(ctx, pal, aMes, 600, xCol, y, pal.tintaSec, 1.2);
     y += alto(aMes, 1.2) + S(16);
+    if (debajo && comp) {
+      if (pintar) dibujarComparacionesBajo(ctx, pal, comp, debajo, xCol, y);
+      y += debajo.alto + S(14);
+    }
   }
   if (d.leyenda) {
     const fila = S(horiz ? 42 : 46);

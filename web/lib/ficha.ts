@@ -12,6 +12,7 @@ import { comparaciones, plantillaSuelta, type Comparacion } from "./plantillas";
 import { datosDesde, periodoMandato, variacionMostrada } from "./tablas";
 import { encExpr } from "./url";
 import type { VistaImg } from "./imagen-datos";
+import type { ComparacionImg } from "./imagen";
 import type { VelaDato } from "@/components/Velas";
 import type { DeltaProps } from "@/components/sistema/Delta";
 import type { CeldaMandato, ColumnaMandato, FilaMandato } from "@/components/sistema/TablaMandatos";
@@ -142,6 +143,8 @@ export interface CabeceraFicha {
   extras: DeltaProps[];
   /** Clave de `frase` entre las del contexto del dato: la imagen que se comparte desde la ficha lleva esta misma frase. */
   fraseClave?: ClaveFrase;
+  /** Las dos comparaciones de `deltas` con su cifra y su período (para el texto y la imagen que se comparten). Null = no hay. */
+  comp: { anterior: Comparacion | null; anio: Comparacion | null };
 }
 /** Lo que muestra la apertura de la ficha: la cifra con su fecha, hasta dos cambios (contra el período anterior y contra un año atrás),
  *  el interanual si la cifra es una variación mensual, y un hecho que los cambios no dicen (nunca un adjetivo, D-012). Null sin datos. */
@@ -164,15 +167,38 @@ export function cabeceraFicha(m: Motor, e: Expr, desdeCfg?: DesdePref): Cabecera
   const elegida: [ClaveFrase, string | null | undefined][] = [["desde", bajo], ["desde", desde], ["record", c.dir < 0 ? null : de("record")], ["minimo", de("minimo")]];
   const [fraseClave, frase] = elegida.find(([, t]) => !!t) ?? [undefined, undefined];
   const extras = desdeCfg ? comparacionesExtra(m, c, desdeCfg) : [];
-  return { cifra: ctx.valor, fecha: ctx.mes, deltas, secundarias, frase: frase ?? undefined, fraseClave, ultimoDisponible: ctx.ultimoDisponible, extras };
+  return { cifra: ctx.valor, fecha: ctx.mes, deltas, secundarias, frase: frase ?? undefined, fraseClave, ultimoDisponible: ctx.ultimoDisponible, extras, comp: { anterior: comp?.anterior ?? null, anio: comp?.anio ?? null } };
 }
 
 /** La vista que se comparte como imagen desde la cabecera de la ficha: el gráfico de la variable con el período `E` y las mismas frases de contexto que muestra la cabecera.
  *  La usan la ficha y la página de novedades (una sola definición: lo que se comparte es lo que muestra la ficha). */
-export const vistaCompartirFicha = (e: Expr, E: Pick<Comun, "desde" | "hasta" | "meses">, cab: Pick<CabeceraFicha, "fraseClave" | "frase"> | null): VistaImg => ({
-  exprs: [e], modo: "valor", eje: "propia", desde: E.desde, hasta: E.hasta, meses: E.meses, freq: "M", ag: "promedio",
-  frases: cab?.fraseClave ? [cab.fraseClave] : [], fraseFija: cab?.frase,
-});
+export const vistaCompartirFicha = (e: Expr, E: Pick<Comun, "desde" | "hasta" | "meses">, cab: Pick<CabeceraFicha, "fraseClave" | "frase"> & Partial<Pick<CabeceraFicha, "comp" | "fecha">> | null): VistaImg => {
+  const items = cab?.comp ? comparacionesCompartir(cab as CabeceraFicha).items : [];
+  return {
+    exprs: [e], modo: "valor", eje: "propia", desde: E.desde, hasta: E.hasta, meses: E.meses, freq: "M", ag: "promedio",
+    frases: cab?.fraseClave ? [cab.fraseClave] : [], fraseFija: cab?.frase,
+    ...(items.length ? { comparaciones: items, comparacionesMes: cab?.fecha } : {}),
+  };
+};
+
+/** Las comparaciones de la cabecera para compartir: el texto («Mes anterior (oct-26): 2,3 % (+0,1 p.p.). Hace un año (...)») y los items que la imagen dibuja al lado de la cifra grande.
+ *  Palabras neutras (D-012). Sin comparación, esa parte no va. */
+export function comparacionesCompartir(cab: CabeceraFicha): { texto: string; items: ComparacionImg[] } {
+  const lista: [Comparacion | null, string][] = [[cab.comp.anterior, ""], [cab.comp.anio, "Hace un año"]];
+  const texto: string[] = [], items: ComparacionImg[] = [];
+  for (const [c, fijo] of lista) {
+    if (!c) continue;
+    const rotulo = fijo || c.rotulo, vr = menos(c.variacion);
+    texto.push(`${rotulo} (${c.fecha}): ${c.valor} (${vr}).`);
+    items.push({ rotulo, fecha: c.fecha, valor: c.valor, variacion: vr });
+  }
+  return { texto: texto.join(" "), items };
+}
+/** El texto entero que se comparte desde un dato suelto: la cifra, las comparaciones y la fuente. */
+export function textoCompartirFicha(nombre: string, cab: CabeceraFicha, fuente: string): string {
+  const comp = comparacionesCompartir(cab).texto;
+  return `${nombre}: ${cab.cifra} en ${cab.fecha}. ${comp ? `${comp} ` : ""}Fuente: ${fuente}.`;
+}
 
 /** Las comparaciones extra del último dato (inicio del período, promedio, mediana, máximo, mínimo) con el período de la ficha (el de la vista simple de Histórico):
  *  la misma función y el mismo formato que usa Histórico (`comparacionesCabecera`, `deltaDeComparacion`). */

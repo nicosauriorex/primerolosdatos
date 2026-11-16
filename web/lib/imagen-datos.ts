@@ -4,7 +4,7 @@ import { aBase100, claseVariacion, crearPres, estadisticasRows, filasGrafico, fr
 import { admiteContexto, contextoDato } from "./contexto-dato";
 import { DATOS_GEN, DATOS_PRES, type ClaveFrase, type DatoGen, type DatoPres, type DesdePref, type FormatoImg, type OpcionesImagen } from "./config";
 import { leerComun, leerGrafico, frecuenciaOrigen, textoTemporalidad, TODOS_MESES } from "./historico";
-import type { DatosImagen, TarjetaDato, TarjetaImg } from "./imagen";
+import type { ComparacionImg, DatosImagen, TarjetaDato, TarjetaImg } from "./imagen";
 import { fmtMes, nf0, nf1, fmtNum, norm, ok } from "./formato";
 import type { Calculo, Expr, Motor } from "./motor";
 import { fuentesCalc } from "./motor";
@@ -25,6 +25,10 @@ export interface VistaImg {
   fraseFija?: string;
   /** Línea del cero (R20): false = no se dibuja (el Histórico la apaga con `cero=0`). Sin esto, se dibuja si los valores cruzan el cero. */
   cero?: boolean;
+  /** Comparaciones (mes anterior, hace un año) que la imagen dibuja al lado de la cifra grande; se apagan con `OpcionesImagen.comparaciones`. */
+  comparaciones?: ComparacionImg[];
+  /** El dato contra el que se calcularon (`cab.fecha`, "oct-26"): si la imagen termina en otro mes (Personalizar → período), no se dibujan, porque no cerrarían con la cifra grande. */
+  comparacionesMes?: string;
 }
 export interface OpcionesImg {
   formato: FormatoImg; comentario: string; base: BaseCfg; colPres?: Record<string, string>;
@@ -244,6 +248,8 @@ export function armarImagen(m: Motor, v: VistaImg, o: OpcionesImg): DatosImagen 
     fmtEje: b100 ? (x) => nf0.format(x) : fmtEjeDe(calcs[0]),
     fmtEje2: !b100 && lista.length === 2 && v.eje !== "misma" ? fmtEjeDe(calcs[1]) : null,
     franjas, tarjetas, lineasRef, marcasExt, marcaUltimo: pers ? pers.marcaUltimo : true,
+    // R30: las comparaciones de la vista van al lado de la cifra, salvo que quien comparte las apague
+    comparaciones: ctx && v.comparaciones?.length && (!v.comparacionesMes || v.comparacionesMes === ctx.mes) && (pers ? pers.comparaciones : true) ? v.comparaciones : undefined,
     cero: v.cero, armado: lista.length > 1,   // R22: con más de una serie, la vista la armó quien comparte
     inicioTxt: conPres ? oracionInicio(o.base) : null,
     comentario: limpiarComentario(o.comentario),

@@ -2526,11 +2526,28 @@ nav.tabs .con-menu { align-self: stretch; align-items: center; }
 .nov-vacio { padding-block: var(--e-4); }
 .nov-dia { margin: 0 0 var(--e-4); min-width: 0; }
 .nov-dia:last-child { margin-bottom: 0; }
-.nov-dia-titulo { margin: 0 0 var(--e-2); font-size: var(--t-base); font-weight: 700; color: var(--text-secondary); overflow-wrap: anywhere; }
-.nov-dia-titulo::first-letter { text-transform: uppercase; }
+/* R31: el título de cada día tiene otro fondo, más tamaño y el número destacado; queda fijo arriba mientras se recorren los datos de ese día */
+.nov-dia { scroll-margin-top: calc(var(--nav-h) + var(--e-3)); }
+.nov-dia-titulo { margin: 0; font-size: var(--t-base); font-weight: 600; color: var(--text-secondary); min-width: 0; }
+.nov-dia-abierto > .nov-dia-titulo { position: sticky; top: var(--nav-h); z-index: 5; }
+.nov-dia-btn { display: flex; align-items: center; gap: var(--e-3); width: 100%; min-height: 44px; box-sizing: border-box; padding: var(--e-2) var(--e-3); border: 0; border-left: 4px solid var(--acento);
+  border-radius: var(--r-2); background: var(--relleno); color: inherit; font: inherit; text-align: left; cursor: pointer; min-width: 0; }   /* azul del sitio, no el casi negro de --surface-2 (pedido) */
+.nov-dia-abierto > .nov-dia-titulo .nov-dia-btn { border-radius: var(--r-2) var(--r-2) 0 0; }
+.nov-dia-btn:hover { background: var(--relleno-hover); }
+.nov-dia-btn:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.nov-dia-num { flex: none; font-size: var(--t-xl, 1.6rem); line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.nov-dia-texto { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.nov-dia-resumen { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--t-sm); font-weight: 400; color: var(--text-muted); }
+.nov-dia-flecha { flex: none; transition: transform .15s; }
+.nov-dia-abierto .nov-dia-flecha { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .nov-dia-flecha { transition: none; } }
+.nov-dia-resto { display: block; min-width: 0; overflow-wrap: anywhere; }
+.nov-dia-resto::first-letter { text-transform: uppercase; }
 .nov-lista { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
 .nov-lista > li { min-width: 0; border-bottom: 1px solid var(--border); }
-.nov-fila { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--e-2); align-items: center; padding: var(--e-3) 0; min-width: 0; }
+.nov-fila { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--e-2); align-items: start; padding: var(--e-3) 0; min-width: 0; }
+/* Las series de la publicación van debajo del renglón entero (todas las columnas), no apretadas en la del nombre. */
+.nov-resto { grid-column: 1 / -1; min-width: 0; }
 .nov-dato { display: block; min-width: 0; overflow-wrap: anywhere; }
 .nov-titulo { display: block; margin: 0; }
 .nov-periodo { color: var(--text-secondary); }
@@ -2544,14 +2561,93 @@ nav.tabs .con-menu { align-self: stretch; align-items: center; }
 .nov-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2); min-width: 0; }
 .nov-acciones .chip-c { text-decoration: none; }
 .nov-mas { margin-top: var(--e-1); font-size: var(--t-sm); }
-.nov-mas summary { cursor: pointer; color: var(--text-secondary); }
-.nov-mas ul { margin: var(--e-1) 0 0; padding-left: var(--e-4); }
-.nov-mas li { margin: 2px 0; overflow-wrap: anywhere; }
+.nov-mas summary { cursor: pointer; color: var(--text-secondary); overflow-wrap: anywhere; }
+.nov-caja { max-height: 18rem; overflow-y: auto; margin-top: var(--e-2); border: 1px solid var(--border); border-radius: var(--r-2); background: var(--surface-1); overscroll-behavior: contain; }
+.nov-caja:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.nov-grupo { margin: 0; padding: 0 var(--e-3) var(--e-2); }
+.nov-grupo-cab { position: sticky; top: 0; z-index: 1; margin: 0 calc(-1 * var(--e-3)) var(--e-1); padding: var(--e-1) var(--e-3); background: var(--relleno); border-bottom: 1px solid var(--border); }
+.nov-grupo-n { color: var(--text-muted); }
+.nov-series { list-style: none; margin: 0; padding: 0; columns: 15rem auto; column-gap: var(--e-4); }
+.nov-series li { break-inside: avoid; margin: 0; overflow-wrap: anywhere; }
+.nov-series a { display: block; padding: 3px 0; text-decoration: none; color: var(--text-primary); }
+.nov-series a:hover { text-decoration: underline; color: var(--acento-texto); }
+/* pestañas y grilla del mes */
+.nov-vista { margin: 0 0 var(--e-4); }
+.nov-cal { max-width: 26rem; margin: 0 0 var(--e-4); }
+.nov-cal-cab { display: flex; align-items: center; justify-content: space-between; gap: var(--e-2); margin-bottom: var(--e-2); }
+.nov-cal-mes { text-transform: capitalize; }
+.nov-cal-grilla { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.nov-cal-sem { text-align: center; font-size: var(--t-xs); color: var(--text-muted); font-weight: 700; }
+.nov-gd { position: relative; display: block; box-sizing: border-box; min-height: 44px; min-width: 0; padding: 4px 0 0; border: 1px solid transparent; border-radius: var(--r-2);
+  background: transparent; color: var(--text-muted); font: inherit; font-size: var(--t-sm); text-align: center; }
+.nov-gd-con { background: var(--surface-1); border-color: var(--border); color: var(--text-primary); cursor: pointer; font-weight: 600; }
+.nov-gd-con:hover { background: var(--relleno-hover); border-color: var(--border-fuerte); }
+.nov-gd-con:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
+.nov-gd-hoy { border-color: var(--acento); box-shadow: inset 0 0 0 1px var(--acento); }
+.nov-gd-num { display: block; line-height: 1.4; font-variant-numeric: tabular-nums; }
+.nov-bola { position: absolute; top: 1px; right: 1px; min-width: 16px; height: 16px; padding: 0 3px; box-sizing: border-box; border-radius: var(--r-pleno);
+  background: var(--acento); color: var(--sobre-acento); font-size: 10px; font-weight: 800; line-height: 16px; text-align: center; font-variant-numeric: tabular-nums; }
+.nov-bola-est { top: auto; right: 1px; bottom: 1px; background: transparent; color: var(--text-secondary); box-shadow: inset 0 0 0 1.5px var(--text-secondary); }
+.nov-gd-elegida { background: var(--acento); border-color: var(--acento); color: var(--sobre-acento); }
+.nov-gd-elegida:hover { background: var(--acento); border-color: var(--acento); }
+.nov-gd-elegida .nov-bola { background: var(--sobre-acento); color: var(--acento); }
+/* grilla chica + resumen del día: desde 900 px, la grilla a la izquierda y el panel a la derecha (alto propio, no estira la grilla) */
+.nov-zona { min-width: 0; margin: 0 0 var(--e-4); }
+.nov-zona .nov-cal { margin-bottom: 0; }
+@media (min-width: 900px) {
+  /* El panel toma el alto de la grilla (stretch) y no lo pasa: su contenido va fuera del flujo y la lista se desliza por dentro. */
+  .nov-zona { display: grid; grid-template-columns: minmax(18rem, 26rem) minmax(0, 1fr); gap: var(--e-5); align-items: stretch; }
+  .nov-zona .nov-panel { position: relative; min-height: 14rem; }
+  .nov-zona .nov-panel > .nov-res { position: absolute; inset: var(--e-3) var(--e-4); display: flex; flex-direction: column; min-height: 0; }
+  .nov-zona .nov-panel .nov-res-lista { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; padding-right: var(--e-2); }
+  .nov-zona .nov-panel .nov-res-tit, .nov-zona .nov-panel .nov-res-ir { flex: none; }
+  .nov-zona .nov-panel .nov-res-ir { align-self: flex-start; }
+}
+.nov-panel { min-width: 0; padding: var(--e-3) var(--e-4); border: 1px solid var(--border); border-radius: var(--r-2); background: var(--surface-1); }
+.nov-res { min-width: 0; padding: 0 var(--e-3) var(--e-3); }
+.nov-panel .nov-res { padding: 0; }
+.nov-res-tit { margin: 0 0 var(--e-2); font-size: var(--t-base); }
+.nov-res-lista { list-style: none; margin: 0; padding: 0; }
+/* `.nov-res .nov-res-fila`: le gana a `.modal li { display: flex }` dentro de la ventana del celular */
+.nov-res .nov-res-fila { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--e-1) var(--e-3); align-items: center; padding: var(--e-2) 0; border-bottom: 1px solid var(--border); min-width: 0; }
+.nov-res-dato { grid-column: 1 / -1; margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.nov-res-cifra { min-width: 0; }
+.nov-res-ver { text-decoration: none; }
+.nov-res-mas { margin: var(--e-2) 0 0; }
+.nov-res-ir { margin-top: var(--e-3); }
+@media (min-width: 900px) {
+  .nov-res .nov-res-fila { grid-template-columns: minmax(0, 1fr) auto auto; }
+  .nov-res-dato { grid-column: auto; }
+}
+/* Agendar: el botón del desplegable se ve como un chip compacto y el panel flota sin mover el renglón */
+.nov-agendar { position: relative; display: inline-block; }
+/* Debajo de 720 px: el nombre arriba y, en un renglón, la hora y las acciones. */
+@media (max-width: 719px) {
+  .nov-fila-prox { grid-template-columns: auto minmax(0, 1fr); column-gap: var(--e-3); }
+  .nov-fila-prox .nov-dato { grid-column: 1 / -1; }
+}
+/* En el celular, .desplegable y .btn.drop ocupan todo el ancho (regla general de 640 px): «Agendar» queda compacto, al lado de «Ver». */
+@media (max-width: 640px) {
+  .desplegable.nov-agendar { display: inline-block; width: auto; }
+  .nov-agendar > .btn.drop { width: auto; justify-content: flex-start; }
+  .desplegable.nov-agendar .panel { width: 15.5rem; }
+}
+.nov-agendar > .btn { min-height: 32px; padding: 0 var(--e-3); border: 1px solid var(--border); border-radius: var(--r-pleno); background: var(--surface-1); font-size: var(--t-sm); font-weight: 600; line-height: 1; }
+.nov-agendar > .btn::before { content: ""; position: absolute; inset: -6px -2px; }
+.nov-agendar .panel { position: absolute; top: 100%; left: 0; z-index: 40; width: 15.5rem; max-width: calc(100vw - 32px); }
+.nov-agendar .panel { padding: var(--e-1); }
+.nov-agendar .panel-cruz { position: absolute; top: 0; right: 0; margin: 0; }
+.nov-agendar-op { display: flex; flex-direction: column; gap: 2px; padding-right: 44px; }
+.nov-agendar-item { display: flex; align-items: center; min-height: 44px; padding: 0 var(--e-3); border: 0; border-radius: var(--r-2); background: transparent; color: var(--text-primary);
+  font: inherit; font-size: var(--t-sm); font-weight: 600; text-align: left; text-decoration: none; cursor: pointer; }
+.nov-agendar-item:hover { background: var(--relleno-hover); }
+.nov-agendar-item:focus-visible { outline: var(--linea) solid var(--foco); outline-offset: 2px; }
 .nov-pie { margin-top: var(--e-5); padding-top: var(--e-3); border-top: 1px solid var(--border); max-width: 72ch; }
 .nov-pie-titulo { margin: 0 0 var(--e-2); font-size: var(--t-base); }
 .nov-pie .note { margin: 0 0 var(--e-2); }
 @media (min-width: 720px) {
   .nov-fila { grid-template-columns: minmax(0, 1fr) 13rem 10.5rem; gap: var(--e-4); }
+  .nov-fila-prox { grid-template-columns: minmax(0, 1fr) 9rem 17rem; }
   .nov-acciones { flex-wrap: nowrap; justify-content: flex-start; }
 }
 /* portada: dos listas lado a lado; cada renglón se toca entero */

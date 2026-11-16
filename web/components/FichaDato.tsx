@@ -37,7 +37,7 @@ import { fuentesCalc } from "@/lib/motor";
 import { hrefDato, hrefHistorico, idsDe } from "@/lib/temas";
 import {
   cabeceraFicha, filasMandatosFicha, historicoFicha, hrefMandatoDe, hrefPresidentesDe, mandatoFicha, mesesIguales, paramsInicio, periodosFicha,
-  bajadaTablaMandatos, sinMandatoTxt, velasDe, vistaCompartirFicha, type CabeceraFicha, type PeriodoFicha,
+  bajadaTablaMandatos, sinMandatoTxt, textoCompartirFicha, velasDe, vistaCompartirFicha, type CabeceraFicha, type PeriodoFicha,
 } from "@/lib/ficha";
 
 type SetFn = (cambios: Record<string, string | null | undefined>) => void;
@@ -106,7 +106,7 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
   const fuente = fuentesCalc(c).map(fuentePublica).join("; ");
   const V = useViene(m, e, version, p);   // el período del gráfico: lo usan el capítulo "¿Cómo viene?" y su Compartir
   const hrefV = hrefHistorico(e, V.per ? { d: V.D.E.desde, h: V.D.E.hasta } : {});
-  const textoV = cab ? `${nombre}: ${cab.cifra} en ${cab.fecha}. Fuente: ${fuente}.` : undefined;
+  const textoV = cab ? textoCompartirFicha(nombre, cab, fuente) : undefined;
 
   return (
     <div className="fi">

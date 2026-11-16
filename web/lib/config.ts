@@ -19,6 +19,7 @@ export interface OpcionesImagen {
   promedio: boolean; mediana: boolean; lineaUltimo: boolean;   // líneas horizontales con su nombre y valor
   marcaUltimo: boolean; marcaExtremos: boolean;                 // marcadores sobre la serie
   resaltar: boolean;                                            // franjas de los presidentes en el gráfico
+  comparaciones: boolean;                                       // mes anterior y hace un año al lado de la cifra (solo si la vista los trae)
   tarjetas: TarjetasImg;
   datosPres: DatoPres[];                                        // hasta 3, en el orden de DATOS_PRES
   datosGen: DatoGen[];                                          // hasta 4, en el orden de DATOS_GEN
@@ -48,7 +49,7 @@ export interface Config {
   preguntarPorque: boolean;      // tira «¿Por qué lo compartís?» después de compartir (docs/specs/contar-compartir.md)
 }
 export const IMAGEN_DEFECTO: OpcionesImagen = {
-  promedio: false, mediana: false, lineaUltimo: false, marcaUltimo: true, marcaExtremos: false, resaltar: false, tarjetas: "ninguna",
+  promedio: false, mediana: false, lineaUltimo: false, marcaUltimo: true, marcaExtremos: false, resaltar: false, comparaciones: true, tarjetas: "ninguna",
   datosPres: ["recibio", "entrego", "variacion"], datosGen: ["ultimo", "promedio", "maximo", "minimo"],
   frases: null,
 };
@@ -81,7 +82,7 @@ export function normalizarImagen(raw: unknown): OpcionesImagen {
   const si = (x: unknown, def: boolean) => (typeof x === "boolean" ? x : def);
   return {
     promedio: si(r.promedio, D.promedio), mediana: si(r.mediana, D.mediana), lineaUltimo: si(r.lineaUltimo, D.lineaUltimo),
-    marcaUltimo: si(r.marcaUltimo, D.marcaUltimo), marcaExtremos: si(r.marcaExtremos, D.marcaExtremos), resaltar: si(r.resaltar, D.resaltar),
+    marcaUltimo: si(r.marcaUltimo, D.marcaUltimo), marcaExtremos: si(r.marcaExtremos, D.marcaExtremos), resaltar: si(r.resaltar, D.resaltar), comparaciones: si(r.comparaciones, D.comparaciones),
     tarjetas: unoDe(r.tarjetas, TARJETAS_IMG, D.tarjetas),
     datosPres: datosDe(r.datosPres, DATOS_PRES, MAX_DATOS_PRES, D.datosPres), datosGen: datosDe(r.datosGen, DATOS_GEN, MAX_DATOS_GEN, D.datosGen),
     // null (o algo inválido) = las dos de fábrica; una lista vacía válida = ninguna frase

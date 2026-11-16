@@ -193,6 +193,11 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
                 <Marca t="Línea del último dato" v={img.lineaUltimo} f={(x) => cambiarImg({ lineaUltimo: x })} off={!completa} />
                 <Marca t="Marcadores de máximo y mínimo" v={img.marcaExtremos} f={(x) => cambiarImg({ marcaExtremos: x })} off={!completa} />
               </Grupo>
+              {!!vg?.comparaciones?.length && (
+                <Grupo titulo="Comparaciones">
+                  <Marca t="Mes anterior y hace un año" v={img.comparaciones} f={(x) => cambiarImg({ comparaciones: x })} />
+                </Grupo>
+              )}
               {ctxFrases && ctxFrases.todas.length > 0 && (
                 <Grupo titulo="Frases">
                   <p className="note" style={{ margin: 0 }}>Elegí hasta {MAX_FRASES_IMG}. Las calcula el sitio: no se pueden editar.</p>
