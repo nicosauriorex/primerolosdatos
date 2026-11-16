@@ -390,3 +390,8 @@ Crítica final de Impeccable: 26/40 (antes 21/40). El usuario eligió arreglar l
 
 ## Datos calientes que faltan (2026-11-16)
 - ~~Segunda investigación (`docs/investigaciones/datos-nuevos-2-2026-11-16.md`): subsidios al transporte, transferencias a provincias, patentamientos, demanda eléctrica, gasto por función, siniestros viales y femicidios (a mano) → spec: docs/specs/datos-calientes-2.md~~ ✅ 2026-11-16
+
+## ~~Novedades, calendario y predicciones (primera parte)~~ ✅ 2026-11-16
+→ spec: docs/specs/novedades-calendario.md
+- ~~Sección con los datos nuevos que van entrando, para que la gente opine.~~ ✅ 2026-11-16
+- ~~Calendario de próximas publicaciones con fecha (INDEC tiene calendario; para el resto, el día promedio en que suele salir).~~ ✅ 2026-11-16 (las fechas estimadas aparecen cuando cada fuente tenga dos meses registrados)

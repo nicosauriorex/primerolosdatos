@@ -1,6 +1,6 @@
 # Novedades y calendario (bloque 9b)
 
-Estado: en curso
+Estado: implementada (2026-11-16) — 24d0366, corrida completa en verde (run 43931777809)
 Ideas: Novedades, calendario y predicciones (primera parte)
 
 ## Objetivo
