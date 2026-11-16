@@ -399,3 +399,14 @@ Crítica final de Impeccable: 26/40 (antes 21/40). El usuario eligió arreglar l
 ## ~~Novedades, calendario y predicciones (segunda parte)~~ ✅ 2026-11-16
 → spec: docs/specs/predicciones.md
 - ~~La gente deja su predicción (ej. inflación de noviembre) y la página muestra la **mediana** (un valor absurdo no la mueve). Limitar valores imposibles (ej. 1.000.000% de inflación).~~ ✅ 2026-11-16 (solo inflación mensual, rango −5 a 30 %; para que guarde en el sitio faltan la base D1 y Turnstile)
+
+## ~~Tanda 13: Novedades (2026-11-16)~~ ✅ 2026-11-16
+→ spec: docs/specs/ajustes-tanda-13.md
+- ~~«no se distingue mucho los dias en los que salio el dato xq tiene mismo color y fuente».~~ ✅ 2026-11-16
+- ~~«al principio estaría bueno una vista de calendario con los dias y con un numerito tipo notificacion de cada dia de la cantidad de datos principales que salieron (ponele inflacion cuenta como 1) y los proximos que salen. Despues abajo si la linea historia cronologica» (una grilla por pestaña).~~ ✅ 2026-11-16
+- ~~«al compartir estaria bueno que ponga el mes anterior y variacion intermensual y el dato del año anterior y la interanual» (texto e imagen, en todo el sitio).~~ ✅ 2026-11-16
+- ~~«al desplegar los datos se ven feos y cuando son muchos como la inflación como que tambien queda feo».~~ ✅ 2026-11-16
+- ~~«Lo ultimo y que salio debería ser como dos pestañas de novedades y calendario».~~ ✅ 2026-11-16
+- ~~«se podría agendar un dato?» (botón por fecha: Google Calendar y .ics).~~ ✅ 2026-11-16
+- ~~Segunda vuelta (2026-11-16): «yo decia de ponerla ahi al lado de la etiqueta del 2.2 grande… y se pueda prender y apagar desde la personalizacion asi no compite con las otras tarjetas»; «queda fea la grilla porque tiene dos cruces al costado que no tienen uso… en PC deja mucho hueco a la derecha»; «que los dias se puedan contraer y sean como desplegables grandes»; «se ve feo cuando hay muchos datos. de ultima pone un deslizador»; Agendar «se ve feo xq tiene espaci arriba».~~ ✅ 2026-11-16
+- ~~Tercera vuelta (2026-11-16): «queda feo el calendario tan grande. de ultima busca otro grafico para pc» y «al apretar las casillas del calendario te muestra resumido los datos que hay tipo pop up» (elegido: grilla chica + panel al lado en PC, ventana en el celular).~~ ✅ 2026-11-16

@@ -1,6 +1,6 @@
 # Ajustes de la tanda 13: Novedades
 
-Estado: en curso
+Estado: implementada (2026-11-16) — fe1b069, corrida en verde (run 43956106566)
 Ideas: Tanda 13: Novedades (2026-11-16)
 
 ## Objetivo

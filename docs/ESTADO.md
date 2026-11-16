@@ -8,6 +8,7 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-16.
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
 Últimos bloques (todos publicados, corrida en verde):
+- Tanda 13 (Novedades): pestañas Novedades / Calendario, grilla chica con resumen del día (panel en PC, ventana en el celular), días desplegables, series en caja deslizable, Agendar (Google Calendar e .ics); compartir un dato suma mes anterior y hace un año (texto e imagen; reglas R30 y R31) — 2026-11-16, fe1b069 (corrida en verde, run 43956106566) — [spec](specs/ajustes-tanda-13.md)
 - Predicciones (9c): `/predicciones/` con la inflación del mes, mediana de la gente después de predecir, REM del Banco Central e historia; funciones `/api/prediccion(es)` con Turnstile — 2026-11-16, bb22f77 (corrida completa en verde, run 43939206761; la página y el REM están publicados, `/api/predicciones` responde 503 hasta crear la base) — [spec](specs/predicciones.md)
 - Novedades y calendario (9b): `/novedades/` con lo que salió (cifra, cambio, contexto, Compartir) y el calendario del INDEC, bloque en la portada; registro `datos/novedades.json` (D-026) — 2026-11-16, 24d0366 (corrida completa en verde, run 43931777809; el registro se lee y se guarda en el commit de datos) — [spec](specs/novedades-calendario.md)
 - Contar los Compartir (9a): función de Pages + D1, tira «¿Por qué lo compartís?» que se apaga en Configuración, `npm run conteos` — 2026-11-16, 26eec12 (corrida completa en verde, run 43913974906; publicado sin la base: `/api/compartir` responde 503 hasta crearla) — [spec](specs/contar-compartir.md)
@@ -38,6 +39,7 @@ A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunid
 
 ## Sin verificar (lo que sigue abierto)
 - **Predicciones:** guardar en el sitio (falta la base y Turnstile), Turnstile con la clave real y con un token fallido, el primer cierre real (15 de diciembre) y el paso a «resultado» cuando entre el dato.
+- **Tanda 13:** un .ics abierto en un calendario real; la imagen 4:5 con las comparaciones; el foco del teclado al abrir y cerrar ventanas (`Modal` no lo mueve, en todo el sitio).
 - **Novedades:** el bloque de la portada (no se vio: panel oculto), las fechas estimadas (aparecen cuando cada fuente tenga dos meses registrados, hacia enero) y la primera entrada nueva del registro en una corrida (la del push dio 0, sin datos nuevos).
 - **Conteos:** que se guarde en el sitio (falta crear la base D1) y la pregunta con el menú de compartir de un celular real.
 - **En general:** tema claro, celular real (Atrás, teclado, safe-area de la barra inferior) y aspecto en capturas de casi todas las páginas: el panel del navegador suele estar oculto y se verifica midiendo.
