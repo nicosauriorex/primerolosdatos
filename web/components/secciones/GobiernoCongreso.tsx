@@ -1,23 +1,26 @@
 "use client";
 // Página "Gobierno y Congreso" (/congreso/, bloque 6d): bancas propias y aliadas, leyes del Ejecutivo, DNU y vetos.
 // Sin cuentas acá: todo sale de lib/capacidad.ts.
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useCapacidad } from "../useCapacidad";
 import { useSeccion } from "../useSeccion";
 import { Cargando } from "../ui";
+import { PanelGasto } from "../PanelGasto";
 import { CabeceraDato } from "../sistema/CabeceraDato";
 import { Capitulo } from "../sistema/Capitulo";
 import { FilaChips } from "../sistema/FilaChips";
 import { InfoPunto } from "../sistema/InfoPunto";
 import { ColumnasGobiernos, type ColGob } from "../sistema/ColumnasGobiernos";
 import { CompartirHoja } from "../sistema/CompartirHoja";
+import { ConCartel } from "../sistema/ConCartel";
 import { nf0, nf1, ok } from "@/lib/formato";
 import {
-  CAMARAS, INDICADORES, bancasDe, fraseCapacidad, indicadorTieneDatos, periodoMandato as periodoDe, mandatos, primerIndicadorConDatos, queHayCargado, pctAliados, pctPropios, quorumPct, resumenApoyo, resumenBancas, resumenDnu, resumenLeyes, resumenVetos, valorIndicador,
+  CAMARAS, INDICADORES, armarImagenCongreso, bancasDe, fraseCapacidad, indicadorTieneDatos, periodoMandato as periodoDe, mandatos, primerIndicadorConDatos, queHayCargado, pctAliados, pctPropios, quorumPct, resumenApoyo, resumenBancas, resumenDnu, resumenLeyes, resumenVetos, valorIndicador,
   type Camara, type DatosCap, type Indicador, type Mandato,
 } from "@/lib/capacidad";
 import { PRES_DEF, nombreCorto } from "@/lib/estadisticas";
 import { unoDe, useParams } from "@/lib/url";
+import type { FormatoImg } from "@/lib/config";
 
 type Setter = (c: Record<string, string | null | undefined>) => void;
 const SIN = <span title="sin dato cargado">—</span>;
@@ -48,6 +51,7 @@ function Cuerpo({ d, ultimo, p, set }: { d: DatosCap; ultimo: string; p: URLSear
   const sel = p.get("cgp") && IDS.includes(p.get("cgp") as string) ? (p.get("cgp") as string) : null;
   const hay: Record<Indicador, boolean> = { bancas: indicadorTieneDatos(d, "bancas", M), leyes: indicadorTieneDatos(d, "leyes", M), apoyo: indicadorTieneDatos(d, "apoyo", M), dnu: indicadorTieneDatos(d, "dnu", M), vetos: indicadorTieneDatos(d, "vetos", M) };
   const sinTotalVetos = M.some((x) => { const rv = resumenVetos(d, x.id, x); return !!rv && rv.total == null; });
+  const [imagen, setImagen] = useState(false);
   const [ord, setOrd] = useState<{ k: ColClave | null; d: number }>({ k: null, d: -1 });
   const valor = (m: Mandato, k: ColClave): number | null => {
     if (k === "dip" || k === "sen") return resumenBancas(d, m.id, k).alEmpezar;
@@ -86,6 +90,12 @@ function Cuerpo({ d, ultimo, p, set }: { d: DatosCap; ultimo: string; p: URLSear
   });
   const nota = ind === "bancas" ? "Diputados: % de bancas propias y aliadas al asumir." : ind === "leyes" ? "Leyes del Ejecutivo aprobadas, en % de las enviadas." : ind === "apoyo" ? "Leyes por apoyo: % de leyes del Ejecutivo aprobadas ÷ % de bancas propias y aliadas en Diputados (promedio del mandato). 1,0 = aprobó en la misma proporción que su apoyo; más de 1, más leyes que su apoyo; menos de 1, menos. Solo gobiernos con leyes y bancas cargadas." : ind === "dnu" ? "DNU por año de mandato." : sinTotalVetos ? "Vetos que el Congreso insistió, por año de mandato. Falta cargar el total de vetos; solo se conocen los insistidos." : "Vetos por año de mandato.";
 
+  const nombreInd = INDICADORES.find((x) => x[0] === ind)?.[1] ?? "";
+  const linea = ind === "bancas" ? { v: 50, txt: "mayoría" } : ind === "apoyo" ? { v: 1, txt: "igual a su apoyo" } : undefined;
+  const armarImg = useCallback((f: FormatoImg) => armarImagenCongreso({ indicador: nombreInd, nota, linea, columnas, fuente: "informes oficiales cargados a mano (Diputados, Senado e Infoleg); el detalle está en la página" }, f)!,
+    [nombreInd, nota, ind, d, M]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const hayImagen = hay[ind];
+
   return (
     <section>
       {rta && presRta ? (
@@ -95,7 +105,7 @@ function Cuerpo({ d, ultimo, p, set }: { d: DatosCap; ultimo: string; p: URLSear
       <Capitulo id="congreso" titulo="Cada gobierno frente al Congreso" bajada="Cuánto respaldo tuvo cada presidente en el Congreso y cómo gobernó con él: números crudos, sin puntaje."
         acciones={<>
           <InfoPunto etiqueta="Qué hay cargado"><p>{queHayCargado(d, M)}</p></InfoPunto>
-          <CompartirHoja href={hrefPag} titulo="Gobierno y Congreso" texto={rta ? `${rta.frase} Fuente: informes oficiales cargados a mano; el detalle está en la página.` : undefined} />
+          <CompartirHoja href={hrefPag} titulo="Gobierno y Congreso" onImagen={hayImagen ? () => setImagen(true) : undefined} texto={rta ? `${rta.frase} Fuente: informes oficiales cargados a mano; el detalle está en la página.` : undefined} />
         </>}>
         <FilaChips etiqueta="Indicador" valor={ind} onElegir={(v) => set({ cgi: v === primero ? null : v })}
           opciones={INDICADORES.map(([v, t]) => [v, hay[v] ? t : `${t} (sin datos)`] as [string, string])} />
@@ -103,7 +113,7 @@ function Cuerpo({ d, ultimo, p, set }: { d: DatosCap; ultimo: string; p: URLSear
           <p className="note cg-nota">{nota} Tocá una columna para ver el detalle de ese gobierno.</p>
           <ColumnasGobiernos etiqueta={`${INDICADORES.find((x) => x[0] === ind)?.[1]} por gobierno`} filas={columnas} dec={dec} max={ind === "bancas" || ind === "leyes" ? 100 : undefined}
             sel={sel} onElegir={alternarPres} fmtEje={(v) => (ind === "bancas" || ind === "leyes" ? `${nf0.format(v)} %` : Number.isInteger(v) ? nf0.format(v) : nf1.format(v))}
-            linea={ind === "bancas" ? { v: 50, txt: "mayoría" } : ind === "apoyo" ? { v: 1, txt: "igual a su apoyo" } : undefined}
+            linea={linea}
             rotAlto={ind === "bancas" ? "Más apoyo" : "Más alto"} rotBajo={ind === "bancas" ? "Menos apoyo" : "Más bajo"} />
         </>}
         <details className="cg-todas">
@@ -164,6 +174,7 @@ function Cuerpo({ d, ultimo, p, set }: { d: DatosCap; ultimo: string; p: URLSear
           ))}
         </p>
       </details>
+      {imagen && hayImagen && <PanelGasto armar={armarImg} titulo={`${nombreInd} por gobierno`} href={hrefPag} onCerrar={() => setImagen(false)} />}
     </section>
   );
 }
@@ -212,10 +223,10 @@ function Apiladas({ d, m, cam, nom }: { d: DatosCap; m: Mandato; cam: Camara; no
   return (
     <>
       <h3 className="cg-sub">{nom}: bancas propias y aliadas, en % de la cámara</h3>
-      <div className="cg-apilado" role="img" aria-label={`Bancas de ${nom} durante ${m.n}`}>
+      <ConCartel><div className="cg-apilado" role="img" aria-label={`Bancas de ${nom} durante ${m.n}`}>
         <span className="cg-lm" style={{ bottom: "calc(18px + (100% - 18px) / 2)" }} title="Mayoría (50 %)"><i>50 %</i></span>
         {bs.map((b) => (
-          <div key={b.fecha} className="cg-col" title={`${b.fecha}: propios ${b.propios}, aliados ${b.aliados}, total ${b.total}`}>
+          <div key={b.fecha} className="cg-col" data-cartel={`${b.fecha.split("-").reverse().join("/")}: propios ${b.propios}, aliados ${b.aliados}, de ${b.total} bancas`}>
             <span className="cg-lq" style={{ bottom: `${quorumPct(b.total)}%` }} />
             <div className="cg-pila">
               <span style={{ height: `${pctAliados(b)}%`, background: "var(--series-2)" }} />
@@ -224,7 +235,7 @@ function Apiladas({ d, m, cam, nom }: { d: DatosCap; m: Mandato; cam: Camara; no
             <small>{b.fecha.slice(0, 7)}</small>
           </div>
         ))}
-      </div>
+      </div></ConCartel>
       <p className="note"><span className="cg-ley" style={{ background: "var(--series-1)" }} /> propios <span className="cg-ley" style={{ background: "var(--series-2)" }} /> aliados · línea continua: mayoría (50 %); línea punteada: quórum (mitad más uno).</p>
       {asuncion && (
         <div className="tablewrap fija"><table>

@@ -4,9 +4,12 @@
 // Estado en la URL: ib_act (actividad), ib_anio y ib_orden (desc | asc); el valor por defecto no se escribe. La ventana de aperturas es un estado local (cierra con la cruz, Atrás y Escape).
 // Si el archivo falta o no valida, el bloque no aparece.
 import { HojaListo } from "./comunes";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useProvinciasAlicuotas } from "../useProvincias";
 import { Modal } from "../ui";
+import { PanelGasto } from "../PanelGasto";
+import { CompartirHoja } from "../sistema/CompartirHoja";
+import type { FormatoImg } from "@/lib/config";
 import { Capitulo } from "../sistema/Capitulo";
 import { BarraVista } from "../sistema/BarraVista";
 import { Hoja } from "../sistema/Hoja";
@@ -15,7 +18,7 @@ import { ListaBarras, type FilaBarra } from "../sistema/ListaBarras";
 import { fechaLarga } from "@/lib/gasto";
 import { conPunto, type Contexto } from "@/lib/provincias";
 import {
-  ORDEN_A_DEFECTO, ORDENES_A, actividadDefecto, actividadValida, anioDefectoA, anioValidoA, armarVistaA, esOrdenA, fraseAlicuotas, opcionesActividadA, opcionesAnioA,
+  ORDEN_A_DEFECTO, ORDENES_A, armarImagenA, fuenteAlicuotas, hrefAlicuotas, tituloAlicuotas, actividadDefecto, actividadValida, anioDefectoA, anioValidoA, armarVistaA, esOrdenA, fraseAlicuotas, opcionesActividadA, opcionesAnioA,
   type DatosAlicuotas, type FilaA, type OrdenA, type VistaA,
 } from "@/lib/provinciasAlicuotas";
 
@@ -55,6 +58,7 @@ export function Alicuotas({ c, p, set }: { c: Contexto; p: URLSearchParams; set:
 function Cuerpo({ d, c, p, set }: { d: DatosAlicuotas; c: Contexto; p: URLSearchParams; set: Cambiar }) {
   const [abierta, setAbierta] = useState<FilaA | null>(null);
   const [hoja, setHoja] = useState(false);
+  const [imagen, setImagen] = useState(false);
   const defA = actividadDefecto(d), defAnio = anioDefectoA(d);
   const actividad = actividadValida(d, p.get("ib_act")) ?? defA;
   const anio = anioValidoA(d, p.get("ib_anio")) ?? defAnio;
@@ -72,8 +76,12 @@ function Cuerpo({ d, c, p, set }: { d: DatosAlicuotas; c: Contexto; p: URLSearch
     onClick: f.aperturas.length ? () => setAbierta(f) : undefined, flecha: f.aperturas.length > 0,
     aria: f.aperturas.length ? `${f.n}: ${f.txt}. Tiene ${f.aperturas.length} ${f.aperturas.length === 1 ? "apertura" : "aperturas"}. Ver aperturas` : undefined,
   })) : [];
+  const href = hrefAlicuotas(d, { actividad, anio, orden });
+  const armarImg = useCallback((f: FormatoImg) => armarImagenA(v!, d, f), [v, d]);
+  const conImagen = !!v && !v.vacia;
   return (
-    <Capitulo id="pc-ib" titulo="Cuánto cobra cada provincia de Ingresos Brutos">
+    <Capitulo id="pc-ib" titulo="Cuánto cobra cada provincia de Ingresos Brutos"
+      acciones={conImagen ? <CompartirHoja href={href} titulo={tituloAlicuotas(v!)} onImagen={() => setImagen(true)} texto={`${frase ? `${frase} ` : ""}Tope del Consenso Fiscal: ${v!.tope}. Es la alícuota teórica de la ley, no lo que se paga en promedio. Fuente: ${fuenteAlicuotas(d)}`} /> : undefined}>
       {frase && <p className="prov-respuesta">{frase}</p>}
       <BarraVista items={items} onAbrir={() => setHoja(true)} />
       <HojaListo titulo="Ajustes: Ingresos Brutos" abierta={hoja} onCerrar={() => setHoja(false)}>
@@ -101,6 +109,7 @@ function Cuerpo({ d, c, p, set }: { d: DatosAlicuotas; c: Contexto; p: URLSearch
         </>)}
       <PieA d={d} anio={anio} />
       {abierta && v && <Aperturas f={abierta} v={v} onCerrar={() => setAbierta(null)} />}
+      {imagen && conImagen && <PanelGasto armar={armarImg} titulo={tituloAlicuotas(v!)} href={href} onCerrar={() => setImagen(false)} />}
     </Capitulo>
   );
 }

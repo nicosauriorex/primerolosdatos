@@ -8,13 +8,13 @@ import { useConfig } from "@/components/ConfigProvider";
 import { useCargar, useDatos } from "@/components/DatosProvider";
 import { Sparkline } from "@/components/Sparkline";
 import { medidaInicial } from "@/lib/config";
-import { MAS_BUSCADOS, buscar, hayBusqueda, hrefMasBuscado, type ResultadoBusqueda } from "@/lib/busqueda";
+import { MAS_BUSCADOS, buscar, hayBusqueda, hrefMasBuscado, type ContextoBusqueda, type ResultadoBusqueda } from "@/lib/busqueda";
 import { medDefaultDe, type SerieMeta } from "@/lib/motor";
 import { crearPlantillas, evaluar, plantillaSuelta } from "@/lib/plantillas";
 import { TEMAS, idsDe } from "@/lib/temas";
 import { IconoBuscar, IconoCerrar } from "./iconos";
 
-const ETIQUETA_TIPO: Record<ResultadoBusqueda["tipo"], string> = { principal: "Dato", variable: "Variable", herencia: "Herencia", diario: "Diario", grafico: "Gráfico listo", seccion: "Sección" };
+const ETIQUETA_TIPO: Record<ResultadoBusqueda["tipo"], string> = { principal: "Dato", variable: "Variable", herencia: "Herencia", diario: "Diario", semaforo: "Semáforo", grafico: "Gráfico listo", seccion: "Sección" };
 
 /** Valor, fecha y minigráfico del primer resultado. La línea ocupa su lugar desde el principio para que nada salte. */
 function CifraViva({ r }: { r: ResultadoBusqueda }) {
@@ -49,13 +49,25 @@ export function Buscador({ autoFoco, onElegido, sinAtajos, flotante }: { autoFoc
   const [q, setQ] = useState("");
   const [activo, setActivo] = useState(0);
   const [enfocado, setEnfocado] = useState(false);
+  // Indicadores del semáforo: se bajan la primera vez que se usa el buscador (no en cada página); si falla, la búsqueda sigue sin ellos
+  const [semaforo, setSemaforo] = useState<NonNullable<ContextoBusqueda["semaforo"]>>();
   const campo = useRef<HTMLInputElement>(null), raiz = useRef<HTMLDivElement>(null);
   const id = useId();
+
+  useEffect(() => {
+    if (!enfocado || semaforo) return;
+    let vivo = true;
+    fetch("/datos/semaforo.json").then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((c: { indicadores?: { clave: string; nombre: string; grupo: string; id: string | null }[] }) => {
+        if (vivo && Array.isArray(c.indicadores)) setSemaforo(c.indicadores.filter((i) => i && typeof i.clave === "string" && typeof i.nombre === "string").map((i) => ({ clave: i.clave, nombre: i.nombre, grupo: String(i.grupo ?? ""), id: i.id ?? null })));
+      }).catch(() => {});
+    return () => { vivo = false; };
+  }, [enfocado, semaforo]);
 
   const S = useMemo(() => Object.fromEntries(metas.map((s) => [s.id, s])) as Record<string, SerieMeta>, [metas]);
   const plantillas = useMemo(() => (listo ? crearPlantillas(metas) : []), [listo, metas]);
   const medidaDe = useMemo(() => (s: SerieMeta) => medidaInicial(s.tipo, medDefaultDe(s), config), [config]);
-  const resultados = useMemo(() => (listo ? buscar(q, { metas, S, plantillas, medidaDe }) : []), [listo, q, metas, S, plantillas, medidaDe]);
+  const resultados = useMemo(() => (listo ? buscar(q, { metas, S, plantillas, medidaDe, semaforo }) : []), [listo, q, metas, S, plantillas, medidaDe, semaforo]);
   const busca = hayBusqueda(q);
   const sinResultados = listo && busca && !resultados.length;
   const idOpcion = (i: number) => `${id}-op-${i}`;

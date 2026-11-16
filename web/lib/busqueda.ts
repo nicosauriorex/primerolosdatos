@@ -1,5 +1,5 @@
 // Orden de los resultados del buscador (portada y buscador global). Funciones puras, sin React.
-// Un solo orden: datos principales, filas propias de Herencia y del parte diario del Banco Central con las palabras en el nombre,
+// Un solo orden: datos principales, filas propias de Herencia, del parte diario del Banco Central y del semáforo de actividad (los indicadores sin serie del catálogo) con las palabras en el nombre,
 // variables del catálogo, las filas propias que coinciden por sinónimos, gráficos listos, temas y secciones. Regla: todo dato que se ve en el sitio se encuentra desde la lupa.
 import { buscarSeries, palabrasBusqueda, textoBusqueda } from "./catalogo";
 import { hrefFijo, mismaVariable } from "./datos-fijos";
@@ -14,7 +14,7 @@ import { GRUPOS_SECCIONES, SECCIONES } from "./secciones";
 import { TEMAS, hrefDato, hrefHistorico, principalesDe } from "./temas";
 
 export interface ResultadoBusqueda {
-  tipo: "principal" | "variable" | "herencia" | "diario" | "grafico" | "seccion";
+  tipo: "principal" | "variable" | "herencia" | "diario" | "semaforo" | "grafico" | "seccion";
   titulo: string;
   /** Línea gris: la ruta ("Precios › Indicadores de inflación") o el grupo. */
   detalle: string;
@@ -30,10 +30,12 @@ export interface ContextoBusqueda {
   plantillas: Plantilla[];
   /** Medida con la que se abre una variable (la preferida del usuario para las de pesos). */
   medidaDe: (s: SerieMeta) => string;
+  /** Indicadores del semáforo de actividad (de `semaforo.json`, que baja el Buscador al usarse). Sin ellos, la búsqueda sigue igual. */
+  semaforo?: { clave: string; nombre: string; grupo: string; id: string | null }[];
 }
 
 /** Máximo de cada grupo. */
-export const MAX_GRUPO = { principal: 3, variable: 4, herencia: 4, diario: 2, grafico: 3, seccion: 2 } as const;
+export const MAX_GRUPO = { principal: 3, variable: 4, herencia: 4, diario: 2, semaforo: 3, grafico: 3, seccion: 2 } as const;
 
 /** Palabras con las que también se encuentra una fila de Herencia (además de su nombre). Clave: la de la fila. */
 const SINONIMOS_HERENCIA: Record<string, string> = {
@@ -126,13 +128,15 @@ export function buscar(q: string, ctx: ContextoBusqueda): ResultadoBusqueda[] {
   // Filas propias de Herencia y del parte diario del Banco Central (fuera del catálogo mensual). Las que tienen todas las palabras en el nombre
   // van antes de las variables (primero las que empiezan con la primera palabra: "compras" → la compra de dólares antes que el cepo);
   // las que coinciden solo por sinónimos, después de las variables.
-  const propias = (filas: FilaPropia[], tipo: "herencia" | "diario"): (ResultadoBusqueda & { enNombre: boolean; inicio: boolean })[] =>
+  const propias = (filas: FilaPropia[], tipo: "herencia" | "diario" | "semaforo"): (ResultadoBusqueda & { enNombre: boolean; inicio: boolean })[] =>
     filas.map((h) => {
       const nombre = norm(h.titulo);
       return { tipo, titulo: h.titulo, detalle: h.detalle, href: h.href, enNombre: cuantas(nombre, ws) === ws.length, inicio: nombre.startsWith(ws[0]),
         enTodo: cuantas(nombre + " " + norm(h.extra), ws) === ws.length };
     }).filter((x) => x.enTodo).sort((a, b) => Number(b.enNombre) - Number(a.enNombre)).slice(0, MAX_GRUPO[tipo]).map(({ enTodo: _, ...x }) => x);
-  const extras = [...propias(FILAS_BUSCABLES_HERENCIA, "herencia"), ...propias(FILAS_BUSCABLES_DIARIO, "diario")];
+  // Del semáforo, solo los indicadores sin serie en el catálogo (los demás ya salen como dato o variable)
+  const filasSemaforo: FilaPropia[] = (ctx.semaforo ?? []).filter((i) => !i.id || !ctx.S[i.id]).map((i) => ({ titulo: i.nombre, detalle: `Semáforo de actividad › ${i.grupo}`, href: `/semaforo/?v=${i.clave}`, extra: i.clave }));
+  const extras = [...propias(FILAS_BUSCABLES_HERENCIA, "herencia"), ...propias(FILAS_BUSCABLES_DIARIO, "diario"), ...propias(filasSemaforo, "semaforo")];
   const sinMarcas = ({ enNombre: _a, inicio: _b, ...r }: (typeof extras)[number]): ResultadoBusqueda => r;
   extras.filter((x) => x.enNombre).map((x, i) => ({ x, i })).sort((a, b) => Number(b.x.inicio) - Number(a.x.inicio) || a.i - b.i).forEach(({ x }) => out.push(sinMarcas(x)));
 

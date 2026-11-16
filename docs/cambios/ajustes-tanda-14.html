@@ -1,0 +1,114 @@
+<title>Tanda 14 valores</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@700&display=swap">
+<style>
+/* Lista de control: una columna, secciones en el orden del menú del sitio, cada cambio con su link directo */
+:root {
+  --bg: #f3f5fb; --sup: #ffffff; --tinta: #0b1230; --sec: #4a5478; --borde: #d9deee;
+  --acento: #1f6fd1; --sobre-acento: #ffffff; --accion: #f5b81c; --sobre-accion: #0b1230; --hecho: #1d8a55; --propio: #9a5400;
+  --f-txt: "Archivo", system-ui, sans-serif; --f-tit: "Archivo Narrow", "Archivo", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--tinta); font-family: var(--f-txt); font-size: 15px; line-height: 1.5; margin: 0 }
+.envoltura { max-width: 760px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+h1 { font-family: var(--f-tit); font-size: 30px; text-transform: uppercase; letter-spacing: .01em; margin: 0 0 6px; text-wrap: balance }
+.bajada { color: var(--sec); margin: 0 0 18px; max-width: 62ch }
+.barra { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--borde); margin-bottom: 8px }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.riel { display: inline-flex; background: var(--sup); border-radius: 999px; padding: 4px; gap: 2px }
+.riel button { border: 0; background: transparent; color: var(--tinta); font: 600 14px var(--f-txt); padding: 8px 14px; border-radius: 999px; cursor: pointer }
+.riel button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento) }
+.progreso { color: var(--sec); font-size: 14px; font-variant-numeric: tabular-nums; margin-left: auto }
+.aviso { font-size: 13px; color: var(--sec); margin: 6px 0 0; width: 100% }
+.aviso code { background: var(--sup); padding: 1px 6px; border-radius: 6px; font-size: 12px; user-select: all }
+section { padding-top: 22px }
+h2 { font-family: var(--f-tit); font-size: 19px; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline }
+h2 .n { color: var(--acento); font-variant-numeric: tabular-nums; min-width: 1.6em }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px }
+li { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; background: var(--sup); border-radius: 12px; padding: 10px 12px }
+li.visto { opacity: .55 }
+li.visto .que { text-decoration: line-through; text-decoration-color: var(--sec) }
+input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--hecho); margin: 0 }
+.que { min-width: 0 }
+.num { font-weight: 800; color: var(--acento); font-variant-numeric: tabular-nums; margin-right: 4px }
+.origen { display: block; font-size: 13px; margin-top: 2px; color: var(--sec) }
+.origen.propio { color: var(--propio) }
+.que small { display: block; color: var(--sec); font-size: 12.5px; word-break: break-all }
+a.ir { background: var(--accion); color: var(--sobre-accion); text-decoration: none; font-weight: 800; font-size: 13px; padding: 8px 12px; border-radius: 999px; white-space: nowrap }
+a.ir:focus-visible, .riel button:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px }
+.fuera { margin-top: 28px; padding: 14px; border: 1px dashed var(--borde); border-radius: 12px; color: var(--sec); font-size: 14px }
+@media (max-width: 480px) { li { grid-template-columns: 24px 1fr; } a.ir { grid-column: 2; justify-self: start } }
+</style>
+
+<div class="envoltura">
+  <h1>Tanda 14 (valor de cada barra): dónde verlo</h1>
+  <p class="bajada">Cada renglón abre la página donde se ve el cambio. En tu máquina, con la vista <code>web-out</code> (puerto 3100); en el sitio, recién después del commit, el push y la corrida en verde. Para comentar un cambio, citá su número (por ejemplo 2.1). Debajo de cada uno: lo que pediste o por qué lo agregué yo. Marcá la casilla cuando lo revisaste.</p>
+
+  <div class="barra">
+    <div class="riel" role="group" aria-label="Dónde abrir">
+      <button type="button" id="b-local" aria-pressed="true">En mi máquina</button>
+      <button type="button" id="b-sitio" aria-pressed="false">Sitio publicado</button>
+    </div>
+    <span class="progreso" id="progreso">0 de 0 vistos</span>
+    <p class="aviso" id="aviso"></p>
+  </div>
+
+  <div id="lista"></div>
+
+  <div class="fuera"><b>Regla nueva</b>: R32 (un gráfico de barras dice el valor de la barra al pasar el mouse o tocarla; con el mouse se va al salir, en el celular queda hasta tocar fuera). <b>Sin ver</b>: el aspecto en una captura y con un mouse real (se verificó simulando el mouse y el toque). Para que se vea en el sitio hace falta commit y push.</div>
+</div>
+
+<script>
+// Cada cambio: [qué cambió, ruta, origen]. Origen: P("palabras del pedido") = lo pediste vos; Y("por qué") = lo agregué yo (regla general o barrido).
+const P = (t) => ({ tipo: "pedido", t }), Y = (t) => ({ tipo: "propio", t });
+const PEDIDO = "en el 2.1 el resumen por hitos se puede poner que cuando pasas el mouse por arriba te muestra el valor";
+const SECCIONES = [
+  ["Presidentes", [
+    ["Meses de mandato → Resumen por hitos (vista Barras): al pasar el mouse por una barra, o al tocarla en el celular, aparece arriba «presidente, hito: valor»", "/mandato/#mand-hitos", P(PEDIDO)],
+    ["Congreso → elegí un presidente → año por año: cada columna de bancas dice la fecha, los propios, los aliados y el total de la cámara", "/congreso/?cgp=milei#cg-detalle", Y("regla general R32: los otros gráficos de barras que solo tenían el valor en el globito lento del navegador")],
+  ]],
+  ["Gasto", [
+    ["Gasto de la Nación → Cómo viene el año: cada mes dice el gasto de este año y del anterior (o el del mes parcial)", "/gasto/?vista=mes", Y("regla general R32")],
+  ]],
+];
+const BASES = { local: "http://localhost:3100", sitio: "https://primerolosdatos.com.ar" };
+const leer = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
+const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} };
+let base = leer("t14-base", "local"), vistos = leer("t14-vistos", {});
+
+function dibujar() {
+  const cont = document.getElementById("lista"); cont.innerHTML = "";
+  let total = 0, hechos = 0;
+  SECCIONES.forEach(([nombre, items], i) => {
+    const s = document.createElement("section");
+    s.innerHTML = `<h2><span class="n">${i + 1}</span>${nombre}</h2>`;
+    const ul = document.createElement("ul");
+    items.forEach(([que, ruta, origen], j) => {
+      const id = `${i}-${j}`, url = BASES[base] + ruta, ok = !!vistos[id];
+      total++; if (ok) hechos++;
+      const li = document.createElement("li"); if (ok) li.className = "visto";
+      li.innerHTML = `<input type="checkbox" id="c${id}" ${ok ? "checked" : ""} aria-label="Visto">
+        <label class="que" for="c${id}"><span class="num">${i + 1}.${j + 1}</span> ${que}<span class="origen ${origen.tipo}">${origen.tipo === "pedido" ? "Pediste: «" + origen.t + "»" : "Agregado por mí: " + origen.t}</span><small>${ruta}</small></label>
+        <a class="ir" href="${url}" target="_blank" rel="noopener">Ver →</a>`;
+      li.querySelector("input").addEventListener("change", (e) => { vistos[id] = e.target.checked; guardar("t14-vistos", vistos); dibujar(); });
+      ul.appendChild(li);
+    });
+    s.appendChild(ul); cont.appendChild(s);
+  });
+  document.getElementById("progreso").textContent = `${hechos} de ${total} vistos`;
+  document.getElementById("b-local").setAttribute("aria-pressed", base === "local");
+  document.getElementById("b-sitio").setAttribute("aria-pressed", base === "sitio");
+  document.getElementById("aviso").innerHTML = base === "local"
+    ? 'Necesita la vista local con funciones (vista <code>web-funciones</code>). Si no abre, corré en la carpeta web: <code>npm run build && npm run funciones</code>'
+    : "Solo muestra los cambios después del commit, el push y la corrida en verde (corrida completa, unos 10 minutos) y de crear la base con <code>npx wrangler d1 create pld-compartir</code>.";
+}
+document.getElementById("b-local").onclick = () => { base = "local"; guardar("t14-base", base); dibujar(); };
+document.getElementById("b-sitio").onclick = () => { base = "sitio"; guardar("t14-base", base); dibujar(); };
+dibujar();
+</script>

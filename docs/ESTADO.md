@@ -7,7 +7,9 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-16.
 ## Dónde estamos
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
-Últimos bloques (todos publicados, corrida en verde):
+Últimos bloques (todos publicados, corrida en verde, salvo los dos primeros):
+- Imagen al compartir en Lo esperado, Viento, Resumen por hitos, Congreso y alícuotas de Ingresos Brutos; semáforo en la lupa; subpestañas legibles en tema claro — 2026-11-16, **sin commitear** — [spec](specs/imagenes-y-lupa.md)
+- Tanda 14: el valor de una barra al pasar el mouse o tocarla (R32) en Resumen por hitos, Congreso año por año y Gasto por mes — 2026-11-16, **sin commitear** — [spec](specs/ajustes-tanda-14.md)
 - Tanda 13 (Novedades): pestañas Novedades / Calendario, grilla chica con resumen del día (panel en PC, ventana en el celular), días desplegables, series en caja deslizable, Agendar (Google Calendar e .ics); compartir un dato suma mes anterior y hace un año (texto e imagen; reglas R30 y R31) — 2026-11-16, fe1b069 (corrida en verde, run 43956106566) — [spec](specs/ajustes-tanda-13.md)
 - Predicciones (9c): `/predicciones/` con la inflación del mes, mediana de la gente después de predecir, REM del Banco Central e historia; funciones `/api/prediccion(es)` con Turnstile — 2026-11-16, bb22f77 (corrida completa en verde, run 43939206761; la página y el REM están publicados, `/api/predicciones` responde 503 hasta crear la base) — [spec](specs/predicciones.md)
 - Novedades y calendario (9b): `/novedades/` con lo que salió (cifra, cambio, contexto, Compartir) y el calendario del INDEC, bloque en la portada; registro `datos/novedades.json` (D-026) — 2026-11-16, 24d0366 (corrida completa en verde, run 43931777809; el registro se lee y se guarda en el commit de datos) — [spec](specs/novedades-calendario.md)
@@ -32,8 +34,6 @@ Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes
 2. **Datos nuevos «calientes»:** hechos AUH y pensiones, recaudación / seguridad / empleo público y la segunda investigación ([spec](specs/datos-calientes-2.md)). Quedan afuera robos (la serie oficial termina en 2022), obra pública por inciso, motos, mayoristas y vacunas.
 3. **Mantenimiento a mano cuando salgan datos nuevos:** herencia (`datos/manual/herencia.json`; nivel de reservas netas del FMI en la 3ª revisión, dic-2026, y saldos de DEG cada mes en `reservas_netas_supuestos.json`); Congreso (cada 1 de marzo, cortes de las dos cámaras y vetos del año); provincias (el III trimestre de la DNAP entra solo: mirar que pase el control).
 4. **Pendientes sin fuente o sin decidir:** semáforo (desestacionalizado X-13; CAME, patentamientos, Construya, escrituras, leche, petróleo); gasto (empresas públicas sin fuente; universidades: estudiantes antes de 2023 y las 8 sin datos en el PIU); Congreso (leyes del Ejecutivo de Menem a CFK 1); herencia (cepo de 2003 y 2007, FMI de 1995 a 2002).
-5. **Lupa:** el semáforo todavía no está en el buscador (sus indicadores salen de su archivo de datos).
-6. **Imagen al compartir que falta:** Gobierno y Congreso, "Lo esperado" y "Viento" en Contexto; Resumen por hitos; alícuotas de provincias. Elecciones ya tiene.
 
 A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunidad) y 7c-3 (relatos, posts y video), en `docs/ROADMAP.md`.
 
@@ -42,7 +42,8 @@ A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunid
 - **Tanda 13:** un .ics abierto en un calendario real; la imagen 4:5 con las comparaciones; el foco del teclado al abrir y cerrar ventanas (`Modal` no lo mueve, en todo el sitio).
 - **Novedades:** el bloque de la portada (no se vio: panel oculto), las fechas estimadas (aparecen cuando cada fuente tenga dos meses registrados, hacia enero) y la primera entrada nueva del registro en una corrida (la del push dio 0, sin datos nuevos).
 - **Conteos:** el botón de Compartir real hasta la base (se probó el pedido al servidor, no el clic: el portapapeles falla con el panel oculto) y la pregunta con el menú de compartir de un celular real.
-- **En general:** tema claro, celular real (Atrás, teclado, safe-area de la barra inferior) y aspecto en capturas de casi todas las páginas: el panel del navegador suele estar oculto y se verifica midiendo.
+- **En general:** celular real (Atrás, teclado, safe-area de la barra inferior) y aspecto en capturas de casi todas las páginas: el panel del navegador suele estar oculto y se verifica midiendo. Tema claro y 375 px medidos en ocho rutas el 2026-11-16 (sin desborde; contraste arreglado en las subpestañas).
+- **Imágenes nuevas** (Lo esperado, Viento, hitos, Congreso, Ingresos Brutos): textos verificados, aspecto sin mirar en captura.
 - **Imágenes compartidas** sin mirar dentro del panel: «¿Cómo viene?» (sin puntos medidos); formatos 1:1/4:5/16:9 de gasto, provincias, universidades y herencia; meses y barras con variación de la ficha; aviso "Sin <presidente>" en la imagen de precios por presidente.
 - **Animaciones:** Mes a mes con lápiz, despliegue del parte del Banco Central, carrusel de la portada (con el panel oculto no corren).
 - **Datos:**

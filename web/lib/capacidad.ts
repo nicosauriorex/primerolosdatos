@@ -3,6 +3,8 @@
 // Los datos vienen de capacidad.json (cargados a mano en datos/manual/, D-009). No se aplica la configuración de inicio (T±N): un DNU es de quien lo firmó.
 import { PRES_DEF } from "./estadisticas";
 import { fmtMes, nf0, nf1, ok, r1 } from "./formato";
+import type { DatosImagen, FilaBarra } from "./imagen";
+import type { FormatoImg } from "./config";
 
 export type Camara = "dip" | "sen";
 export interface Banca { fecha: string; camara: Camara; pres: string; propios: number; aliados: number; total: number; nota?: string }
@@ -233,5 +235,31 @@ export function fraseCapacidad(d: DatosCap, ind: Indicador, pres: Mandato, M: Ma
   } : {
     titulo: "Vetos insistidos por año de mandato", cifra: nf1.format(v.insistidosPorAnio), unidad: "vetos insistidos por año", fecha: per,
     frase: `${pres.n}: el Congreso insistió en ${nf(v.insistidos)} vetos, ${nf1.format(v.insistidosPorAnio)} por año (todavía falta cargar el total de vetos). ${dif}`,
+  };
+}
+
+/** Imagen compartible de /congreso/: el indicador elegido, una fila por gobierno y en el mismo orden que la pantalla (los mismos valores y textos: no se recalcula nada).
+ *  `columnas`: lo que ya armó la pantalla (id, nombre, valor, txt corto, texto completo). Sin ningún dato devuelve null (no hay imagen). */
+export function armarImagenCongreso(
+  o: { indicador: string; nota: string; linea?: { v: number; txt: string }; columnas: { id: string; nombre: string; valor: number | null; txt: string; texto: string }[]; fuente: string },
+  formato: FormatoImg, hoy: Date = new Date(),
+): DatosImagen | null {
+  const con = o.columnas.filter((c) => c.valor != null);
+  if (!con.length) return null;
+  const filas: FilaBarra[] = con.map((c) => ({
+    id: c.id, nombre: c.nombre, valor: Math.max(0, c.valor as number), variacion: c.txt, cls: "neutro", ini: null, fin: null, nota: null,
+    detalle: c.texto !== c.txt ? c.texto : " ",
+  }));
+  const ref = o.linea ? ` Referencia: ${o.linea.v === 1 ? "1,0" : nf0.format(o.linea.v) + " %"} = ${o.linea.txt}.` : "";
+  const titulo = `${o.indicador} por gobierno`;
+  return {
+    formato, titulo, temporalidad: "En orden cronológico, un gobierno por fila", cifra: null,
+    frases: [{ texto: `${o.nota}${ref}`, cls: "neutro" }],
+    leyenda: null, x: [], series: [], fmtEje: (x) => String(x), fmtEje2: null, franjas: [], inicioTxt: null,
+    comentario: "", unidad: o.indicador, fuente: o.fuente, nota: "Números crudos, sin puntaje",
+    fecha: hoy.toLocaleDateString("es-AR"),
+    archivo: `primerolosdatos-congreso-${o.indicador.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+    lienzo: { tipo: "barras", filas, sinDatos: o.columnas.filter((c) => c.valor == null).map((c) => c.nombre), enc: { nombre: "Gobierno", valor: o.indicador }, sinTope: true },
+    marcaUltimo: false,
   };
 }

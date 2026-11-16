@@ -3,6 +3,8 @@
 // El archivo `provincias_alicuotas.json` lo escribe pipeline/provincias_dnap.py. Sin ranking ni colores de bueno o malo (D-012): el orden es el de la alícuota y se puede invertir.
 import { restaLimpia } from "./formato";
 import { buscarProv, type Contexto } from "./provincias";
+import type { FormatoImg } from "./config";
+import type { DatosImagen, FilaBarra } from "./imagen";
 
 // ---------------------------------------------------------------- formato del archivo (contrato con el pipeline)
 /** Una alícuota: porcentaje (1,5 = 1,5 %), el texto de la planilla ("exenta", "1,70% - 2,21% -2,50%") o null si no hay dato. */
@@ -116,6 +118,38 @@ export function armarVistaA(d: DatosAlicuotas, c: Contexto, o: { actividad: Acti
     return x.n.localeCompare(y.n, "es");
   });
   return { actividad: a, anio: o.anio, orden: o.orden, tope: tope == null ? "Sin dato" : txtAlicuota(tope), filas, vacia: filas.every((f) => f.num == null && f.txt === "Sin dato" && !f.aperturas.length) };
+}
+/** Título de la vista y de la imagen: «Ingresos Brutos: <actividad>, <año>». */
+export const tituloAlicuotas = (v: VistaA): string => `Ingresos Brutos: ${v.actividad.n}, ${v.anio}`;
+/** Fuente de la vista (la misma que el pie de la sección). */
+export const fuenteAlicuotas = (d: DatosAlicuotas): string => (d.fuente ? `${d.fuente.trim().replace(/\.+$/, "")}.` : "Dirección Nacional de Asuntos Provinciales.");
+/** Link del capítulo con los parámetros de la URL (el valor por defecto no se escribe). */
+export function hrefAlicuotas(d: DatosAlicuotas, v: { actividad: ActividadA; anio: number; orden: OrdenA }): string {
+  const p = new URLSearchParams({ vista: "cuentas" });
+  if (v.actividad.slug !== actividadDefecto(d).slug) p.set("ib_act", v.actividad.slug);
+  if (v.anio !== anioDefectoA(d)) p.set("ib_anio", String(v.anio));
+  if (v.orden !== ORDEN_A_DEFECTO) p.set("ib_orden", v.orden);
+  return `/provincias/?${p.toString()}#pc-ib`;
+}
+/** Imagen para compartir: las provincias en barras, en el orden que se ve; las alícuotas que no son un número van en «sin datos». */
+export function armarImagenA(v: VistaA, d: DatosAlicuotas, formato: FormatoImg, hoy: Date = new Date()): DatosImagen {
+  const filas: FilaBarra[] = v.filas.filter((f) => f.num != null).map((f, i) => ({
+    id: `ib-${i}`, nombre: f.n, valor: Math.max(0, f.num!), variacion: f.txt, cls: "neutro", ini: null, fin: null, nota: null,
+    detalle: f.dif ? (f.dif === "igual" ? "igual al tope" : `${f.dif} contra el tope`) : " ",
+  }));
+  const sinDatos = v.filas.filter((f) => f.num == null).map((f) => `${f.n} (${f.txt})`);
+  const frase = fraseAlicuotas(v);
+  return {
+    formato, titulo: tituloAlicuotas(v), temporalidad: `Alícuota general de la ley en ${v.anio}, ordenada de ${v.orden === "desc" ? "mayor a menor" : "menor a mayor"}`,
+    cifra: null, frases: [{ texto: `${frase ? `${frase} ` : ""}Tope del Consenso Fiscal: ${v.tope}. Es la alícuota teórica de la ley, no lo que se paga en promedio.`, cls: "neutro" }],
+    leyenda: null, x: [], series: [], fmtEje: (x) => String(x), fmtEje2: null, franjas: [], inicioTxt: null,
+    comentario: "", unidad: "Alícuota (%)", fuente: fuenteAlicuotas(d).replace(/\.$/, ""),
+    nota: "Alícuota teórica de la ley por actividad, según planillas provisorias de la Dirección Nacional de Asuntos Provinciales; la diferencia con el tope es en puntos porcentuales",
+    fecha: hoy.toLocaleDateString("es-AR"),
+    archivo: `primerolosdatos-ingresos-brutos-${v.actividad.slug}-${v.anio}`,
+    lienzo: { tipo: "barras", filas, sinDatos, enc: { nombre: "Provincia", valor: "Alícuota" }, sinTope: true },
+    marcaUltimo: false,
+  };
 }
 // ---------------------------------------------------------------- remodelación 3.5
 const enMinusc = (s: string) => (/^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);

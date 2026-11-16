@@ -13,6 +13,7 @@ import { Hoja } from "./sistema/Hoja";
 import { InfoPunto } from "./sistema/InfoPunto";
 import { ListaBarras, type FilaBarra } from "./sistema/ListaBarras";
 import { CompartirHoja } from "./sistema/CompartirHoja";
+import { ConCartel } from "./sistema/ConCartel";
 import type { FormatoImg } from "@/lib/config";
 import { BAJADA_FORMA, NIVELES, escribirRuta, leerRuta, nombreForma } from "@/lib/gasto";
 import {
@@ -120,7 +121,7 @@ function GraficoMeses({ v }: { v: VistaM }) {
   const alto = (x: number | null) => (x == null || v.maxMes <= 0 ? 0 : Math.max(0, (x / v.maxMes) * 100));
   const par = v.parcial;
   const columna = (m: MesM) => (
-    <div key={m.mes} className={`gm-mes${m.parcial ? " gm-mes-parcial" : ""}`} title={m.parcial ? `${m.nombre} ${v.anio}: ${m.aTxt} (${v.parcialTxt})` : `${m.nombre}: ${v.anio} ${m.aTxt}; ${v.anioAnt} ${m.bTxt}`}>
+    <div key={m.mes} className={`gm-mes${m.parcial ? " gm-mes-parcial" : ""}`} data-cartel={m.parcial ? `${m.nombre} ${v.anio}: ${m.aTxt} (${v.parcialTxt})` : `${m.nombre}: ${v.anio} ${m.aTxt}; ${v.anioAnt} ${m.bTxt}`}>
       <span className="gm-par">
         {!m.parcial && <span className="gm-b gm-b-ant" style={{ height: `${alto(m.b).toFixed(1)}%` }} />}
         <span className={`gm-b ${m.parcial ? "gm-b-parcial" : "gm-b-a"}`} style={{ height: `${alto(m.a).toFixed(1)}%` }} />
@@ -135,10 +136,10 @@ function GraficoMeses({ v }: { v: VistaM }) {
         <span><i className="gm-sw gm-b-ant" aria-hidden="true" /> {v.anioAnt}</span>
         {par && <span><i className="gm-sw gm-b-parcial" aria-hidden="true" /> {nombreMesLargo(par)} {v.anio}: {v.parcialTxt}</span>}
       </p>
-      <div className="gm-barras" role="img" aria-label={`Gasto de cada mes de ${v.anio} y de ${v.anioAnt}, en pesos de hoy. El detalle está en la tabla de abajo.`}>
+      <ConCartel><div className="gm-barras" role="img" aria-label={`Gasto de cada mes de ${v.anio} y de ${v.anioAnt}, en pesos de hoy. El detalle está en la tabla de abajo.`}>
         {v.meses.map(columna)}
         {par && columna(par)}
-      </div>
+      </div></ConCartel>
       <details className="gm-tabla">
         <summary>Ver mes por mes</summary>
         <div className="tablewrap">

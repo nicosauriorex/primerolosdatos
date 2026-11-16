@@ -1,5 +1,8 @@
 "use client";
-import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { PanelGasto } from "../PanelGasto";
+import { armarImagenHitos } from "@/lib/imagen-hitos";
+import type { FormatoImg } from "@/lib/config";
 import { useSeccion } from "../useSeccion";
 import { Cargando, Selector, Seg, alternar } from "../ui";
 import { FilaVariable } from "../Variables";
@@ -8,6 +11,7 @@ import { BotonCompartir } from "../PanelCompartir";
 import { IconoAjustes, IconoCompartir } from "../Iconos";
 import { Capitulo } from "../sistema/Capitulo";
 import { CompartirHoja } from "../sistema/CompartirHoja";
+import { ConCartel } from "../sistema/ConCartel";
 import { Grafico, type Fila, type SerieG } from "../Grafico";
 import { CeldaPresMandato, LineaInicio, useBase } from "./comunes";
 import { fmtMes } from "@/lib/formato";
@@ -127,6 +131,10 @@ export function Mandato() {
   // se dibuja un mes de más: el recorte deja ver solo hasta donde llegó el lápiz
   const rowsVista = D && anim ? D.rows.map((r, i) => (i <= cuadro + 1 ? r : { t: r.t })) : D?.rows;
 
+  // imagen del resumen por hitos: siempre la tabla (misma función de colores y cifras que la pantalla)
+  const [imagenHitos, setImagenHitos] = useState(false);
+  const armarHitos = useCallback((f: FormatoImg) => armarImagenHitos(m!, D!, celdasHitos(D!.todas, D!.pres, D!.pres.map((x) => x.i1 - baseIdx(m!.F, x, b)), HITOS, D!.c), HITOS, b, f), [m, D, b]);
+
   if (sec.errorGeneral) return <p className="error" role="alert">{sec.errorGeneral}</p>;
   if (!m || !montado) return <Cargando />;
   const errs = Object.values(sec.errores);
@@ -206,7 +214,7 @@ export function Mandato() {
             </details>
           </Capitulo>
           <Capitulo id="mand-hitos" titulo="Resumen por hitos" bajada={`Mismo cálculo que el gráfico (${TITULOS[modoEf]}) en meses clave y al final de cada mandato.`}
-            acciones={<CompartirHoja href={window.location.pathname + window.location.search} titulo="Resumen por hitos"
+            acciones={<CompartirHoja href={window.location.pathname + window.location.search} titulo="Resumen por hitos" onImagen={() => setImagenHitos(true)}
               texto={`${D.c.corto}: resumen por hitos de cada mandato, en ${hitosVista === "tabla" ? "tabla" : "barras"}.`} />}>
             <div className="controls">
               <Seg valor={hitosVista} opciones={[["barras", "Barras"], ["tabla", "Tabla"]]} onElegir={(v) => set({ mhv: v === "barras" ? null : v })} />
@@ -225,6 +233,7 @@ export function Mandato() {
               </>
             )}
           </Capitulo>
+          {imagenHitos && <PanelGasto armar={armarHitos} titulo={`${D.c.corto}: resumen por hitos de cada mandato`} href={window.location.pathname + window.location.search} onCerrar={() => setImagenHitos(false)} />}
         </>
       )}
     </section>
@@ -258,14 +267,14 @@ function BarrasHitos({ D, hitosDe }: { D: { pres: { id: string; n: string; color
     barras: D.pres.map((x, k) => ({ x, ce: t < 0 ? hitosDe[k][hitosDe[k].length - 1] : hitosDe[k].find((q) => q.t === t) })).filter((q) => q.ce && q.ce.valor != null),
   })).filter((g) => g.barras.length);
   return (
-    <div className="pres-barras-marco">
+    <ConCartel><div className="pres-barras-marco">
       <div className="pres-barras" role="img" aria-label={`${D.c.corto}: barras por hito de cada mandato. Las cifras están en la vista Tabla.`}>
         {grupos.map((g) => (
           <div key={g.t} className="pres-barras-grupo">
             <div className="pres-barras-area">
               {g.barras.map(({ x, ce }) => {
                 const v = (ce as CeldaHito).valor as number, arriba = log ? y(f(v)) : y(Math.max(v, 0)), abajo = log ? 100 : y(Math.min(v, 0));
-                return <span key={x.id} className="pres-barra" style={{ ...vcolor(x.color), top: `${arriba}%`, height: `max(2px, ${abajo - arriba}%)` }} title={`${x.n}, ${g.rot.toLowerCase()}: ${D.fmtTip(v)}`} />;
+                return <span key={x.id} className="pres-barra" style={{ ...vcolor(x.color), top: `${arriba}%`, height: `max(2px, ${abajo - arriba}%)` }} data-cartel={`${x.n}, ${g.rot.toLowerCase()}: ${D.fmtTip(v)}`} />;
               })}
             </div>
             <span className="pres-barras-rot">{g.rot}</span>
@@ -273,6 +282,6 @@ function BarrasHitos({ D, hitosDe }: { D: { pres: { id: string; n: string; color
         ))}
       </div>
       <div className="pres-barras-ref" aria-hidden="true">{D.pres.map((x) => <span key={x.id} style={vcolor(x.color)}>{x.n}</span>)}</div>
-    </div>
+    </div></ConCartel>
   );
 }

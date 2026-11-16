@@ -123,7 +123,7 @@ nav.tabs a .icono { display: none; width: 14px; height: 14px; }
   color: var(--sobre-barra); border: 0; border-radius: var(--r-pleno); font-size: var(--t-sm); font-weight: 600; cursor: pointer; white-space: nowrap;
   background: color-mix(in srgb, var(--sobre-barra) 14%, transparent); transition: background var(--d-1); }
 .config-btn:hover { background: color-mix(in srgb, var(--sobre-barra) 24%, transparent); }
-.subtabs { display: flex; gap: var(--e-1); height: 45px; padding: 0 var(--e-2); overflow-x: auto; scrollbar-width: none; background: var(--surface-2); border-top: 1px solid var(--barra-borde); }
+.subtabs { display: flex; gap: var(--e-1); height: 45px; padding: 0 var(--e-2); overflow-x: auto; scrollbar-width: none; background: var(--barra); border-top: 1px solid var(--barra-borde); }   /* --barra (no --surface-2): en tema claro el texto es el de la barra oscura */
 .subtabs a { display: inline-flex; align-items: center; padding: 0 var(--e-2); color: var(--sobre-barra-2); font-size: var(--t-sm); font-weight: 600; font-stretch: var(--ancho-semi);
   text-decoration: none; white-space: nowrap; }
 .subtabs a[aria-current="page"] { color: var(--sobre-barra); font-weight: 800; box-shadow: inset 0 -3px 0 var(--acento); }
@@ -2706,3 +2706,10 @@ nav.tabs .con-menu { align-self: stretch; align-items: center; }
 .pred-linea { margin: var(--e-2) 0 var(--e-3); }
 .pred-pie { margin-top: var(--e-5); padding-top: var(--e-3); border-top: 1px solid var(--border); max-width: 72ch; }
 .pred-pie-titulo { margin: 0 0 var(--e-2); font-size: var(--t-base); }
+
+/* R32: el valor de una barra al pasar el mouse o tocarla (components/sistema/ConCartel.tsx). Uno solo, encima de la barra, sin salirse del gráfico. */
+.con-cartel { position: relative; }
+.cartel-valor { position: absolute; z-index: 5; transform: translateY(calc(-100% - 6px)); max-width: min(240px, 100%); padding: 4px var(--e-2);
+  background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--border-fuerte); border-radius: var(--r-2); box-shadow: var(--sombra-1);
+  font-size: var(--t-sm); font-weight: 700; line-height: 1.25; white-space: normal; pointer-events: none; }
+.con-cartel [data-cartel] { cursor: default; }

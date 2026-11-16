@@ -410,3 +410,6 @@ Crítica final de Impeccable: 26/40 (antes 21/40). El usuario eligió arreglar l
 - ~~«se podría agendar un dato?» (botón por fecha: Google Calendar y .ics).~~ ✅ 2026-11-16
 - ~~Segunda vuelta (2026-11-16): «yo decia de ponerla ahi al lado de la etiqueta del 2.2 grande… y se pueda prender y apagar desde la personalizacion asi no compite con las otras tarjetas»; «queda fea la grilla porque tiene dos cruces al costado que no tienen uso… en PC deja mucho hueco a la derecha»; «que los dias se puedan contraer y sean como desplegables grandes»; «se ve feo cuando hay muchos datos. de ultima pone un deslizador»; Agendar «se ve feo xq tiene espaci arriba».~~ ✅ 2026-11-16
 - ~~Tercera vuelta (2026-11-16): «queda feo el calendario tan grande. de ultima busca otro grafico para pc» y «al apretar las casillas del calendario te muestra resumido los datos que hay tipo pop up» (elegido: grilla chica + panel al lado en PC, ventana en el celular).~~ ✅ 2026-11-16
+
+## Tanda 14 (2026-11-16) → spec: docs/specs/ajustes-tanda-14.md
+- ~~Resumen por hitos: al pasar el mouse por una barra, que muestre el valor~~ ✅ 2026-11-16 (regla R32, también en Congreso y Gasto)

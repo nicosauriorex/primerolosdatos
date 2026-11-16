@@ -25,6 +25,7 @@ paths:
 - **El dato antes que la configuración**: el gráfico o la tabla se ve sin deslizar; los controles van en botones o plegados; las explicaciones largas, plegadas o detrás de un ícono de información.
 - **Lo que se ve se puede compartir**, en la forma en que se ve (gráfico, tabla, velas).
 - **Palabras del público**: nombres de `web/lib/nombres.ts`; sin siglas ni jerga a secas. En las imágenes compartibles, palabras neutras (nunca "bueno", "malo", "mejor", "peor") y sin veredicto (D-012).
+- **El valor de una barra al pasar el mouse o tocarla** (R32): con `ConCartel` (`components/sistema/ConCartel.tsx`) y `data-cartel` en cada barra; nunca solo con `title`.
 - **Verde = mejor, rojo = peor**, siempre con signo o texto; nunca solo color.
 - **Chips compactos (R24)**: los controles que están en la página (filas de chips, barra de vista, Ajustes, botones que abren una ventana) se ven de 32 px con borde fino y fondo de superficie, y se tocan en 44 px. Un control nuevo usa `.chip-c` (bloque R24 al final de `globals.css`). Las listas de opciones dentro de una hoja siguen de 44 px (una fila de chips es compacta en todos lados).
 - Sin `<select>` nativo: `Selector`, `Seg`, `Desplegable` y `Modal` de `web/components/ui.tsx`.

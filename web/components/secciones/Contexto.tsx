@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSeccion } from "../useSeccion";
 import { useContexto } from "../useContexto";
 import { Cargando, Seg, Selector, alternar } from "../ui";
@@ -14,7 +14,11 @@ import { baseDeConfig } from "@/lib/config";
 import { PALETA, vcolor } from "../util";
 import { BotonCompartir } from "../PanelCompartir";
 import { IconoCompartir } from "../Iconos";
-import type { VistaCtx } from "@/lib/imagen-contexto";
+import { armarImagenGrilla, type GrillaCtx, type VistaCtx } from "@/lib/imagen-contexto";
+import { fuentesTxt } from "@/lib/imagen-datos";
+import type { DatosImagen } from "@/lib/imagen";
+import type { FormatoImg } from "@/lib/config";
+import { PanelGasto } from "../PanelGasto";
 import { CeldaPres, FilaAjuste, HojaListo, Valor } from "./comunes";
 import { columnaComparable, periodoMandato } from "@/lib/tablas";
 import { nf0, nf1, ok, r1 } from "@/lib/formato";
@@ -199,20 +203,45 @@ function Esperado({ datos, grupoId, grupo, nombreGrupo, p, set, resalta }: { dat
   const opts: OpcionesG = { height: 300, fmtAxis: (v) => nf1.format(v), fmtTip: (v) => nf1.format(v), tipTitle: (r) => String(r.per), zero: true, refLine: 0, maxGap: 13 };
   const iEst = datos.anios.indexOf(hasta + 1);
   const estA = iEst >= 0 ? serieAnual(datos, def.origen, ARG)[iEst] : null, estG = iEst >= 0 ? serieAnual(datos, def.origen, grupo)[iEst] : null;
-  const porPres = PRES_DEF.map((x) => {
+  const porPres = useMemo(() => PRES_DEF.map((x) => {
     const anios = aniosDe(x.id, hasta);
     return { x, s: sorpresaPres(filas, anios), anios };
-  });
+  }), [filas, hasta]);
   const frase = (s: number) => (Math.abs(s) < 0.05 ? "lo esperado" : `${nf1.format(Math.abs(s))} puntos ${s * dir >= 0 ? "mejor" : "peor"} de lo esperado`);
-  const colS = {
+  const colS = useMemo(() => ({
     arg: columnaComparable(porPres.map((q) => q.s.sArg), dir, true),
     grp: columnaComparable(porPres.map((q) => q.s.sGrp), dir, true),
     dif: columnaComparable(porPres.map((q) => q.s.dif), dir, true),
-  };
+  }), [porPres, dir]);
   const resp = fraseEsperado(datos, grupo, def.origen);
+  const [imagen, setImagen] = useState(false);
+  // la misma tabla «Por presidente» de la pantalla: mismo texto, mismo tono y misma intensidad (`frac`) de cada celda
+  const armarImg = useCallback((formato: FormatoImg) => {
+    const celda = (txt: string, tono: "bueno" | "malo" | null, frac: number) => ({ texto: txt, cls: tono ?? ("neutro" as const), calor: frac });
+    const grilla: GrillaCtx = {
+      titulo: `${def.n}: lo esperado y lo que pasó, por presidente`,
+      frase: `Sorpresa = lo que pasó menos lo que el FMI esperaba en abril, promedio por año, en puntos. Más intenso: más lejos del medio entre los presidentes. ${dir > 0 ? "Verde: pasó más de lo esperado; rojo: pasó menos." : "Verde: pasó menos de lo esperado; rojo: pasó más."}`,
+      unidad: `${def.n} (${def.u}): sorpresa promedio por año, en puntos, Argentina y ${nombre}`,
+      fuente: `${datos.fuente}`,
+      columnas: [{ nombre: "Argentina", metrica: "sorpresa" }, { nombre: nombreGrupo, metrica: "sorpresa" }, { nombre: "Diferencia", metrica: "Argentina − " + nombreGrupo }],
+      filas: porPres.flatMap(({ x, s, anios }, k) => {
+        if (!anios.length) return [];
+        return [{
+          id: x.id, nombre: nombreCorto(x.n), periodo: textoAnios(anios) + (s.n && s.n < anios.length ? ` · ${s.n} de ${anios.length} años` : ""),
+          celdas: s.n ? [
+            celda(ok(s.sArg) ? signo(s.sArg) : "—", colS.arg.tono[k], colS.arg.frac[k]),
+            celda(ok(s.sGrp) ? signo(s.sGrp) : "—", colS.grp.tono[k], colS.grp.frac[k]),
+            celda(ok(s.dif) ? signo(difMostrada(s.sArg, s.sGrp) ?? s.dif) : "—", colS.dif.tono[k], colS.dif.frac[k]),
+          ] : [celda("—", null, 0), celda("—", null, 0), celda("—", null, 0)],
+        }];
+      }),
+      calor: true,
+    };
+    return armarImagenGrilla(grilla, formato) as DatosImagen;
+  }, [def, dir, nombre, nombreGrupo, datos.fuente, porPres, colS]);
   return (
     <Capitulo id="esperado" titulo="Lo esperado y lo que pasó"
-      acciones={<CompartirHoja href={hrefBloque(p, "esperado")} titulo="Lo esperado y lo que pasó" texto={resp ? `${resp} Fuente: ${datos.fuente}.` : undefined} />}>
+      acciones={<CompartirHoja href={hrefBloque(p, "esperado")} titulo="Lo esperado y lo que pasó" onImagen={() => setImagen(true)} texto={resp ? `${resp} Fuente: ${datos.fuente}.` : undefined} />}>
       {resp && <p className="ctx-respuesta">{resp}</p>}
       <div className="ctx-fila"><span className="ctx-rotulo">Dato</span>
         <FilaChips etiqueta="Dato" valor={def.id} opciones={ESPERADO.map((x) => [x.id, x.n] as [string, string])} onElegir={(v) => set({ cd: v === "crec" ? null : v })} /></div>
@@ -267,6 +296,7 @@ function Esperado({ datos, grupoId, grupo, nombreGrupo, p, set, resalta }: { dat
           ))}</tbody>
         </table></div>
       </details>
+      {imagen && <PanelGasto armar={armarImg} titulo="Lo esperado y lo que pasó" href={hrefBloque(p, "esperado")} onCerrar={() => setImagen(false)} />}
     </Capitulo>
   );
 }
@@ -423,13 +453,16 @@ function GraficoMensual({ rows, series, opts, F }: { rows: Fila[]; series: Serie
   );
 }
 
+/** Encabezados cortos de la imagen de Viento (la tabla de la pantalla usa el nombre entero). */
+const CORTO_VIENTO: Record<string, string> = { petroleo: "Petróleo", tdi: "Términos", fed: "Fed", bra: "Brasil", chn: "China" };
+const METRICA_VIENTO: Record<string, string> = { tdi: "de intercambio", fed: "tasa, % anual", bra: "crecim., % anual", chn: "crecim., % anual" };
 const fmtV = (def: Omit<DefViento, "fmt">, v: number | null) => (ok(v) ? (def.u.includes("%") ? nf1.format(v) : nf0.format(v)) : "—");
 const tonoMarca = (mk: Marca) => (mk === "favor" ? "bueno" as const : mk === "contra" ? "malo" as const : null);
 
 function Viento({ m, datos, PRES, resalta, p }: { m: NonNullable<ReturnType<typeof useSeccion>["motor"]>; datos: DatosContexto; PRES: Pres[]; resalta: string | null; p: URLSearchParams }) {
   const hasta = ultimoCerrado(datos);
   const mensuales = VIENTOS.filter((v) => v.fuente === "mensual" && v.serie && m.SER[v.serie]);
-  const porPres = PRES.map((x) => ({ x, v: vientosPres(m, datos, x) }));
+  const porPres = useMemo(() => PRES.map((x) => ({ x, v: vientosPres(m, datos, x) })), [m, datos, PRES]);
   const rowsMes = (def: (typeof VIENTOS)[number]) => {
     const v = m.calc({ id: def.serie as string, med: def.med, rel: null }).v;
     return m.F.map((f, i) => ({ fecha: f, [def.id]: v[i] }));
@@ -438,9 +471,28 @@ function Viento({ m, datos, PRES, resalta, p }: { m: NonNullable<ReturnType<type
   const rowsAnual = datos.anios.filter((y) => y <= hasta).map((y) => { const i = datos.anios.indexOf(y); return ({ fecha: `${y}-01`, per: String(y), bra: (datos.real.NGDP_RPCH?.BRA ?? [])[i] ?? null, chn: (datos.real.NGDP_RPCH?.CHN ?? [])[i] ?? null }); });
   const sgAnual: SerieG[] = [{ key: "bra", name: "Brasil", color: "--series-2" }, { key: "chn", name: "China", color: "--series-4" }];
   const resp = fraseViento(m, datos, presParaViento(m, datos, PRES));
+  const [imagen, setImagen] = useState(false);
+  // la misma tabla «Por presidente» de la pantalla: mismo promedio, mismo período y mismo tono (a favor / en contra) de cada celda
+  const armarImg = useCallback((formato: FormatoImg) => {
+    const grilla: GrillaCtx = {
+      titulo: "Viento de cola o de frente: promedio del mandato, por presidente",
+      frase: "Promedio del mandato contra el de toda la serie. Verde: a favor; rojo: en contra; sin color: sin marca. Que el contexto haya sido favorable no dice si se aprovechó bien; que haya sido desfavorable no explica todo lo que pasó.",
+      unidad: "Precios en US$ de hoy (descontada la inflación de EE.UU.)",
+      // la fuente de cada serie mensual y la del FMI para Brasil y China, sin repetir
+      ...fuentesTxt([...VIENTOS.flatMap((d) => (d.serie && m.SER[d.serie] ? [m.SER[d.serie].fuente] : [])), datos.fuente]),
+      // nombres cortos: la imagen tiene ocho columnas y los nombres largos se cortaban («CRECIMIENT…» dos veces)
+      columnas: VIENTOS.map((d) => ({ nombre: CORTO_VIENTO[d.id] ?? d.n, metrica: METRICA_VIENTO[d.id] ?? d.u.replace("US$ de hoy por ", "US$ por ") })),
+      filas: porPres.map(({ x, v }) => ({
+        id: x.id, nombre: x.corto, periodo: periodoMandato(m.F, x),
+        celdas: v.map((c) => c.mandato == null ? { texto: "—", cls: "neutro" as const, calor: 0 } : { texto: fmtV(c.def, c.mandato), cls: tonoMarca(c.marca) ?? ("neutro" as const), calor: 0 }),
+      })),
+      calor: false,
+    };
+    return armarImagenGrilla(grilla, formato) as DatosImagen;
+  }, [m, datos.fuente, porPres]);
   return (
     <Capitulo id="viento" titulo="Viento de cola o de frente"
-      acciones={<CompartirHoja href={hrefBloque(p, "viento")} titulo="Viento de cola o de frente" texto={resp ? `${resp} Fuente: ${datos.fuente}.` : undefined} />}>
+      acciones={<CompartirHoja href={hrefBloque(p, "viento")} titulo="Viento de cola o de frente" onImagen={() => setImagen(true)} texto={resp ? `${resp} Fuente: ${datos.fuente}.` : undefined} />}>
       {resp && <p className="ctx-respuesta">{resp}</p>}
       <p className="note">Lo que pasaba afuera y la Argentina no controlaba. Precios en dólares de hoy (descontada la inflación de EE.UU.).</p>
       <Plegado resumen={`Ver los ${mensuales.length + 1} gráficos`}>
@@ -477,6 +529,7 @@ function Viento({ m, datos, PRES, resalta, p }: { m: NonNullable<ReturnType<type
       </table></div>
       <p className="note" style={{ marginTop: "var(--e-2)" }}>Promedio del mandato contra el de toda la serie.</p>
       <p className="note"><b>Que el contexto haya sido favorable no dice si se aprovechó bien; que haya sido desfavorable no explica todo lo que pasó.</b></p>
+      {imagen && <PanelGasto armar={armarImg} titulo="Viento de cola o de frente" href={hrefBloque(p, "viento")} onCerrar={() => setImagen(false)} />}
     </Capitulo>
   );
 }

@@ -1,6 +1,6 @@
 // Datos de la imagen de compartir de "Precios contra el mundo" (/contexto/). No dibuja: eso es `imagen.ts` (lienzo "barras").
 // La página ya tiene todo calculado (compararPrecios, frasePrecios): la vista lleva esas filas y acá solo se arman los textos, para que la imagen muestre lo mismo.
-import type { DatosImagen, FilaBarra } from "./imagen";
+import type { ColumnaGrillaImg, DatosImagen, FilaBarra, FilaGrillaImg } from "./imagen";
 import type { FormatoImg } from "./config";
 import { limpiarComentario, slug } from "./imagen-datos";
 import { nf0, nf1 } from "./formato";
@@ -42,6 +42,24 @@ function imagenLineas(v: Extract<VistaCtx, { tipo: "ctx-lineas" }>, o: OpcionesC
     fmtEje: (n) => nf.format(n), fmtEje2: null, franjas: [], presidentes: null, inicioTxt: null, comentario: limpiarComentario(o.comentario), fuente: v.fuente, nota: "",
     unidad: v.unidad, fecha: new Date().toLocaleDateString("es-AR"), archivo: `primerolosdatos-${slug(v.titulo)}`,
     log: v.log, refLinea: v.refLinea ?? null, marcaUltimo: true, armado: true,
+  };
+}
+
+/** Tabla «Por presidente» de /contexto/esperado/ y /contexto/viento/: la pantalla ya calculó cada celda (texto y tono) y acá solo se arma la grilla. */
+export interface GrillaCtx {
+  titulo: string; frase: string; unidad: string; fuente: string; nota?: string;
+  /** Versión corta de la fuente, para cuando la larga no entra (la de `fuentesTxt`). */ fuenteCorta?: string;
+  columnas: ColumnaGrillaImg[]; filas: FilaGrillaImg[]; calor: boolean;
+}
+
+/** Imagen de una tabla por presidente (lienzo `grilla`). Null si no hay filas ni columnas. Palabras neutras: el color se explica con la frase (D-012). */
+export function armarImagenGrilla(g: GrillaCtx, formato: FormatoImg, comentario = ""): DatosImagen | null {
+  if (!g.filas.length || !g.columnas.length) return null;
+  return {
+    formato, titulo: g.titulo, cifra: null, frases: [{ texto: g.frase, cls: "neutro" }], leyenda: null, x: [], series: [], fmtEje: (n) => String(n), fmtEje2: null, franjas: [],
+    inicioTxt: null, comentario: limpiarComentario(comentario), fuente: g.fuente, ...(g.fuenteCorta ? { fuenteCorta: g.fuenteCorta } : {}), nota: g.nota ?? "", unidad: g.unidad,
+    fecha: new Date().toLocaleDateString("es-AR"), archivo: `primerolosdatos-${slug(g.titulo)}`,
+    lienzo: { tipo: "grilla", columnas: g.columnas, filas: g.filas, calor: g.calor },
   };
 }
 
