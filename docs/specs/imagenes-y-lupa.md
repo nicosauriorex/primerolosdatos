@@ -1,6 +1,6 @@
 # Imagen al compartir en las secciones que no la tienen, y el semáforo en la lupa
 
-Estado: implementada (2026-11-16), sin commitear
+Estado: implementada y publicada (2026-11-16, 3ba7993; corrida en verde, run 43966469194)
 
 Sale de `docs/ESTADO.md` («Qué sigue», puntos 5 y 6) y del pedido del usuario del 2026-11-16: «dale segui con las 3 cosas que no esperan datos». La tercera cosa (verificar celular y tema claro) no lleva código: va en «Cómo se verifica».
 

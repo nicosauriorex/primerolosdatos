@@ -1,6 +1,6 @@
 # Ajustes, tanda 14: el valor de una barra al pasar el mouse o tocarla
 
-Estado: implementada (2026-11-16), sin commitear
+Estado: implementada y publicada (2026-11-16, 3ba7993; corrida en verde, run 43966469194)
 
 Pedido del usuario (2026-11-16), al recorrer los cambios de [imagenes-y-lupa](imagenes-y-lupa.md): «en el 2.1 el resumen por hitos se puede poner que cuando pasas el mouse por arriba te muestra el valor».
 

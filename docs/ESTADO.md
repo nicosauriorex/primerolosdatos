@@ -7,9 +7,9 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-16.
 ## Dónde estamos
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
-Últimos bloques (todos publicados, corrida en verde, salvo los dos primeros):
-- Imagen al compartir en Lo esperado, Viento, Resumen por hitos, Congreso y alícuotas de Ingresos Brutos; semáforo en la lupa; subpestañas legibles en tema claro — 2026-11-16, **sin commitear** — [spec](specs/imagenes-y-lupa.md)
-- Tanda 14: el valor de una barra al pasar el mouse o tocarla (R32) en Resumen por hitos, Congreso año por año y Gasto por mes — 2026-11-16, **sin commitear** — [spec](specs/ajustes-tanda-14.md)
+Últimos bloques (todos publicados, corrida en verde):
+- Imagen al compartir en Lo esperado, Viento, Resumen por hitos, Congreso y alícuotas de Ingresos Brutos; semáforo en la lupa; subpestañas legibles en tema claro — 2026-11-16, 3ba7993 (corrida en verde, run 43966469194) — [spec](specs/imagenes-y-lupa.md)
+- Tanda 14: el valor de una barra al pasar el mouse o tocarla (R32) en Resumen por hitos, Congreso año por año y Gasto por mes — 2026-11-16, 3ba7993 (corrida en verde, run 43966469194) — [spec](specs/ajustes-tanda-14.md)
 - Tanda 13 (Novedades): pestañas Novedades / Calendario, grilla chica con resumen del día (panel en PC, ventana en el celular), días desplegables, series en caja deslizable, Agendar (Google Calendar e .ics); compartir un dato suma mes anterior y hace un año (texto e imagen; reglas R30 y R31) — 2026-11-16, fe1b069 (corrida en verde, run 43956106566) — [spec](specs/ajustes-tanda-13.md)
 - Predicciones (9c): `/predicciones/` con la inflación del mes, mediana de la gente después de predecir, REM del Banco Central e historia; funciones `/api/prediccion(es)` con Turnstile — 2026-11-16, bb22f77 (corrida completa en verde, run 43939206761; la página y el REM están publicados, `/api/predicciones` responde 503 hasta crear la base) — [spec](specs/predicciones.md)
 - Novedades y calendario (9b): `/novedades/` con lo que salió (cifra, cambio, contexto, Compartir) y el calendario del INDEC, bloque en la portada; registro `datos/novedades.json` (D-026) — 2026-11-16, 24d0366 (corrida completa en verde, run 43931777809; el registro se lee y se guarda en el commit de datos) — [spec](specs/novedades-calendario.md)
