@@ -1,6 +1,6 @@
 # Contar los Compartir y preguntar por qué
 
-Estado: implementada (2026-11-16), sin publicar; falta crear la base D1 (requisito 8)
+Estado: implementada (2026-11-16), publicada en 26eec12 (corrida completa en verde, run 43913974906); sin la base D1 todavía: `/api/compartir` responde 503 (requisito 8)
 Ideas: Contar los Compartir y preguntar por qué (2026-11-15)
 
 Pedido del usuario (2026-11-16): «Spec de 9a»; sobre la pregunta: «tras cada acción pero que se pueda habilitar y deshabilitar». Lo demás sale de las opciones recomendadas: cuenta cada acción que sale bien y los números los ve solo el usuario por ahora.
