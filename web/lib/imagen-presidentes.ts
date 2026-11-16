@@ -9,6 +9,7 @@ import type { FormatoImg } from "./config";
 import { fuenteLegible, fuentesTxt, limpiarComentario, notaInflacion, slug, tituloVariable } from "./imagen-datos";
 import { fmtMes, lastIdx, ok, r1 } from "./formato";
 import type { Expr, Motor } from "./motor";
+import { fuentesCalc } from "./motor";
 import { grupoDe } from "./catalogo";
 import { datosDesde, variacionMostrada } from "./tablas";
 import { BASE_HERENCIA, GRUPOS_HERENCIA, tablaHerencia } from "./herencia";
@@ -105,7 +106,7 @@ export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosI
       tipo: "barras", filas, sinDatos: sin,
       ...(v.metrica === "prom" ? { enc: { nombre: "Presidente", valor: "Promedio del mandato" } } : c.pct ? { enc: { nombre: "Presidente", valor: "Cierre − inicio (p.p.)" } } : {}),
     };
-    d.unidad = c.unidad; d.fuente = "Fuente: " + fuenteLegible(c.serie.fuente); d.nota = notaInflacion([c], false);
+    d.unidad = c.unidad; d.fuente = "Fuente: " + fuentesCalc(c).map(fuenteLegible).join("; "); d.nota = notaInflacion([c], false);
     return d;
   }
 
@@ -130,7 +131,7 @@ export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosI
     const color = !c.dir ? "Sin colores: para este dato no se califica si subir o bajar es favorable." : c.dir > 0 ? "Verde: subió; rojo: bajó." : "Verde: bajó; rojo: subió.";
     d.frases = [neutro(`Una vela por mandato: la línea fina va del mínimo al máximo; el cuerpo, del valor de inicio al de cierre. ${color} Misma escala para todos (${m.fmtC(c, Math.min(...filas.map((f) => f.min)))} a ${m.fmtC(c, Math.max(...filas.map((f) => f.max)))}).`)];
     d.lienzo = { tipo: "velas", filas, sinDatos: sin };
-    d.unidad = c.unidad; d.fuente = "Fuente: " + fuenteLegible(c.serie.fuente); d.nota = notaInflacion([c], false);
+    d.unidad = c.unidad; d.fuente = "Fuente: " + fuentesCalc(c).map(fuenteLegible).join("; "); d.nota = notaInflacion([c], false);
     return d;
   }
 
@@ -156,7 +157,7 @@ export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosI
     d.lienzo = { tipo: "variables", filas, presId: p.id };
     d.unidad = "Valor al inicio y al cierre, y variación en % (en puntos si el dato ya es un porcentaje)";
     d.armado = true;   // R22: las variables las eligió quien comparte
-    const f = fuentesTxt(calcs.map((c) => c.serie.fuente));
+    const f = fuentesTxt(calcs.flatMap(fuentesCalc));
     d.fuente = f.fuente; d.fuenteCorta = f.fuenteCorta; d.nota = notaInflacion(calcs, false);
     return d;
   }
@@ -187,7 +188,7 @@ export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosI
     d.fmtEje = D.fmtAxis; d.ejeX = "mes"; d.log = D.usarLog; d.refLinea = D.ref; d.armado = true;
     const unidadDato = D.modo === "var" && !D.c.pct ? "variación en %, desde el mes 0" : D.c.unidad;
     d.unidad = `Eje horizontal: meses desde el inicio de cada mandato${recorte} · ${unidadDato}`;
-    d.fuente = "Fuente: " + fuenteLegible(D.c.serie.fuente);
+    d.fuente = "Fuente: " + fuentesCalc(D.c).map(fuenteLegible).join("; ");
     d.nota = [D.teo ? `Punteadas: mismo punto de partida, desde ${m.fmtC(D.c, D.ancla)} (${D.ancTxt}).` : "", notaInflacion([D.c], false)].filter(Boolean).join(" ");
     return d;
   }
@@ -206,7 +207,7 @@ export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosI
   const filas: FilaRank[] = res.filas.map((f, k) => ({ puesto: k + 1, id: f.p.id, nombre: f.p.n, score: f.score as number, indicadores: f.items.length }));
   d.lienzo = { tipo: "ranking", filas, sinDatos: PRES.filter((p) => !res.filas.some((f) => f.p.id === p.id)).map((p) => p.n) };
   d.unidad = "Puntaje de 0 (el peor) a 100 (el mejor), por presidente";
-  const f = fuentesTxt(res.filas.flatMap((fl) => fl.items.map((i) => i.c.serie.fuente)));
+  const f = fuentesTxt(res.filas.flatMap((fl) => fl.items.flatMap((i) => fuentesCalc(i.c))));
   d.fuente = f.fuente; d.fuenteCorta = f.fuenteCorta;
   d.armado = true;   // R22: el ranking depende de los criterios y variables que eligió quien comparte
   return d;
@@ -257,7 +258,7 @@ function imagenMeses(m: Motor, v: Extract<VistaPres, { tipo: "meses" }>, o: Opci
   d.frases = [neutro(r.frase)];
   d.lienzo = { tipo: "meses", filas };
   d.unidad = `${r.mes[0].toUpperCase()}${r.mes.slice(1)} de cada año, de ${filas[0].anio} a ${ult} · ${c.unidad}`;
-  d.fuente = "Fuente: " + fuenteLegible(c.serie.fuente); d.nota = notaInflacion([c], false);
+  d.fuente = "Fuente: " + fuentesCalc(c).map(fuenteLegible).join("; "); d.nota = notaInflacion([c], false);
   return d;
 }
 
@@ -300,7 +301,7 @@ function imagenHerencia(m: Motor, v: Extract<VistaPres, { tipo: "herencia" }>, o
   d.lienzo = { tipo: "variables", filas, presId: p.id, enc: { ini: "Recibió", fin: t.enCurso ? "Hoy" : "Entregó", vr: "Cambio", sp: "Recorrido", sinDato: "sin dato" } };
   d.unidad = "Cambio en % (en puntos si el dato ya es un porcentaje). Debajo, los meses de los dos datos";
   const calcs = conDato.map((f) => f.c!);
-  const fu = fuentesTxt([...calcs.map((c) => c.serie.fuente), ...new Set(inf.flatMap((f) => [f.recibio, f.entrego]).flatMap((x) => (x ? [`${x.dato.organismo} (informes)`] : [])))]);
+  const fu = fuentesTxt([...calcs.flatMap(fuentesCalc), ...new Set(inf.flatMap((f) => [f.recibio, f.entrego]).flatMap((x) => (x ? [`${x.dato.organismo} (informes)`] : [])))]);
   d.fuente = fu.fuente; d.fuenteCorta = fu.fuenteCorta; d.nota = notaInflacion(calcs, false);
   // R22: con variables elegidas (la lista no es la completa de la herencia) la imagen lo dice
   d.armado = idsHerencia().filter((id) => !!m.SER[id]).some((id) => !v.ids.includes(id));

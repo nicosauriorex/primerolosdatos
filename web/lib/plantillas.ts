@@ -84,6 +84,16 @@ export function crearPlantillas(metas: SerieMeta[]): Plantilla[] {
     [E("soja_chi", { med: "corr" }), E("soja_ros", { med: "usd_oficial" })], { ej: "misma" });
   manual("salario-minimo-vs-canasta", "Cuántas líneas de pobreza (familia de 4) cubre un salario mínimo", "Poder de compra", "Salario mínimo sobre el valor de la línea de pobreza de una familia de 4",
     ["smvm", "sueldo minimo", "linea de pobreza"], [E("can_cbt_h2", { rel: "smvm", med: "corr" })]);
+  manual("auh-alimentar-vs-canasta", "AUH y Alimentar: cuántas canastas alimentarias cubre (cuenta de Capital Humano)", "Poder de compra",
+    "La AUH completa más la Prestación Alimentar de un hijo, sobre el valor de la canasta alimentaria de un adulto (línea de indigencia). Es la cuenta que publica el Ministerio de Capital Humano",
+    ["auh", "tarjeta alimentar", "asignacion universal", "canasta alimentaria", "plan social"], [E("can_cba", { rel: "auh_alimentar", med: "corr" })]);
+  manual("auh-hogar-4-vs-canasta", "AUH y Alimentar de un hogar de 4: cuántas canastas alimentarias cubre (cuenta de la UCA)", "Poder de compra",
+    "Lo que cobra en mano un hogar con dos hijos de 6 y 8 años por AUH y Prestación Alimentar, sobre el valor de la canasta alimentaria de ese hogar (línea de indigencia de una familia de 4). No incluye otros ingresos. Es la convención de la Universidad Católica Argentina (UCA)",
+    ["auh", "tarjeta alimentar", "asignacion universal", "canasta alimentaria", "plan social", "uca"], [E("can_cba_h2", { rel: "auh_hogar_4", med: "corr" })]);
+  manual("auh-en-pesos-de-hoy", "AUH en pesos de hoy", "Empleo y pobreza", "Monto mensual por hijo de la Asignación Universal por Hijo, sin la Prestación Alimentar, ajustado por inflación",
+    ["auh", "asignacion universal", "asignacion por hijo", "plan social"], [E("auh", { med: "real" })]);
+  manual("pensiones-por-invalidez", "Pensiones por invalidez", "Empleo y pobreza", "Cantidad de pensiones no contributivas por invalidez vigentes a diciembre de cada año",
+    ["pension", "discapacidad", "andis", "pensiones no contributivas"], [E("pnc_invalidez", { med: "asis" })]);
 
   // ---- generadas
   const tieneSal = !!S.sipa_med;

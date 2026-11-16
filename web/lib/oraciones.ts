@@ -25,20 +25,20 @@ export const contraer = (prep: "a" | "de", texto: string): string => {
   return `${prep} ${t}`;
 };
 
-export const SALARIOS = ["sipa_med", "sipa_prom", "smvm", "jub_min", "ripte"];
+export const SALARIOS = ["sipa_med", "sipa_prom", "smvm", "jub_min", "ripte", "auh"];
 const ids = (S: Record<string, SerieMeta>, f: (s: SerieMeta) => boolean) => Object.values(S).filter(f).map((s) => s.id);
 
 /** Qué compra el salario: productos, canastas y dólares. */
 export const idsCompra = (S: Record<string, SerieMeta>) =>
   ids(S, (s) => s.id.startsWith("pp_gba_") || s.id.startsWith("can_") || (FX_KEYS as readonly string[]).some((k) => s.id === "fx_" + k));
 /** Los ítems de una lista de huecos ya ordenados y con sus separadores: Salarios, Canastas, Precios promedio (una sección por categoría), Rubros del IPC y Dólares. */
-export interface SeccionCompra { grupo: "Salarios y jubilaciones" | "Canastas" | "Precios promedio" | "Rubros del IPC" | "Dólares"; categoria?: string; ids: string[] }
+export interface SeccionCompra { grupo: "Salarios, jubilaciones y AUH" | "Canastas" | "Precios promedio" | "Rubros del IPC" | "Dólares"; categoria?: string; ids: string[] }
 export function seccionesCompra(S: Record<string, SerieMeta>, ids: string[]): SeccionCompra[] {
   const nombre = (id: string) => rotulo(id, S);
   const porNombre = (a: string, b: string) => nombre(a).localeCompare(nombre(b), "es");
   const out: SeccionCompra[] = [];
   const salarios = SALARIOS.filter((i) => ids.includes(i) && S[i]);
-  if (salarios.length) out.push({ grupo: "Salarios y jubilaciones", ids: salarios });
+  if (salarios.length) out.push({ grupo: "Salarios, jubilaciones y AUH", ids: salarios });
   const canastas = ids.filter((i) => i.startsWith("can_") && S[i]).sort(porNombre);
   if (canastas.length) out.push({ grupo: "Canastas", ids: canastas });
   const cats = new Map<string, string[]>();

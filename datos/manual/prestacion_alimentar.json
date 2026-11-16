@@ -1,0 +1,150 @@
+{
+  "fuente": "Ministerio de Desarrollo Social (2019-2023) y Ministerio de Capital Humano (desde 2024): resoluciones de la Prestación Alimentar",
+  "nota": "Monto mensual por hogar según la cantidad de hijos que cubre la prestación.",
+  "periodos": [
+    {
+      "desde": "2021-02",
+      "montos": [
+        6000,
+        9000,
+        9000
+      ],
+      "edad_max": 6,
+      "norma": "Resolución 63/2021 del Ministerio de Desarrollo Social",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/240413/20210204",
+      "nota": "El texto oficial fija solo dos categorías: Básica $6.000 (antes $4.000) y Ampliada $9.000 (antes $6.000); se mapean a 1 hijo y a 2 o más. El texto no dice desde qué liquidación ni la edad: el mes (febrero 2021) y el tope de 6 años salen de la prensa del 4-02-2021 (La Capital MdP) y de la Resolución 655/2021 (la extensión pasó de 6 a 14 años)."
+    },
+    {
+      "desde": "2021-05",
+      "montos": [
+        6000,
+        9000,
+        12000
+      ],
+      "edad_max": 14,
+      "norma": "Resolución 655/2021 del Ministerio de Desarrollo Social",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/244619/20210520",
+      "nota": "Amplía a hijos de hasta 14 años y agrega la categoría de 3 o más hijos ($12.000). El texto en el Boletín Oficial no trae los montos (están en un anexo que se publica solo en la edición web): los importes salen de la prensa del 20-05-2021 (Tiempo de San Juan) y coinciden con los montos anteriores que cita el texto oficial de la Resolución 371/2022 (A $6.000, B $9.000, C $12.000). El mes (mayo 2021) sale de la prensa del 11-05-2021 (Diario de Cuyo: se paga este mes)."
+    },
+    {
+      "desde": "2022-05",
+      "montos": [
+        9000,
+        13500,
+        18000
+      ],
+      "edad_max": 14,
+      "norma": "Resolución 371/2022 del Ministerio de Desarrollo Social",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/261183/20220419",
+      "nota": "Aumento de 50 %. El texto oficial no dice desde qué liquidación; la prensa del 19-04-2022 dice que corresponde al pago de abril, que se cobra en los primeros días de mayo."
+    },
+    {
+      "desde": "2022-12",
+      "montos": [
+        12500,
+        19000,
+        25000
+      ],
+      "edad_max": 14,
+      "norma": "Resolución 2067/2022 del Ministerio de Desarrollo Social",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/276598/20221128",
+      "nota": "El texto oficial da los montos nuevos pero no desde qué liquidación. Hay prensa contradictoria: Cronista (2-12-2022) y Bloomberg Línea dicen que se adelantó a diciembre de 2022; C5N (9-12-2022) dice que rige desde enero de 2023. Se carga diciembre 2022; sin verificar."
+    },
+    {
+      "desde": "2023-05",
+      "montos": [
+        17000,
+        26000,
+        34000
+      ],
+      "edad_max": 14,
+      "norma": "Resolución 700/2023 del Ministerio de Desarrollo Social",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/284626/20230418",
+      "nota": "Desde la liquidación de mayo de 2023 (según los considerandos). En septiembre y octubre de 2023 hubo además un refuerzo extraordinario por única vez (Res. 1758/2023: $10.000, $17.000 y $23.000 por hogar, en dos cuotas), que no se incluye en estos montos."
+    },
+    {
+      "desde": "2023-11",
+      "montos": [
+        22000,
+        34500,
+        45500
+      ],
+      "edad_max": 14,
+      "norma": "Resolución 1758/2023 del Ministerio de Desarrollo Social",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/293119/20230830",
+      "nota": "Desde la liquidación de noviembre de 2023 (artículo 2)."
+    },
+    {
+      "desde": "2024-01",
+      "montos": [
+        33000,
+        51750,
+        68250
+      ],
+      "edad_max": 14,
+      "norma": "Resolución 3/2023 del Ministerio de Capital Humano",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/301208/20231222",
+      "nota": "Aumento de 50 % desde la liquidación de enero de 2024."
+    },
+    {
+      "desde": "2024-02",
+      "montos": [
+        44000,
+        69000,
+        91000
+      ],
+      "edad_max": 14,
+      "norma": "Resolución 11/2024 del Ministerio de Capital Humano",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/302095/20240125",
+      "nota": "Desde la liquidación de febrero de 2024."
+    },
+    {
+      "desde": "2024-05",
+      "montos": [
+        48125,
+        75468,
+        99531
+      ],
+      "edad_max": 14,
+      "norma": "Resolución 111/2024 del Ministerio de Capital Humano",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/306384/20240425",
+      "nota": "Desde la liquidación de mayo de 2024."
+    },
+    {
+      "desde": "2024-06",
+      "montos": [
+        52250,
+        81936,
+        108062
+      ],
+      "edad_max": 14,
+      "norma": "Resolución 181/2024 del Ministerio de Capital Humano",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/307628/20240517",
+      "nota": "Desde la liquidación de junio de 2024 (no mayo)."
+    },
+    {
+      "desde": "2024-10",
+      "montos": [
+        52250,
+        81936,
+        108062
+      ],
+      "edad_max": 17,
+      "norma": "Resolución 636/2024 del Ministerio de Capital Humano",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/313702/20240911",
+      "nota": "Extiende la edad hasta 17 años inclusive (sin límite para hijos con discapacidad) desde la liquidación de octubre de 2024; los montos no cambian."
+    },
+    {
+      "desde": "2026-05",
+      "montos": [
+        72250,
+        113299,
+        149425
+      ],
+      "edad_max": 17,
+      "norma": "Resolución 161/2026 del Ministerio de Capital Humano",
+      "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/341664/20260507",
+      "nota": "Aumento de 38 %. El artículo 2 de la resolución dice que rige desde mayo de 2026. Entre octubre de 2024 y abril de 2026 rigieron los montos de la Res. 181/2024 (52.250 / 81.936 / 108.062): la Res. 161/2026 cita como normas anteriores la 181/2024 y la 636/2024, sin otra que cambie montos."
+    }
+  ]
+}

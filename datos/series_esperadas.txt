@@ -1,3 +1,8 @@
+aaff_ninos
+auh
+auh_alimentar
+auh_hogar_4
+auh_ninos
 bcra_1
 bcra_112
 bcra_113
@@ -107,6 +112,9 @@ fx_blue
 fx_ccl
 fx_mep
 fx_oficial
+gasto_aaff
+gasto_auh
+gasto_pnc
 inflacion
 inflacion_ia
 ipc_cuyo_01_1_1_coicop
@@ -437,6 +445,9 @@ mk_tgs
 mk_ypf
 pib_nom
 pib_nom_anual
+pnc_invalidez
+pnc_madres
+pnc_vejez
 pob_tasa_indigencia_hogares
 pob_tasa_indigencia_personas
 pob_tasa_pobreza_hogares

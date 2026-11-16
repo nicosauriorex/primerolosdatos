@@ -7,7 +7,8 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-16.
 ## Dónde estamos
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
-Últimos bloques (todos publicados, corrida en verde):
+Últimos bloques (todos publicados, corrida en verde, salvo el primero):
+- AUH, Tarjeta Alimentar, cobertura de la canasta (cuenta de Capital Humano y de la UCA) y pensiones por invalidez: 11 series; además, enteros exactos en los JSON, fuente de las dos series cuando un dato se mide en otro y cierre de mandato en series anuales — 2026-11-16, sin commitear — [spec](specs/auh-pensiones.md)
 - Revisión de 931167d y 91aec1b (sin bugs graves): cuasifiscal sin «LEFI» en el nombre (la variable 55 solo tiene pases y LELIQ; el 0,0 % desde ago-24 es correcto), deuda / PIB sin «fin de año», celda vacía de adelantos no borra el mes de la consolidada — 2026-11-16, 5eaf7e0
 - Tanda 12: el dato actual primero (Cambiar dato, Ajustes con una sección «Variables»), moneda y escala en desplegables, títulos de ventanas junto a la cruz, arreglo de las ventanas que no guardaban lo elegido al cerrarse, consolidada y cuasifiscal en Cuentas públicas — 2026-11-15, 91aec1b — [spec](specs/ajustes-tanda-12.md)
 - Series de deuda (Finanzas, mensual desde 2019) y deuda consolidada Tesoro + Banco Central (cuenta propia, D-024) — 2026-11-15, 931167d — [spec](specs/series-deuda.md)
@@ -22,7 +23,7 @@ Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes
 
 ## Qué sigue, en orden
 1. **El primer bloque no hecho de la tabla "Próximos bloques" de `docs/ROADMAP.md`** (la única lista de bloques). Hoy: Contar los Compartir (9a), spec pendiente. De la spec de deuda queda opcional la fase 3 (tarifa eléctrica de CAMMESA).
-2. **Datos nuevos «calientes»:** investigación hecha (AUH y canasta, pensiones por invalidez, homicidios, empleo público nacional, recaudación por impuesto, universidades por inciso, Malvinas y más), con ranking en [investigaciones/datos-nuevos-2026-11-16.md](investigaciones/datos-nuevos-2026-11-16.md). Falta que el usuario elija qué pasa a spec.
+2. **Datos nuevos «calientes»:** hecho el bloque de AUH y pensiones; del resto, investigación hecha (AUH y canasta, pensiones por invalidez, homicidios, empleo público nacional, recaudación por impuesto, universidades por inciso, Malvinas y más), con ranking en [investigaciones/datos-nuevos-2026-11-16.md](investigaciones/datos-nuevos-2026-11-16.md). Falta que el usuario elija qué pasa a spec.
 3. **Mantenimiento a mano cuando salgan datos nuevos:** herencia (`datos/manual/herencia.json`; nivel de reservas netas del FMI en la 3ª revisión, dic-2026, y saldos de DEG cada mes en `reservas_netas_supuestos.json`); Congreso (cada 1 de marzo, cortes de las dos cámaras y vetos del año); provincias (el III trimestre de la DNAP entra solo: mirar que pase el control).
 4. **Pendientes sin fuente o sin decidir:** semáforo (desestacionalizado X-13; CAME, patentamientos, Construya, escrituras, leche, petróleo); gasto (empresas públicas sin fuente; universidades: estudiantes antes de 2023 y las 8 sin datos en el PIU); Congreso (leyes del Ejecutivo de Menem a CFK 1); herencia (cepo de 2003 y 2007, FMI de 1995 a 2002).
 5. **Lupa:** el semáforo todavía no está en el buscador (sus indicadores salen de su archivo de datos).

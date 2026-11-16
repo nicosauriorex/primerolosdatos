@@ -41,7 +41,9 @@ export const INFO_CAT: Record<string, string> = {
     <dt>Desocupación, empleo e informalidad</dt><dd>EPH, trimestral, 31 aglomerados urbanos.</dd>
     <dt>Trabajadores registrados</dt><dd>Registro de aportes (SIPA), mensual (personas con aportes).</dd>
     <dt>Pobreza e indigencia</dt><dd>EPH, semestral (se ubica en enero y julio).</dd>
-    <dt>Canastas</dt><dd>Lo que una familia necesita para no ser pobre (CBT) o indigente (CBA).</dd></dl>`,
+    <dt>Canastas</dt><dd>Lo que una familia necesita para no ser pobre (CBT) o indigente (CBA).</dd>
+    <dt>AUH y Prestación Alimentar: cuántas canastas cubren</dt><dd>Hay dos cuentas, y comparan cosas distintas. <b>La del Ministerio de Capital Humano</b> suma la AUH completa y la Prestación Alimentar de un hijo, y la compara con la canasta alimentaria de <b>un adulto</b>. <b>La de la UCA</b> (Universidad Católica Argentina) toma lo que cobra en mano un hogar con dos hijos de 6 y 8 años y lo compara con la canasta alimentaria de <b>toda la familia</b> (hogar de 4); no incluye otros ingresos. Por eso dan resultados muy distintos.</dd>
+    <dt>Pensiones no contributivas</dt><dd>Se publica la cantidad vigente a diciembre de cada año, no las altas: la diferencia entre dos diciembres es altas menos bajas.</dd></dl>`,
   "Sector externo": `<p>Exportaciones e importaciones de bienes (INDEC, en dólares), saldo comercial, términos del intercambio (precio de lo que vendemos vs. lo que compramos) y soja.</p>`,
   "Fiscal": `<p>Sector público nacional, base caja.</p><dl>
     <dt>Resultado primario</dt><dd>Ingresos menos gastos sin contar intereses de la deuda.</dd>

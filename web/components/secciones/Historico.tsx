@@ -16,6 +16,7 @@ import { Grafico, hayDatos, type Fila, type Marca, type OpcionesG, type Ref, typ
 import { PALETA, vcolor } from "../util";
 import { fmtMes, MESES, nf0, nf1, ok, redondeadoComo, restaLimpia } from "@/lib/formato";
 import type { Calculo, Expr, Motor } from "@/lib/motor";
+import { fuentesCalc } from "@/lib/motor";
 import { PRES_DEF, aBase100, claseVariacion, estadisticasRows, etiqueta, filasGrafico, franjasPres, type EstRows } from "@/lib/estadisticas";
 import { admiteContexto, contextoDato } from "@/lib/contexto-dato";
 import { MAX_GRAFICOS, MAX_MISMA_UNIDAD, PG, TODOS_MESES, claseVariacionMostrada, comparacionesCabecera, deltaDeComparacion, exprsUsadas, fraseUltimoVs, frecuenciaOrigen, leerComun, leerGrafico, opcionesComoVerlo, sfx, textoPeriodo, textoTemporalidad, type Comun, type GEst } from "@/lib/historico";
@@ -524,7 +525,7 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     : (lista.length > 2 ? lista[0].c.unidad : lista.map((o, k) => `${dos ? (k ? "Derecha: " : "Izquierda: ") : ""}${o.c.unidad}`).join(" · ")) + ".") + porFreq + sumaTxt +
     (bd ? " La sombra va del mínimo al máximo." : "") +
     // Los valores reales dependen del IPC empalmado: se avisa con qué índice se descontó la inflación.
-    (notaInflacion(lista.map((o) => o.c), b100) ? " " + notaInflacion(lista.map((o) => o.c), b100) : "") + ` Fuente: ${[...new Set(lista.map((o) => o.c.serie.fuente))].join("; ")}.`;
+    (notaInflacion(lista.map((o) => o.c), b100) ? " " + notaInflacion(lista.map((o) => o.c), b100) : "") + ` Fuente: ${[...new Set(lista.flatMap((o) => fuentesCalc(o.c)))].join("; ")}.`;
   // Franjas de presidentes: botón propio junto al gráfico (el estado sigue en el parámetro `pf`)
   const alternarFranjas = () => { const on = !conFranjas; set({ pf: on === cfg.franjas ? null : on ? "1" : "0" }); };
   const botonPresidentes = (
@@ -622,7 +623,7 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     const ultimoConDato = rows.length ? String(rows[rows.length - 1].fecha).slice(0, 7) : null;
     const hastaChip = E.hasta === E.ult && ultimoConDato && ultimoConDato >= E.desde && ultimoConDato < E.hasta ? ultimoConDato : E.hasta;
     const periodo = textoPeriodo(E.desde, hastaChip, E.meses);
-    const fuente = [...new Set(lista.map((o) => fuentePublica(o.c.serie.fuente)))].join("; ");
+    const fuente = [...new Set(lista.flatMap((o) => fuentesCalc(o.c)).map(fuentePublica))].join("; ");
     const chips = [
       { clave: "periodo", texto: periodo },
       { clave: "frecuencia", texto: E.freq === "M" ? "Mensual" : `${E.freq === "T" ? "Trimestral" : "Anual"}, ${E.ag === "cierre" ? "cierre" : "promedio"}` },

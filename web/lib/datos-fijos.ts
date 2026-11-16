@@ -46,6 +46,8 @@ export const DATOS_FIJOS: DatoFijo[] = [
   { slug: "pobreza", e: ex("pob_tasa_pobreza_personas", "asis") },
   { slug: "indigencia", e: ex("pob_tasa_indigencia_personas", "asis") },
   { slug: "empleo-privado-registrado", e: ex("dg_151_1_aariadotac_2012_m_26", "asis") },
+  { slug: "auh-real", e: ex("auh", "real") },
+  { slug: "pensiones-por-invalidez", e: ex("pnc_invalidez", "asis") },
   // Comercio exterior
   { slug: "saldo-comercial", e: ex("dg_saldo_comercial", "corr", { esc: "pib" }) },
   { slug: "cuenta-corriente", e: ex("dg_160_2_tl_cuennte_0_t_22", "corr", { esc: "pib" }) },

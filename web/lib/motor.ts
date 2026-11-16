@@ -21,7 +21,11 @@ export interface Expr {
 export interface Calculo {
   v: Vals; lo?: Vals; hi?: Vals; nombre: string; corto: string; unidad: string; dir: number;
   flujo?: boolean; ultimo?: boolean; pct: boolean; serie: Serie;
+  /** La serie con la que se mide (`rel`), si la hay: su fuente también se nombra. */
+  rel?: Serie;
 }
+/** Fuentes de un cálculo: la de la serie y, si se mide en otra, también la de esa (sin repetir). */
+export const fuentesCalc = (c: Calculo): string[] => [...new Set([c.serie.fuente, c.rel?.fuente].filter((f): f is string => !!f))];
 export type Opcion = [string, string];
 
 export const FX_NOM: Record<string, string> = { oficial: "oficial", blue: "blue", mep: "MEP", ccl: "CCL" };
@@ -336,6 +340,7 @@ export function crearMotor(F: string[]) {
     const b = base();
     const A = SER[e.id];
     let r: Omit<Calculo, "pct" | "serie">;
+    let relUsada: Serie | undefined;
     const esc = escPermitidas(A).some((o) => o[0] === e.esc) ? (e.esc || "") : "";
     if (esc === "pib") {
       const [fa] = FACTOR_U(A.u || "");
@@ -346,11 +351,14 @@ export function crearMotor(F: string[]) {
       r = { v, nombre: `${A.n} (% del PIB)`, corto: `${A.n}, % PIB`, unidad: A.flujo ? "% del PIB (suma de 12 meses / PIB de 12 meses)" : "% del PIB anual", dir: A.dir || 0, ultimo: !!A.flujo };
     } else if (e.rel && SER[e.rel] && relPermitido(A)) {
       const B2 = SER[e.rel];
+      relUsada = B2;
       const a = nominalPesos(A), bb = nominalPesos(B2);
       let v = a.map((x, i) => ok(x) && ok(bb[i]) && x !== 0 && bb[i] !== 0 ? (e.modo === "medido" ? x / (bb[i] as number) : (bb[i] as number) / x) : null);
       const esIdx = A.tipo === "idx" || B2.tipo === "idx";
       if (esIdx) { const p = v.find(ok) as number; v = v.map((x) => ok(x) ? x / p * 100 : null); }
-      const cant = (A.u || "").startsWith("$ por ") ? A.u.slice(6) : "unidades";
+      // Lo que se compra: la unidad del producto ("kg", "litro"); una canasta en "$ por mes" se cuenta en canastas y otro monto por mes o
+      // por año, en veces (no "mes por cada …").
+      const cant = A.id.startsWith("can_") ? "canastas" : /^\$ por (mes|año)/.test(A.u || "") ? "veces" : (A.u || "").startsWith("$ por ") ? A.u.slice(6) : "unidades";
       const dirAB = Math.sign((B2.dir || 0) - (A.dir || 0));
       r = e.modo === "medido"
         ? { v, nombre: `${A.n} medido en ${B2.n}`, unidad: esIdx ? "índice (primer dato = 100)" : `veces "${B2.n}"`, dir: -dirAB, corto: "" }
@@ -371,7 +379,7 @@ export function crearMotor(F: string[]) {
         r.unidad = `${uu.replace(/^personas$/, "")} por habitante`.trim(); r.nombre += " por habitante"; r.corto += " p/hab.";
       }
     }
-    const res: Calculo = { ...r, pct: /%/.test(r.unidad) && !/\$/.test(r.unidad), serie: A };
+    const res: Calculo = { ...r, pct: /%/.test(r.unidad) && !/\$/.test(r.unidad), serie: A, ...(relUsada ? { rel: relUsada } : {}) };
     cache.set(k, res);
     return res;
   }

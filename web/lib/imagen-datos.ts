@@ -7,6 +7,7 @@ import { leerComun, leerGrafico, frecuenciaOrigen, textoTemporalidad, TODOS_MESE
 import type { DatosImagen, TarjetaDato, TarjetaImg } from "./imagen";
 import { fmtMes, nf0, nf1, fmtNum, norm, ok } from "./formato";
 import type { Calculo, Expr, Motor } from "./motor";
+import { fuentesCalc } from "./motor";
 import { filasDeTabla, tablaATexto } from "./tabla-texto";
 import { variacionMostrada } from "./tablas";
 import { fuentePublica, organismoDe, SITIO_FUENTES } from "./fuente-publica";
@@ -247,7 +248,7 @@ export function armarImagen(m: Motor, v: VistaImg, o: OpcionesImg): DatosImagen 
     inicioTxt: conPres ? oracionInicio(o.base) : null,
     comentario: limpiarComentario(o.comentario),
     unidad: b100 ? "Base 100: primer dato del período = 100" : [...new Set(calcs.map((c) => c.unidad))].join(" · "),
-    fuente: "Fuente: " + [...new Set(calcs.map((c) => fuenteLegible(c.serie.fuente)))].join("; "), nota: notaInflacion(calcs, b100),
+    fuente: "Fuente: " + [...new Set(calcs.flatMap(fuentesCalc).map(fuenteLegible))].join("; "), nota: notaInflacion(calcs, b100),
     fecha: hoy.toLocaleDateString("es-AR"),
     archivo: `primerolosdatos-${slug(tituloBase)}-${mesUlt.slice(0, 7)}`,
   };

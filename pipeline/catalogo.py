@@ -548,7 +548,8 @@ def construir(m: pd.DataFrame, token: str | None):
     series = propias(m)
     for nombre, f in [("IPC INDEC", lambda: ipc_indec(token, idx)), ("BCRA", lambda: bcra(idx)),
                       ("datos.gob.ar", lambda: datos_gob(idx, m["ipc_ar"])), ("INDEC social", lambda: indec_social(token, idx)),
-                      ("Mercados", lambda: mercados(idx)), ("Deuda (Finanzas)", lambda: __import__("deuda").series(idx))]:
+                      ("Mercados", lambda: mercados(idx)), ("Deuda (Finanzas)", lambda: __import__("deuda").series(idx)),
+                      ("Protección social", lambda: __import__("proteccion_social").series(idx))]:
         try:
             nuevas = f()
             print(f"  {nombre}: {len(nuevas)} series")
@@ -573,7 +574,8 @@ def a_json(series, idx):
         if v.notna().sum() == 0:
             return None, []
         a, b = idx.get_loc(v.first_valid_index()), idx.get_loc(v.last_valid_index())
-        vals = [None if pd.isna(x) else float(f"{x:.6g}") for x in v.iloc[a:b + 1]]
+        # Enteros exactos (cantidades como 4.138.967 niños o 1.215.548 pensiones: con 6 cifras saldrían 4.138.970); el resto, 6 cifras.
+        vals = [None if pd.isna(x) else int(x) if float(x).is_integer() else float(f"{x:.6g}") for x in v.iloc[a:b + 1]]
         return a, vals
 
     out = []

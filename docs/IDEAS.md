@@ -103,4 +103,6 @@ Idea del usuario. Agregado el mismo día: ~~ver el presupuesto de cada entidad p
 
 ## Datos calientes que faltan (2026-11-16)
 Idea del usuario: sumar datos que mencionan seguido el gobierno, los ministros y la oposición, que le importan a la gente y que el sitio no tiene. Ejemplos suyos: AUH y asignaciones en términos reales y cuánto cubren de la canasta (la cuenta de Capital Humano); pensiones por invalidez por gobierno; qué hizo cada gobierno por Malvinas (y la ley de sanciones a las petroleras); en qué gastan las universidades (licitaciones, si no presentan presupuesto); empleados públicos por provincia y municipio.
-Investigado: fuentes, IDs, ranking y qué no se puede en `docs/investigaciones/datos-nuevos-2026-11-16.md`. Falta elegir qué pasa a spec.
+Investigado: fuentes, IDs, ranking y qué no se puede en `docs/investigaciones/datos-nuevos-2026-11-16.md`.
+- ~~AUH, Tarjeta Alimentar, cobertura de la canasta y pensiones por invalidez~~ ✅ 2026-11-16 → spec: docs/specs/auh-pensiones.md
+- El resto (homicidios, empleo público nacional, recaudación por impuesto, universidades por inciso, Malvinas…): sin elegir.

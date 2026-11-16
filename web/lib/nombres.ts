@@ -50,6 +50,17 @@ export const NOMBRES: Record<string, string> = {
   soja_ratio_blue: "Brecha de la soja: Rosario contra Chicago (dólar blue)",
   soja_ratio_mep: "Brecha de la soja: Rosario contra Chicago (dólar MEP)",
   soja_ratio_ccl: "Brecha de la soja: Rosario contra Chicago (dólar CCL)",
+  auh: "Asignación Universal por Hijo (AUH)",
+  auh_alimentar: "AUH más Prestación Alimentar (un hijo)",
+  auh_hogar_4: "Lo que cobra un hogar de 4 por AUH y Alimentar",
+  auh_ninos: "Niños con AUH",
+  aaff_ninos: "Niños con asignación familiar por hijo (trabajadores registrados)",
+  pnc_invalidez: "Pensiones por invalidez",
+  pnc_madres: "Pensiones a madres de 7 o más hijos",
+  pnc_vejez: "Pensiones no contributivas por vejez",
+  gasto_auh: "Gasto del Estado en AUH",
+  gasto_aaff: "Gasto del Estado en asignaciones familiares",
+  gasto_pnc: "Gasto del Estado en pensiones no contributivas",
 };
 
 /** Nombres públicos de las categorías (`cat[1]`, y el grupo de las listas). El catálogo conserva el nombre técnico: sirve para agrupar y para leer los metadatos;
@@ -92,6 +103,17 @@ export const SINONIMOS: Record<string, string> = {
   deuda_pib: "deuda publica sobre pib deuda producto porcentaje del pib deuda bruta",
   deuda_consolidada: "deuda consolidada tesoro banco central bcra pasivos remunerados deuda total del estado leliq pases",
   dg_313_1_deuda_por_nes_0_t_28: "deuda comercial importaciones proveedores del exterior deuda externa privada importadores",
+  auh: "auh asignacion universal asignacion por hijo plan social anses",
+  auh_alimentar: "auh tarjeta alimentar prestacion alimentar asignacion universal plan social capital humano canasta alimentaria",
+  auh_hogar_4: "auh tarjeta alimentar prestacion alimentar asignacion universal plan social uca hogar dos hijos canasta alimentaria",
+  auh_ninos: "auh asignacion universal asignacion por hijo ninos beneficiarios hijos plan social",
+  aaff_ninos: "asignaciones familiares suaf asignacion por hijo hijos trabajadores registrados anses",
+  pnc_invalidez: "pensiones por invalidez discapacidad andis pensiones no contributivas pension laboral",
+  pnc_madres: "pensiones a madres de 7 hijos madres de siete hijos pensiones no contributivas",
+  pnc_vejez: "pensiones no contributivas por vejez pension por vejez",
+  gasto_auh: "gasto auh asignacion universal presupuesto plan social",
+  gasto_aaff: "gasto asignaciones familiares suaf presupuesto",
+  gasto_pnc: "gasto pensiones no contributivas invalidez discapacidad andis presupuesto",
 };
 
 // Los "regulados" del IPC (tarifas de servicios públicos, combustibles, transporte, educación…): se buscan también como "servicios públicos" y "tarifas", en todas las regiones.

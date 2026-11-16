@@ -2,7 +2,7 @@
 // Una variable (`Expr`, la misma de la URL del Histórico) contada en capítulos: ahora, cómo viene, el mismo mes en otros años,
 // cada presidente y mes a mes desde que asumió. Funciones puras (sin React): la ficha y las imágenes usan las mismas.
 // Ver docs/specs/ajustes-tanda-5.md y docs/specs/remodelacion-fichas.md.
-import { baseIdx, calcularMandato, claseVariacion, crearPres, estadisticasRows, filasGrafico, mesInicioTxt, statsMandato, varNum, type BaseCfg, type Fila, type ModoMandato, type Pres, type StatsM } from "./estadisticas";
+import { baseIdx, calcularMandato, pasoDatos, claseVariacion, crearPres, estadisticasRows, filasGrafico, mesInicioTxt, statsMandato, varNum, type BaseCfg, type Fila, type ModoMandato, type Pres, type StatsM } from "./estadisticas";
 import { fmtMes, lastIdx, mesNum, nf1, ok, redondeadoComo, r1 } from "./formato";
 import { TODOS_MESES, comparacionesCabecera, deltaDeComparacion, frecuenciaOrigen, leerComun, type Comun, type FrecOrigen } from "./historico";
 import type { ClaveFrase, DesdePref } from "./config";
@@ -263,6 +263,8 @@ export function cuentaDesde(F: string[], arr: ArrayLike<number | null | undefine
   const propia = baseIdx(F, x, b);
   const desde = fmtMes(F[st.iniI]);
   if (st.iniI === propia && ok(arr[propia])) return `Cuenta desde ${desde} (${mesInicioTxt(b.t0p[x.id] ?? b.t0).replace(/^el /, "")})`;
+  // Serie anual o semestral con datos antes: el primero del mandato llega después de asumir.
+  if (pasoDatos(arr) >= 6) for (let i = 0; i < st.iniI; i++) if (ok(arr[i])) return `Cuenta desde ${desde} (primer dato del mandato: la serie no es mensual)`;
   return `Cuenta desde ${desde} (inicio de los datos)`;
 }
 /** Filas y columnas de `TablaMandatos` de la ficha: una fila por presidente con datos.

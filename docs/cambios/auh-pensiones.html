@@ -1,0 +1,134 @@
+<title>AUH y pensiones</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@700&display=swap">
+<style>
+/* Lista de control: una columna, secciones en el orden del menú del sitio, cada cambio con su link directo */
+:root {
+  --bg: #f3f5fb; --sup: #ffffff; --tinta: #0b1230; --sec: #4a5478; --borde: #d9deee;
+  --acento: #1f6fd1; --sobre-acento: #ffffff; --accion: #f5b81c; --sobre-accion: #0b1230; --hecho: #1d8a55; --propio: #9a5400;
+  --f-txt: "Archivo", system-ui, sans-serif; --f-tit: "Archivo Narrow", "Archivo", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--tinta); font-family: var(--f-txt); font-size: 15px; line-height: 1.5; margin: 0 }
+.envoltura { max-width: 760px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+h1 { font-family: var(--f-tit); font-size: 30px; text-transform: uppercase; letter-spacing: .01em; margin: 0 0 6px; text-wrap: balance }
+.bajada { color: var(--sec); margin: 0 0 18px; max-width: 62ch }
+.barra { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--borde); margin-bottom: 8px }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.riel { display: inline-flex; background: var(--sup); border-radius: 999px; padding: 4px; gap: 2px }
+.riel button { border: 0; background: transparent; color: var(--tinta); font: 600 14px var(--f-txt); padding: 8px 14px; border-radius: 999px; cursor: pointer }
+.riel button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento) }
+.progreso { color: var(--sec); font-size: 14px; font-variant-numeric: tabular-nums; margin-left: auto }
+.aviso { font-size: 13px; color: var(--sec); margin: 6px 0 0; width: 100% }
+.aviso code { background: var(--sup); padding: 1px 6px; border-radius: 6px; font-size: 12px; user-select: all }
+section { padding-top: 22px }
+h2 { font-family: var(--f-tit); font-size: 19px; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline }
+h2 .n { color: var(--acento); font-variant-numeric: tabular-nums; min-width: 1.6em }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px }
+li { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; background: var(--sup); border-radius: 12px; padding: 10px 12px }
+li.visto { opacity: .55 }
+li.visto .que { text-decoration: line-through; text-decoration-color: var(--sec) }
+input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--hecho); margin: 0 }
+.que { min-width: 0 }
+.num { font-weight: 800; color: var(--acento); font-variant-numeric: tabular-nums; margin-right: 4px }
+.origen { display: block; font-size: 13px; margin-top: 2px; color: var(--sec) }
+.origen.propio { color: var(--propio) }
+.que small { display: block; color: var(--sec); font-size: 12.5px; word-break: break-all }
+a.ir { background: var(--accion); color: var(--sobre-accion); text-decoration: none; font-weight: 800; font-size: 13px; padding: 8px 12px; border-radius: 999px; white-space: nowrap }
+a.ir:focus-visible, .riel button:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px }
+.fuera { margin-top: 28px; padding: 14px; border: 1px dashed var(--borde); border-radius: 12px; color: var(--sec); font-size: 14px }
+@media (max-width: 480px) { li { grid-template-columns: 24px 1fr; } a.ir { grid-column: 2; justify-self: start } }
+</style>
+
+<div class="envoltura">
+  <h1>AUH, Alimentar y pensiones: dónde verlo</h1>
+  <p class="bajada">Cada renglón abre la página justo donde está el cambio. Para comentar uno, citá su número (por ejemplo 4.2). Debajo de cada cambio: lo que pediste, con tus palabras, o por qué lo agregué yo. Marcá la casilla cuando lo revisaste.</p>
+
+  <div class="barra">
+    <div class="riel" role="group" aria-label="Dónde abrir">
+      <button type="button" id="b-local" aria-pressed="true">En mi máquina</button>
+      <button type="button" id="b-sitio" aria-pressed="false">Sitio publicado</button>
+    </div>
+    <span class="progreso" id="progreso">0 de 0 vistos</span>
+    <p class="aviso" id="aviso"></p>
+  </div>
+
+  <div id="lista"></div>
+
+  <div class="fuera"><b>Fuera de este bloque</b> (quedan en <code>docs/investigaciones/datos-nuevos-2026-11-16.md</code>): pensiones por provincia cada 1.000 habitantes, la serie mensual con suspendidas, la línea de tiempo de ANDIS, el monto de la asignación familiar por tramo y las moratorias.</div>
+</div>
+
+<script>
+// Cada cambio: [qué cambió, ruta, origen]. Origen: P("palabras del pedido") = lo pediste vos; Y("por qué") = lo agregué yo (regla general o barrido).
+const P = (t) => ({ tipo: "pedido", t }), Y = (t) => ({ tipo: "propio", t });
+const SECCIONES = [
+  ["Buscar", [
+    ["La lupa encuentra AUH, Tarjeta Alimentar, pensiones por invalidez, discapacidad, ANDIS, asignaciones familiares (tocá la lupa y escribí «tarjeta alimentar»)", "/", Y("regla general: cada dato nuevo con sus sinónimos de búsqueda")],
+  ]],
+  ["Histórico", [
+    ["AUH y Alimentar: cuántas canastas alimentarias cubre, con la cuenta de Capital Humano (AUH completa más la Alimentar de un hijo contra la canasta de un adulto). Da 54,8 % en dic-23 y 100,7 % en nov-24, las cifras oficiales; con la misma cuenta, en 2021 y 2022 ya pasaba el 100 % para los chicos que cubría la Alimentar (hasta 14 años; desde oct-24, hasta 17)", "/historico/?v=can_cba%7Ecorr%7Eauh_alimentar%7Ecompra%7E&pl=auh-alimentar-vs-canasta", P("cuánto cubre lo que entregó de la canasta básica. Esto es un cálculo que ya hacía el Ministerio de Capital Humano")],
+    ["La misma cobertura con la cuenta de la UCA (lo que cobra en mano un hogar con dos hijos contra la canasta de toda la familia): 28 % en dic-23, 48 % hoy", "/historico/?v=can_cba_h2%7Ecorr%7Eauh_hogar_4%7Ecompra%7E&pl=auh-hogar-4-vs-canasta", Y("el «cubre el 100 %» y el «cubre el 45 %» salen de dos cuentas distintas con los mismos datos: mostrar las dos, cada una con lo que compara")],
+    ["AUH más Alimentar en pesos de hoy (la Alimentar, con la resolución de cada aumento)", "/historico/?v=auh_alimentar%7Ereal%7E%7Ecompra%7E", P("el AUH o las asignaciones familiares que se entregaban en términos reales, digamos, cuánto entregó cada gobierno")],
+    ["Gasto del Estado en AUH, en asignaciones familiares y en pensiones no contributivas (pesos de hoy; también como % del PIB en «Cómo verlo»)", "/historico/?v=gasto_auh%7Ereal%7E%7Ecompra%7E", P("el AUH o las asignaciones familiares que se entregaban en términos reales, digamos, cuánto entregó cada gobierno")],
+    ["Niños con AUH y niños con asignación familiar de trabajadores registrados (2009 a hoy, dos tramos empalmados)", "/historico/?v=auh_ninos%7Easis%7E%7Ecompra%7E", Y("para ver a cuántos llega, además de cuánto cobra cada uno")],
+    ["Cuando un dato se mide en otro (una canasta en la AUH, un producto en el salario), la fuente nombra a los dos y la unidad dice «canastas por cada …» (antes: solo la primera fuente y «mes por cada …»)", "/historico/?v=can_cbt_h2%7Ecorr%7Esmvm%7Ecompra%7E&pl=salario-minimo-vs-canasta", Y("bug encontrado: ya pasaba en «salario mínimo contra la canasta»; corregido en todo el sitio, también en las imágenes")],
+    ["Cantidades exactas: los números enteros (niños, pensiones) se guardan sin redondear (antes 4.138.970 en vez de 4.138.967)", "/historico/?v=auh_ninos%7Easis%7E%7Ecompra%7E", Y("bug encontrado: el sitio redondeaba todo a 6 cifras y no coincidía con la fuente")],
+  ]],
+  ["Ficha del dato", [
+    ["AUH en pesos de hoy, con su propia página para compartir: por presidente, octubre de cada año, récord", "/dato/auh-real/", P("el AUH o las asignaciones familiares que se entregaban en términos reales, digamos, cuánto entregó cada gobierno")],
+    ["Pensiones por invalidez, con su propia página para compartir", "/dato/pensiones-por-invalidez/", P("las pensiones por invalidez, que es un tema que se discute bastante. ¿Qué cantidad dio cada gobierno?")],
+    ["Pensiones a madres de 7 o más hijos y por vejez", "/historico/?v=pnc_madres%7Easis%7E%7Ecompra%7E", Y("las otras pensiones no contributivas de la misma fuente")],
+  ]],
+  ["Temas", [
+    ["Empleo y pobreza: «AUH real» y «Pensiones por invalidez» entre los principales; abajo, la explicación de las dos cuentas de cobertura", "/tema/empleo/", Y("para que se encuentren desde el tema sin buscarlos")],
+  ]],
+  ["Por presidente", [
+    ["Pensiones por invalidez por presidente, de diciembre a diciembre: Macri −2,3 %, Alberto Fernández +16,8 %, Milei −5,4 % (cantidad vigente, no altas)", "/dato/pensiones-por-invalidez/#fi-pres", P("las pensiones por invalidez, que es un tema que se discute bastante. ¿Qué cantidad dio cada gobierno?")],
+    ["AUH en pesos de hoy por presidente", "/dato/auh-real/#fi-pres", P("el AUH o las asignaciones familiares que se entregaban en términos reales, digamos, cuánto entregó cada gobierno")],
+    ["Series anuales: cada mandato cierra con el diciembre del año en que terminó (antes el último año no se le contaba a nadie) y el aviso dice «primer dato del mandato: la serie no es mensual»", "/dato/pensiones-por-invalidez/#fi-pres", Y("bug encontrado: también afectaba a «Deuda bruta / PIB»")],
+  ]],
+  ["Gráficos listos", [
+    ["Cuatro nuevos: las dos coberturas de la canasta, AUH en pesos de hoy y pensiones por invalidez", "/plantillas/?q=auh", Y("los mismos gráficos, a un toque")],
+  ]],
+];
+const BASES = { local: "http://localhost:3100", sitio: "https://primerolosdatos.com.ar" };
+const leer = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
+const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} };
+let base = leer("auh-base", "local"), vistos = leer("auh-vistos", {});
+
+function dibujar() {
+  const cont = document.getElementById("lista"); cont.innerHTML = "";
+  let total = 0, hechos = 0;
+  SECCIONES.forEach(([nombre, items], i) => {
+    const s = document.createElement("section");
+    s.innerHTML = `<h2><span class="n">${i + 1}</span>${nombre}</h2>`;
+    const ul = document.createElement("ul");
+    items.forEach(([que, ruta, origen], j) => {
+      const id = `${i}-${j}`, url = BASES[base] + ruta, ok = !!vistos[id];
+      total++; if (ok) hechos++;
+      const li = document.createElement("li"); if (ok) li.className = "visto";
+      li.innerHTML = `<input type="checkbox" id="c${id}" ${ok ? "checked" : ""} aria-label="Visto">
+        <label class="que" for="c${id}"><span class="num">${i + 1}.${j + 1}</span> ${que}<span class="origen ${origen.tipo}">${origen.tipo === "pedido" ? "Pediste: «" + origen.t + "»" : "Agregado por mí: " + origen.t}</span><small>${ruta}</small></label>
+        <a class="ir" href="${url}" target="_blank" rel="noopener">Ver →</a>`;
+      li.querySelector("input").addEventListener("change", (e) => { vistos[id] = e.target.checked; guardar("auh-vistos", vistos); dibujar(); });
+      ul.appendChild(li);
+    });
+    s.appendChild(ul); cont.appendChild(s);
+  });
+  document.getElementById("progreso").textContent = `${hechos} de ${total} vistos`;
+  document.getElementById("b-local").setAttribute("aria-pressed", base === "local");
+  document.getElementById("b-sitio").setAttribute("aria-pressed", base === "sitio");
+  document.getElementById("aviso").innerHTML = base === "local"
+    ? 'Necesita la vista local andando. Si no abre, corré en la carpeta del proyecto: <code>python -m http.server 3100 --directory web/out</code>'
+    : "Solo muestra los cambios después del commit, el push y la corrida en verde (alrededor de un minuto).";
+}
+document.getElementById("b-local").onclick = () => { base = "local"; guardar("auh-base", base); dibujar(); };
+document.getElementById("b-sitio").onclick = () => { base = "sitio"; guardar("auh-base", base); dibujar(); };
+dibujar();
+</script>

@@ -32,6 +32,7 @@ import { datoFijoDe, hrefFijo } from "@/lib/datos-fijos";
 import { fmtEjeDe, notaInflacion, tituloVariable } from "@/lib/imagen-datos";
 import { fuentePublica } from "@/lib/fuente-publica";
 import type { Expr, Motor, SerieMeta } from "@/lib/motor";
+import { fuentesCalc } from "@/lib/motor";
 import { hrefDato, hrefHistorico, idsDe } from "@/lib/temas";
 import {
   cabeceraFicha, filasMandatosFicha, historicoFicha, hrefMandatoDe, hrefPresidentesDe, mandatoFicha, mesesIguales, paramsInicio, periodosFicha,
@@ -101,7 +102,7 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
     return mandatoFicha(m, PRES, PRES_T0, e, b, pd);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [m, version, kE, b, pd, PRES]);
-  const fuente = fuentePublica(c.serie.fuente);
+  const fuente = fuentesCalc(c).map(fuentePublica).join("; ");
   const V = useViene(m, e, version, p);   // el período del gráfico: lo usan el capítulo "¿Cómo viene?" y su Compartir
   const hrefV = hrefHistorico(e, V.per ? { d: V.D.E.desde, h: V.D.E.hasta } : {});
   const textoV = cab ? `${nombre}: ${cab.cifra} en ${cab.fecha}. Fuente: ${fuente}.` : undefined;

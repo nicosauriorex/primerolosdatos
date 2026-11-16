@@ -160,6 +160,15 @@ export interface StatsM {
   n: number; total?: number; ini?: number; iniI?: number; fin?: number; finI?: number;
   min?: number; minI?: number; max?: number; maxI?: number; prom?: number; med?: number;
 }
+/** Cada cuántos meses hay dato (la mediana de la distancia entre datos seguidos): 1 en una serie mensual, 6 en una semestral, 12 en una anual. */
+export function pasoDatos(arr: ArrayLike<number | null | undefined>): number {
+  const d: number[] = [];
+  let ant = -1;
+  for (let i = 0; i < arr.length; i++) if (ok(arr[i])) { if (ant >= 0) d.push(i - ant); ant = i; }
+  if (!d.length) return 1;
+  d.sort((a, c) => a - c);
+  return d[Math.floor(d.length / 2)];
+}
 export function statsMandato(F: string[], arr: Vals, p: Pres, b: BaseCfg): StatsM {
   const res: StatsM = { n: 0 };
   const vals: [number, number][] = [];
@@ -168,7 +177,12 @@ export function statsMandato(F: string[], arr: Vals, p: Pres, b: BaseCfg): Stats
   const bi = baseIdx(F, p, b);
   res.n = vals.length; res.total = p.i1 - p.i0 + 1;
   if (bi >= 0 && ok(arr[bi])) { res.ini = arr[bi] as number; res.iniI = bi; } else { res.ini = vals[0][0]; res.iniI = vals[0][1]; }
-  const u = vals[vals.length - 1]; res.fin = u[0]; res.finI = u[1];
+  let u = vals[vals.length - 1];
+  // Serie anual (un dato cada 12 meses o más, como las de diciembre): si hay dato en el mes siguiente al último del mandato (el de
+  // asunción del sucesor), ese es el cierre; si no, el último año no se le contaría a nadie. Solo cierra: no entra en mínimo, máximo ni promedio.
+  const sig = p.i1 + 1;
+  if (pasoDatos(arr) >= 12 && p.i1 - u[1] >= 6 && sig < arr.length && ok(arr[sig])) u = [arr[sig] as number, sig];
+  res.fin = u[0]; res.finI = u[1];
   const mn = vals.reduce((a, c) => c[0] < a[0] ? c : a), mx = vals.reduce((a, c) => c[0] > a[0] ? c : a);
   res.min = mn[0]; res.minI = mn[1]; res.max = mx[0]; res.maxI = mx[1];
   res.prom = vals.reduce((a, c) => a + c[0], 0) / vals.length;

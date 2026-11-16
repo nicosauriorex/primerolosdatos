@@ -59,6 +59,8 @@ export const TEMAS: Tema[] = [
       { id: "pob_tasa_pobreza_personas", nombre: "Pobreza", corto: "la pobreza" },
       { id: "pob_tasa_indigencia_personas", nombre: "Indigencia", corto: "la indigencia" },
       { id: "dg_151_1_aariadotac_2012_m_26", nombre: "Empleo privado registrado", corto: "el empleo privado registrado" },
+      { id: "auh", nombre: "AUH real", corto: "la AUH real", med: "real" },
+      { id: "pnc_invalidez", nombre: "Pensiones por invalidez", corto: "las pensiones por invalidez", med: "asis" },
     ], grupos: ["Empleo y pobreza"], q: "empleo", desc: "Desocupación, empleo, informalidad, pobreza e indigencia en Argentina." },
   { slug: "externo", nombre: "Comercio exterior", cats: ["Sector externo"], corto: INFO_CORTA["Sector externo"].texto, largo: largoDe("Sector externo"),
     principales: [
