@@ -814,6 +814,32 @@ function columnasMeses(ctx: Ctx, r: Rect, L: LienzoDe<"meses">, pal: Paleta, esc
   ctx.font = fuenteDe(pal, 800, fVal); ctx.textAlign = "left";
   if (ref) { ctx.fillStyle = pal.accion; ctx.fillText(recortarPuntos(ctx, ref.t, x1 - x0), ref.x, ref.y); }
   if (act) { ctx.fillStyle = pal.acento; ctx.fillText(recortarPuntos(ctx, act.t, x1 - x0), act.x, act.y); }
+  // escala: sin eje, una línea punteada a la altura de la columna más alta con su valor y su año (si no es ya la del año actual o la de referencia),
+  // en el primer costado donde el texto no tape ninguna columna ni la columna (o la guía) del año actual o de referencia.
+  // Si la actual o la de referencia empatan con la más alta, ya tienen su rótulo: no se dibuja.
+  const vMax = Math.max(...vals), iMax = vals.indexOf(vMax);
+  const empata = (i: number) => i >= 0 && vals[i] === vMax;
+  if (vMax > 0 && !empata(iAct) && !empata(iRef)) {
+    const fEsc = px(Math.max(13, 20 * Math.max(esc, 0.9)));
+    ctx.font = fuenteDe(pal, 600, fEsc);
+    const t = recortarPuntos(ctx, `El más alto: ${L.filas[iMax].texto} (${L.filas[iMax].anio})`, x1 - x0), w = ctx.measureText(t).width;
+    const yl = Y(vMax), base = yl + fEsc + 6;
+    const libre = (xa: number) => L.filas.every((f, k) => {
+      const a = x0 + k * banda, b = a + banda;
+      return b <= xa - 6 || a >= xa + w + 6 || (k !== iAct && k !== iRef && Y(Math.max(f.valor, 0)) > base + 6);
+    });
+    // sin lugar debajo de la línea (columnas anchas y parejas): arriba de ella, en el renglón de los rótulos, si no choca con el del año actual ni el de referencia
+    const arriba = yl - 8, sobra = (xa: number) =>
+      [act, ref].every((q) => !q || q.x >= xa + w + 12 || q.x + q.w <= xa - 12 || Math.abs(q.y - arriba) >= renglon)
+      && [iAct, iRef].every((i) => i < 0 || xCol(i) + bw / 2 < xa - 8 || xCol(i) + bw / 2 > xa + w + 8);   // ni su guía vertical
+    const pos = libre(x0) ? { x: x0, y: base } : libre(x1 - w) ? { x: x1 - w, y: base }
+      : arriba - fEsc >= r.y + 4 && sobra(x0) ? { x: x0, y: arriba } : arriba - fEsc >= r.y + 4 && sobra(x1 - w) ? { x: x1 - w, y: arriba } : null;
+    if (pos) {
+      ctx.strokeStyle = pal.tintaSec; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.5; ctx.setLineDash([6, 6]);
+      ctx.beginPath(); ctx.moveTo(x0, yl); ctx.lineTo(x1, yl); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+      ctx.fillStyle = pal.tintaSec; ctx.textAlign = "left"; ctx.fillText(t, pos.x, pos.y);
+    }
+  }
   // años del primero y del último, debajo del eje
   ctx.font = fuenteDe(pal, 600, fAnio); ctx.fillStyle = pal.tintaSec;
   const yAnio = r.y + r.h - pad;

@@ -35,6 +35,13 @@ Sale de `docs/ESTADO.md` («Sin verificar») y del pedido del usuario del 2026-1
 - Sin cambios necesarios: Viento, Provincias (con 24 filas, el horizontal va en dos columnas), Universidades (el total en «millones» es a propósito: en «billones» la fila más chica se leería «$ 0,07 billones»).
 - **Sin verificar:** las animaciones (carrusel de la portada, despliegue del parte del Banco Central, «Mes a mes» con lápiz). Con el panel del navegador oculto no corren ni el `IntersectionObserver` ni las animaciones CSS: se comprobó que el observador no responde ni con una prueba aparte, así que no es un error del sitio. En el celular (táctil), el carrusel no avanza solo por diseño (R5).
 
+## Segunda vuelta (2026-11-17)
+Las imágenes que quedaban sin mirar, vistas en captura (lienzo sacado con `toDataURL`, panel oculto):
+- **Sin cambios necesarios:** «¿Cómo viene?» de la ficha (1:1, 4:5 y 16:9, inflación mensual); el gráfico y «por presidente» de la deuda consolidada (las cuentas cierran: 74,5 → 65,5 = −9,0 p.p.); el aviso «Sin Milei: no hay datos de carne en México…» en la imagen de precios por presidente.
+- **Regla general: unas barras sin eje dicen al menos su máximo.** «<mes> de cada año» (`lib/imagen.ts`, `columnasMeses`) solo rotulaba el año actual: no se podía leer la altura de las demás. Ahora una línea punteada a la altura de la columna más alta, con «El más alto: 8,3 % (2023)», debajo de la línea, del costado donde no tapa ninguna columna ni la columna (con su guía) del año actual o de referencia; con columnas anchas y parejas (deuda, 8 años) va arriba de la línea, en el renglón de los rótulos, si no choca con el del año actual; si no entra en ningún lado, no se dibuja; si la actual o la de referencia empatan con la más alta, ya tienen su rótulo y tampoco se dibuja. El texto se corta con «…» si no entra en el ancho.
+- **La frase dice lo que muestra la fila.** Precios por presidente (`components/secciones/PreciosMundo.tsx`) decía «promedio de cada presidencia» aunque contra México cada fila es el único año medido por el Banco Mundial. Ahora: «el año medido en cada presidencia» si todas son medidas, «promedio de cada presidencia» si todas son estimadas, y las dos cosas si se mezclan. La frase ya no repite «Carne:», que está en el título.
+- **Sigue sin verificar:** las animaciones (necesitan el panel del navegador a la vista).
+
 ## Dónde ver los cambios
 Local: `http://localhost:3100<ruta>` (vista `web-out`). Publicado: `https://primerolosdatos.com.ar<ruta>`, después del commit, el push y la corrida en verde. Página: `docs/cambios/verificacion-imagenes.html`.
 
@@ -52,3 +59,10 @@ Local: `http://localhost:3100<ruta>` (vista `web-out`). Publicado: `https://prim
    - 5.1 Ingresos Brutos → Compartir → Imagen: línea del tope, «Sin una sola cifra», «industria manufacturera» — `/provincias/?vista=cuentas#pc-ib`. Agregado por mí.
 6. Novedades
    - 6.1 Títulos sin dos paréntesis seguidos — `/novedades/`. Agregado por mí: el mismo caso que 1.1.
+
+Segunda vuelta (página `docs/cambios/verificacion-imagenes-2.html`, numeración propia):
+1. Ficha
+   - 1.1 «¿Cómo fue octubre en otros años?» → Compartir → Imagen: línea y rótulo del más alto — `/dato/inflacion-mensual/`. Agregado por mí: sin eje no se leía ninguna barra salvo la última.
+   - 1.2 Lo mismo con pocas columnas anchas: el rótulo va arriba de la línea — `/dato/deuda-consolidada-pib/`. Agregado por mí: con 8 años no quedaba lugar debajo.
+2. El mundo y la Argentina
+   - 2.1 Precios por presidente → Compartir → Imagen: «el año medido» en vez de «promedio» — `/contexto/?pqr=carne&pqc=MEX&pqv=pres#precios-mundo`. Agregado por mí: la frase contradecía «medido en 2017».

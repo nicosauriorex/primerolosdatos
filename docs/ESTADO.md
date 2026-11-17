@@ -47,13 +47,13 @@ A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunid
 - **Novedades:** las fechas estimadas (aparecen cuando cada fuente tenga dos meses registrados, hacia enero) y la primera entrada nueva del registro en una corrida (la del push dio 0, sin datos nuevos).
 - **Conteos:** el botón de Compartir real hasta la base (se probó el pedido al servidor, no el clic: el portapapeles falla con el panel oculto) y la pregunta con el menú de compartir de un celular real.
 - **En general:** celular real (Atrás, teclado, safe-area de la barra inferior) y aspecto en capturas de casi todas las páginas: el panel del navegador suele estar oculto y se verifica midiendo. Tema claro y 375 px medidos en ocho rutas el 2026-11-16 (sin desborde; contraste arreglado en las subpestañas).
-- **Imágenes compartidas** sin mirar en captura: «¿Cómo viene?»; meses y barras con variación de la ficha; aviso "Sin <presidente>" en la imagen de precios por presidente. Las demás se miraron el 2026-11-17 ([verificación](specs/verificacion-imagenes.md)).
+- **Imágenes compartidas:** todas miradas en captura el 2026-11-17 ([verificación](specs/verificacion-imagenes.md), con la segunda vuelta: escala en «<mes> de cada año» y frase de precios por presidente; sin commit todavía).
 - **Animaciones:** Mes a mes con lápiz, despliegue del parte del Banco Central, carrusel de la portada: con el panel oculto no corren ni el `IntersectionObserver` ni las animaciones CSS (comprobado el 2026-11-17 con una prueba aparte). Mirarlas con el panel a la vista.
 - **Datos:**
   - Universidades: lo que declaran en la Cuenta de Inversión 2024 no cierra con lo transferido (la página lo dice).
   - Banco Central: unos cinco días hábiles de atraso en todas las fuentes legibles; falta saber si es lo normal.
   - Precios contra el mundo: "La región" puede quedar con un mes viejo (ropa: dic-23); México corta comunicación, recreación y varios en jul-24; Chile, comunicación y recreación en dic-23; EE.UU. sin oct-25 (cierre del gobierno).
-  - Deuda: el % del PIB de la web (dólar promedio, PIB de 12 meses) difiere unas décimas del de Finanzas (lo dice la ficha); imagen para compartir de las fichas nuevas sin mirar.
+  - Deuda: el % del PIB de la web (dólar promedio, PIB de 12 meses) difiere unas décimas del de Finanzas (lo dice la ficha).
   - Femicidios 2018 y 2020 salen del gráfico del informe 2025 (sin frase textual).
   - Las estimaciones propias de reservas netas dependen de supuestos fijos (swaps 20.000, SEDESA 2.000).
 

@@ -146,8 +146,11 @@ function Cuerpo({ m, d, PRES, p, set }: { m: Motor; d: DatosPM; PRES: Pres[]; p:
     tipo: "ctx-precios", titulo: "Precios contra el mundo: por rubro", frase: `Precios de ${dichoRef} contra ${dichoContra}, rubro por rubro${porRubro.fechaTxt ? ` (${porRubro.fechaTxt})` : ""}.`,
     filas: rubrosOrd, soloMedido: [], refNombre: nombreRef, dolar, fuente: d.fuente, enc: "Rubro", contraDicho: dichoContra,
   } : null);
+  // con estimado mes a mes la fila es el promedio del mandato; sin él, el único año que midió el Banco Mundial en ese mandato
+  const cuantoPres = porPres.every((f) => f.modo === "medido") ? "el año medido en cada presidencia"
+    : porPres.some((f) => f.modo === "medido") ? "promedio de cada presidencia o, sin estimado mes a mes, el año medido" : "promedio de cada presidencia";
   const vistaPres = (): VistaCtx | null => (porPres.length ? {
-    tipo: "ctx-precios", titulo: `${rubro.n}: precios por presidente`, frase: `${rubro.n}: precios de ${dichoRef} contra ${dichoContra}, promedio de cada presidencia.${avisoPres ? ` ${avisoPres}` : ""}`,
+    tipo: "ctx-precios", titulo: `${rubro.n}: precios por presidente`, frase: `Precios de ${dichoRef} contra ${dichoContra}, ${cuantoPres}.${avisoPres ? ` ${avisoPres}` : ""}`,
     filas: porPres.map((f) => (f.cierre ? { ...f, fecha: `${f.fecha} · al cierre (${f.cierre.fecha}): ${txtDif(f.cierre.dif)}` } : f)), soloMedido: [], refNombre: nombreRef, dolar, fuente: d.fuente, enc: "Presidente", orden: "fijo", contraDicho: dichoContra,
   } : null);
   const compartir = (cual: string, crear: () => VistaCtx | null) => (
