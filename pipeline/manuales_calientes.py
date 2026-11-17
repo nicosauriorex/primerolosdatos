@@ -126,22 +126,12 @@ def series(idx):
 
     p = _piquetes()
     if p is not None:
-        s, afirm = p
-        # Solo las afirmaciones sobre «cero» (o «100 %»), cada una con lo que dijeron los chequeos; el veredicto se lee del campo, no se corta el texto.
-        cero = [a for a in afirm if any(k in a.get("textual", "").lower() for k in ("cero", " 0", "100%", "100 %"))]
-        partes = []
-        for a in cero:
-            ch = a.get("chequeo", "")
-            veredicto = "Chequeado lo calificó «Falso»" if "Falso" in ch else ("el director de Diagnóstico Político respondió que «es inexacto»" if "inexacto" in ch else ch)
-            partes.append(f"{a.get('quien', '').split(' (')[0]}, {(lambda d: d[:1].lower() + d[1:])(a.get('donde', '').split(',')[0])}: «{a.get('textual', '').split(' // ')[0]}» ({veredicto}).")
-        links = sorted({a["url"] for a in cero if a.get("url")})
+        s, _afirm = p  # las frases del Gobierno y los chequeos quedan en datos/manual/piquetes.json, no se muestran (pedido del usuario, 2026-11-17)
         out.append(S("piquetes", "Piquetes (cortes de calle y ruta)", CAT_SEG, "none", "cortes por año", s.reindex(idx), -1,
                      "Diagnóstico Político (consultora privada), citado por Chequeado y otros medios",
                      "Cantidad de cortes de calle y ruta en protestas, según el conteo de la consultora privada Diagnóstico Político, que cuenta cada interrupción total o parcial "
                      "de una vía pública que informan los medios de todo el país (más de un centenar), sin importar cuánto dure. No hay conteo oficial publicado del Ministerio de Seguridad. "
-                     "Los años sin una cita abierta quedan vacíos. El Gobierno afirma que los piquetes bajaron a cero, pero el conteo de 2025 da "
-                     + f"{int(s.iloc[-1]):,}".replace(",", ".") + " cortes: " + " ".join(partes)
-                     + (" Los chequeos completos están en chequeado.com (notas del 13 de marzo de 2025, del 1 de marzo de 2026 y del 10 de julio de 2026)." if links else "")))
+                     "Los años sin una cita abierta quedan vacíos. Dato anual, se ubica en diciembre."))
 
     c = _carne()
     if c is not None:

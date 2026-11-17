@@ -119,6 +119,8 @@ Universidades (inscriptos, estudiantes y egresados en serie larga), robos de mot
 - Web: tipos, previas (58 de 58) y build sin error. En el navegador (leyendo el contenido y midiendo; sin capturas, el panel está oculto): `/rigi/` (cifras, sectores, tabla ordenable), fichas nuevas, «Datos trimestrales» en puestos, fuentes de obra pública y SRT completas, lupa con trabajo en negro, piquetes, rigi, vacunas, robo de autos, carne; 17 rutas a 360 px sin desborde de página (ancho 357), sin errores de consola.
 - Revisor: primera pasada marcó 9 puntos (veredicto «Falso» perdido en la desc de piquetes, pollo y cerdo en info.ts, frase de carne al revés, categoría de pobreza UTDT, versiones mezcladas sin aviso, un error de obra que tiraba las 11 series, «100 o 200 medios», proyecto RIGI sin norma en el recuento, división por None); todos corregidos.
 
+- Después de publicar (2026-11-17), a pedido del usuario («eso de las frases de chequeado sacalas»): la ficha de piquetes ya no muestra las frases del Gobierno ni los chequeos; siguen en `datos/manual/piquetes.json`.
+
 ## Dónde ver los cambios
 Local con la vista `web-out` (`http://localhost:3100<ruta>`); en el sitio (`https://primerolosdatos.com.ar<ruta>`) recién después del commit, el push y la corrida completa en verde. Lista con links: `docs/cambios/datos-calientes-3.html`.
 1. Portada y menús: RIGI en el menú «Más» y el mosaico — `/`; la lupa encuentra trabajo en negro, pobres, vacunas, piquetes, carne, rigi, motos, robo de autos — `/`
