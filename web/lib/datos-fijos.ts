@@ -57,6 +57,9 @@ export const DATOS_FIJOS: DatoFijo[] = [
   { slug: "trabajo-en-negro", e: ex("puestos_noreg_pct", "asis") },
   { slug: "pobres", e: ex("pobres_31", "asis") },
   { slug: "empresas", e: ex("empresas_art", "asis") },
+  { slug: "empresas-que-cierran", e: ex("cierres_empresas", "asis") },
+  { slug: "puestos-por-cierre", e: ex("puestos_por_cierre", "asis") },
+  { slug: "empresas-chicas", e: ex("empresas_chicas_pct", "asis") },
   // Comercio exterior
   { slug: "saldo-comercial", e: ex("dg_saldo_comercial", "corr", { esc: "pib" }) },
   { slug: "cuenta-corriente", e: ex("dg_160_2_tl_cuennte_0_t_22", "corr", { esc: "pib" }) },

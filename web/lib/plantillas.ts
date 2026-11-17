@@ -139,6 +139,22 @@ export function crearPlantillas(metas: SerieMeta[]): Plantilla[] {
     "Denuncias de robo o hurto de autos inscriptas en el Registro del Automotor (no es el total de denuncias policiales)",
     ["robo de autos", "autos robados", "inseguridad", "recuperos"],
     [E("robos_autos", { med: "asis" })]);
+  manual("empresas-por-tamano", "Empresas por tamaño", "Empleo y pobreza",
+    "Empleadores con al menos un trabajador declarado en una ART, según cuántos trabajadores tienen. Son variaciones netas por tramo: una empresa que achica pasa a un tramo menor",
+    ["empresas", "pymes", "microempresas", "cuits", "empresas chicas", "tamano de empresas", "monotributistas con empleados"],
+    ["empresas_t1", "empresas_t2a5", "empresas_t6a10", "empresas_t11a50", "empresas_t51a500", "empresas_t501"].map((id) => E(id, { med: "asis" })));
+  manual("trabajadores-segun-tamano-de-empresa", "Trabajadores según el tamaño de la empresa", "Empleo y pobreza",
+    "Trabajadores cubiertos por una ART, según el tamaño de la empresa donde trabajan",
+    ["trabajadores", "pymes", "empresas chicas", "tamano de empresas", "empleo por tamano"],
+    ["trab_empresas_t1", "trab_empresas_t2a5", "trab_empresas_t6a10", "trab_empresas_t11a50", "trab_empresas_t51a500", "trab_empresas_t501"].map((id) => E(id, { med: "asis" })));
+  manual("empresas-que-abren-y-cierran", "Empresas que abren y cierran", "Empleo y pobreza",
+    "Empresas del sector privado que empezaron o dejaron de declarar empleados en el SIPA, por trimestre (con estacionalidad: comparar con el mismo trimestre de otro año)",
+    ["empresas que cierran", "cierre de empresas", "cierran empresas", "aperturas de empresas", "pymes", "cuits"],
+    ["aperturas_empresas", "cierres_empresas"].map((id) => E(id, { med: "asis" })));
+  manual("puestos-perdidos-cierres-y-empresas-que-achican", "Puestos perdidos: cierres y empresas que achican", "Empleo y pobreza",
+    "Puestos de trabajo destruidos por trimestre: por empresas que cerraron y por empresas que siguen abiertas y redujeron su plantel",
+    ["despidos", "puestos perdidos", "empresas que cierran", "achican", "cierre de empresas"],
+    ["puestos_perdidos_cierres", "puestos_perdidos_contraccion"].map((id) => E(id, { med: "asis" })));
   manual("subsidios-transporte-y-energia-en-pesos-de-hoy", "Subsidios: transporte y energía en pesos de hoy", "Fiscal",
     "Subsidios económicos al transporte (mensual) y a la energía (trimestral, repartido en los 3 meses), ajustados por inflación",
     ["subsidios", "colectivos", "trenes", "transporte", "energia", "luz", "gas", "tarifas"],

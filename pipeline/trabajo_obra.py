@@ -203,7 +203,8 @@ def _empresas(idx, out):
                  "Empleadores (empresas y otras unidades productivas, sin casas particulares) que tienen al menos una persona trabajadora declarada "
                  "con contrato vigente en una ART (Superintendencia de Riesgos del Trabajo). "
                  "La SRT avisa que un cambio de un mes puede venir de rescisiones de contratos o de nóminas vacías: no es lo mismo que empresas que abren o cierran. "
-                 "Tampoco es el total de empleadores del país (no incluye a quienes no tienen ART)."))
+                 "Tampoco es el total de empleadores del país (no incluye a quienes no tienen ART). "
+                 "Por tamaño: ver Empresas por tamaño (SRT)."))
 
 
 # ---------------------------------------------------------------- motos

@@ -1,4 +1,5 @@
 aaff_ninos
+aperturas_empresas
 auh
 auh_alimentar
 auh_hogar_4
@@ -39,6 +40,7 @@ can_cba_h2
 can_cbt
 can_cbt_h2
 carne_vacuna
+cierres_empresas
 cpi_usa
 ctx_fed
 ctx_maiz
@@ -116,6 +118,13 @@ empleo_publico_apn
 empleo_publico_empresas
 empleo_publico_nacional
 empresas_art
+empresas_chicas_pct
+empresas_t1
+empresas_t11a50
+empresas_t2a5
+empresas_t501
+empresas_t51a500
+empresas_t6a10
 femicidios
 fx_blue
 fx_ccl
@@ -620,6 +629,9 @@ puestos_asal_noreg
 puestos_asal_reg
 puestos_no_asal
 puestos_noreg_pct
+puestos_perdidos_cierres
+puestos_perdidos_contraccion
+puestos_por_cierre
 puestos_total
 rec_bienes_personales
 rec_cheque
@@ -648,6 +660,12 @@ soja_ratio_oficial
 soja_ros
 sub_transporte
 tcrm
+trab_empresas_t1
+trab_empresas_t11a50
+trab_empresas_t2a5
+trab_empresas_t501
+trab_empresas_t51a500
+trab_empresas_t6a10
 transf_prov
 transf_prov_capital
 transf_prov_corrientes

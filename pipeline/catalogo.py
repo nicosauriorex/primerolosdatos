@@ -553,6 +553,7 @@ def construir(m: pd.DataFrame, token: str | None):
                       ("Sociedad y recaudación", lambda: __import__("sociedad").series(idx, next((s["v"] for s in series if s["id"] == "poblacion"), None))),
                       ("Más series (subsidios, provincias, autos, gasto)", lambda: __import__("mas_series").series(idx)),
                       ("Trabajo, obra pública, motos y robos", lambda: __import__("trabajo_obra").series(idx)),
+                      ("Empresas por tamaño, aperturas y cierres", lambda: __import__("empresas").series(idx)),
                       ("Población, salud y pobres", lambda: __import__("poblacion_salud").series(idx, next((s["v"] for s in series if s["id"] == "poblacion"), None))),
                       ("Datos a mano (pobreza UTDT, piquetes, carne, RIGI)", lambda: __import__("manuales_calientes").series(idx))]:
         try:

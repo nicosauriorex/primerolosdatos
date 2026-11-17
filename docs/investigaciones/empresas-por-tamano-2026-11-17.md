@@ -17,7 +17,7 @@ Pedido del usuario: «fijate si tenemos empleados por empresa. porque a veces ci
 
 ## Resultado (OEDE)
 - Puestos por empresa cerrada: 2,2 a 2,6 por trimestre (1T-26: 18.013 cierres, 43.458 puestos). Empresa promedio: 12,3 puestos.
-- 1T-26: 42.381 puestos perdidos por cierres contra 230.305 por contracción de empresas que siguen.
+- 1T-26: 42.381 puestos perdidos por cierres contra 225.462 por contracción de empresas que siguen (con estacionalidad; 230.305 sin estacionalidad).
 - «Cierre» = la CUIT deja de declarar empleo en el SIPA (no es baja en ARCA ni quiebra); el OEDE avisa que los cierres recientes se revisan.
 
 ## No hay
