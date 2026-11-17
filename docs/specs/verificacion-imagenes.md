@@ -1,6 +1,6 @@
 # Tanda de verificación: imágenes compartidas, Novedades y animaciones
 
-Estado: implementada (2026-11-17), sin subir
+Estado: implementada y publicada (2026-11-17, 29dbd1f; corrida en verde, run 44147580068)
 
 Sale de `docs/ESTADO.md` («Sin verificar») y del pedido del usuario del 2026-11-17: «Tanda de verificación». Se miraron en captura las imágenes que nunca se habían visto. Cada imagen se sacó del lienzo con `toDataURL`, así que se ve aunque el panel del navegador esté oculto. También se miraron el bloque de Novedades de la portada y las animaciones. Lo que estaba mal se corrigió con una regla general, no solo en el caso encontrado.
 
