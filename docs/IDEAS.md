@@ -101,7 +101,3 @@ Idea del usuario: sumar datos que mencionan seguido el gobierno, los ministros y
 Investigado: fuentes, IDs, ranking y qué no se puede en `docs/investigaciones/datos-nuevos-2026-11-16.md`.
 - ~~AUH, Tarjeta Alimentar, cobertura de la canasta y pensiones por invalidez~~ ✅ 2026-11-16 → spec: docs/specs/auh-pensiones.md
 - El resto (homicidios, empleo público nacional, recaudación por impuesto, universidades por inciso, Malvinas…): sin elegir.
-
-## Empresas que cierran: ¿de qué tamaño? (2026-11-17)
-Idea del usuario: «fijate si tenemos empleados por empresa. porque a veces cierran empresas (cuits) con 1 solo empleado o sin. y se usa eso para decir que cierran empresas. o como lo podemos contrastar».
-→ spec: docs/specs/empresas-por-tamano.md. Investigado (fuentes bajadas; detalle en `docs/investigaciones/empresas-por-tamano-2026-11-17.md`): de las 32.429 empresas con trabajadores que bajaron en la SRT entre nov-23 y ago-26, 26.808 (82,7 %) tenían de 1 a 5 trabajadores (comprobado por la sesión principal); pero del empleo perdido solo el 9,6 % estaba en esas, y el 59 % en empresas de más de 500. OEDE: cada empresa que cierra tenía unos 2,4 puestos, contra 12,3 la empresa promedio. Propuesta: empresas y trabajadores por tamaño (SRT, mensual), cierres y puestos por cierre (OEDE, trimestral). Sin implementar.

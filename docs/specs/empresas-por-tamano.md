@@ -1,6 +1,6 @@
 # Empresas por tamaño: cuántas cierran y de qué tamaño
 
-Estado: implementada (2026-11-17), sin publicar
+Estado: implementada (2026-11-17), publicada en 467dc21 (corrida completa en verde, run 44121733652; /dato/puestos-por-cierre/ responde en el sitio)
 
 Pedido del usuario (2026-11-17): «fijate si tenemos empleados por empresa. porque a veces cierran empresas (cuits) con 1 solo empleado o sin. y se usa eso para decir que cierran empresas. o como lo podemos contrastar», y después «Yes, spec and implement».
 Investigación: `docs/investigaciones/empresas-por-tamano-2026-11-17.md` (fuentes bajadas; la sesión principal recalculó la tabla de la SRT: de las 32.429 empresas menos entre nov-23 y ago-26, 26.808 tenían de 1 a 5 trabajadores).

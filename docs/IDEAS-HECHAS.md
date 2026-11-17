@@ -414,3 +414,7 @@ Crítica final de Impeccable: 26/40 (antes 21/40). El usuario eligió arreglar l
 
 ## Tanda 14 (2026-11-16) → spec: docs/specs/ajustes-tanda-14.md
 - ~~Resumen por hitos: al pasar el mouse por una barra, que muestre el valor~~ ✅ 2026-11-16 (regla R32, también en Congreso y Gasto)
+
+## Empresas que cierran: ¿de qué tamaño? (2026-11-17)
+Idea del usuario: «fijate si tenemos empleados por empresa. porque a veces cierran empresas (cuits) con 1 solo empleado o sin. y se usa eso para decir que cierran empresas. o como lo podemos contrastar».
+- ~~Empresas y trabajadores por tamaño (SRT) y aperturas y cierres (OEDE)~~ ✅ 2026-11-17 → spec: docs/specs/empresas-por-tamano.md
