@@ -8,9 +8,6 @@
       "Bash(python pipeline/ver_cache.py)",
       "Bash(python pipeline/ver_cache.py *)"
     ],
-    "ask": [
-      "Bash(git push*)"
-    ],
     "deny": [
       "Read(./.indec_token*)",
       "Read(./indec_token.txt)",
