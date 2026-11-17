@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Para retomar en una sesión nueva. Última actualización: 2026-11-16.
+Para retomar en una sesión nueva. Última actualización: 2026-11-17.
 
 **Reglas de este archivo:** máximo ~1 página. Las ideas abiertas están en `docs/IDEAS.md`; las hechas, en `docs/IDEAS-HECHAS.md`. Una línea por bloque, con link a su spec; el detalle (cómo se verificó, qué marcó el revisor, medidas) va a la spec, no acá. Al cerrar una tanda: agregar su línea, sacar de "Sin verificar" lo que se verificó y, si una sección crece, mover lo viejo a `docs/HISTORIAL.md`.
 
