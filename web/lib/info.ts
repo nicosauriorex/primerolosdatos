@@ -36,7 +36,8 @@ export const INFO_CAT: Record<string, string> = {
     <dt>EMAE</dt><dd>Estimador mensual de la actividad (anticipa el PIB).</dd>
     <dt>PIB</dt><dd>Trimestral, a precios de 2004 (ya es real).</dd>
     <dt>ISAC</dt><dd>Construcción.</dd>
-    <dt>Patentamientos y autos usados</dt><dd>Autos inscriptos por primera vez (0 km) y transferencias de autos usados, suma de todas las provincias (Registro del Automotor, Ministerio de Justicia).</dd>
+    <dt>Patentamientos y autos usados</dt><dd>Autos inscriptos por primera vez (0 km) y transferencias de autos usados, suma de todas las provincias (Registro del Automotor, Ministerio de Justicia). Lo mismo para motos.</dd>
+    <dt>Consumo de carne</dt><dd>Kilos por habitante por año de carne vacuna, de la Secretaría de Agricultura. Anual.</dd>
     <dt>Demanda de electricidad</dt><dd>Energía pedida al sistema mayorista (CAMMESA), en GWh. Depende del clima: conviene comparar contra el mismo mes de otros años.</dd></dl>
     <p>Son índices o cantidades: no se pasan a dólares ni a pesos reales.</p>`,
   "Empleo, pobreza e ingresos": `<dl>
@@ -46,14 +47,18 @@ export const INFO_CAT: Record<string, string> = {
     <dt>Canastas</dt><dd>Lo que una familia necesita para no ser pobre (CBT) o indigente (CBA).</dd>
     <dt>AUH y Prestación Alimentar: cuántas canastas cubren</dt><dd>Hay dos cuentas, y comparan cosas distintas. <b>La del Ministerio de Capital Humano</b> suma la AUH completa y la Prestación Alimentar de un hijo, y la compara con la canasta alimentaria de <b>un adulto</b>. <b>La de la UCA</b> (Universidad Católica Argentina) toma lo que cobra en mano un hogar con dos hijos de 6 y 8 años y lo compara con la canasta alimentaria de <b>toda la familia</b> (hogar de 4); no incluye otros ingresos. Por eso dan resultados muy distintos.</dd>
     <dt>Pensiones no contributivas</dt><dd>Se publica la cantidad vigente a diciembre de cada año, no las altas: la diferencia entre dos diciembres es altas menos bajas.</dd>
-    <dt>Empleo público nacional</dt><dd>Empleados de la administración pública nacional y de las empresas y sociedades del Estado (INDEC). Empieza en julio de 2022: no compara con gobiernos anteriores. El empleo público de cada provincia está en la sección Provincias.</dd></dl>`,
-  "Sector externo": `<p>Exportaciones e importaciones de bienes (INDEC, en dólares), saldo comercial, términos del intercambio (precio de lo que vendemos vs. lo que compramos) y soja. También las importaciones de bienes de consumo y los viajes al exterior en avión (pasajeros por Ezeiza y Aeroparque, INDEC).</p>`,
+    <dt>Empleo público nacional</dt><dd>Empleados de la administración pública nacional y de las empresas y sociedades del Estado (INDEC). Empieza en julio de 2022: no compara con gobiernos anteriores. El empleo público de cada provincia está en la sección Provincias.</dd>
+    <dt>Puestos de trabajo totales</dt><dd>Cuenta <b>puestos</b>, no personas (quien tiene dos trabajos cuenta dos veces), formales e informales. Combina registros de aportes con la encuesta de hogares, por eso no coincide con la EPH (personas, 31 aglomerados) ni con el SIPA (solo lo formal). Trimestral y sin quitarle la estacionalidad: el 4.º trimestre es siempre el más alto, conviene comparar con el mismo trimestre de otro año.</dd>
+    <dt>Personas pobres</dt><dd>Cantidad de personas, no porcentaje. La cifra oficial es la de los 31 aglomerados urbanos (unos 30 millones de personas). «Todo el país» es una estimación propia que supone la misma tasa en el resto del país. La estimación mensual de la Universidad Di Tella es privada y se revisa.</dd>
+    <dt>Empresas con trabajadores registrados</dt><dd>Empleadores con al menos un trabajador declarado en una ART (Superintendencia de Riesgos del Trabajo). Un cambio de un mes puede venir de rescisiones o de nóminas vacías: no es lo mismo que empresas que abren o cierran.</dd></dl>`,
+  "Sector externo": `<p>Exportaciones e importaciones de bienes (INDEC, en dólares), saldo comercial, términos del intercambio (precio de lo que vendemos vs. lo que compramos) y soja. También las importaciones de bienes de consumo y los viajes al exterior en avión (pasajeros por Ezeiza y Aeroparque, INDEC). Los proyectos aprobados del RIGI (Régimen de Incentivo para Grandes Inversiones) están en su propia página.</p>`,
   "Fiscal": `<p>Sector público nacional, base caja.</p><dl>
     <dt>Resultado primario</dt><dd>Ingresos menos gastos sin contar intereses de la deuda.</dd>
     <dt>Resultado financiero</dt><dd>Después de pagar intereses.</dd>
     <dt>Deuda pública</dt><dd>Secretaría de Finanzas, mensual desde 2019 y en dólares. La deuda consolidada del Tesoro y el Banco Central es una cuenta propia que suma lo que ambos deben a terceros.</dd>
     <dt>Subsidios al transporte</dt><dd>Plata del Estado nacional para que colectivos y trenes cobren menos de lo que cuestan; base caja, mensual. Los subsidios a la energía están aparte y son trimestrales.</dd>
     <dt>Transferencias a provincias</dt><dd>Las que decide el gobierno nacional (no automáticas): no incluye la coparticipación. Las corrientes son para gastos del día a día; las de capital, para obras.</dd>
+    <dt>Obra pública nacional</dt><dd>Compra y construcción de bienes de capital del sector público nacional (rutas, edificios, equipos), base caja. No incluye lo que la Nación gira a las provincias para obras: eso está en «Transferencias de capital a provincias». Se ve mejor en pesos de hoy o como % del PIB.</dd>
     <dt>Gasto por función</dt><dd>Gasto devengado de la administración nacional en salud, educación, ciencia, seguridad y defensa, en % del PIB del año. No incluye lo que gastan provincias y municipios. Dato anual, ubicado en diciembre.</dd>
     <dt>Recaudación por impuesto</dt><dd>Lo que ARCA (ex AFIP) recaudó cada mes por IVA, Ganancias, retenciones a las exportaciones, Bienes Personales, impuesto PAIS, impuesto al cheque y aportes a la seguridad social. Va en pesos de cada mes: se ve mejor en pesos de hoy o como % del PIB.</dd></dl>
     <p>Las cifras mensuales son muy estacionales: conviene verlas como % del PIB (suma de 12 meses) o por año.</p>`,
@@ -61,7 +66,11 @@ export const INFO_CAT: Record<string, string> = {
     <dt>Homicidios dolosos</dt><dd>Sistema Nacional de Información Criminal (Ministerio de Seguridad), anual. La <b>tasa de víctimas</b> es la que cita el Gobierno; la de <b>hechos</b> cuenta casos (un hecho puede tener varias víctimas).</dd>
     <dt>Mortalidad infantil</dt><dd>Muertes de menores de un año cada 1.000 nacidos vivos (Ministerio de Salud). Anual; el último año sale con unos dos años de atraso.</dd>
     <dt>Muertes en siniestros viales</dt><dd>Muertes en hechos de tránsito registradas por las fuerzas de seguridad (SNIC, Ministerio de Seguridad). Puede diferir de la Agencia Nacional de Seguridad Vial, que cuenta también a quienes mueren hasta 30 días después. Anual.</dd>
-    <dt>Personas presas</dt><dd>Presos en cárceles provinciales y federales a fin de cada año (SNEEP, Ministerio de Justicia). No incluye a los detenidos en comisarías.</dd></dl>
+    <dt>Personas presas</dt><dd>Presos en cárceles provinciales y federales a fin de cada año (SNEEP, Ministerio de Justicia). No incluye a los detenidos en comisarías.</dd>
+    <dt>Robos y recuperos de autos</dt><dd>Denuncias de robo o hurto inscriptas en los Registros Seccionales del Automotor: no es el total de denuncias policiales. El recupero se cuenta en el mes en que se comunica, no en el del robo. Solo autos.</dd>
+    <dt>Natalidad y mortalidad</dt><dd>Nacimientos (por residencia de la madre) y defunciones (ocurridas en el país): son criterios distintos. 2020-2022 tienen exceso de mortalidad por covid. Anual.</dd>
+    <dt>Vacunación</dt><dd>Estimación de la OMS y UNICEF, que revisan la serie hacia atrás cada año. El Ministerio de Salud informa coberturas más altas con su registro nominal: son métodos distintos, no un error.</dd>
+    <dt>Piquetes</dt><dd>Cortes de calle y ruta que cuenta la consultora Diagnóstico Político con noticias. Es un dato privado, cargado a mano con su cita.</dd></dl>
     <p>Son datos anuales, ubicados en diciembre de cada año.</p>`,
   "Contexto internacional": `<p>Lo que pasa afuera y la Argentina no controla.</p><dl>
     <dt>Precios de la soja, el maíz, el trigo y el petróleo</dt><dd>Banco Mundial vía FRED, en dólares: se pueden ver en dólares de hoy.</dd>

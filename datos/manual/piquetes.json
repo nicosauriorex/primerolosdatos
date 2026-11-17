@@ -1,0 +1,156 @@
+{
+ "actualizado": "2026-11-17",
+ "fuente": "Diagnóstico Político (consultora privada, no oficial) vía Chequeado, Infobae, La Nación/El Economista, Diario de Cuyo y Hoy Día. No se encontró conteo oficial del Ministerio de Seguridad.",
+ "nota": "Serie anual de cortes de calle y ruta según Diagnóstico Político (consultora privada; recuento diario de más de 100 medios de todo el país desde 2009; piquete = «toda interrupción total o parcial de una vía pública en el marco de una protesta», sin importar su duración). No se pudieron cargar 2009-2013, 2015, 2017 y 2020 (no aparecen con cita en las notas abiertas); un extracto de buscador da 4.504 para 2020 pero sin URL de origen, por eso no se carga. Los informes originales de Diagnóstico Político (diagnosticopolitico.com.ar) no se pudieron abrir. Las afirmaciones del Gobierno van aparte (clave afirmaciones): no son valores de la serie.",
+ "definicion": "Diagnóstico Político (consultora privada; recuento diario de más de 100 medios de todo el país desde 2009; piquete = «toda interrupción total o parcial de una vía pública en el marco de una protesta», sin importar su duración)",
+ "valores_anuales": [
+  {
+   "anio": 2014,
+   "piquetes": 6805,
+   "fecha": "2019-01-22",
+   "url": "https://www.diariodecuyo.com.ar/noticias/hubo-5-857-piquetes-el-ano-pasado-215637.html",
+   "verificado": "abierto",
+   "cita": "2014: 6.805, la cifra más alta de los últimos diez años (nota de Diario de Cuyo sobre el estudio de Diagnóstico Político publicado el 21/01/2019)."
+  },
+  {
+   "anio": 2016,
+   "piquetes": 6491,
+   "fecha": "2019-01-22",
+   "url": "https://www.diariodecuyo.com.ar/noticias/hubo-5-857-piquetes-el-ano-pasado-215637.html",
+   "verificado": "abierto",
+   "cita": "2016: 6.491 (misma nota).",
+   "nota": "Otra fuente (La Izquierda Diario) dice 6.490."
+  },
+  {
+   "anio": 2018,
+   "piquetes": 5857,
+   "fecha": "2019-01-22",
+   "url": "https://www.diariodecuyo.com.ar/noticias/hubo-5-857-piquetes-el-ano-pasado-215637.html",
+   "verificado": "abierto",
+   "cita": "«Argentina registró el año pasado 5.857 protestas con corte de vías públicas», un 12% más que en 2017; recuento diario de más de 200 medios."
+  },
+  {
+   "anio": 2019,
+   "piquetes": 5430,
+   "fecha": "2020-01-01",
+   "url": "https://diagnosticopolitico.com.ar/wp-content/uploads/2020/01/Ocho-an%CC%83os-consecutivos-con-ma%CC%81s-de-5.000-piquetes.pdf",
+   "verificado": "NO abierto: el PDF devolvió 404 al descargarlo; el dato sale de un extracto del buscador. Fecha del informe aproximada (enero 2020). Comprobar antes de publicar.",
+   "cita": "Informe «Ocho años consecutivos con más de 5.000 piquetes» (enero 2020): 5.430 cortes en 2019, -7% frente a 2018."
+  },
+  {
+   "anio": 2021,
+   "piquetes": 6658,
+   "fecha": "2022-07-08",
+   "url": "https://www.mdzol.com/sociedad/2022/7/8/los-movimientos-sociales-se-le-plantan-al-gobierno-mas-de-3800-cortes-piquetes-en-seis-meses-256896.html",
+   "verificado": "NO abierto (403): dato de un extracto del buscador. Comprobar.",
+   "cita": "El año pasado hubo 6.658 piquetes y fue el número más alto desde 2014 (nota de MDZ, 08/07/2022)."
+  },
+  {
+   "anio": 2022,
+   "piquetes": 9778,
+   "fecha": "2024-05-13",
+   "url": "https://www.infobae.com/opinion/2024/05/13/milei-y-el-gran-desafio-de-recuperar-el-orden-en-las-calles/",
+   "verificado": "abierto",
+   "cita": "2022: 9.778 cortes. «2022 y 2023 fueron los dos años con más cortes desde que hay registro» (Infobae, opinión de Patricio Giusto y Roberto Chiti, con datos de Diagnóstico Político)."
+  },
+  {
+   "anio": 2023,
+   "piquetes": 8239,
+   "fecha": "2025-03-13",
+   "url": "https://chequeado.com/ultimas-noticias/javier-milei-en-la-apertura-de-sesiones-2025-logramos-bajar-la-cantidad-de-piquetes-en-la-calle-y-rutas-de-mas-de-8-200-a-0/",
+   "verificado": "abierto",
+   "cita": "Chequeado: Diagnóstico Político contó 8.239 piquetes a nivel nacional en 2023."
+  },
+  {
+   "anio": 2024,
+   "piquetes": 5996,
+   "fecha": "2025-03-13",
+   "url": "https://chequeado.com/ultimas-noticias/javier-milei-en-la-apertura-de-sesiones-2025-logramos-bajar-la-cantidad-de-piquetes-en-la-calle-y-rutas-de-mas-de-8-200-a-0/",
+   "verificado": "abierto",
+   "cita": "Chequeado: 5.996 piquetes en 2024, una baja del 27% respecto de 2023; promedio 2009-2024 de 5.704 por año (91.259 en 16 años)."
+  },
+  {
+   "anio": 2025,
+   "piquetes": 3893,
+   "fecha": "2026-01-14",
+   "url": "https://hoydia.com.ar/sociedad/los-piquetes-cayeron-527-desde-la-asuncion-de-milei-segun-informe/amp/",
+   "url_confirma": "https://chequeado.com/ultimas-noticias/javier-milei-en-la-apertura-de-sesiones-2026-hemos-terminado-con-los-piquetes-de-una-vez-por-todas-los-cuales-pasaron-de-9-mil-por-ano-a-0/",
+   "verificado": "abierto (dos fuentes)",
+   "cita": "«la cifra más baja desde 2011»: 3.893 piquetes en 2025 (8.239 en 2023, 5.996 en 2024); cayeron 52,7% desde el inicio del gobierno de Milei. Chequeado (01/03/2026): 3.893, caída de 52,8% frente a 2023; 95.152 piquetes entre 2009 y 2025."
+  }
+ ],
+ "totales": [
+  {
+   "desde": 2009,
+   "hasta": 2024,
+   "piquetes": 91259,
+   "promedio_anual": 5704,
+   "fecha": "2025-03-13",
+   "url": "https://chequeado.com/ultimas-noticias/javier-milei-en-la-apertura-de-sesiones-2025-logramos-bajar-la-cantidad-de-piquetes-en-la-calle-y-rutas-de-mas-de-8-200-a-0/",
+   "cita": "Promedio 2009-2024: 5.704 cortes por año (91.259 piquetes en 16 años)."
+  },
+  {
+   "desde": 2009,
+   "hasta": 2025,
+   "piquetes": 95152,
+   "promedio_anual": 5597,
+   "fecha": "2026-03-01",
+   "url": "https://chequeado.com/ultimas-noticias/javier-milei-en-la-apertura-de-sesiones-2026-hemos-terminado-con-los-piquetes-de-una-vez-por-todas-los-cuales-pasaron-de-9-mil-por-ano-a-0/",
+   "cita": "Entre 2009 y 2025 se registraron 95.152 piquetes, con un promedio de 5.597 por año (control: 95.152 menos 91.259 da 3.893, coincide con 2025)."
+  }
+ ],
+ "valores_mensuales": [
+  {
+   "mes": "2025-01",
+   "piquetes": 226,
+   "fecha": "2025-03-13",
+   "url": "https://chequeado.com/ultimas-noticias/javier-milei-en-la-apertura-de-sesiones-2025-logramos-bajar-la-cantidad-de-piquetes-en-la-calle-y-rutas-de-mas-de-8-200-a-0/",
+   "cita": "Chequeado: Enero de 2025: 226 piquetes a nivel nacional (Diagnóstico Político)."
+  }
+ ],
+ "mensual_nota": "No se encontró una serie mensual completa con cita; solo enero de 2025.",
+ "afirmaciones": [
+  {
+   "quien": "Javier Milei (presidente)",
+   "cuando": "Apertura de sesiones ordinarias del Congreso 2025 (la página de Chequeado no da el día exacto; nota original del 2025-03-02)",
+   "donde": "Discurso de apertura de sesiones 2025",
+   "textual": "Logramos bajar la cantidad de piquetes en la calle y rutas de más de 8.200 a cero",
+   "chequeo": "Chequeado, publicada el 2025-03-13 (original 2025-03-02): calificación «Falso». 2023: 8.239; 2024: 5.996 (-27%); enero 2025: 226.",
+   "url": "https://chequeado.com/ultimas-noticias/javier-milei-en-la-apertura-de-sesiones-2025-logramos-bajar-la-cantidad-de-piquetes-en-la-calle-y-rutas-de-mas-de-8-200-a-0/"
+  },
+  {
+   "quien": "Patricia Bullrich (entonces ministra de Seguridad)",
+   "cuando": "2025 (citada en el chequeo del 2025-03-13; fecha exacta no indicada)",
+   "donde": "Declaración citada por Chequeado",
+   "textual": "Todos los piquetes que hubo fueron controlados y encauzados de acuerdo al protocolo",
+   "chequeo": "Chequeado la cita junto al protocolo antipiquetes del Boletín Oficial, sin cifras oficiales.",
+   "url": "https://chequeado.com/ultimas-noticias/javier-milei-en-la-apertura-de-sesiones-2025-logramos-bajar-la-cantidad-de-piquetes-en-la-calle-y-rutas-de-mas-de-8-200-a-0/"
+  },
+  {
+   "quien": "Javier Milei (presidente)",
+   "cuando": "Apertura de sesiones 2026 (Chequeado, 2026-03-01; la página no indica el día exacto)",
+   "donde": "Discurso de apertura de sesiones 2026",
+   "textual": "Hemos terminado con los piquetes de una vez por todas, los cuales pasaron de 9 mil por año a 0",
+   "chequeo": "Chequeado, 2026-03-01: «Falso». 2023: 8.239; 2025: 3.893 («la cifra más baja desde 2011», -52,8% frente a 2023).",
+   "url": "https://chequeado.com/ultimas-noticias/javier-milei-en-la-apertura-de-sesiones-2026-hemos-terminado-con-los-piquetes-de-una-vez-por-todas-los-cuales-pasaron-de-9-mil-por-ano-a-0/"
+  },
+  {
+   "quien": "Patricia Bullrich (senadora, ex ministra de Seguridad)",
+   "cuando": "Hacia el 2026-01-16 (nota de El Economista; fecha de la publicación en X no indicada)",
+   "donde": "Mensaje en X, respondiendo al informe de Diagnóstico Político",
+   "textual": "Esto NO es así. En la Argentina se terminó el piquete al 100%. // Lo que ya no existe es el piquete violento y extorsivo que paralizaba al país.",
+   "chequeo": "El director de Diagnóstico Político (La Nación, citado por El Economista): «es inexacto lo que afirma el Gobierno, pero hay que darle la derecha en que está domesticando un problema».",
+   "url": "https://eleconomista.com.ar/politica/bullrich-cuestiono-informe-sobre-caida-piquetes-se-terminaron-100-n92019"
+  },
+  {
+   "quien": "Javier Milei (presidente)",
+   "cuando": "Cadena nacional por los 210 años de la Independencia (9 de julio de 2026); según Chequeado lo repitió en Tucumán",
+   "donde": "Cadena nacional",
+   "textual": "De 9000 piquetes por año, hoy ese número es 0",
+   "chequeo": "Chequeado, 2026-07-10: «Falso». 3.893 en 2025, -52,8% frente a 2023, lejos del -100%. La nota no cita datos oficiales.",
+   "url": "https://chequeado.com/ultimas-noticias/javier-milei-de-9000-piquetes-por-ano-hoy-ese-numero-es-0/",
+   "nota": "La nota de Chequeado dice cadena nacional por el aniversario de la Independencia y se publicó el 10 de julio; el día 9 se deduce de eso."
+  }
+ ],
+ "datos_oficiales": "Ministerio de Seguridad: no se encontró ningún conteo anual publicado de cortes de calle o ruta. Chequeado y El Economista no citan cifras del Ministerio. Una nota de Sitio Andino afirma que estadísticas oficiales dieron 9 mil piquetes en 2022; no se abrió ni se verificó y no se carga."
+}

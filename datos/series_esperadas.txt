@@ -38,6 +38,7 @@ can_cba
 can_cba_h2
 can_cbt
 can_cbt_h2
+carne_vacuna
 cpi_usa
 ctx_fed
 ctx_maiz
@@ -45,6 +46,7 @@ ctx_petroleo
 ctx_soja
 ctx_terminos
 ctx_trigo
+defunciones
 demanda_electrica
 deuda_ac_me
 deuda_ac_mn
@@ -113,6 +115,7 @@ dg_saldo_comercial
 empleo_publico_apn
 empleo_publico_empresas
 empleo_publico_nacional
+empresas_art
 femicidios
 fx_blue
 fx_ccl
@@ -130,6 +133,8 @@ homicidios_hechos_tasa
 homicidios_tasa
 homicidios_victimas
 imp_consumo
+indigentes_31
+indigentes_pais
 inflacion
 inflacion_ia
 ipc_cuyo_01_1_1_coicop
@@ -458,10 +463,17 @@ mk_supv
 mk_teo
 mk_tgs
 mk_ypf
+mortalidad
 mortalidad_infantil
+motos_0km
+motos_usadas
+nacimientos
+natalidad
+obra_publica
 patentamientos
 pib_nom
 pib_nom_anual
+piquetes
 pnc_invalidez
 pnc_madres
 pnc_vejez
@@ -470,6 +482,9 @@ pob_tasa_indigencia_personas
 pob_tasa_pobreza_hogares
 pob_tasa_pobreza_personas
 poblacion
+pobres_31
+pobres_pais
+pobreza_utdt
 pp_cuyo_aceite_de_girasol
 pp_cuyo_arroz_blanco_simple
 pp_cuyo_azucar
@@ -601,6 +616,11 @@ pp_patagonia_papa
 pp_patagonia_pollo_entero
 presos
 presos_tasa
+puestos_asal_noreg
+puestos_asal_reg
+puestos_no_asal
+puestos_noreg_pct
+puestos_total
 rec_bienes_personales
 rec_cheque
 rec_ganancias
@@ -609,8 +629,11 @@ rec_iva
 rec_pais
 rec_retenciones
 rec_seguridad_social
+recuperos_autos
 riesgo
+rigi_aprobado
 ripte
+robos_autos
 seguro_desempleo
 siniestros_viales
 siniestros_viales_tasa
@@ -631,3 +654,7 @@ transf_prov_corrientes
 transferencias_autos
 turismo_emisivo
 turismo_receptivo
+vacuna_bcg
+vacuna_dtp3
+vacuna_sarampion1
+vacuna_sarampion2

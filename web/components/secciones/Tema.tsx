@@ -25,6 +25,8 @@ const MAX_PLANTILLAS = 8;
 const TEMAS_CON_PARTE = new Set(["dolar", "finanzas"]);
 /** Temas que enlazan al semáforo de actividad (/semaforo/). */
 const TEMAS_CON_SEMAFORO = new Set(["actividad"]);
+/** Temas que enlazan al panel del RIGI (/rigi/). */
+const TEMAS_CON_RIGI = new Set(["externo"]);
 
 function Texto({ t }: { t: Tema }) {
   const [largo, setLargo] = useState(false);
@@ -157,6 +159,7 @@ export function TemaPagina({ t }: { t: Tema }) {
         <Texto t={t} />
         {TEMAS_CON_PARTE.has(t.slug) && <Link prefetch={false} href="/bcra/" className="enlace-parte">Parte del Banco Central: los datos de cada día</Link>}
         {TEMAS_CON_SEMAFORO.has(t.slug) && <Link prefetch={false} href="/semaforo/" className="enlace-parte">Semáforo de actividad: qué indicadores subieron cada mes</Link>}
+        {TEMAS_CON_RIGI.has(t.slug) && <Link prefetch={false} href="/rigi/" className="enlace-parte">RIGI: los proyectos de grandes inversiones aprobados</Link>}
       </div>
 
       <div className="e1-pestanas" role="tablist" aria-label={`Datos de ${t.nombre}`} onKeyDown={teclaPestanas}>

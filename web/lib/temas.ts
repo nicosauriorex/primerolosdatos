@@ -63,6 +63,8 @@ export const TEMAS: Tema[] = [
       { id: "auh", nombre: "AUH real", corto: "la AUH real", med: "real" },
       { id: "pnc_invalidez", nombre: "Pensiones por invalidez", corto: "las pensiones por invalidez", med: "asis" },
       { id: "empleo_publico_nacional", nombre: "Empleados públicos nacionales", corto: "los empleados públicos nacionales", med: "asis" },
+      { id: "puestos_total", nombre: "Puestos de trabajo totales", corto: "los puestos de trabajo", med: "asis" },
+      { id: "pobres_31", nombre: "Personas pobres (31 aglomerados)", corto: "las personas pobres", med: "asis" },
     ], grupos: ["Empleo y pobreza"], q: "empleo", desc: "Desocupación, empleo, informalidad, pobreza e indigencia en Argentina." },
   { slug: "externo", nombre: "Comercio exterior", cats: ["Sector externo"], corto: INFO_CORTA["Sector externo"].texto, largo: largoDe("Sector externo"),
     principales: [
@@ -81,6 +83,7 @@ export const TEMAS: Tema[] = [
       { id: "rec_retenciones", nombre: "Retenciones a las exportaciones (en pesos de hoy)", corto: "las retenciones a las exportaciones", med: "real" },
       { id: "transf_prov", nombre: "Transferencias no automáticas a provincias (en pesos de hoy)", corto: "las transferencias a provincias", med: "real" },
       { id: "sub_transporte", nombre: "Subsidios al transporte (en pesos de hoy)", corto: "los subsidios al transporte", med: "real" },
+      { id: "obra_publica", nombre: "Obra pública nacional (en pesos de hoy)", corto: "la obra pública", med: "real" },
     ], grupos: ["Fiscal"], q: "fiscal", desc: "Resultado primario y financiero del sector público nacional, ingresos, gastos, deuda y recaudación por impuesto." },
   { slug: "sociedad", nombre: "Seguridad y salud", cats: ["Sociedad"], corto: INFO_CORTA["Sociedad"].texto, largo: largoDe("Sociedad"),
     principales: [
@@ -89,6 +92,8 @@ export const TEMAS: Tema[] = [
       { id: "siniestros_viales_tasa", nombre: "Muertes en siniestros viales cada 100.000 habitantes", corto: "las muertes en siniestros viales", med: "asis" },
       { id: "presos_tasa", nombre: "Presos cada 100.000 habitantes", corto: "los presos por habitante", med: "asis" },
       { id: "presos", nombre: "Personas presas", corto: "las personas presas", med: "asis" },
+      { id: "vacuna_sarampion1", nombre: "Vacunación (sarampión, 1.ª dosis)", corto: "la vacunación contra el sarampión", med: "asis" },
+      { id: "natalidad", nombre: "Natalidad", corto: "la natalidad", med: "asis" },
     ], grupos: ["Sociedad"], porCat: true, q: "homicidios", desc: "Homicidios dolosos, mortalidad infantil, muertes en siniestros viales y personas presas en Argentina, con datos oficiales." },
   { slug: "finanzas", nombre: "Dinero, tasas y mercados", cats: ["Dinero y bancos (BCRA)", "Tasas de interés", "Mercados"],
     corto: "Reservas, tasas de interés y riesgo país: cómo están el dinero y los mercados.", largo: largoDe("Dinero y bancos (BCRA)", "Tasas de interés", "Mercados"),

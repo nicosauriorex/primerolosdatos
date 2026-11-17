@@ -1,0 +1,529 @@
+{
+ "actualizado": "2026-11-17",
+ "fuente": "Ministerio de Economía, planilla oficial de proyectos RIGI aprobados (Google Sheet 1eytHJrzUjIFOXI-P1Hx_wbmZiSqPxVle059Djdos6u8, hoja dataset), con fechas tomadas de cada norma de aprobación (Resoluciones del Ministerio de Economía en argentina.gob.ar/normativa y Boletín Oficial); ingresado: BCRA (presentación de Werning, abril 2026).",
+ "url_planilla": "https://docs.google.com/spreadsheets/d/1eytHJrzUjIFOXI-P1Hx_wbmZiSqPxVle059Djdos6u8/gviz/tq?tqx=out:csv&sheet=dataset",
+ "fecha_descarga": "2026-11-17",
+ "nota": "Un proyecto por fila (las filas repetidas por provincia están agrupadas en provincias): 30 proyectos, monto total comprometido USD 79649 millones (monto = columna inv-comprometida de la planilla, millones de US$). fecha = fecha de firma de la resolución de aprobación (legislationDate de argentina.gob.ar/normativa o fecha de la resolución en el Boletín Oficial); fecha_publicacion = día del Boletín Oficial. El proyecto sin norma (Parque Eólico la Rinconada) queda con fecha null. Los empleos son los de la planilla (directos e indirectos, como los informa la empresa/gobierno), no un dato medido. La planilla es la lista del Ministerio; no distingue lo anunciado de lo ejecutado.",
+ "proyectos": [
+  {
+   "nombre": "Parque Solar El Quemado y Anexos",
+   "empresa": "Luz del Campo SA",
+   "provincias": [
+    "Mendoza"
+   ],
+   "sector": "Energía eléctrica",
+   "monto": 211.0,
+   "empleos": 384,
+   "descripcion": "Parque solar fotovoltaico de 305 MW, el más grande del país, el primer proyecto aprobado y el primero en entrar en operación bajo el RIGI. El proyecto contempla la instalación de más de 511.000 paneles bifaciales de última generación y representa el 11% de la capacidad solar instalada de la Argentina, generando energía equivalente al consumo de 233.000 hogares, con un factor de carga estimado del 31,4%.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-408210",
+   "norma_id": "Resolución 1/2025",
+   "fecha": "2025-01-07",
+   "fecha_publicacion": "2025-01-08",
+   "cita_norma": "Resolución 1/2025 (Ministerio de Economía), firmada el 2025-01-07 y publicada el 2025-01-08: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI) BAJO EL SECTOR DE ENERGIA Y EL PLAN DE INVERSION, PRESENTADOS POR LUZ DEL CAMPO SA (CUIT N° 30-71765521-0), TITULAR DEL VEHICULO DE PROYECTO UNICO (VPU) A CARGO DEL PROYECTO UNICO DENOMINADO “PARQUE SOLAR EL QUEMADO Y ANEXOS” POR UNA CAPACIDAD INSTALADA POR UN TOTAL DE TRESCIENTOS CINCO M"
+  },
+  {
+   "nombre": "Vaca Muerta Oleoducto Sur (VMOS)",
+   "empresa": "VMOS S.A.",
+   "provincias": [
+    "Río Negro"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 2900.0,
+   "empleos": 3108,
+   "descripcion": "Construcción de un oleoducto de 437 km, con capacidad de transporte de 377.400 barriles diarios y almacenamiento de 3,77 millones de barriles, que permitirá duplicar las exportaciones de petróleo. El proyecto podrá expandirse en el futuro hasta alcanzar una capacidad máxima de exportación de 700.000 barriles por día, viabilizando exportaciones por más de USD 16.000 millones anuales. El RIGI permitió al consorcio VMOS estructurar el mayor financiamiento de tipo project finance de la historia argentina, otorgado por 14 entidades financieras.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-410830",
+   "norma_id": "Resolución 302/2025",
+   "fecha": "2025-03-20",
+   "fecha_publicacion": "2025-03-21",
+   "cita_norma": "Resolución 302/2025 (Ministerio de Economía), firmada el 2025-03-20 y publicada el 2025-03-21: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), COMO PROYECTO DE EXPORTACION ESTRATEGICA DE LARGO PLAZO, ENMARCADO EN EL SECTOR “PETROLEO Y GAS” Y EL PLAN DE INVERSION, PRESENTADOS POR VMOS S.A. (CUIT N° 30-71871335-4), TITULAR DEL VEHICULO DE PROYECTO UNICO (VPU) DENOMINADO “VACA MUERTA OLEODUCTO SUR” O “PROYECTO VMOS”, POR UNA CAPAC"
+  },
+  {
+   "nombre": "Licuefacción de Gas Natural",
+   "empresa": "Southern Energy s.a.",
+   "provincias": [
+    "Río Negro"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 15156.0,
+   "empleos": 836,
+   "descripcion": "Instalación de dos unidades flotantes de licuefacción de gas natural (Hilli Episeyo y Esperanza) en el Golfo San Matías, destinadas a la producción y exportación de Gas Natural Licuado (GNL). El proyecto tendrá una capacidad total de producción de 6 millones de toneladas anuales y prevé iniciar sus exportaciones en 2027, contribuyendo a ampliar la capacidad exportadora del país y a incrementar la producción nacional de gas en aproximadamente un 20%.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-412353",
+   "norma_id": "Resolución 559/2025",
+   "fecha": "2025-04-29",
+   "fecha_publicacion": "2025-05-05",
+   "cita_norma": "Resolución 559/2025 (Ministerio de Economía), firmada el 2025-04-29 y publicada el 2025-05-05: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), COMO PROYECTO DE EXPORTACION ESTRATEGICA DE LARGO PLAZO, ENMARCADO EN EL SECTOR “PETROLEO Y GAS” Y EL PLAN DE INVERSION, PRESENTADOS POR EL SOUTHERN ENERGY S.A. (VPU), CUIT N° 30-71858062-1, TITULAR DEL PROYECTO UNICO DENOMINADO “PROYECTO DE LICUEFACCION DE GAS NATURAL”, POR UNA CAPACIDA"
+  },
+  {
+   "nombre": "Rincón",
+   "empresa": "Rincón Mining PTY LTD. Sucursal Argentina",
+   "provincias": [
+    "Salta"
+   ],
+   "sector": "Minería",
+   "monto": 2744.0,
+   "empleos": 1985,
+   "descripcion": "Proyecto de producción de carbonato de litio con capacidad inicial de 53.000 tpa y potencial de expansión a 60.000 tpa, mediante tecnología de extracción directa de litio (DLE) de menor impacto ambiental.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-413550",
+   "norma_id": "Resolución 735/2025",
+   "fecha": "2025-05-30",
+   "fecha_publicacion": "2025-06-03",
+   "cita_norma": "Resolución 735/2025 (Ministerio de Economía), firmada el 2025-05-30 y publicada el 2025-06-03: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), COMO PROYECTO DE EXPORTACION ESTRATEGICA DE LARGO PLAZO, ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR “POTASIO Y LITIO”, Y EL PLAN DE INVERSION PRESENTADOS POR RINCON MINING PTY LTD. SUCURSAL ARGENTINA (VPU), (CUIT N° 30- 70708643-9), TITULAR DEL PROYECTO UNICO DENOMINADO “PROYECTO RINCON"
+  },
+  {
+   "nombre": "Sidersa",
+   "empresa": "Sidersa Acería s.d.e.",
+   "provincias": [
+    "Buenos Aires"
+   ],
+   "sector": "Siderurgia",
+   "monto": 286.0,
+   "empleos": 3800,
+   "descripcion": "Construcción de una nueva planta de aceros largos, la primera acería en construirse en el país en más de 50 años, con tecnología de última generación, menores emisiones de CO2 y producción basada en economía circular.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-415410",
+   "norma_id": "Resolución 1028/2025",
+   "fecha": "2025-07-21",
+   "fecha_publicacion": "2025-07-22",
+   "cita_norma": "Resolución 1028/2025 (Ministerio de Economía), firmada el 2025-07-21 y publicada el 2025-07-22: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), COMO PROYECTO UNICO, ENMARCADO EN EL SECTOR “SIDERURGIA” Y EL PLAN DE INVERSION, PRESENTADO POR SIDERSA S.A. (CUIT N° 30-61536829-2) PARA SU SUCURSAL DEDICADA ESPECIAL SIDERSA ACERIA S.D.E. (VPU) (CUIT N° 33-71879284-9), TITULAR DEL PROYECTO UNICO DENOMINADO “PROYECTO SIDERURGICO ARGENTI"
+  },
+  {
+   "nombre": "Parque Eólico Olavarría",
+   "empresa": "Generación Eléctrica Argentina Renovable I S.A. Sucursal Dedicada PEO",
+   "provincias": [
+    "Buenos Aires"
+   ],
+   "sector": "Energía eléctrica",
+   "monto": 276.0,
+   "empleos": 165,
+   "descripcion": "Parque eólico de 180 MW que contempla la construcción de una ET, una línea de AT y obras de ampliación del transporte eléctrico, para abastecer las plantas industriales de Acindar.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-416877",
+   "norma_id": "Resolución 1254/2025",
+   "fecha": "2025-08-26",
+   "fecha_publicacion": "2025-08-27",
+   "cita_norma": "Resolución 1254/2025 (Ministerio de Economía), firmada el 2025-08-26 y publicada el 2025-08-27: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), COMO PROYECTO UNICO, ENMARCADO EN EL SECTOR DE “ENERGIA” Y EL PLAN DE INVERSION, PRESENTADO POR GEAR I SA (CUIT N° 30-71592816-3) PARA SU SUCURSAL DEDICADA O ESPECIAL “GENERACION ELECTRICA ARGENTINA RENOVABLE I S.A SUCURSAL DEDICADA PEO” (GEAR I SDE) (CUIT N° 30-71903605-4), TITULAR DEL "
+  },
+  {
+   "nombre": "Hombre Muerto Oeste (HMW)",
+   "empresa": "Galán s.d.e.",
+   "provincias": [
+    "Catamarca"
+   ],
+   "sector": "Minería",
+   "monto": 292.0,
+   "empleos": 670,
+   "descripcion": "Proyecto para la producción de 12.000 toneladas anuales de carbonato de litio equivalente.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-416924",
+   "norma_id": "Resolución 1271/2025",
+   "fecha": "2025-08-27",
+   "fecha_publicacion": "2025-08-28",
+   "cita_norma": "Resolución 1271/2025 (Ministerio de Economía), firmada el 2025-08-27 y publicada el 2025-08-28: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR “POTASIO Y LITIO”, Y EL PLAN DE INVERSION, PRESENTADO POR GALAN LITIO SA (CUIT N° 30-71736364-3), PARA SU SUCURSAL DEDICADA O ESPECIAL GALAN SDE (CUIT 30-71899846-4), TITULAR DEL PROYECTO UNICO DENOMINADO “HOMBRE MUERTO OESTE (HMW)” POR UNA CAP"
+  },
+  {
+   "nombre": "Los Azules",
+   "empresa": "Andes Corporación Minera S.A.",
+   "provincias": [
+    "San Juan"
+   ],
+   "sector": "Minería",
+   "monto": 2672.0,
+   "empleos": 7391,
+   "descripcion": "Proyecto para la exploración y explotación de cobre, que contempla las etapas de factibilidad y permisos, la construcción de la mina y la planta de procesamiento.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-418673",
+   "norma_id": "Resolución 1553/2025",
+   "fecha": "2025-10-13",
+   "fecha_publicacion": "2025-10-14",
+   "cita_norma": "Resolución 1553/2025 (Ministerio de Economía), firmada el 2025-10-13 y publicada el 2025-10-14: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR “MINERALES DE PRIMERA Y SEGUNDA CATEGORIA DEL CODIGO DE MINERIA DE LA NACION (EXCLUIDOS POTASIO Y LITIO)”, Y EL PLAN DE INVERSION, PRESENTADO POR ANDES CORPORACION MINERA SA (ACM SA), (CUIT N° 30-70952278-3), TITULAR DEL PROYECTO UNICO DENOMINA"
+  },
+  {
+   "nombre": "Terminal Timbúes",
+   "empresa": ". Terminal Timbúes s.a.",
+   "provincias": [
+    "Santa Fe"
+   ],
+   "sector": "Infraestructura",
+   "monto": 277.0,
+   "empleos": 9700,
+   "descripcion": "Proyecto para desarrollar una terminal porturaria multimodal en la Hidrovía Paraguay–Paraná, para optimizar las operaciones logísticas, de carga, almacenamiento y despacho de mercaderías.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-420421",
+   "norma_id": "Resolución 1842/2025",
+   "fecha": "2025-11-19",
+   "fecha_publicacion": "2025-11-20",
+   "cita_norma": "Resolución 1842/2025 (Ministerio de Economía), firmada el 2025-11-19 y publicada el 2025-11-20: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “INFRAESTRUCTURA”, Y EL PLAN DE INVERSION, PRESENTADO POR TERMINAL TIMBUES S.A. (CUIT N° 30-71891156-3), TITULAR DEL PROYECTO UNICO DENOMINADO “PROYECTO TERMINAL MULTIPROPOSITO TIMBUES”, CUYO OBJETO CONSISTE EN CONSTRUIR, EXPLOTAR Y OPERAR UNA TERMINAL PORTUARIA MU"
+  },
+  {
+   "nombre": "Carbonatos Profundos (DCP)",
+   "empresa": "Minas Argentinas s.a. dedicada RIGI - Nuevo Gualcamayo",
+   "provincias": [
+    "San Juan"
+   ],
+   "sector": "Minería",
+   "monto": 665.0,
+   "empleos": 4500,
+   "descripcion": "Proyecto para reactivar la mina Gualcamayo y explotar oro, mediante la exploración de nuevos recursos minerales y la construcción y operación de una planta de tratamiento.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-422390",
+   "norma_id": "Resolución 6/2026",
+   "fecha": "2026-01-13",
+   "fecha_publicacion": "2026-01-15",
+   "cita_norma": "Resolución 6/2026 (Ministerio de Economía), firmada el 2026-01-13 y publicada el 2026-01-15: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR “MINERALES DE PRIMERA Y SEGUNDA CATEGORIA DEL CODIGO DE MINERIA DE LA NACION (EXCLUIDOS POTASIO Y LITIO)”, Y EL PLAN DE INVERSION PRESENTADO POR MINAS ARGENTINAS SA SUCURSAL DEDICADA RIGI I-NUEVO GUALCAMAYO (EN ADELANTE “MASA-SD”) (CUIT 30-7191"
+  },
+  {
+   "nombre": "Ampliación Fases 8 y 9 del Sistema de Lixiviación en Valle de Mina Veladero",
+   "empresa": "Minera Andina del Sol S.R.L. Sucursal Dedicada 1",
+   "provincias": [
+    "San Juan"
+   ],
+   "sector": "Minería",
+   "monto": 436.0,
+   "empleos": 1048,
+   "descripcion": "Proyecto para ampliar la capacidad de producción de la mina, que generará exportaciones por USD 3.800 millones.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-424457",
+   "norma_id": "Resolución 413/2026",
+   "fecha": "2026-03-30",
+   "fecha_publicacion": "2026-04-01",
+   "cita_norma": "Resolución 413/2026 (Ministerio de Economía), firmada el 2026-03-30 y publicada el 2026-04-01: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI) DE AMPLIACION DE UN PROYECTO PREEXISTENTE NO ADHERIDO AL RIGI Y EL PLAN DE INVERSION, ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR “MINERALES DE PRIMERA Y SEGUNDA CATEGORIA (EXCLUIDOS POTASIO Y LITIO)”, DE MINERA ANDINA DEL SOL S.R.L. SUCURSAL DEDICADA 1 (“MAS-SD1”), CUIT 30-71906943-2, TI"
+  },
+  {
+   "nombre": "Expansión Fase 1B",
+   "empresa": "Minera del Altiplano S.A. Sucursal Dedicada",
+   "provincias": [
+    "Catamarca"
+   ],
+   "sector": "Minería",
+   "monto": 531.0,
+   "empleos": 1273,
+   "descripcion": "Ampliación del proyecto Fénix para aumentar la producción de litio mediante nuevas plantas de procesamiento, infraestructura y ampliación de la capacidad de abastecimiento de gas natural.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-424514",
+   "norma_id": "Resolución 431/2026",
+   "fecha": "2026-03-31",
+   "fecha_publicacion": "2026-04-06",
+   "cita_norma": "Resolución 431/2026 (Ministerio de Economía), firmada el 2026-03-31 y publicada el 2026-04-06: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI) DE AMPLIACION DE UN PROYECTO PREEXISTENTE NO ADHERIDO AL RIGI Y PLAN DE INVERSION, ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR POTASIO Y LITIO, PRESENTADO POR MINERA DEL ALTIPLANO S.A. SUCURSAL DEDICADA (“MDASD”), CUIT N° 30-71906845-2, TITULAR DEL PROYECTO UNICO DENOMINADO “EXPANSION FAS"
+  },
+  {
+   "nombre": "Diablillos",
+   "empresa": "Pacific Rim Mining Corporation Argentina SA",
+   "provincias": [
+    "Salta",
+    "Catamarca"
+   ],
+   "sector": "Minería",
+   "monto": 764.0,
+   "empleos": 2013,
+   "descripcion": "Proyecto minero para la explotación de oro y plata, que contempla una planta de procesamiento de 3,15 millones de toneladas anuales y el desarrollo de infraestructura integral.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-425673",
+   "norma_id": "Resolución 562/2026",
+   "fecha": "2026-05-07",
+   "fecha_publicacion": "2026-05-11",
+   "cita_norma": "Resolución 562/2026 (Ministerio de Economía), firmada el 2026-05-07 y publicada el 2026-05-11: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR “MINERALES DE PRIMERA Y SEGUNDA CATEGORIA DEL CODIGO DE MINERIA DE LA NACION (EXCLUIDOS POTASIO Y LITIO)”, Y EL PLAN DE INVERSION PRESENTADOS POR PACIFIC RIM MINING CORPORATION ARGENTINA S.A. (“PACIFIC RIM”), CUIT Nº 30-67305977-1, TITULAR DEL "
+  },
+  {
+   "nombre": "Ampliación del Tramo I del Gasoducto Perito Francisco Pascasio Moreno (GPM)",
+   "empresa": "Transportadora de Gas del Sur S.A. Sucursal Dedicada 1",
+   "provincias": [
+    "La Pampa"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 550.0,
+   "empleos": 7535,
+   "descripcion": "Ampliación del Gasoducto Perito Moreno (GPM) mediante la construcción de cuatro nuevas plantas compresoras, que permitirán incrementar en 14 millones de m³/d la capacidad de transporte de gas natural. El proyecto contribuirá a sustituir importaciones de hidrocarburos por USD 700 millones y generará un ahorro fiscal estimado de USD 500 millones.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-425734",
+   "norma_id": "Resolución 676/2026",
+   "fecha": "2026-05-12",
+   "fecha_publicacion": "2026-05-13",
+   "cita_norma": "Resolución 676/2026 (Ministerio de Economía), firmada el 2026-05-12 y publicada el 2026-05-13: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI) DEL PROYECTO Y SU PLAN DE INVERSION, ENMARCADO EN EL SECTOR “PETROLEO Y GAS”, SUBSECTOR “TRANSPORTE Y ALMACENAMIENTO”, PRESENTADO POR TRANSPORTADORA DE GAS DEL SUR SA SUCURSAL DEDICADA 1 (TGS SD1), CUIT N° 30-71881250-6, TITULAR DEL PROYECTO UNICO DENOMINADO “AMPLIACION DEL TRAMO I DEL GA"
+  },
+  {
+   "nombre": "PSJ Cobre Mendocino",
+   "empresa": "Minera San Jorge SA",
+   "provincias": [
+    "Mendoza"
+   ],
+   "sector": "Minería",
+   "monto": 891.0,
+   "empleos": 6300,
+   "descripcion": "Desarrollo, extracción y procesamiento de cobre con recuperación de oro mediante una mina a cielo abierto y una planta concentradora, con una capacidad estimada de procesamiento de diez millones de toneladas anuales de mineralización de cobre y oro.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-426315",
+   "norma_id": "Resolución 809/2026",
+   "fecha": "2026-06-01",
+   "fecha_publicacion": "2026-06-02",
+   "cita_norma": "Resolución 809/2026 (Ministerio de Economía), firmada el 2026-06-01 y publicada el 2026-06-02: DASE POR DESIGNADA TRANSITORIAMENTE, A PARTIR DEL 2 DE FEBRERO DE 2026 Y POR EL PLAZO DE CIENTO OCHENTA (180) DIAS HABILES, A LA MEDICA VETERINARIA ALICIA MERCEDES BEARZI (MI N° 28.045.000), EN EL CARGO DE COORDINADORA REGIONAL DE INOCUIDAD Y CALIDAD AGROALIMENTARIA DE LA DIRECCION DE CENTRO REGIONAL CORDOBA DEPENDIENTE DE LA DIRECCION NACIONAL DE OPERACIONES DEL SERVICIO NACIO"
+  },
+  {
+   "nombre": "Ampliación Cauchari Olaroz",
+   "empresa": "Minera Exar Sucursal Dedicada",
+   "provincias": [
+    "Jujuy"
+   ],
+   "sector": "Minería",
+   "monto": 1241.0,
+   "empleos": 1787,
+   "descripcion": "Ampliación del proyecto Cauchari Olaroz mediante la construcción de pozos de extracción, pozas de evaporación y una nueva planta de producción, para incrementar su capacidad en 45.000 t/año de carbonato de litio equivalente y alcanzar un total de 85.000 t/año",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-426429",
+   "norma_id": "Resolución 825/2026",
+   "fecha": "2026-06-04",
+   "fecha_publicacion": "2026-06-05",
+   "cita_norma": "Resolución 825/2026 (Ministerio de Economía), firmada el 2026-06-04 y publicada el 2026-06-05: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR “MINERALES DE PRIMERA CATEGORIA DEL CODIGO DE MINERIA DE LA NACION (POTASIO Y LITIO)”, Y EL PLAN DE INVERSION PRESENTADOS POR MINERA EXAR SUCURSAL DEDICADA (“EXARSD”) (CUIT N° 30- 71924298-3), TITULAR DEL PROYECTO UNICO DENOMINADO “AMPLIACION C"
+  },
+  {
+   "nombre": "San Matías Pipeline SA",
+   "empresa": "San Matías Pipeline S.A.",
+   "provincias": [
+    "Río Negro",
+    "Neuquén"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 1300.0,
+   "empleos": 2489,
+   "descripcion": "Gasoducto de 480 km que llevará gas de Vaca Muerta desde el Predio Cabecera Tratayén en Neuquén hasta la Estación Compresora San Antonio Oeste en Río Negro, para su exportación como GNL. Con 36 pulgadas de diámetro y una capacidad de 27 millones de metros cúbicos diarios, busca evacuar la producción incremental de la cuenca Neuquina hacia terminales licuefactoras en el Golfo San Matías, aprovechando el potencial de recursos no convencionales provenientes de Vaca Muerta.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-427059",
+   "norma_id": "Resolución 873/2026",
+   "fecha": "2026-06-25",
+   "fecha_publicacion": "2026-06-26",
+   "cita_norma": "Resolución 873/2026 (Ministerio de Economía), firmada el 2026-06-25 y publicada el 2026-06-26: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “PETROLEO Y GAS”, SUBSECTOR “TRANSPORTE Y ALMACENAMIENTO”, Y EL PLAN DE INVERSION PRESENTADO POR SAN MATIAS PIPELINE SA (SMP SA), (CUIT N° 30-71703621-9), TITULAR DEL PROYECTO UNICO DENOMINADO “GASODUCTO DEDICADO PARA LA EXPORTACION DE GAS NATURAL”; CUYO OBJETO CON"
+  },
+  {
+   "nombre": "Rincón de Aranda",
+   "empresa": "Pampa Energía Sociedad Anónima - Sucursal dedicada proyecto RDA",
+   "provincias": [
+    "Neuquén"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 4522.0,
+   "empleos": 1733,
+   "descripcion": "Nuevo desarrollo de hidrocarburos en el área Rincón de Aranda, Vaca Muerta, el cual consiste en la perforación de 259 pozos junto con su infraestructura asociada para el tratamiento de la producción por una capacidad máxima de 44 mil barriles de petróleo diarios. El proyecto prevé un total de 305 millones de barriles de petróleo de exportación durante su operación.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-427918",
+   "norma_id": "Resolución 1025/2026",
+   "fecha": "2026-07-20",
+   "fecha_publicacion": "2026-07-21",
+   "cita_norma": "Resolución 1025/2026 (Ministerio de Economía), firmada el 2026-07-20 y publicada el 2026-07-21: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), COMO PROYECTO DE EXPORTACION ESTRATEGICA DE LARGO PLAZO, ENMARCADO EN EL SECTOR “PETROLEO Y GAS”, SUBSECTOR “EXPLOTACION Y PRODUCCION DE HIDROCARBUROS LIQUIDOS Y GASEOSOS COSTA ADENTRO”, Y EL PLAN DE INVERSION PRESENTADOS POR PAMPA ENERGIA SA - SUCURSAL DEDICADA PROYECTO RDA, (CUIT N° 30"
+  },
+  {
+   "nombre": "Sucursal Dedicada de Liex S.A",
+   "empresa": "Liex S.A. Sucursal Dedicada",
+   "provincias": [
+    "Catamarca"
+   ],
+   "sector": "Minería",
+   "monto": 710.0,
+   "empleos": 4406,
+   "descripcion": "Construcción y operación de una planta de proceso y de la infraestructura asociada, diseñadas para alcanzar una capacidad de producción de cuarenta mil (40.000) toneladas anuales de carbonato de litio mediante el método de extracción directa.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-428274",
+   "norma_id": "Resolución 1153/2026",
+   "fecha": "2026-07-27",
+   "fecha_publicacion": "2026-07-29",
+   "cita_norma": "Resolución 1153/2026 (Ministerio de Economía), firmada el 2026-07-27 y publicada el 2026-07-29: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR “POTASIO Y LITIO”, Y EL PLAN DE INVERSION PRESENTADOS POR LA FIRMA LIEX S.A. SUCURSAL DEDICADA, (CUIT N° 30-71929244-1), TITULAR DEL PROYECTO UNICO DENOMINADO “PROYECTO DE LA SUCURSAL DEDICADA DE LIEX S.A.”, UBICADO EN LAS CONCESIONES MINERAS D"
+  },
+  {
+   "nombre": "Vicuña",
+   "empresa": "Vicuña Argentina SA",
+   "provincias": [
+    "San Juan"
+   ],
+   "sector": "Minería",
+   "monto": 9737.0,
+   "empleos": 31700,
+   "descripcion": "Proyecto para la extracción, producción y exportación de cobre, oro y plata. Incluye infraestructura clave para operaciones de minería a cielo abierto: una planta concentradora para el procesamiento de minerales, instalaciones de lixiviación, infraestructura eléctrica, sistemas de suministro de agua, caminos de acceso y alojamientos.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-428357",
+   "norma_id": "Resolución 1154/2026",
+   "fecha": "2026-07-28",
+   "fecha_publicacion": "2026-07-30",
+   "cita_norma": "Resolución 1154/2026 (Ministerio de Economía), firmada el 2026-07-28 y publicada el 2026-07-30: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), COMO PROYECTO DE EXPORTACION ESTRATEGICA DE LARGO PLAZO, ENMARCADO EN EL SECTOR “MINERIA” SUBSECTOR “MINERALES DE PRIMERA Y SEGUNDA CATEGORIA (EXCLUIDOS POTASIO Y LITIO)” Y EL PLAN DE INVERSION, PRESENTADOS POR VICUÑA ARGENTINA SA, CUIT N° 33-61913055-9, TITULAR DEL PROYECTO UNICO DENOMI"
+  },
+  {
+   "nombre": "Sal de Oro II",
+   "empresa": "Posco Argentina SAU SDE",
+   "provincias": [
+    "Salta",
+    "Catamarca"
+   ],
+   "sector": "Minería",
+   "monto": 547.0,
+   "empleos": 2335,
+   "descripcion": "Construcción de una planta destinada a la producción de carbonato de litio y su infraestructura complementaria. La planta tendrá una capacidad operativa aproximada de 23.000 toneladas anuales, que se obtendrá a través de un proceso convencional de evaporación solar y tratamiento químico de salmuera.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-428465",
+   "norma_id": "Resolución 1157/2026",
+   "fecha": "2026-07-29",
+   "fecha_publicacion": "2026-07-31",
+   "cita_norma": "Resolución 1157/2026 (Ministerio de Economía), firmada el 2026-07-29 y publicada el 2026-07-31: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR “POTASIO Y LITIO”, Y EL PLAN DE INVERSION PRESENTADOS POR POSCO ARGENTINA SAU SDE, CUIT N° 30-71922048-3, TITULAR DEL PROYECTO UNICO DENOMINADO “SAL DE ORO II”, UBICADO EN UN AREA DEL SALAR DEL HOMBRE MUERTO EMPLAZADO EN UNA ZONA LIMITROFE ENTR"
+  },
+  {
+   "nombre": "Ampliación Mega",
+   "empresa": "Compañía Mega S.A. Sucursal Dedicada",
+   "provincias": [
+    "Neuquén",
+    "La Pampa",
+    "Río Negro",
+    "Buenos Aires"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 365.0,
+   "empleos": 792,
+   "descripcion": "Ampliación de un complejo industrial para incrementar la capacidad de producción de Líquidos del Gas Natural (LGN) en 1500 toneladas diarias.  El proyecto contempla nuevas instalaciones en la Planta de Separación de Loma La Lata, la ampliación de la capacidad de transporte del poliducto que atraviesa Neuquén, Río Negro, La Pampa y Buenos Aires, y la expansión de la Planta de Fraccionamiento ubicada en Bahía Blanca.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-429238",
+   "norma_id": "Resolución 1381/2026",
+   "fecha": "2026-08-25",
+   "fecha_publicacion": "2026-08-26",
+   "cita_norma": "Resolución 1381/2026 (Ministerio de Economía), firmada el 2026-08-25 y publicada el 2026-08-26: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “PETROLEO Y GAS”, SUBSECTOR “CONSTRUCCION DE PLANTAS DE TRATAMIENTO, PLANTAS DE SEPARACION DE LIQUIDOS DE GAS NATURAL, OLEODUCTOS, GASODUCTOS Y POLIDUCTOS E INSTALACIONES DE ALMACENAMIENTO”, Y EL PLAN DE INVERSION PRESENTADO POR COMPAÑIA MEGA SA SUCURSAL DEDICADA ("
+  },
+  {
+   "nombre": "Fertilizantes",
+   "empresa": "Fertil Pampa S.A.U",
+   "provincias": [
+    "Buenos Aires"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 2693.0,
+   "empleos": 12500,
+   "descripcion": "Construcción, operación y gerenciamiento de dos plantas de producción de urea, cada una con capacidad de 3.000 toneladas por día, con sus correspondientes unidades de granulación, y una planta de amoníaco con capacidad de 3.450 toneladas por día, utilizando como insumo principal el gas natural de Vaca Muerta",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-429717",
+   "norma_id": "Resolución 1468/2026",
+   "fecha": "2026-09-03",
+   "fecha_publicacion": "2026-09-07",
+   "cita_norma": "Resolución 1468/2026 (Ministerio de Economía), firmada el 2026-09-03 y publicada el 2026-09-07: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), COMO PROYECTO DE EXPORTACION ESTRATEGICA DE LARGO PLAZO (PEELP), ENMARCADO EN EL SECTOR “PETROLEO Y GAS”, SUBSECTOR “PETROQUIMICA Y FERTILIZANTES”, Y EL PLAN DE INVERSION PRESENTADOS POR FERTIL PAMPA SAU (CUIT N° 30-71875855-2), TITULAR DEL PROYECTO UNICO DENOMINADO “FERTILIZANTES”, CONS"
+  },
+  {
+   "nombre": "Los Toldos",
+   "empresa": "Tecpetrol S.A. Gas y Petróleo del Neuquén S.A. UT RIGI Los Toldos U.T.E.",
+   "provincias": [
+    "Neuquén"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 6432.0,
+   "empleos": 7900,
+   "descripcion": "Nuevo desarrollo de hidrocarburos en el área Los Toldos II Este, Vaca Muerta, el cual consiste en la perforación de 380 pozos junto con su infraestructura asociada para el tratamiento de la producción por una capacidad máxima de 70 mil barriles de petróleo diarios. El proyecto prevé un total de 360 millones de barriles de petróleo de exportación durante su operación.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-431089",
+   "norma_id": "Resolución 1771/2026",
+   "fecha": "2026-10-08",
+   "fecha_publicacion": "2026-10-09",
+   "cita_norma": "Resolución 1771/2026 (Ministerio de Economía), firmada el 2026-10-08 y publicada el 2026-10-09: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), COMO PROYECTO DE EXPORTACION ESTRATEGICA DE LARGO PLAZO (PEELP), ENMARCADO EN EL SECTOR “PETROLEO Y GAS”, SUBSECTOR “EXPLOTACION Y PRODUCCION DE NUEVOS DESARROLLOS DE HIDROCARBUROS LIQUIDOS Y GASEOSOS COSTA ADENTRO”, Y EL PLAN DE INVERSION PRESENTADOS POR TECPETROL S.A. GAS Y PETROLEO DE"
+  },
+  {
+   "nombre": "Bajo del Choique - La Invernada",
+   "empresa": "Gas y Petróleo del Neuquén SA - Pluspetrol Cuenca Neuquina SRL – Unión Transitoria Exploración y Producción Bajo del Choique – La Invernada",
+   "provincias": [
+    "Neuquén"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 12240.0,
+   "empleos": 2301,
+   "descripcion": "Desarrollo integral del área de Concesión de Explotación No Convencional de Hidrocarburos “Bajo del Choique - La Invernada”, que contempla la perforación de 620 nuevos pozos, la construcción y operación de cuatro plantas de tratamiento por una capacidad de 100 mil barriles de petróleo diarios, y la infraestructura para el procesamiento, almacenamiento y transporte de petróleo, gas y agua, destinados a la comercialización y exportación de 613 millones de barriles de petróleo estimados.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-431356",
+   "norma_id": "Resolución 1808/2026",
+   "fecha": "2026-10-15",
+   "fecha_publicacion": "2026-10-19",
+   "cita_norma": "Resolución 1808/2026 (Ministerio de Economía), firmada el 2026-10-15 y publicada el 2026-10-19: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), COMO PROYECTO DE EXPORTACION ESTRATEGICA DE LARGO PLAZO (PEELP), ENMARCADO EN EL SECTOR “PETROLEO Y GAS”, SUBSECTOR “EXPLOTACION Y PRODUCCION DE NUEVOS DESARROLLOS DE HIDROCARBUROS LIQUIDOS Y GASEOSOS COSTA ADENTRO”, Y EL PLAN DE INVERSION PRESENTADOS POR LA UNION TRANSITORIA DENOMINADA "
+  },
+  {
+   "nombre": "Toyota",
+   "empresa": "TOYOTA ARGENTINA SA SDE",
+   "provincias": [
+    "Buenos Aires"
+   ],
+   "sector": "Tecnología",
+   "monto": 1341.0,
+   "empleos": 6225,
+   "descripcion": "Construcción, instalación, puesta en funcionamiento y operación de una planta de producción destinada a la fabricación de vehículos con nuevas tecnologías de motorización, 100% electrificados, que no cuentan con antecedentes de producción local. Se trata de la inversión más grande de la historia en la industria automotriz argentina.",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-431504",
+   "norma_id": "Resolución 1848/2026",
+   "fecha": "2026-10-21",
+   "fecha_publicacion": "2026-10-22",
+   "cita_norma": "Resolución 1848/2026 (Ministerio de Economía), firmada el 2026-10-21 y publicada el 2026-10-22: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI) DE AMPLIACION DE UN PROYECTO PREEXISTENTE NO ADHERIDO AL RIGI Y SU PLAN DE INVERSION, ENMARCADO EN EL SECTOR “TECNOLOGIA”, PRESENTADO POR TOYOTA ARGENTINA S.A. SUCURSAL DEDICADA (CUIT Nº 30-71944240-0), TITULAR DEL PROYECTO UNICO DENOMINADO “PLANTA PARA LA PRODUCCION DE VEHICULOS ELECTRIF"
+  },
+  {
+   "nombre": "Agua Rica",
+   "empresa": "Minera Agua Rica LLC, Sucursal Argentina",
+   "provincias": [
+    "Catamarca"
+   ],
+   "sector": "Minería",
+   "monto": 6394.0,
+   "empleos": 8200,
+   "descripcion": "Desarrollo y explotación de un yacimiento a gran escala de cobre, oro, plata y molibdeno",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-431646",
+   "norma_id": "Resolución 1854/2026",
+   "fecha": "2026-10-25",
+   "fecha_publicacion": "2026-10-27",
+   "cita_norma": "Resolución 1854/2026 (Ministerio de Economía), firmada el 2026-10-25 y publicada el 2026-10-27: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR “MINERALES DE PRIMERA Y SEGUNDA CATEGORIA DEL CODIGO DE MINERIA DE LA NACION (EXCLUIDOS POTASIO Y LITIO)”, Y EL PLAN DE INVERSION PRESENTADOS POR MINERA AGUA RICA LLC, SUCURSAL ARGENTINA (CUIT N° 30-70769036-0), TITULAR DEL PROYECTO UNICO DENOM"
+  },
+  {
+   "nombre": "Proyecto de Procesamiento",
+   "empresa": "Procesadora de Gas del Sur SA",
+   "provincias": [
+    "Neuquén"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 1395.0,
+   "empleos": 4852,
+   "descripcion": "Construcción y operación de un sistema de gasoductos de captación y una planta de separación de líquidos de gas natural en la Cuenca Neuquina, con capacidad para procesar 1.200 millones de pies cúbicos estándar por día.",
+   "norma": "https://www.boletinoficial.gob.ar/detalleAviso/primera/350288/20261113",
+   "norma_id": "Resolución 1977/2026 (Ministerio de Economía)",
+   "fecha": "2026-11-12",
+   "fecha_publicacion": "2026-11-13",
+   "cita_norma": "RESOL-2026-1977-APN-MEC: aprueba la solicitud de adhesión al RIGI de Procesadora de Gas del Sur SA (VPU), proyecto Proyecto de Procesamiento, sector Petróleo y Gas; firmada el 12/11/2026, publicada el 13/11/2026 en el Boletín Oficial (aviso 350288)."
+  },
+  {
+   "nombre": "Proyecto de Transporte, Fraccionamiento, Almacenamiento y Comercialización",
+   "empresa": "Midstream de Gas del Sur SA",
+   "provincias": [
+    "Río Negro",
+    "Buenos Aires",
+    "La Pampa",
+    "Neuquén"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 1850.0,
+   "empleos": 14455,
+   "descripcion": "Construcción, operación y mantenimiento de un poliducto de 577 km. Incluye una planta de fraccionamiento con capacidad para procesar 90.000 barriles diarios de líquidos del gas natural, tres ductos de transferencia, una planta de almacenamiento y despacho y líneas de vinculación. La producción estará destinada a la obtención y comercialización de propano, butano y gasolina natural, principalmente para exportación.",
+   "norma": "https://www.boletinoficial.gob.ar/detalleAviso/primera/350287/20261113",
+   "norma_id": "Resolución 1976/2026 (Ministerio de Economía)",
+   "fecha": "2026-11-12",
+   "fecha_publicacion": "2026-11-13",
+   "cita_norma": "RESOL-2026-1976-APN-MEC: aprueba la solicitud de adhesión al RIGI de Midstream de Gas del Sur SA (VPU), Proyecto de Transporte, Fraccionamiento, Almacenamiento y Comercialización; firmada el 12/11/2026, publicada el 13/11/2026 (aviso 350287); considerandos: activos computables USD 1.849.581.183,36."
+  },
+  {
+   "nombre": "Parque Eólico la Rinconada",
+   "empresa": "Vientos La Rinconada S.A.U.",
+   "provincias": [
+    "Buenos Aires"
+   ],
+   "sector": "Energía eléctrica",
+   "monto": 231.0,
+   "empleos": 902,
+   "descripcion": "Desarrollo y explotación de un parque eólico de 94,5 MW, en Olavarría, provincia de Buenos Aires",
+   "norma": null,
+   "norma_id": null,
+   "fecha": null,
+   "fecha_publicacion": null,
+   "cita_norma": null,
+   "nota": "La planilla oficial no trae enlace a la norma para este proyecto y no se encontró la resolución de aprobación (la prensa de 2025 lo mostraba como en evaluación); la fecha queda sin cargar."
+  }
+ ],
+ "ingresado": {
+  "bruto": 1205,
+  "egresos": 452,
+  "neto": 762,
+  "hasta": "2026-03",
+  "unidad": "millones de US$",
+  "acumulado_desde": "2025-01 (aprobación del primer proyecto, según Bloomberg Línea)",
+  "tipo": "dato del BCRA presentado por Vladimir Werning; flujos cambiarios acumulados de proyectos RIGI aprobados",
+  "nota": "1.205 menos 452 da 753, no 762: la diferencia de 9 millones no está explicada en ninguna nota (lo marcó Chequeado). Forbes Argentina presentó el ingreso como del primer trimestre de 2026 y Bloomberg Línea como acumulado desde enero de 2025; Chequeado dice hasta el primer trimestre de 2026. El PDF del BCRA tiene el gráfico Cumulative FX Market Flows from RIGI Projects (lámina 9, fuente BCRA) pero las cifras están dibujadas como gráfico y no se pudieron leer del archivo.",
+  "documento_original": "BCRA, Vladimir Werning, «Argentina: Programa Económico Fase 4», Washington DC, abril 2026, lámina 9 (Cumulative FX Market Flows from RIGI Projects, Source BCRA)",
+  "url": "https://www.bcra.gob.ar/archivos/Pdfs/Noticias/presentacion-vicepresidente-bcra-program-phase-4-2026-04-13.pdf",
+  "fecha": "2026-04-20",
+  "url_noticia_bcra": "https://www.bcra.gob.ar/noticias/el-vicepresidente-del-bcra-expuso-el-programa-economico-ante-inversores-en-washington-d-c/",
+  "cita": "PDF del BCRA (publicado el 20/04/2026): lámina 9, título Cumulative FX Market Flows from RIGI Projects; texto de la lámina: FX inflows from foreign direct investment related to long-term RIGI approved projects are already being deployed (cifras solo en el gráfico).",
+  "citas_de_las_cifras": [
+   {
+    "url": "https://chequeado.com/el-explicador/el-gobierno-anuncio-en-paris-2-nuevos-rigi-cuantos-proyectos-se-aprobaron-y-cuantos-dolares-ingresaron-hasta-ahora/",
+    "fecha": "2026-10-02",
+    "organismo": "Chequeado",
+    "cita": "hasta el primer trimestre de 2026 habían ingresado US$ 762 millones netos en inversiones (US$ 1.205 millones de ingresos, matizados por salidas por US$ 452 millones); fuente: presentación a inversores del vicepresidente del BCRA, Vladimir Werning."
+   },
+   {
+    "url": "https://www.bloomberglinea.com/latinoamerica/argentina/los-dolares-del-rigi-ya-ingresan-al-mercado-de-cambios-con-un-saldo-superavitario/",
+    "fecha": "2026-04-21",
+    "organismo": "Bloomberg Línea",
+    "cita": "US$1.205 millones ingresados al país, US$452 millones salidos por importaciones de bienes y servicios y saldo positivo de US$762 millones; el cálculo se inicia con la aprobación del primer proyecto, en enero de 2025."
+   }
+  ],
+  "mas_nuevo_oficial": "No se encontró ninguna cifra oficial posterior de lo efectivamente invertido o ingresado. Chequeado (2026-10-02) solo trae proyecciones oficiales de ingresos de capital: US$ 6.200 millones en 2026, 6.251 en 2027 y 6.644 en 2028 (no son datos efectivos)."
+ }
+}

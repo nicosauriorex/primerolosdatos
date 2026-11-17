@@ -390,6 +390,7 @@ Crítica final de Impeccable: 26/40 (antes 21/40). El usuario eligió arreglar l
 
 ## Datos calientes que faltan (2026-11-16)
 - ~~Segunda investigación (`docs/investigaciones/datos-nuevos-2-2026-11-16.md`): subsidios al transporte, transferencias a provincias, patentamientos, demanda eléctrica, gasto por función, siniestros viales y femicidios (a mano) → spec: docs/specs/datos-calientes-2.md~~ ✅ 2026-11-16
+- ~~Tercera tanda (2026-11-17), investigada en `docs/investigaciones/datos-nuevos-3-2026-11-17.md` → spec: docs/specs/datos-calientes-3.md: robos de autos, motos, obra pública, vacunas, empleadores; y pedidos del usuario: «puestos de trabajo totales? (formal + informal)»; «pobreza en numero de personas? (creo que tenemos el % nomás). y pobreza de alta frecuencia (la medicion mensual, habia una fuente que en enero 26 daba como 57% creo)»; «inversiones rigi anunciadas y ejecutadas?»; «piquetes?»; «consumo de carne?»; «ingresos, alumnos regulares y graduados?»; «natalidad, mortalidad?».~~ ✅ 2026-11-17 (universidades en serie larga quedó afuera: las fuentes no cierran)
 
 ## ~~Novedades, calendario y predicciones (primera parte)~~ ✅ 2026-11-16
 → spec: docs/specs/novedades-calendario.md

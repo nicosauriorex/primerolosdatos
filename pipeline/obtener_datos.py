@@ -347,6 +347,11 @@ def escribir_json_web(datos, ctx=None, pm=None, cap=None, con_red=True):
         (destino / "reservas_netas.json").write_text(json.dumps(reservas_netas.construir_json(con_red), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     except Exception as e:
         print(f"Reservas netas: no se pudo armar, se sigue sin reservas_netas.json ({e}).")
+    # RIGI: proyectos aprobados y lo ingresado (datos/manual/rigi.json, sin red). Va fuera del hash. Si falla, la corrida sigue sin rigi.json.
+    try:
+        __import__("manuales_calientes").escribir_rigi(destino)
+    except Exception as e:
+        print(f"RIGI: no se pudo armar, se sigue sin rigi.json ({e}).")
     # "version" cambia con cada dato nuevo: la web la agrega a cada pedido para no mezclar cachés viejos y nuevos.
     (destino / "catalogo.json").write_text(
         json.dumps({"version": h.hexdigest()[:10], "fechas": datos["fechas"], "series": meta}, ensure_ascii=False, separators=(",", ":")),

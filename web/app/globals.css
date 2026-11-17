@@ -2713,3 +2713,20 @@ nav.tabs .con-menu { align-self: stretch; align-items: center; }
   background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--border-fuerte); border-radius: var(--r-2); box-shadow: var(--sombra-1);
   font-size: var(--t-sm); font-weight: 700; line-height: 1.25; white-space: normal; pointer-events: none; }
 .con-cartel [data-cartel] { cursor: default; }
+
+/* RIGI (/rigi/, components/secciones/Rigi.tsx): tres cifras arriba y la tabla de proyectos. */
+.rigi { min-width: 0; }
+.rigi-cifras { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--e-4); margin: 0 0 var(--e-4); }
+.rigi-cifras > div { min-width: 0; }
+.rigi-cifras dt { font-size: var(--t-xs); color: var(--text-muted); }
+.rigi-cifras dd { margin: 0; }
+.rigi-num { font-size: var(--t-xl, 1.5rem); font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; overflow-wrap: anywhere; }
+.rigi-sub { font-size: var(--t-xs); color: var(--text-muted); margin-top: var(--e-1, 4px); overflow-wrap: anywhere; }
+@media (max-width: 640px) { .rigi-cifras { grid-template-columns: minmax(0, 1fr); } }
+.rigi-tabla table { font-size: var(--t-sm); font-variant-numeric: tabular-nums; }
+.rigi-tabla th[scope="row"] { text-align: left; min-width: 14rem; }
+.rigi-tabla td { vertical-align: top; min-width: 8rem; }
+.rigi-tabla th small { display: block; font-weight: 400; font-size: var(--t-xs); color: var(--text-muted); }
+.rigi-nombre { font-weight: 700; }
+.rigi-tabla .rigi-num-col { text-align: right; white-space: nowrap; }
+.rigi-tabla th.rigi-num-col .cg-th { text-align: right; white-space: normal; }

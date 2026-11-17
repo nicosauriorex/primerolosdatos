@@ -43,6 +43,8 @@ export const DATOS_FIJOS: DatoFijo[] = [
   { slug: "produccion-industrial", e: ex("dg_453_1_serie_deseada_0_0_24_58", "asis") },
   { slug: "patentamientos", e: ex("patentamientos", "asis") },
   { slug: "demanda-electrica", e: ex("demanda_electrica", "asis") },
+  { slug: "motos", e: ex("motos_0km", "asis") },
+  { slug: "carne", e: ex("carne_vacuna", "asis") },
   // Empleo y pobreza
   { slug: "desocupacion", e: ex("dg_42_3_eph_puntuatal_0_m_30", "asis") },
   { slug: "pobreza", e: ex("pob_tasa_pobreza_personas", "asis") },
@@ -51,6 +53,10 @@ export const DATOS_FIJOS: DatoFijo[] = [
   { slug: "auh-real", e: ex("auh", "real") },
   { slug: "pensiones-por-invalidez", e: ex("pnc_invalidez", "asis") },
   { slug: "empleo-publico-nacional", e: ex("empleo_publico_nacional", "asis") },
+  { slug: "puestos-de-trabajo", e: ex("puestos_total", "asis") },
+  { slug: "trabajo-en-negro", e: ex("puestos_noreg_pct", "asis") },
+  { slug: "pobres", e: ex("pobres_31", "asis") },
+  { slug: "empresas", e: ex("empresas_art", "asis") },
   // Comercio exterior
   { slug: "saldo-comercial", e: ex("dg_saldo_comercial", "corr", { esc: "pib" }) },
   { slug: "cuenta-corriente", e: ex("dg_160_2_tl_cuennte_0_t_22", "corr", { esc: "pib" }) },
@@ -66,12 +72,18 @@ export const DATOS_FIJOS: DatoFijo[] = [
   { slug: "subsidios-transporte", e: ex("sub_transporte", "real") },
   { slug: "transferencias-provincias", e: ex("transf_prov", "real") },
   { slug: "gasto-ciencia", e: ex("gasto_ciencia", "asis") },
+  { slug: "obra-publica", e: ex("obra_publica", "real") },
+  { slug: "rigi", e: ex("rigi_aprobado", "asis") },
   // Seguridad y salud
   { slug: "homicidios", e: ex("homicidios_tasa", "asis") },
   { slug: "mortalidad-infantil", e: ex("mortalidad_infantil", "asis") },
   { slug: "presos-por-habitante", e: ex("presos_tasa", "asis") },
   { slug: "presos", e: ex("presos", "asis") },
   { slug: "siniestros-viales", e: ex("siniestros_viales_tasa", "asis") },
+  { slug: "natalidad", e: ex("natalidad", "asis") },
+  { slug: "vacunacion", e: ex("vacuna_sarampion1", "asis") },
+  { slug: "robos-de-autos", e: ex("robos_autos", "asis") },
+  { slug: "piquetes", e: ex("piquetes", "asis") },
   // Dinero, tasas y mercados
   { slug: "reservas", e: ex("bcra_1", "usdr") },
   { slug: "riesgo-pais", e: ex("riesgo", "asis") },

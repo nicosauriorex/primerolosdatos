@@ -1,0 +1,289 @@
+{
+ "actualizado": "2026-11-17",
+ "fuente": "Universidad Torcuato Di Tella (UTDT), Nowcast de Pobreza de Martín González-Rozada (estimación privada, semestre móvil, EPH simulada), y Observatorio de la Deuda Social Argentina (ODSA) de la UCA (privado). Cada valor cita la nota que lo publicó; el informe original de la UTDT no se pudo abrir.",
+ "nota": "Ninguna cifra es oficial: el INDEC publica pobreza por semestre. El nowcast se revisa mes a mes, por eso cada entrada lleva su campo version y la fecha de publicación; una misma ventana puede tener dos valores (primera estimación y versión revisada). El informe de la UTDT es de acceso restringido; solo dos páginas de utdt.edu son accesibles (reproducen notas de El Cronista). Las siete ventanas vigentes (12/11/2026) salen de una sola tabla de iProfesional. Hay huecos: ventanas que la prensa no publicó no se cargan. Regla: sin cita no se carga.",
+ "nowcast_utdt_vigente": [
+  {
+   "desde": "2025-10",
+   "hasta": "2026-03",
+   "pobreza": 29.9,
+   "indigencia": 6.5,
+   "version": "vigente al 2026-11-12",
+   "fecha": "2026-11-12",
+   "organismo_nota": "iProfesional (cita al Nowcast de la UTDT)",
+   "url": "https://www.iprofesional.com/economia/468929-pobreza-urbana-llego-32-por-ciento-afecta-a-10-millones-argentinos",
+   "cita": "Nowcast de Pobreza (UTDT), tabla de semestres móviles de la nota: octubre 2025-marzo 2026, pobreza 29,9%, indigencia 6,5%."
+  },
+  {
+   "desde": "2025-11",
+   "hasta": "2026-04",
+   "pobreza": 30.7,
+   "indigencia": 6.5,
+   "version": "vigente al 2026-11-12",
+   "fecha": "2026-11-12",
+   "organismo_nota": "iProfesional (cita al Nowcast de la UTDT)",
+   "url": "https://www.iprofesional.com/economia/468929-pobreza-urbana-llego-32-por-ciento-afecta-a-10-millones-argentinos",
+   "cita": "Nowcast de Pobreza (UTDT), tabla de semestres móviles de la nota: noviembre 2025-abril 2026, pobreza 30,7%, indigencia 6,5%."
+  },
+  {
+   "desde": "2025-12",
+   "hasta": "2026-05",
+   "pobreza": 31.3,
+   "indigencia": 6.7,
+   "version": "vigente al 2026-11-12",
+   "fecha": "2026-11-12",
+   "organismo_nota": "iProfesional (cita al Nowcast de la UTDT)",
+   "url": "https://www.iprofesional.com/economia/468929-pobreza-urbana-llego-32-por-ciento-afecta-a-10-millones-argentinos",
+   "cita": "Nowcast de Pobreza (UTDT), tabla de semestres móviles de la nota: diciembre 2025-mayo 2026, pobreza 31,3%, indigencia 6,7%."
+  },
+  {
+   "desde": "2026-01",
+   "hasta": "2026-06",
+   "pobreza": 32.3,
+   "indigencia": 6.9,
+   "version": "vigente al 2026-11-12",
+   "fecha": "2026-11-12",
+   "organismo_nota": "iProfesional (cita al Nowcast de la UTDT)",
+   "url": "https://www.iprofesional.com/economia/468929-pobreza-urbana-llego-32-por-ciento-afecta-a-10-millones-argentinos",
+   "cita": "Nowcast de Pobreza (UTDT), tabla de semestres móviles de la nota: enero-junio 2026, pobreza 32,3%, indigencia 6,9%."
+  },
+  {
+   "desde": "2026-02",
+   "hasta": "2026-07",
+   "pobreza": 32.2,
+   "indigencia": 6.6,
+   "version": "vigente al 2026-11-12",
+   "fecha": "2026-11-12",
+   "organismo_nota": "iProfesional (cita al Nowcast de la UTDT)",
+   "url": "https://www.iprofesional.com/economia/468929-pobreza-urbana-llego-32-por-ciento-afecta-a-10-millones-argentinos",
+   "cita": "Nowcast de Pobreza (UTDT), tabla de semestres móviles de la nota: febrero-julio 2026, pobreza 32,2%, indigencia 6,6%."
+  },
+  {
+   "desde": "2026-03",
+   "hasta": "2026-08",
+   "pobreza": 32.0,
+   "indigencia": 7.1,
+   "version": "vigente al 2026-11-12",
+   "fecha": "2026-11-12",
+   "organismo_nota": "iProfesional (cita al Nowcast de la UTDT)",
+   "url": "https://www.iprofesional.com/economia/468929-pobreza-urbana-llego-32-por-ciento-afecta-a-10-millones-argentinos",
+   "cita": "Nowcast de Pobreza (UTDT), tabla de semestres móviles de la nota: marzo-agosto 2026, pobreza 32,0%, indigencia 7,1%."
+  },
+  {
+   "desde": "2026-04",
+   "hasta": "2026-09",
+   "pobreza": 32.6,
+   "indigencia": 7.1,
+   "version": "vigente al 2026-11-12",
+   "fecha": "2026-11-12",
+   "organismo_nota": "iProfesional (cita al Nowcast de la UTDT)",
+   "url": "https://www.iprofesional.com/economia/468929-pobreza-urbana-llego-32-por-ciento-afecta-a-10-millones-argentinos",
+   "cita": "La tasa de pobreza pasó de 29.4% a 32.6% (abril-septiembre 2025 a abril-septiembre 2026); indigencia 7,1%. Tabla de semestres móviles de la nota.",
+   "intervalo_95": [
+    30.1,
+    34.1
+   ],
+   "nota": "El intervalo del 95 % aparece como 30,1-34,1 en Séptima Sección (13/11/2026); la búsqueda dio 31,1-34,1 para iProfesional: no se pudo contrastar. Perfil dio 31,3 % para marzo-agosto 2026 (otra versión del cálculo); acá se usa la tabla de iProfesional."
+  }
+ ],
+ "nowcast_utdt_historico": [
+  {
+   "desde": "2024-02",
+   "hasta": "2024-07",
+   "pobreza": 50.2,
+   "indigencia": null,
+   "version": "publicada el 2024-08-16",
+   "fecha": "2024-08-16",
+   "organismo_nota": "Bloomberg Línea",
+   "url": "https://www.bloomberglinea.com/latinoamerica/argentina/baja-la-pobreza-en-la-argentina-de-milei-esto-anticipo-la-universidad-torcuato-di-tella/",
+   "cita": "Pobreza de 50,2% (intervalo de confianza del 95%: 48,7% a 51,7%), bajó desde el 51,9% de junio; Nowcast de Pobreza de la UTDT, Martín González-Rozada.",
+   "intervalo_95": [
+    48.7,
+    51.7
+   ]
+  },
+  {
+   "desde": "2024-07",
+   "hasta": "2024-12",
+   "pobreza": 36.8,
+   "indigencia": null,
+   "version": "publicada el 2025-02-12",
+   "fecha": "2025-02-12",
+   "organismo_nota": "Perfil",
+   "url": "https://www.perfil.com/noticias/reperfilar/por-la-baja-inflacion-la-pobreza-bajo-al-368.phtml",
+   "cita": "El Nowcast estima una tasa de pobreza de 36,8% para el semestre julio-diciembre (intervalo del 95%: 35,3% a 38,2%).",
+   "intervalo_95": [
+    35.3,
+    38.2
+   ],
+   "nota": "Otras notas dan 9,2 % de indigencia; no se pudo abrir esa nota, por eso no se carga."
+  },
+  {
+   "desde": "2024-09",
+   "hasta": "2025-02",
+   "pobreza": 34.9,
+   "indigencia": 8.7,
+   "version": "publicada el 2025-03-15",
+   "fecha": "2025-03-15",
+   "organismo_nota": "Los Andes",
+   "url": "https://www.losandes.com.ar/sociedad/la-pobreza-al-349-febrero-ultimo-segun-una-proyeccion-la-universidad-di-tella-n5941571",
+   "cita": "la pobreza en Argentina descendió al 34,9% en febrero de 2025 (semestre septiembre 2024-febrero 2025; intervalo del 95%: 33,4% a 36,3%; indigencia 8,7%).",
+   "intervalo_95": [
+    33.4,
+    36.3
+   ]
+  },
+  {
+   "desde": "2024-11",
+   "hasta": "2025-04",
+   "pobreza": 35.4,
+   "indigencia": 7.8,
+   "version": "publicada el 2025-05-15",
+   "fecha": "2025-05-15",
+   "organismo_nota": "UTDT (reproduce nota de El Cronista)",
+   "url": "https://www.utdt.edu/ver_nota_prensa.php?id_nota_prensa=22739&id_item_menu=6",
+   "cita": "Con menos inflación, la pobreza podría tocar un mínimo desde 2022: semestre noviembre 2024-abril 2025, pobreza 35,4% («se ubica en niveles mínimos desde la primera mitad de 2022»), indigencia 7,8%."
+  },
+  {
+   "desde": "2025-01",
+   "hasta": "2025-06",
+   "pobreza": 31.6,
+   "indigencia": 7.4,
+   "version": "publicada el 2025-07-15",
+   "fecha": "2025-07-15",
+   "organismo_nota": "Infobae (y Bloomberg Línea; UTDT reproduce la nota de El Cronista)",
+   "url": "https://www.infobae.com/economia/2025/07/15/la-pobreza-se-redujo-al-316-en-el-primer-semestre-y-alcanzo-su-nivel-mas-bajo-en-los-ultimos-siete-anos/",
+   "cita": "Pobreza 31,6% en el primer semestre de 2025 frente a 52,9% del mismo semestre de 2024; indigencia 7,4% frente a 18,2%. Nowcast de Martín González Rozada (UTDT).",
+   "intervalo_95": [
+    30.1,
+    33.1
+   ],
+   "nota": "El intervalo sale de Bloomberg Línea (2025-07-15)."
+  },
+  {
+   "desde": "2025-04",
+   "hasta": "2025-09",
+   "pobreza": 30.7,
+   "indigencia": 7.1,
+   "version": "publicada el 2025-10-14",
+   "fecha": "2025-10-14",
+   "organismo_nota": "Infobae",
+   "url": "https://www.infobae.com/economia/2025/10/15/segun-un-informe-privado-la-pobreza-bajo-al-307-entre-abril-y-septiembre-de-este-ano/",
+   "cita": "El nowcast estima una tasa de pobreza de 30,7% (intervalo del 95%: 29,3% a 32,2%); indigencia 7,1%. Semestre abril-septiembre 2025.",
+   "intervalo_95": [
+    29.3,
+    32.2
+   ],
+   "nota": "Versión posterior (13/11/2026): 29,4 % y 7,0 % para el mismo semestre; ver la entrada siguiente."
+  },
+  {
+   "desde": "2025-04",
+   "hasta": "2025-09",
+   "pobreza": 29.4,
+   "indigencia": 7.0,
+   "version": "revisada, nota del 2026-11-13",
+   "fecha": "2026-11-13",
+   "organismo_nota": "Séptima Sección",
+   "url": "https://septimaseccion.com.ar/segun-un-informe-de-la-universidad-di-tella-la-pobreza-alcanza-a-casi-10-millones-de-personas/",
+   "cita": "Mismo semestre de 2025 (abril-septiembre): pobreza de 29,4% e indigencia de 7,0%, comparado con la estimación 32,6% / 7,1% de abril-septiembre 2026 del Nowcast de la UTDT."
+  },
+  {
+   "desde": "2024-01",
+   "hasta": "2024-06",
+   "pobreza": 52.9,
+   "indigencia": 18.2,
+   "version": "cifra que cita la nota del 2026-11-13 (primer semestre de 2024, pico)",
+   "fecha": "2026-11-13",
+   "organismo_nota": "Séptima Sección",
+   "url": "https://septimaseccion.com.ar/segun-un-informe-de-la-universidad-di-tella-la-pobreza-alcanza-a-casi-10-millones-de-personas/",
+   "cita": "Primer semestre de 2024: pico de pobreza de 52,9% e indigencia de 18,2% (misma cifra que cita Infobae el 2025-07-15 para el primer semestre de 2024).",
+   "nota": "Es la referencia del primer semestre de 2024 con la que se compara; probablemente es el dato oficial del INDEC y no una estimación del nowcast, por eso va marcada como referencia.",
+   "tipo": "referencia"
+  },
+  {
+   "desde": "2025-07",
+   "hasta": "2025-12",
+   "pobreza": 30.6,
+   "indigencia": null,
+   "version": "publicada el 2026-01-27",
+   "fecha": "2026-01-27",
+   "organismo_nota": "Ámbito",
+   "url": "https://www.ambito.com/economia/ante-la-aceleracion-la-inflacion-pronosticos-advierten-que-se-frena-la-baja-la-pobreza-al-cierre-2025-n6237110",
+   "cita": "la tasa de pobreza del segundo semestre -entre julio y diciembre 2025- se ubicaría en torno al 30,6%."
+  }
+ ],
+ "nowcast_utdt_trimestral": [
+  {
+   "periodo": "2025-T4",
+   "pobreza": 32.5,
+   "indigencia": null,
+   "fecha": "2026-01-18",
+   "url": "https://www.noticiasnqn.com.ar/amp/noticias/2026/01/18/326727-la-pobreza-volvio-a-aumentar-en-los-ultimos-meses-de-2025",
+   "cita": "Según el Nowcast, la tasa subió al 32,5% en el cuarto trimestre de 2025, desde el 27,5% del tercero (la pobreza volvió a subir en el último tramo del año)."
+  },
+  {
+   "periodo": "2025-T3",
+   "pobreza": 27.5,
+   "indigencia": null,
+   "fecha": "2026-01-18",
+   "url": "https://www.noticiasnqn.com.ar/amp/noticias/2026/01/18/326727-la-pobreza-volvio-a-aumentar-en-los-ultimos-meses-de-2025",
+   "cita": "subió al 32,5% en el cuarto trimestre de 2025, desde el 27,5% del tercero."
+  }
+ ],
+ "uca_odsa": [
+  {
+   "periodo": "2023-T3",
+   "pobreza": 44.7,
+   "indigencia": 9.6,
+   "tipo": "medición (EDSA)",
+   "fecha": "2024-02-17",
+   "url": "https://diariodecuyo.com.ar/argentina/La-UCA-estima-que-aumento-la-pobreza-llego-a-57-en-enero-20240217-0051.html",
+   "documento": "ODSA-UCA, «Estimación de los efectos del impacto inflacionario posdevaluación» (informe difundido el 17/02/2024)",
+   "cita": "Tabla de la nota: 3er trimestre 2023, indigencia 9,6%, pobreza 44,7%."
+  },
+  {
+   "periodo": "2023-12",
+   "pobreza": 49.5,
+   "indigencia": 14.2,
+   "tipo": "simulación",
+   "fecha": "2024-02-17",
+   "url": "https://diariodecuyo.com.ar/argentina/La-UCA-estima-que-aumento-la-pobreza-llego-a-57-en-enero-20240217-0051.html",
+   "documento": "ODSA-UCA, «Estimación de los efectos del impacto inflacionario posdevaluación» (informe difundido el 17/02/2024)",
+   "cita": "Tabla de la nota: diciembre 2023, indigencia 14,2%, pobreza 49,5%."
+  },
+  {
+   "periodo": "2024-01",
+   "pobreza": 57.4,
+   "indigencia": 15.0,
+   "tipo": "simulación (NO es una medición)",
+   "fecha": "2024-02-17",
+   "url": "https://diariodecuyo.com.ar/argentina/La-UCA-estima-que-aumento-la-pobreza-llego-a-57-en-enero-20240217-0051.html",
+   "documento": "ODSA-UCA, «Estimación de los efectos del impacto inflacionario posdevaluación» (informe difundido el 17/02/2024)",
+   "cita": "Tabla de Diario de Cuyo (17/02/2024): enero 2024, indigencia 15%, pobreza 57,4%; es el nivel más alto de la serie, ya que en 2004 fue del 54%.",
+   "url_aclaracion": "https://chequeado.com/ultimas-noticias/javier-milei-6-de-cada-10-argentinos-son-pobres/",
+   "cita_aclaracion": "Chequeado (28/02/2024; original 21/02/2024): el ODSA describe su cifra de enero de 2024 como un «ejercicio de simulación». Agustín Salvia (director del ODSA): «No hicimos una nueva medición en enero.»",
+   "nota": "Partió de la encuesta del 3T 2023 ajustada por precios y salarios; no es una medición ni es comparable con el INDEC."
+  },
+  {
+   "periodo": "2024-T3",
+   "pobreza": 45.6,
+   "indigencia": 11.2,
+   "tipo": "medición (EDSA)",
+   "fecha": "2025-12-04",
+   "url": "https://www.diariodecuyo.com.ar/economia/segun-el-informe-de-la-uca-la-pobreza-cayo-al-363-en-el-tercer-trimestre-1806443.html",
+   "documento": "ODSA-UCA, Encuesta de la Deuda Social Argentina 2025",
+   "cita": "tras haber alcanzado en igual período de 2024 el 45,6% (indigencia 11,2%)."
+  },
+  {
+   "periodo": "2025-T3",
+   "pobreza": 36.3,
+   "indigencia": 6.8,
+   "tipo": "medición (EDSA)",
+   "fecha": "2025-12-04",
+   "url": "https://www.diariodecuyo.com.ar/economia/segun-el-informe-de-la-uca-la-pobreza-cayo-al-363-en-el-tercer-trimestre-1806443.html",
+   "documento": "ODSA-UCA, Encuesta de la Deuda Social Argentina 2025",
+   "cita": "Titular: la pobreza cayó al 36,3% en el tercer trimestre; indigencia 6,8%.",
+   "nota": "La misma nota dice 36,6% en el cuerpo; el titular y la mayoría de las fuentes dan 36,3 y se carga ese. Nivel más bajo desde 2018 según la nota."
+  }
+ ]
+}

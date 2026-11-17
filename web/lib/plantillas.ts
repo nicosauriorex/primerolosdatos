@@ -114,6 +114,31 @@ export function crearPlantillas(metas: SerieMeta[]): Plantilla[] {
     ["gasto_salud", "gasto_educacion", "gasto_ciencia"].map((id) => E(id, { med: "asis" })));
   manual("patentamientos", "Patentamientos de autos 0 km", "Actividad", "Automotores 0 km (autos, utilitarios y otros; la fuente no los separa) inscriptos por primera vez en el Registro del Automotor, por mes",
     ["autos", "0 km", "ventas de autos", "automotores", "usados"], [E("patentamientos", { med: "asis" })]);
+  manual("trabajo-formal-e-informal", "Trabajo formal e informal", "Empleo y pobreza",
+    "Puestos de trabajo asalariados registrados, asalariados no registrados (en negro) y no asalariados (cuentapropistas y patrones), en miles de puestos por trimestre. Cuenta puestos, no personas",
+    ["trabajo en negro", "informalidad", "informales", "puestos de trabajo", "empleo total", "cuentapropistas", "monotributistas"],
+    ["puestos_asal_reg", "puestos_asal_noreg", "puestos_no_asal"].map((id) => E(id, { med: "asis" })));
+  manual("pobres-31-aglomerados-y-todo-el-pais", "Pobres: 31 aglomerados y todo el país", "Empleo y pobreza",
+    "Personas pobres en los 31 aglomerados urbanos (cifra oficial del INDEC) y estimación propia para todo el país, que supone la misma tasa en el resto",
+    ["pobres", "cantidad de pobres", "millones de pobres", "pobreza", "personas pobres"],
+    ["pobres_31", "pobres_pais"].map((id) => E(id, { med: "asis" })));
+  manual("natalidad-y-mortalidad", "Natalidad y mortalidad", "Sociedad",
+    "Nacimientos y muertes cada 1.000 habitantes por año. La mortalidad es una cuenta propia: defunciones sobre población",
+    ["natalidad", "mortalidad", "nacimientos", "muertes", "defunciones", "bebes", "fecundidad"],
+    ["natalidad", "mortalidad"].map((id) => E(id, { med: "asis" })));
+  manual("vacunacion-sarampion-dtp-bcg", "Vacunación: sarampión, DTP y BCG", "Sociedad",
+    "Porcentaje de niños vacunados según la estimación de la OMS y UNICEF (distinta del registro del Ministerio de Salud)",
+    ["vacunas", "vacunacion", "sarampion", "calendario de vacunas", "dtp", "bcg"],
+    ["vacuna_sarampion1", "vacuna_sarampion2", "vacuna_dtp3", "vacuna_bcg"].map((id) => E(id, { med: "asis" })));
+  manual("autos-y-motos-0-km", "Autos y motos 0 km", "Actividad",
+    "Autos y motos inscriptos por primera vez en el Registro del Automotor, por mes",
+    ["motos", "motos 0 km", "autos", "patentamientos", "ventas de autos"],
+    ["patentamientos", "motos_0km"].map((id) => E(id, { med: "asis" })));
+  // Solo los robos: los recuperos (decenas o cientos por mes) quedan planos en el mismo eje que miles de robos; tienen su propia ficha.
+  manual("robos-y-recuperos-de-autos", "Robos de autos por mes", "Sociedad",
+    "Denuncias de robo o hurto de autos inscriptas en el Registro del Automotor (no es el total de denuncias policiales)",
+    ["robo de autos", "autos robados", "inseguridad", "recuperos"],
+    [E("robos_autos", { med: "asis" })]);
   manual("subsidios-transporte-y-energia-en-pesos-de-hoy", "Subsidios: transporte y energía en pesos de hoy", "Fiscal",
     "Subsidios económicos al transporte (mensual) y a la energía (trimestral, repartido en los 3 meses), ajustados por inflación",
     ["subsidios", "colectivos", "trenes", "transporte", "energia", "luz", "gas", "tarifas"],

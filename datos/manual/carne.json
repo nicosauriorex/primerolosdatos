@@ -1,0 +1,266 @@
+{
+ "actualizado": "2026-11-17",
+ "fuente": "Secretaría de Agricultura, Ganadería y Pesca (MAGyP): serie anual 1990-2018 de la API de Series de Tiempo (AGRO_0244) y tablero de consumo per cápita de carnes 2020-2025; CICCRA (privada) como contraste. El PDF Indicadores bovinos anuales 1914-2025 NO se pudo abrir.",
+ "nota": "Sitio magyp.gob.ar devolvió 403 a cuatro pedidos de este trabajo (PDF 1914-2025 por curl y por WebFetch, tablero 2025 y CSV de datos.magyp.gob.ar), así que la serie 1914-2025 no está. HAY UN CORTE DE METODOLOGIA entre 1990-2018 y 2019-2025: la serie vieja (publicada hasta 2019) da 57,94 kg en 2018 y el tablero nuevo 51,15 en 2019; no se pueden empalmar sin la nota metodológica del PDF. Cada fila lleva su estado de verificación. Total de carnes no se carga para 2019. Regla: sin cita no se carga.",
+ "serie_historica_oficial": {
+  "nombre": "Mercado Interno: Consumo per Capita (Kg./Hab.), Ganadería - Indicadores bovinos anuales",
+  "id_serie": "AGRO_0244",
+  "unidad": "kg por habitante por año, carne vacuna (consumo aparente; la serie de la Junta Nacional de Carnes y MAGyP es en equivalente res con hueso, según la nota metodológica citada por el buscador)",
+  "organismo": "Secretaría de Agricultura, Ganadería y Pesca (Subsecretaría de Ganadería)",
+  "url": "https://apis.datos.gob.ar/series/api/series/?ids=AGRO_0244&format=json",
+  "fecha": "2019-10-02",
+  "cita": "API de Series de Tiempo (datos.gob.ar): serie AGRO_0244, anual 1990-01-01 a 2018-01-01, dataset modificado el 2019-10-02; descargada el 2026-11-17 (29 valores, 1990=78,23 y 2018=57,94).",
+  "valores": [
+   {
+    "anio": 1990,
+    "vacuna": 78.23
+   },
+   {
+    "anio": 1991,
+    "vacuna": 75.02
+   },
+   {
+    "anio": 1992,
+    "vacuna": 73.43
+   },
+   {
+    "anio": 1993,
+    "vacuna": 74.86
+   },
+   {
+    "anio": 1994,
+    "vacuna": 70.46
+   },
+   {
+    "anio": 1995,
+    "vacuna": 63.21
+   },
+   {
+    "anio": 1996,
+    "vacuna": 63.84
+   },
+   {
+    "anio": 1997,
+    "vacuna": 64.81
+   },
+   {
+    "anio": 1998,
+    "vacuna": 61.94
+   },
+   {
+    "anio": 1999,
+    "vacuna": 66.24
+   },
+   {
+    "anio": 2000,
+    "vacuna": 65.63
+   },
+   {
+    "anio": 2001,
+    "vacuna": 63.82
+   },
+   {
+    "anio": 2002,
+    "vacuna": 58.73
+   },
+   {
+    "anio": 2003,
+    "vacuna": 60.82
+   },
+   {
+    "anio": 2004,
+    "vacuna": 63.49
+   },
+   {
+    "anio": 2005,
+    "vacuna": 62.26
+   },
+   {
+    "anio": 2006,
+    "vacuna": 64.15
+   },
+   {
+    "anio": 2007,
+    "vacuna": 68.97
+   },
+   {
+    "anio": 2008,
+    "vacuna": 68.76
+   },
+   {
+    "anio": 2009,
+    "vacuna": 68.36
+   },
+   {
+    "anio": 2010,
+    "vacuna": 57.78
+   },
+   {
+    "anio": 2011,
+    "vacuna": 55.79
+   },
+   {
+    "anio": 2012,
+    "vacuna": 58.64
+   },
+   {
+    "anio": 2013,
+    "vacuna": 63.09
+   },
+   {
+    "anio": 2014,
+    "vacuna": 58.6
+   },
+   {
+    "anio": 2015,
+    "vacuna": 59.44
+   },
+   {
+    "anio": 2016,
+    "vacuna": 56.46
+   },
+   {
+    "anio": 2017,
+    "vacuna": 58.54
+   },
+   {
+    "anio": 2018,
+    "vacuna": 57.94
+   }
+  ]
+ },
+ "serie_tablero_oficial": [
+  {
+   "anio": 2019,
+   "vacuna": 51.15,
+   "porcina": null,
+   "aviar": null,
+   "total": null,
+   "estado": "SOLO extracto de buscador del tablero 2024 (otra versión de la serie); PDF no abierto (403). Comprobar",
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/estadistica/carne/_archivos/000008_Indicadores%20Actuales/240000_2024/000011_Tablero%20consumo%20per%20capita%20de%20carnes%202024.pdf",
+   "url_prensa": null,
+   "cita": "Tablero consumo per cápita de carnes 2024, serie vacuna 2019-2024 (versión anterior a la del tablero 2025, que revisó 2023 de 52,24 a 52,72 y 2024 de 47,67 a 48,49)."
+  },
+  {
+   "anio": 2020,
+   "vacuna": 50.68,
+   "porcina": 14.34,
+   "aviar": 46.79,
+   "total": 111.81,
+   "estado": "SOLO extracto de buscador del PDF oficial; PDF no abierto (403). Comprobar contra el PDF",
+   "url": "https://www.magyp.gob.ar/sitio/areas/bovinos/informacion_sectorial/_archivos/000017_Tablero%20de%20consumo%20de%20carnes/000002_Tablero%20consumo%20per%20capita%20de%20carnes%202025.pdf",
+   "url_prensa": null,
+   "cita": "Tablero consumo per cápita de carnes 2025 (Secretaría de Agricultura, Ganadería y Pesca), serie 2020-2025 en kg por habitante por año; datos provisorios, sujetos a revisión."
+  },
+  {
+   "anio": 2021,
+   "vacuna": 49.4,
+   "porcina": 15.86,
+   "aviar": 46.32,
+   "total": 111.58,
+   "estado": "SOLO extracto de buscador del PDF oficial; PDF no abierto (403). Comprobar contra el PDF",
+   "url": "https://www.magyp.gob.ar/sitio/areas/bovinos/informacion_sectorial/_archivos/000017_Tablero%20de%20consumo%20de%20carnes/000002_Tablero%20consumo%20per%20capita%20de%20carnes%202025.pdf",
+   "url_prensa": null,
+   "cita": "Tablero consumo per cápita de carnes 2025 (Secretaría de Agricultura, Ganadería y Pesca), serie 2020-2025 en kg por habitante por año; datos provisorios, sujetos a revisión."
+  },
+  {
+   "anio": 2022,
+   "vacuna": 50.98,
+   "porcina": 16.8,
+   "aviar": 46.35,
+   "total": 114.13,
+   "estado": "SOLO extracto de buscador del PDF oficial; PDF no abierto (403). Comprobar contra el PDF",
+   "url": "https://www.magyp.gob.ar/sitio/areas/bovinos/informacion_sectorial/_archivos/000017_Tablero%20de%20consumo%20de%20carnes/000002_Tablero%20consumo%20per%20capita%20de%20carnes%202025.pdf",
+   "url_prensa": null,
+   "cita": "Tablero consumo per cápita de carnes 2025 (Secretaría de Agricultura, Ganadería y Pesca), serie 2020-2025 en kg por habitante por año; datos provisorios, sujetos a revisión."
+  },
+  {
+   "anio": 2023,
+   "vacuna": 52.72,
+   "porcina": 16.82,
+   "aviar": 46.46,
+   "total": 116.0,
+   "estado": "SOLO extracto de buscador del PDF oficial; PDF no abierto (403). Comprobar contra el PDF",
+   "url": "https://www.magyp.gob.ar/sitio/areas/bovinos/informacion_sectorial/_archivos/000017_Tablero%20de%20consumo%20de%20carnes/000002_Tablero%20consumo%20per%20capita%20de%20carnes%202025.pdf",
+   "url_prensa": null,
+   "cita": "Tablero consumo per cápita de carnes 2025 (Secretaría de Agricultura, Ganadería y Pesca), serie 2020-2025 en kg por habitante por año; datos provisorios, sujetos a revisión."
+  },
+  {
+   "anio": 2024,
+   "vacuna": 48.49,
+   "porcina": 17.42,
+   "aviar": 46.25,
+   "total": 112.16,
+   "estado": "confirmado por prensa: Los Andes (2026-02-05) da 2024 y 2025 iguales",
+   "url": "https://www.magyp.gob.ar/sitio/areas/bovinos/informacion_sectorial/_archivos/000017_Tablero%20de%20consumo%20de%20carnes/000002_Tablero%20consumo%20per%20capita%20de%20carnes%202025.pdf",
+   "url_prensa": "https://www.losandes.com.ar/economia/consumo-carne-aumento-crecieron-la-aviar-y-la-porcina-debido-la-suba-precios-la-vacuna-n5979561",
+   "cita": "Tablero consumo per cápita de carnes 2025 (Secretaría de Agricultura, Ganadería y Pesca), serie 2020-2025 en kg por habitante por año; datos provisorios, sujetos a revisión. Los Andes: 2024 total 112,16 y 2025 total 116,4; bovina 48,49 y 49,92; aviar 46,25 y 47,68."
+  },
+  {
+   "anio": 2025,
+   "vacuna": 49.92,
+   "porcina": 18.89,
+   "aviar": 47.68,
+   "total": 116.49,
+   "estado": "confirmado por prensa: Los Andes (2026-02-05) da 2024 y 2025 iguales",
+   "url": "https://www.magyp.gob.ar/sitio/areas/bovinos/informacion_sectorial/_archivos/000017_Tablero%20de%20consumo%20de%20carnes/000002_Tablero%20consumo%20per%20capita%20de%20carnes%202025.pdf",
+   "url_prensa": "https://www.losandes.com.ar/economia/consumo-carne-aumento-crecieron-la-aviar-y-la-porcina-debido-la-suba-precios-la-vacuna-n5979561",
+   "cita": "Tablero consumo per cápita de carnes 2025 (Secretaría de Agricultura, Ganadería y Pesca), serie 2020-2025 en kg por habitante por año; datos provisorios, sujetos a revisión. Los Andes: 2024 total 112,16 y 2025 total 116,4; bovina 48,49 y 49,92; aviar 46,25 y 47,68."
+  }
+ ],
+ "serie_privada_ciccra": {
+  "organismo": "CICCRA (Cámara de la Industria y Comercio de Carnes), privada",
+  "nota": "Ventana ene-jul de cada año (promedio móvil informado por la prensa), no año calendario; NO empalma con la serie oficial (CICCRA usa otra metodología: 51 kg en ene-jul 2025 contra 49,92 oficial en 2025).",
+  "valores": [
+   {
+    "periodo": "ene-jul 2021",
+    "vacuna": 49.4,
+    "fecha": "2026-08-22",
+    "url": "https://www.agrolatam.com/argentina/actualidad/consumo-carne-vacuna-argentina-caida-46-kilos/",
+    "cita": "CICCRA, consumo per cápita de carne vacuna, tabla de la nota de Agrolatam (22/08/2026): enero-julio 2021: 49,4 kg/habitante/año."
+   },
+   {
+    "periodo": "ene-jul 2022",
+    "vacuna": 50.4,
+    "fecha": "2026-08-22",
+    "url": "https://www.agrolatam.com/argentina/actualidad/consumo-carne-vacuna-argentina-caida-46-kilos/",
+    "cita": "CICCRA, consumo per cápita de carne vacuna, tabla de la nota de Agrolatam (22/08/2026): enero-julio 2022: 50,4 kg/habitante/año."
+   },
+   {
+    "periodo": "ene-jul 2023",
+    "vacuna": 54.3,
+    "fecha": "2026-08-22",
+    "url": "https://www.agrolatam.com/argentina/actualidad/consumo-carne-vacuna-argentina-caida-46-kilos/",
+    "cita": "CICCRA, consumo per cápita de carne vacuna, tabla de la nota de Agrolatam (22/08/2026): enero-julio 2023: 54,3 kg/habitante/año."
+   },
+   {
+    "periodo": "ene-jul 2024",
+    "vacuna": 48.6,
+    "fecha": "2026-08-22",
+    "url": "https://www.agrolatam.com/argentina/actualidad/consumo-carne-vacuna-argentina-caida-46-kilos/",
+    "cita": "CICCRA, consumo per cápita de carne vacuna, tabla de la nota de Agrolatam (22/08/2026): enero-julio 2024: 48,6 kg/habitante/año."
+   },
+   {
+    "periodo": "ene-jul 2025",
+    "vacuna": 51.0,
+    "fecha": "2026-08-22",
+    "url": "https://www.agrolatam.com/argentina/actualidad/consumo-carne-vacuna-argentina-caida-46-kilos/",
+    "cita": "CICCRA, consumo per cápita de carne vacuna, tabla de la nota de Agrolatam (22/08/2026): enero-julio 2025: 51,0 kg/habitante/año."
+   },
+   {
+    "periodo": "ene-jul 2026",
+    "vacuna": 46.3,
+    "fecha": "2026-08-22",
+    "url": "https://www.agrolatam.com/argentina/actualidad/consumo-carne-vacuna-argentina-caida-46-kilos/",
+    "cita": "CICCRA, consumo per cápita de carne vacuna, tabla de la nota de Agrolatam (22/08/2026): enero-julio 2026: 46,3 kg/habitante/año."
+   },
+   {
+    "periodo": "ene-may 2026",
+    "vacuna": 47.5,
+    "fecha": "2026-06-14",
+    "url": "https://www.ambito.com/economia/el-consumo-carne-vacuna-cae-minimos-dos-decadas-y-acelera-el-reemplazo-pollo-y-cerdo-n6288669",
+    "cita": "CICCRA, informe de mayo (enero-mayo 2026): 47,5 kg por persona por año, «el registro más bajo de los últimos veinte años»; -6,1% interanual."
+   }
+  ]
+ }
+}

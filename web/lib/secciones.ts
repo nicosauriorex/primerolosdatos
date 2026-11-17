@@ -24,6 +24,7 @@ export const SECCIONES: Seccion[] = [
   S("elecciones", "Elecciones", "Mirá qué datos de la economía se movieron junto con el voto en cada elección.", "presidentes", "Qué datos se movieron junto con el voto."),
   S("congreso", "Gobierno y Congreso", "Bancas, leyes, decretos y vetos de cada gobierno.", "presidentes", "Bancas, leyes, decretos y vetos de cada gobierno."),
   S("contexto", "El mundo y la Argentina", "Compará a la Argentina con otros países y con los precios del mundo.", "mundo", "La Argentina contra otros países y los precios del mundo."),
+  S("rigi", "RIGI: grandes inversiones", "Los proyectos aprobados del Régimen de Incentivo para Grandes Inversiones: cuánto prevén invertir y cuánto ingresó.", "mundo", "Los proyectos aprobados del RIGI y su inversión prevista."),
   S("gasto", "En qué gasta la Nación", "Cuánto gastó el Estado nacional cada año: para qué, quién, en qué y dónde, presupuestado y ejecutado.", "estado", "Cuánto gastó la Nación: para qué, quién, en qué y dónde."),
   S("provincias", "Las provincias", "El gasto que la Nación declara en cada provincia, por habitante y en pesos de hoy.", "estado", "El gasto de la Nación en cada provincia, por habitante."),
   S("universidades", "Universidades", "Lo que la Nación transfiere a cada universidad nacional, año por año, y cómo se controla.", "estado", "Lo que recibe cada universidad nacional, año por año."),

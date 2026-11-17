@@ -50,6 +50,8 @@ const SECCIONES_ICONO: Record<string, ReactNode> = {
   provincias: <><path d="M10 18s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10z" /><circle cx="10" cy="8" r="2" /></>,
   universidades: <><path d="M1 8l9-4 9 4-9 4z" /><path d="M5 10v4c2 2 8 2 10 0v-4M18 8v5" /></>,
   semaforo: <><rect x="5" y="1.5" width="10" height="17" /><circle cx="10" cy="5.8" r="1.6" /><circle cx="10" cy="10" r="1.6" /><circle cx="10" cy="14.2" r="1.6" /></>,
+  // RIGI: grúa de obra
+  rigi: <><path d="M3 17.5h14M5 17.5V8h3v9.5M3 8h7M6.5 8V3l9 2.5M13 5.5v4M13 9.5v1.5" /><circle cx="13" cy="12.5" r="1.2" /></>,
   novedades: <><rect x="3" y="4" width="14" height="13" /><path d="M3 8h14M7 2v4M13 2v4M7 12h2M11 12h2" /></>,
   // mismo dibujo que `IconoBanco` (BloqueParte.tsx)
   bcra: <><path d="M2 8 10 3l8 5zM4 10v5M8 10v5M12 10v5M16 10v5M2 17.5h16" /></>,
