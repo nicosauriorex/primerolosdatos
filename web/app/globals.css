@@ -227,6 +227,7 @@ input[type=radio], input[type=checkbox] { accent-color: var(--acento); }
 /* Modal del selector de variables */
 .modal-fondo { position: fixed; inset: 0; background: var(--velo); z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 6vh var(--e-4); }
 .modal-fondo[hidden] { display: none; }
+.modal:focus, .exp:focus, .comp-completa:focus { outline: none; }   /* el contenedor recibe el foco al abrir (useFocoVentana); los botones de adentro conservan su contorno */
 .modal { background: var(--surface-1); border: 1px solid var(--border-fuerte); border-radius: var(--r-2); box-shadow: var(--sombra-2);
   width: min(680px, 100%); max-height: 84vh; display: flex; flex-direction: column; }
 .modal header { padding: 14px 14px var(--e-2); border-bottom: 1px solid var(--border); }

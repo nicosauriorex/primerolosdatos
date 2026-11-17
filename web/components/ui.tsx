@@ -257,9 +257,40 @@ function IconoCruz() {
 const CerrarModalCtx = createContext<(luego?: () => void) => void>(() => {});
 export const useCerrarModal = () => useContext(CerrarModalCtx);
 
-/** Ventana modal con foco, cruz de cerrar (44 px), Escape, clic en el fondo y botón Atrás para cerrar. */
+const FOCALES = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/** Foco de una ventana (mismo contrato que `Hoja`): al abrir guarda dónde estaba el foco y lo lleva a la ventana
+ *  (salvo que algo de adentro ya lo tenga, como un `autoFocus`); Tab no sale de la ventana; al cerrar, el foco vuelve.
+ *  Devuelve el manejador de `onKeyDown` para el contenedor `role="dialog"` (que necesita `tabIndex={-1}`).
+ *  Con ventanas anidadas, solo atrapa el Tab la de arriba. */
+export function useFocoVentana(panel: React.RefObject<HTMLElement | null>): (ev: React.KeyboardEvent) => void {
+  // Se guarda en el primer render: en el efecto ya puede tenerlo un `autoFocus` de adentro.
+  const [previo] = useState(() => (typeof document !== "undefined" && document.activeElement instanceof HTMLElement ? document.activeElement : null));
+  useEffect(() => {
+    const p = panel.current;
+    if (p && !p.contains(document.activeElement)) p.focus({ preventScroll: true });
+    // Se devuelve un instante después y solo si la ventana ya no está: en desarrollo (StrictMode) el efecto se desmonta y
+    // se vuelve a montar con la ventana en pie, y devolver el foco ahí pisaría el `autoFocus` de adentro.
+    return () => queueMicrotask(() => { if ((!p || !p.isConnected) && previo && previo.isConnected) previo.focus({ preventScroll: true }); });
+  }, [panel, previo]);
+  return useCallback((ev: React.KeyboardEvent) => {
+    const p = panel.current;
+    if (ev.key !== "Tab" || !p || ev.defaultPrevented) return;
+    if (ev.target instanceof Element && ev.target.closest('[aria-modal="true"]') !== p) return;   // es de una ventana de adentro
+    const f = Array.from(p.querySelectorAll<HTMLElement>(FOCALES))
+      .filter((e) => (e.offsetParent !== null || e === document.activeElement) && !e.closest("[inert]") && e.closest('[aria-modal="true"]') === p);
+    if (!f.length) { ev.preventDefault(); p.focus(); return; }
+    const primero = f[0], ultimo = f[f.length - 1], en = document.activeElement;
+    if (ev.shiftKey && (en === primero || en === p)) { ev.preventDefault(); ultimo.focus(); }
+    else if (!ev.shiftKey && en === ultimo) { ev.preventDefault(); primero.focus(); }
+  }, [panel]);
+}
+
+/** Ventana modal con foco (`useFocoVentana`), cruz de cerrar (44 px), Escape, clic en el fondo y botón Atrás para cerrar. */
 export function Modal({ titulo, cabecera, onCerrar, children, ancho }: { titulo: string; cabecera?: ReactNode; onCerrar: () => void; children: ReactNode; ancho?: boolean }) {
   const yo = useRef(Symbol("modal"));
+  const panel = useRef<HTMLDivElement>(null);
+  const atrapar = useFocoVentana(panel);
   const luego = useRef<(() => void) | null>(null);
   const alCerrar = useRef(onCerrar);
   alCerrar.current = onCerrar;
@@ -280,7 +311,7 @@ export function Modal({ titulo, cabecera, onCerrar, children, ancho }: { titulo:
   }, []);
   return (
     <div className="modal-fondo" onMouseDown={(ev) => { if (ev.target === ev.currentTarget) cerrar(); }}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label={titulo} style={{ maxWidth: "100%", ...(ancho ? { width: "min(760px,100%)" } : null) }}>
+      <div className="modal" ref={panel} tabIndex={-1} onKeyDown={atrapar} role="dialog" aria-modal="true" aria-label={titulo} style={{ maxWidth: "100%", ...(ancho ? { width: "min(760px,100%)" } : null) }}>
         <div className={`modal-cab${cabecera ? " con-tit" : ""}`}>
           {cabecera ? <h2 className="modal-tit">{cabecera}</h2> : null}
           <button type="button" className="cruz-capa modal-cruz" aria-label="Cerrar" onClick={() => cerrar()}><IconoCruz /></button>

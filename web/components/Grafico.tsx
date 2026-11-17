@@ -8,7 +8,7 @@ import { MESES, fmtMes, mesNum, ok } from "@/lib/formato";
 import { estadisticasRows } from "@/lib/estadisticas";
 import { useConfig } from "./ConfigProvider";
 import { BarraZoom } from "./BarraZoom";
-import { useAtras } from "./ui";
+import { useAtras, useFocoVentana } from "./ui";
 
 export type Fila = Record<string, any>;
 export interface SerieG {
@@ -157,6 +157,7 @@ export function Grafico({ rows, series, opts, expandir }: { rows: Fila[]; series
 
 function Expandido({ expandir, ayuda, children }: { expandir: Expandir; ayuda: string; children: ReactNode }) {
   const raiz = useRef<HTMLDivElement>(null);
+  const atrapar = useFocoVentana(raiz);
   const [vertical, setVertical] = useState(false);
   const coarse = useMedia("(pointer: coarse)");
   // El botón Atrás del celular cierra la vista ampliada (no sale de la página); la cruz y Escape usan el mismo camino.
@@ -187,7 +188,7 @@ function Expandido({ expandir, ayuda, children }: { expandir: Expandir; ayuda: s
     };
   }, []);
   return (
-    <div className="exp" ref={raiz} role="dialog" aria-modal="true" aria-label={expandir.titulo}>
+    <div className="exp" ref={raiz} tabIndex={-1} onKeyDown={atrapar} role="dialog" aria-modal="true" aria-label={expandir.titulo}>
       <div className="exp-cab">
         <h2>{expandir.titulo}</h2>
         <button type="button" className="btn exp-cerrar" aria-label="Cerrar vista ampliada" onClick={cerrar}>✕</button>

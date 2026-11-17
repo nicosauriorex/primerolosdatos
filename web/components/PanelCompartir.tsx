@@ -3,7 +3,7 @@
 // Ver docs/specs/responder-con-imagen.md y docs/specs/personalizar-imagen.md.
 import { Children, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Modal, Selector, Seg, useAtras, useCapa } from "./ui";
+import { Modal, Selector, Seg, useAtras, useCapa, useFocoVentana } from "./ui";
 import { useConfig } from "./ConfigProvider";
 import { useCargar, useDatos } from "./DatosProvider";
 import { exprsUsadas } from "@/lib/historico";
@@ -249,6 +249,8 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
 export function VistaCompleta({ archivo, titulo, onCerrar }: { archivo: File; titulo: string; onCerrar: () => void }) {
   const [url, setUrl] = useState<string | null>(null);
   const boton = useRef<HTMLButtonElement>(null);
+  const capa = useRef<HTMLDivElement>(null);
+  const atrapar = useFocoVentana(capa);   // Tab no sale de la capa y el foco vuelve al cerrarla
   const esLaDeArriba = useCapa(true);
   const cerrarAtras = useAtras(true, onCerrar);   // el botón Atrás del celular cierra esta capa y no sale de la página
   const cerrar = useRef(cerrarAtras);
@@ -261,7 +263,7 @@ export function VistaCompleta({ archivo, titulo, onCerrar }: { archivo: File; ti
     return () => document.removeEventListener("keydown", tecla, true);
   }, [esLaDeArriba]);
   return createPortal(
-    <div className="comp-completa" role="dialog" aria-modal="true" aria-label={`Vista previa a pantalla completa: ${titulo}`} onClick={cerrarAtras}>
+    <div className="comp-completa" ref={capa} tabIndex={-1} onKeyDown={atrapar} role="dialog" aria-modal="true" aria-label={`Vista previa a pantalla completa: ${titulo}`} onClick={cerrarAtras}>
       {url && <img src={url} alt={`Imagen para compartir: ${titulo}`} />}
       <button ref={boton} type="button" className="comp-completa-cerrar" aria-label="Cerrar la vista a pantalla completa" onClick={(ev) => { ev.stopPropagation(); cerrarAtras(); }}>×</button>
     </div>, document.body);
