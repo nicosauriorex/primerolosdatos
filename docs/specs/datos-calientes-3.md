@@ -1,6 +1,6 @@
 # Datos calientes 3: puestos de trabajo, pobreza en personas, natalidad, vacunas, obra pública, motos, robos de autos, empresas, RIGI, piquetes y carne
 
-Estado: implementada (2026-11-17), sin publicar
+Estado: implementada (2026-11-17), publicada en 13b023b (corrida completa en verde, run 44089512632; /rigi/, /dato/piquetes/, /dato/puestos-de-trabajo/ y /dato/pobres/ responden en el sitio)
 
 Pedidos del usuario (2026-11-17): «seguí con los datos calientes que faltan» (robos, motos, obra pública, vacunas, empleadores, de `datos-nuevos-2-2026-11-16.md`); «puestos de trabajo totales? (formal + informal)»; «pobreza en numero de personas? (creo que tenemos el % nomás). y pobreza de alta frecuencia (la medicion mensual, habia una fuente que en enero 26 daba como 57% creo)»; «inversiones rigi anunciadas y ejecutadas?»; «piquetes?»; «consumo de carne?»; «ingresos, alumnos regulares y graduados?»; «natalidad, mortalidad?».
 Decisiones del usuario: pobreza en personas → las dos (31 aglomerados oficial + estimación del país como cuenta propia); pobreza mensual → a mano con cita; piquetes y carne → «ambas a mano. pero chequea porque el gobierno dice que las bajó a cero»; RIGI → panel con lista de aprobados + lo ingresado con su cita.
