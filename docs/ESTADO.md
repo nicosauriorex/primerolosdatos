@@ -8,6 +8,7 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-17.
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
 Últimos bloques (todos publicados, corrida en verde):
+- Tanda de verificación: imágenes compartidas miradas en captura (11 imágenes, tres formatos) y arreglos: color de Lo esperado según el signo, unidad en hitos, líneas de referencia en Congreso e Ingresos Brutos, «Fuente:» en todas, nombres cortos en Herencia, barras sin vacío en vertical, sin dos paréntesis seguidos — 2026-11-17, sin subir — [spec](specs/verificacion-imagenes.md)
 - Empresas por tamaño: empleadores y trabajadores por tramo (SRT, mensual) y aperturas, cierres y puestos por empresa cerrada (OEDE, trimestral): 18 series; las que se van son casi todas de 1 a 5 trabajadores — 2026-11-17, 467dc21 (corrida completa en verde, run 44121733652) — [spec](specs/empresas-por-tamano.md)
 - Datos calientes 3: puestos de trabajo formales e informales, pobres en personas (31 aglomerados + país, D-027), pobreza mensual UTDT, natalidad, defunciones, vacunas (OMS), obra pública, empresas (SRT), motos, robos de autos, piquetes, carne y página `/rigi/`: 27 series — 2026-11-17, 13b023b (corrida completa en verde, run 44089512632; /rigi/ y fichas nuevas comprobadas en el sitio) — [spec](specs/datos-calientes-3.md)
 - Cantidades enteras sin decimal («200» femicidios, no «200,0»): `entero` en cada cálculo del motor (todos sus valores enteros; 30 series) y `fmtCant` en valores, diferencias y ejes; promedios y medianas conservan su decimal — 2026-11-17, c4b76b4 (corrida en verde, run 44067698585)
@@ -43,12 +44,11 @@ A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunid
 ## Sin verificar (lo que sigue abierto)
 - **Predicciones:** Turnstile con un token fallido, el primer cierre real (15 de diciembre) y el paso a «resultado» cuando entre el dato.
 - **Tanda 13:** un .ics abierto en un calendario real; la imagen 4:5 con las comparaciones; el foco del teclado al abrir y cerrar ventanas (`Modal` no lo mueve, en todo el sitio).
-- **Novedades:** el bloque de la portada (no se vio: panel oculto), las fechas estimadas (aparecen cuando cada fuente tenga dos meses registrados, hacia enero) y la primera entrada nueva del registro en una corrida (la del push dio 0, sin datos nuevos).
+- **Novedades:** las fechas estimadas (aparecen cuando cada fuente tenga dos meses registrados, hacia enero) y la primera entrada nueva del registro en una corrida (la del push dio 0, sin datos nuevos).
 - **Conteos:** el botón de Compartir real hasta la base (se probó el pedido al servidor, no el clic: el portapapeles falla con el panel oculto) y la pregunta con el menú de compartir de un celular real.
 - **En general:** celular real (Atrás, teclado, safe-area de la barra inferior) y aspecto en capturas de casi todas las páginas: el panel del navegador suele estar oculto y se verifica midiendo. Tema claro y 375 px medidos en ocho rutas el 2026-11-16 (sin desborde; contraste arreglado en las subpestañas).
-- **Imágenes nuevas** (Lo esperado, Viento, hitos, Congreso, Ingresos Brutos): textos verificados, aspecto sin mirar en captura.
-- **Imágenes compartidas** sin mirar dentro del panel: «¿Cómo viene?» (sin puntos medidos); formatos 1:1/4:5/16:9 de gasto, provincias, universidades y herencia; meses y barras con variación de la ficha; aviso "Sin <presidente>" en la imagen de precios por presidente.
-- **Animaciones:** Mes a mes con lápiz, despliegue del parte del Banco Central, carrusel de la portada (con el panel oculto no corren).
+- **Imágenes compartidas** sin mirar en captura: «¿Cómo viene?»; meses y barras con variación de la ficha; aviso "Sin <presidente>" en la imagen de precios por presidente. Las demás se miraron el 2026-11-17 ([verificación](specs/verificacion-imagenes.md)).
+- **Animaciones:** Mes a mes con lápiz, despliegue del parte del Banco Central, carrusel de la portada: con el panel oculto no corren ni el `IntersectionObserver` ni las animaciones CSS (comprobado el 2026-11-17 con una prueba aparte). Mirarlas con el panel a la vista.
 - **Datos:**
   - Universidades: lo que declaran en la Cuenta de Inversión 2024 no cierra con lo transferido (la página lo dice).
   - Banco Central: unos cinco días hábiles de atraso en todas las fuentes legibles; falta saber si es lo normal.

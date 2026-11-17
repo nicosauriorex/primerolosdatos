@@ -256,10 +256,11 @@ export function armarImagenCongreso(
     formato, titulo, temporalidad: "En orden cronológico, un gobierno por fila", cifra: null,
     frases: [{ texto: `${o.nota}${ref}`, cls: "neutro" }],
     leyenda: null, x: [], series: [], fmtEje: (x) => String(x), fmtEje2: null, franjas: [], inicioTxt: null,
-    comentario: "", unidad: o.indicador, fuente: o.fuente, nota: "Números crudos, sin puntaje",
+    comentario: "", unidad: o.indicador, fuente: `Fuente: ${o.fuente}`, nota: "Números crudos, sin puntaje",
     fecha: hoy.toLocaleDateString("es-AR"),
     archivo: `primerolosdatos-congreso-${o.indicador.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
-    lienzo: { tipo: "barras", filas, sinDatos: o.columnas.filter((c) => c.valor == null).map((c) => c.nombre), enc: { nombre: "Gobierno", valor: o.indicador }, sinTope: true },
+    lienzo: { tipo: "barras", filas, sinDatos: o.columnas.filter((c) => c.valor == null).map((c) => c.nombre), enc: { nombre: "Gobierno", valor: o.indicador }, sinTope: true,
+      ref: o.linea ? { v: o.linea.v, txt: `${o.linea.v === 1 ? "1,0" : nf0.format(o.linea.v) + " %"} = ${o.linea.txt}` } : undefined },
     marcaUltimo: false,
   };
 }

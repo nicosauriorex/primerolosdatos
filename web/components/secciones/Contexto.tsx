@@ -208,11 +208,15 @@ function Esperado({ datos, grupoId, grupo, nombreGrupo, p, set, resalta }: { dat
     return { x, s: sorpresaPres(filas, anios), anios };
   }), [filas, hasta]);
   const frase = (s: number) => (Math.abs(s) < 0.05 ? "lo esperado" : `${nf1.format(Math.abs(s))} puntos ${s * dir >= 0 ? "mejor" : "peor"} de lo esperado`);
-  const colS = useMemo(() => ({
-    arg: columnaComparable(porPres.map((q) => q.s.sArg), dir, true),
-    grp: columnaComparable(porPres.map((q) => q.s.sGrp), dir, true),
-    dif: columnaComparable(porPres.map((q) => q.s.dif), dir, true),
-  }), [porPres, dir]);
+  // la sorpresa tiene un cero natural (lo esperado): verde o rojo según el signo, como dice la leyenda, y sin color si se lee «0,0»;
+  // la intensidad sigue siendo qué tan lejos está del mayor de la columna
+  const colS = useMemo(() => {
+    const col = (vals: (number | null | undefined)[]) => {
+      const c = columnaComparable(vals, dir, true);
+      return { ...c, tono: vals.map((v) => (v == null || !Number.isFinite(v) || !dir || Math.abs(v) < 0.05 ? null : v * dir > 0 ? "bueno" as const : "malo" as const)) };
+    };
+    return { arg: col(porPres.map((q) => q.s.sArg)), grp: col(porPres.map((q) => q.s.sGrp)), dif: col(porPres.map((q) => difMostrada(q.s.sArg, q.s.sGrp) ?? q.s.dif)) };   // el color de la diferencia, de la que se lee
+  }, [porPres, dir]);
   const resp = fraseEsperado(datos, grupo, def.origen);
   const [imagen, setImagen] = useState(false);
   // la misma tabla «Por presidente» de la pantalla: mismo texto, mismo tono y misma intensidad (`frac`) de cada celda
@@ -220,7 +224,7 @@ function Esperado({ datos, grupoId, grupo, nombreGrupo, p, set, resalta }: { dat
     const celda = (txt: string, tono: "bueno" | "malo" | null, frac: number) => ({ texto: txt, cls: tono ?? ("neutro" as const), calor: frac });
     const grilla: GrillaCtx = {
       titulo: `${def.n}: lo esperado y lo que pasó, por presidente`,
-      frase: `Sorpresa = lo que pasó menos lo que el FMI esperaba en abril, promedio por año, en puntos. Más intenso: más lejos del medio entre los presidentes. ${dir > 0 ? "Verde: pasó más de lo esperado; rojo: pasó menos." : "Verde: pasó menos de lo esperado; rojo: pasó más."}`,
+      frase: `Sorpresa = lo que pasó menos lo que el FMI esperaba en abril, promedio por año, en puntos. Más intenso: más lejos de lo esperado. ${dir > 0 ? "Verde: pasó más de lo esperado; rojo: pasó menos." : "Verde: pasó menos de lo esperado; rojo: pasó más."}`,
       unidad: `${def.n} (${def.u}): sorpresa promedio por año, en puntos, Argentina y ${nombre}`,
       fuente: `${datos.fuente}`,
       columnas: [{ nombre: "Argentina", metrica: "sorpresa" }, { nombre: nombreGrupo, metrica: "sorpresa" }, { nombre: "Diferencia", metrica: "Argentina − " + nombreGrupo }],
@@ -272,7 +276,7 @@ function Esperado({ datos, grupoId, grupo, nombreGrupo, p, set, resalta }: { dat
             {anios.length && s.n ? <>
               <Valor tono={colS.arg.tono[k]} f={colS.arg.frac[k]} modo="centro" neg={(s.sArg ?? 0) < 0} marca={colS.arg.marca[k]} sub={s.n < anios.length ? <small>{s.n} de {anios.length} años</small> : null}>{ok(s.sArg) ? signo(s.sArg) : "—"}</Valor>
               <Valor tono={colS.grp.tono[k]} f={colS.grp.frac[k]} modo="centro" neg={(s.sGrp ?? 0) < 0} marca={colS.grp.marca[k]}>{ok(s.sGrp) ? signo(s.sGrp) : "—"}</Valor>
-              <Valor tono={colS.dif.tono[k]} f={colS.dif.frac[k]} modo="centro" neg={(s.dif ?? 0) < 0} marca={colS.dif.marca[k]}>{ok(s.dif) ? signo(difMostrada(s.sArg, s.sGrp) ?? s.dif) : "—"}</Valor>
+              <Valor tono={colS.dif.tono[k]} f={colS.dif.frac[k]} modo="centro" neg={(difMostrada(s.sArg, s.sGrp) ?? s.dif ?? 0) < 0} marca={colS.dif.marca[k]}>{ok(s.dif) ? signo(difMostrada(s.sArg, s.sGrp) ?? s.dif) : "—"}</Valor>
             </> : <td colSpan={3} style={{ textAlign: "center", color: "var(--text-muted)" }}>{anios.length ? "sin proyección de abril para esos años" : "sin años completos"}</td>}
           </tr>
         ))}</tbody>

@@ -23,47 +23,49 @@ type Tipo = "monto" | "pct" | "texto";
  *  `serie`: id de la serie del catálogo con la evolución del mismo dato (link «Ver la evolución»). Las cifras de cada traspaso siguen saliendo
  *  del informe cargado a mano (cubre desde 1989); la serie solo existe desde 2019 (desde 2000 la de la deuda / PIB). */
 export type GrupoInforme = GrupoHerencia | "Estimaciones";
-export interface DefInforme { clave: string; grupo: GrupoInforme; nombre: string; unidad: string; tipo: Tipo; nota?: string; dec?: number; quien?: string; sinDato?: string; oficial?: boolean; serie?: string }
+export interface DefInforme { clave: string; grupo: GrupoInforme; nombre: string; unidad: string; tipo: Tipo; nota?: string; dec?: number; quien?: string; sinDato?: string; oficial?: boolean; serie?: string;
+  /** Nombre corto para la imagen para compartir, donde la columna de nombres corta lo largo con «…» (y dos filas podían quedar iguales). */
+  img?: string }
 
 /** Filas de informes, en el orden en que se intercalan al final de cada grupo de la tabla. */
 export const FILAS_INFORME: DefInforme[] = [
-  { clave: "puts", grupo: "Banco Central", nombre: "Opciones de venta de títulos que los bancos tenían contra el Banco Central (puts)", unidad: "billones de $ de dic-2023", tipo: "monto", dec: 2,
+  { clave: "puts", img: "Puts de los bancos", grupo: "Banco Central", nombre: "Opciones de venta de títulos que los bancos tenían contra el Banco Central (puts)", unidad: "billones de $ de dic-2023", tipo: "monto", dec: 2,
     nota: "Opciones de liquidez sobre títulos del Tesoro (Comunicación \"A\" 7716): si los bancos las ejercían, el Banco Central tenía que comprarles los bonos con pesos nuevos. Valor nominal a precios de mercado." },
-  { clave: "bopreal", grupo: "Banco Central", nombre: "Bonos del Banco Central para importadores (BOPREAL)", unidad: "millones de US$ colocados", tipo: "monto",
+  { clave: "bopreal", img: "BOPREAL (importadores)", grupo: "Banco Central", nombre: "Bonos del Banco Central para importadores (BOPREAL)", unidad: "millones de US$ colocados", tipo: "monto",
     nota: "Bonos en dólares que el Banco Central empezó a colocar en diciembre de 2023 para la deuda de importadores con el exterior." },
   { clave: "cepo", grupo: "Dólar", nombre: "Restricciones para comprar dólares (personas)", unidad: "vigentes o no, y desde cuándo", tipo: "texto",
     nota: "Si una persona podía comprar dólares para ahorro sin tope ni permiso. Sale de las normas del Banco Central y del Boletín Oficial." },
-  { clave: "cobertura_luz", grupo: "Precios", nombre: "Parte del costo de la electricidad que pagan las tarifas", unidad: "% (precio estacional / costo medio del sistema)", tipo: "pct",
+  { clave: "cobertura_luz", img: "Luz: % del costo en tarifa", grupo: "Precios", nombre: "Parte del costo de la electricidad que pagan las tarifas", unidad: "% (precio estacional / costo medio del sistema)", tipo: "pct",
     nota: "Precio estacional que pagan las distribuidoras dividido el precio monómico (costo medio) del mercado eléctrico mayorista, según la Secretaría de Energía. Solo electricidad." },
-  { clave: "precios_acordados", grupo: "Precios", nombre: "Precios en programas acordados (Precios Justos y otros)", unidad: "% de los precios relevados en el GBA", tipo: "pct", dec: 2,
+  { clave: "precios_acordados", img: "Precios acordados", grupo: "Precios", nombre: "Precios en programas acordados (Precios Justos y otros)", unidad: "% de los precios relevados en el GBA", tipo: "pct", dec: 2,
     nota: "Parte de los precios que releva el INDEC para el IPC del Gran Buenos Aires que estaban dentro de programas de precios acordados entre el Estado y las empresas. Es parte de la muestra, no de la canasta ponderada." },
-  { clave: "importaciones_pendientes", grupo: "Deuda y sector externo", nombre: "Importaciones pendientes de pago", unidad: "millones de US$", tipo: "monto",
+  { clave: "importaciones_pendientes", img: "Importaciones sin pagar", grupo: "Deuda y sector externo", nombre: "Importaciones pendientes de pago", unidad: "millones de US$", tipo: "monto",
     nota: "Deuda de importadores de bienes y servicios con el exterior estimada por el Banco Central al 12-12-2023, con la que se armaron los BOPREAL." },
   { clave: "deuda_bruta_usd", grupo: "Deuda y sector externo", nombre: "Deuda pública bruta", unidad: "millones de US$", tipo: "monto", serie: "deuda_ac_total" },
   { clave: "deuda_bruta_pib", grupo: "Deuda y sector externo", nombre: "Deuda pública bruta / PIB", unidad: "% del PIB", tipo: "pct", serie: "deuda_pib" },
-  { clave: "deuda_moneda_ext", grupo: "Deuda y sector externo", nombre: "Deuda pública en moneda extranjera", unidad: "% de la deuda bruta", tipo: "pct", serie: "deuda_ac_me" },
+  { clave: "deuda_moneda_ext", img: "Deuda en moneda extranjera", grupo: "Deuda y sector externo", nombre: "Deuda pública en moneda extranjera", unidad: "% de la deuda bruta", tipo: "pct", serie: "deuda_ac_me" },
   { clave: "fmi_deuda", grupo: "Deuda y sector externo", nombre: "Deuda con el FMI", unidad: "millones de DEG (moneda del FMI)", tipo: "monto", serie: "deuda_fmi",
     nota: "En DEG (derechos especiales de giro), la moneda de cuenta del FMI, que es como lo publica el Fondo en su página de cada país. No se pasa a dólares para no mezclar el tipo de cambio de cada fecha." },
   { clave: "fmi_acuerdo", grupo: "Deuda y sector externo", nombre: "Acuerdo vigente con el FMI", unidad: "tipo, año y monto", tipo: "texto" },
-  { clave: "deuda_importadores", grupo: "Deuda y sector externo", nombre: "Deuda comercial de importadores (informes)", unidad: "millones de US$", tipo: "monto",
+  { clave: "deuda_importadores", img: "Deuda comercial (informes)", grupo: "Deuda y sector externo", nombre: "Deuda comercial de importadores (informes)", unidad: "millones de US$", tipo: "monto",
     nota: "Deuda por importaciones de bienes según los informes de deuda externa privada del Banco Central." },
   // Estimaciones (fase 3): no son datos oficiales del país; van en un bloque aparte
   { clave: "reservas_netas_fmi", grupo: "Estimaciones", nombre: "Reservas netas según el FMI", unidad: "millones de US$", tipo: "monto", quien: "FMI", sinDato: "el FMI no la publicó",
     nota: "Reservas brutas menos lo que el Banco Central debe devolver en el corto plazo (swaps, encajes de los bancos, seguro de depósitos y, según el acuerdo, el crédito del FMI). Cada cifra sale de un informe distinto del FMI, con la definición de ese informe: ver la nota de cada dato." },
-  { clave: "reservas_netas_bcra", grupo: "Estimaciones", nombre: "Reservas netas según el Banco Central", unidad: "millones de US$", tipo: "monto", quien: "Banco Central", oficial: true, sinDato: "el Banco Central no la publicó",
+  { clave: "reservas_netas_bcra", img: "Reservas netas, Banco Central", grupo: "Estimaciones", nombre: "Reservas netas según el Banco Central", unidad: "millones de US$", tipo: "monto", quien: "Banco Central", oficial: true, sinDato: "el Banco Central no la publicó",
     nota: "Definición propia del Banco Central, con criterios jurídicos y contables; el FMI usa otra para seguir el acuerdo." },
-  { clave: "cobertura_amba", grupo: "Estimaciones", nombre: "Parte del costo de los servicios públicos que pagan los hogares del AMBA", unidad: "% del costo (luz, gas, agua y transporte)", tipo: "pct", quien: "IIEP (UBA-CONICET)", sinDato: "no hay un promedio publicado de esa fecha",
+  { clave: "cobertura_amba", img: "Tarifas AMBA: % del costo", grupo: "Estimaciones", nombre: "Parte del costo de los servicios públicos que pagan los hogares del AMBA", unidad: "% del costo (luz, gas, agua y transporte)", tipo: "pct", quien: "IIEP (UBA-CONICET)", sinDato: "no hay un promedio publicado de esa fecha",
     nota: "Promedio para hogares de ingresos altos, medios y bajos del AMBA, del Observatorio de Tarifas y Subsidios del IIEP. La serie empieza en 2023 y no es comparable con la de la electricidad de la Secretaría de Energía." },
 ];
 /** Las filas de la estimación propia de reservas netas (salen de reservas_netas.json, no del archivo de informes): una con el método del FMI
  *  y otra con la definición del Banco Central (la misma cuenta sin restar el crédito del FMI, que es deuda del Tesoro). */
 export type DefinicionRN = "fmi" | "bcra";
 export const DEF_RN_PROPIA: DefInforme = {
-  clave: "reservas_netas_propia", grupo: "Estimaciones", nombre: "Reservas netas, estimación propia con el método del FMI", unidad: "millones de US$", tipo: "monto", quien: "Primero los Datos", sinDato: "la estimación empieza en abr-24",
+  clave: "reservas_netas_propia", img: "Netas propias (método FMI)", grupo: "Estimaciones", nombre: "Reservas netas, estimación propia con el método del FMI", unidad: "millones de US$", tipo: "monto", quien: "Primero los Datos", sinDato: "la estimación empieza en abr-24",
   nota: "Cuenta propia al día con datos del Banco Central y supuestos tomados de los informes del FMI. Tocá el valor para ver la fórmula y cuánto se apartó del FMI cuando publicó.",
 };
 export const DEF_RN_PROPIA_BCRA: DefInforme = {
-  clave: "reservas_netas_propia_bcra", grupo: "Estimaciones", nombre: "Reservas netas, estimación propia con la definición del Banco Central", unidad: "millones de US$", tipo: "monto", quien: "Primero los Datos", sinDato: "la estimación empieza en abr-24",
+  clave: "reservas_netas_propia_bcra", img: "Netas propias (Banco Central)", grupo: "Estimaciones", nombre: "Reservas netas, estimación propia con la definición del Banco Central", unidad: "millones de US$", tipo: "monto", quien: "Primero los Datos", sinDato: "la estimación empieza en abr-24",
   nota: "La misma cuenta propia sin restar el crédito del FMI, que el Banco Central no descuenta porque es deuda del Tesoro. Tocá el valor para ver la fórmula y cuánto se apartó del Banco Central cuando publicó.",
 };
 export const defRNPropia = (cual: DefinicionRN): DefInforme => (cual === "bcra" ? DEF_RN_PROPIA_BCRA : DEF_RN_PROPIA);

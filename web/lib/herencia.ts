@@ -29,6 +29,8 @@ interface Medida { med: string; esc?: string }
 export interface DefFila {
   clave: string; grupo: GrupoHerencia; id: string; medidas: Medida[]; nombre?: string; cociente?: { id: string; nombre: string; unidad: string };
   neutra?: boolean; nota?: string;
+  /** Nombre corto para la imagen para compartir (la columna de nombres corta lo largo con «…»). */
+  img?: string;
   /** Llevar la serie a 100 en su primer mes con dato (para índices relativos, que en "real" quedan en puntos de hoy). */
   base100?: { unidad: string };
   /** "Recibió" = el año calendario cerrado del traspaso (para quien asume en diciembre, el año que termina ese diciembre; si no, el último año completo
@@ -42,14 +44,14 @@ export interface DefFila {
 export const FILAS_HERENCIA: DefFila[] = [
   // Banco Central
   { clave: "reservas", grupo: "Banco Central", id: "bcra_1", medidas: [{ med: "usdr" }], nombre: "Reservas brutas" },
-  { clave: "pasivos", grupo: "Banco Central", id: "bcra_pasivos_rem", medidas: [{ med: "real" }], nombre: "Pasivos remunerados del Banco Central", neutra: true,
+  { clave: "pasivos", img: "Pasivos remunerados", grupo: "Banco Central", id: "bcra_pasivos_rem", medidas: [{ med: "real" }], nombre: "Pasivos remunerados del Banco Central", neutra: true,
     nota: "Letras y pases por los que el Banco Central paga interés (Lebac, pases, Leliq, Lefi). La caída de agosto de 2025 es real: al terminar las Lefi (julio de 2025), esa deuda pasó al Tesoro y en el Banco Central quedó un resto chico. Más o menos pasivos no se califica: sin color." },
   {
-    clave: "pasivos_base", grupo: "Banco Central", id: "bcra_pasivos_rem", medidas: [{ med: "corr" }], nombre: "Pasivos remunerados / base monetaria", neutra: true, nota: "Cuenta propia: pasivos remunerados dividido la base monetaria, en pesos de cada mes. Desde agosto de 2025 es casi cero: las Lefi terminaron y esa deuda pasó al Tesoro.",
+    clave: "pasivos_base", img: "Pasivos remunerados / base", grupo: "Banco Central", id: "bcra_pasivos_rem", medidas: [{ med: "corr" }], nombre: "Pasivos remunerados / base monetaria", neutra: true, nota: "Cuenta propia: pasivos remunerados dividido la base monetaria, en pesos de cada mes. Desde agosto de 2025 es casi cero: las Lefi terminaron y esa deuda pasó al Tesoro.",
     cociente: { id: "bcra_15", nombre: "base monetaria", unidad: "% de la base monetaria" },
   },
   {
-    clave: "cuasifiscal", grupo: "Banco Central", id: "bcra_cuasifiscal", medidas: [{ med: "real", esc: "pib" }, { med: "real" }], anioCerrado: true,
+    clave: "cuasifiscal", img: "Déficit cuasifiscal, % PIB", grupo: "Banco Central", id: "bcra_cuasifiscal", medidas: [{ med: "real", esc: "pib" }, { med: "real" }], anioCerrado: true,
     nota: "No incluye los intereses de las Lebac (2002 a 2017).",
   },
   // Dólar
@@ -58,19 +60,19 @@ export const FILAS_HERENCIA: DefFila[] = [
   { clave: "tcrm", grupo: "Dólar", id: "tcrm", medidas: [{ med: "asis" }], neutra: true },
   // Cuentas públicas
   { clave: "primario", grupo: "Cuentas públicas", id: "dg_379_9_superavit_017_23_94", medidas: [{ med: "real", esc: "pib" }], anioCerrado: true },
-  { clave: "financiero", grupo: "Cuentas públicas", id: "dg_379_9_resultado_017_18_38", medidas: [{ med: "real", esc: "pib" }], anioCerrado: true },
+  { clave: "financiero", img: "Resultado financiero, % PIB", grupo: "Cuentas públicas", id: "dg_379_9_resultado_017_18_38", medidas: [{ med: "real", esc: "pib" }], anioCerrado: true },
   {
     // resultado financiero (Tesoro) menos el déficit cuasifiscal (Banco Central, en positivo cuando es déficit): más alto = mejor
     clave: "fiscal_cuasi", grupo: "Cuentas públicas", id: "dg_379_9_resultado_017_18_38", medidas: [{ med: "real", esc: "pib" }], anioCerrado: true,
-    nombre: "Resultado fiscal + cuasifiscal (Tesoro + Banco Central)", menos: { clave: "cuasifiscal" },
+    nombre: "Resultado fiscal + cuasifiscal (Tesoro + Banco Central)", img: "Resultado fiscal + cuasifiscal", menos: { clave: "cuasifiscal" },
     nota: "Resultado financiero del Tesoro menos el déficit cuasifiscal del Banco Central, los dos en % del PIB. No incluye los intereses de las Lebac (2002 a 2017).",
   },
   { clave: "subsidios", grupo: "Cuentas públicas", id: "dg_452_2_energiagia_0_t_7_79", medidas: [{ med: "real", esc: "pib" }, { med: "real" }, { med: "usdr" }], nota: "Serie desde 2016." },
   // Precios
-  { clave: "inflacion12", grupo: "Precios", id: "ipc_empalme", medidas: [{ med: "via" }], nombre: "Inflación de los últimos 12 meses" },
+  { clave: "inflacion12", img: "Inflación de 12 meses", grupo: "Precios", id: "ipc_empalme", medidas: [{ med: "via" }], nombre: "Inflación de los últimos 12 meses" },
   { clave: "inflacion1", grupo: "Precios", id: "ipc_empalme", medidas: [{ med: "vm" }], nombre: "Inflación del último mes" },
   {
-    clave: "regulados", grupo: "Precios", id: "ipc_nacional_r_estaci", medidas: [{ med: "real" }], nombre: "Precios regulados contra el nivel general", neutra: true,
+    clave: "regulados", img: "Regulados / nivel general", grupo: "Precios", id: "ipc_nacional_r_estaci", medidas: [{ med: "real" }], nombre: "Precios regulados contra el nivel general", neutra: true,
     base100: { unidad: "índice, dic-16 = 100 (regulados / nivel general)" },
     nota: "Índice de precios regulados (tarifas, combustibles, transporte) dividido por el índice general: si sube, los regulados aumentaron más que el resto. Serie desde 2017.",
   },
@@ -78,14 +80,14 @@ export const FILAS_HERENCIA: DefFila[] = [
   { clave: "riesgo", grupo: "Deuda y sector externo", id: "riesgo", medidas: [{ med: "asis" }] },
   { clave: "cuenta_corriente", grupo: "Deuda y sector externo", id: "dg_160_2_tl_cuennte_0_t_22", medidas: [{ med: "corr", esc: "pib" }] },
   {
-    clave: "importadores", grupo: "Deuda y sector externo", id: "dg_313_1_deuda_por_nes_0_t_28", medidas: [{ med: "usdr" }, { med: "real" }], nombre: "Deuda con importadores",
+    clave: "importadores", img: "Deuda de importadores", grupo: "Deuda y sector externo", id: "dg_313_1_deuda_por_nes_0_t_28", medidas: [{ med: "usdr" }, { med: "real" }], nombre: "Deuda con importadores",
     nota: "La serie abierta va de 2001 a 2017. Desde 2017 el dato sale de los informes de deuda externa privada del Banco Central (fila “Deuda comercial de importadores (informes)”), con otro relevamiento: no se empalman.",
   },
   // Social
   { clave: "pobreza", grupo: "Social", id: "pob_tasa_pobreza_personas", medidas: [{ med: "asis" }] },
   { clave: "indigencia", grupo: "Social", id: "pob_tasa_indigencia_personas", medidas: [{ med: "asis" }] },
   { clave: "desocupacion", grupo: "Social", id: "dg_42_3_eph_puntuatal_0_m_30", medidas: [{ med: "asis" }] },
-  { clave: "salario", grupo: "Social", id: "sipa_med", medidas: [{ med: "real" }], nombre: "Salario real (mediano, registrados)" },
+  { clave: "salario", img: "Salario real registrado", grupo: "Social", id: "sipa_med", medidas: [{ med: "real" }], nombre: "Salario real (mediano, registrados)" },
 ];
 
 /** Ids de series que necesita la sección (para pedir sus archivos). */

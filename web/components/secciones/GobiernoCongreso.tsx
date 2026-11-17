@@ -92,7 +92,7 @@ function Cuerpo({ d, ultimo, p, set }: { d: DatosCap; ultimo: string; p: URLSear
 
   const nombreInd = INDICADORES.find((x) => x[0] === ind)?.[1] ?? "";
   const linea = ind === "bancas" ? { v: 50, txt: "mayoría" } : ind === "apoyo" ? { v: 1, txt: "igual a su apoyo" } : undefined;
-  const armarImg = useCallback((f: FormatoImg) => armarImagenCongreso({ indicador: nombreInd, nota, linea, columnas, fuente: "informes oficiales cargados a mano (Diputados, Senado e Infoleg); el detalle está en la página" }, f)!,
+  const armarImg = useCallback((f: FormatoImg) => armarImagenCongreso({ indicador: nombreInd, nota, linea, columnas, fuente: "Informes oficiales cargados a mano (Diputados, Senado e Infoleg); el detalle está en la página" }, f)!,
     [nombreInd, nota, ind, d, M]);   // eslint-disable-line react-hooks/exhaustive-deps
   const hayImagen = hay[ind];
 

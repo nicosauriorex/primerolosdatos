@@ -57,9 +57,11 @@ export const notaInflacion = (calcs: Calculo[], b100: boolean): string =>
 
 /** Título de una imagen de una sola variable: el nombre y, entre paréntesis, cómo se mide. */
 export function tituloVariable(m: Motor, e: Expr, c: Calculo): string {
-  if (e.rel || e.esc) return c.nombre;
+  // dos paréntesis seguidos («… (RIPTE) (pesos de hoy)», «… (Administración Central) (% del PIB)»): el último va después de una coma
+  const sinDoble = (t: string) => t.replace(/\) \(([^()]*)\)$/, "), $1");
+  if (e.rel || e.esc) return sinDoble(c.nombre);
   const r = m.resumenMedida(c.serie, e.med ?? m.medDefault(c.serie));
-  return r ? `${c.nombre} (${r})` : c.nombre;
+  return sinDoble(r ? `${c.nombre} (${r})` : c.nombre);
 }
 /** La fuente de una serie en la imagen: sin números de serie ni nombres de API; "ver Fuentes" pasa a la dirección (la imagen no tiene botones). */
 export const fuenteLegible = fuentePublica;

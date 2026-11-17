@@ -137,7 +137,10 @@ export function armarImagenA(v: VistaA, d: DatosAlicuotas, formato: FormatoImg, 
     id: `ib-${i}`, nombre: f.n, valor: Math.max(0, f.num!), variacion: f.txt, cls: "neutro", ini: null, fin: null, nota: null,
     detalle: f.dif ? (f.dif === "igual" ? "igual al tope" : `${f.dif} contra el tope`) : " ",
   }));
-  const sinDatos = v.filas.filter((f) => f.num == null).map((f) => `${f.n} (${f.txt})`);
+  // las que no tienen alícuota van por nombre («Sin datos»); las que tienen una alícuota que no es un solo número, con su texto
+  const sinNum = v.filas.filter((f) => f.num == null), soloFaltan = sinNum.every((f) => f.txt === "Sin dato");
+  const sinDatos = sinNum.map((f) => (f.txt === "Sin dato" ? f.n : `${f.n} (${f.txt})`));
+  const topeNum = v.actividad.tope[d.anios.indexOf(v.anio)];
   const frase = fraseAlicuotas(v);
   return {
     formato, titulo: tituloAlicuotas(v), temporalidad: `Alícuota general de la ley en ${v.anio}, ordenada de ${v.orden === "desc" ? "mayor a menor" : "menor a mayor"}`,
@@ -147,12 +150,14 @@ export function armarImagenA(v: VistaA, d: DatosAlicuotas, formato: FormatoImg, 
     nota: "Alícuota teórica de la ley por actividad, según planillas provisorias de la Dirección Nacional de Asuntos Provinciales; la diferencia con el tope es en puntos porcentuales",
     fecha: hoy.toLocaleDateString("es-AR"),
     archivo: `primerolosdatos-ingresos-brutos-${v.actividad.slug}-${v.anio}`,
-    lienzo: { tipo: "barras", filas, sinDatos, enc: { nombre: "Provincia", valor: "Alícuota" }, sinTope: true },
+    lienzo: { tipo: "barras", filas, sinDatos, enc: { nombre: "Provincia", valor: "Alícuota" }, sinTope: true,
+      sinTitulo: soloFaltan ? undefined : "Sin una sola cifra", ref: typeof topeNum === "number" ? { v: topeNum, txt: `tope ${v.tope}` } : undefined },
     marcaUltimo: false,
   };
 }
 // ---------------------------------------------------------------- remodelación 3.5
-const enMinusc = (s: string) => (/^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+// en medio de la frase, cada palabra en minúscula («Industria Manufacturera» → «industria manufacturera»); las siglas quedan como están
+const enMinusc = (s: string) => s.replace(/[A-ZÁÉÍÓÚÑ][a-záéíóúñü]+/g, (w) => w.toLowerCase());
 /** La respuesta: la alícuota más alta y la más baja de la actividad (solo las que son un número, con el valor como se ve). */
 export function fraseAlicuotas(v: VistaA): string | null {
   const num = v.filas.filter((f) => f.num != null);

@@ -65,7 +65,7 @@ export type Lienzo =
   | { tipo: "hoy"; cifra: string | null; rotulo: string; frases: string[]; referencia: string | null }
   | { tipo: "dispersion"; graficos: GraficoDisp[] }
   | { tipo: "correlacion"; filas: FilaCorr[] }
-  | { tipo: "barras"; filas: FilaBarra[]; sinDatos: string[]; enc?: { nombre: string; valor: string }; sinTope?: boolean }
+  | { tipo: "barras"; filas: FilaBarra[]; sinDatos: string[]; enc?: { nombre: string; valor: string }; sinTope?: boolean; ref?: { v: number; txt: string }; sinTitulo?: string }
   | { tipo: "variables"; filas: FilaVariable[]; presId: string; enc?: EncVariables }
   | { tipo: "velas"; filas: FilaVela[]; sinDatos: string[] }
   | { tipo: "ranking"; filas: FilaRank[]; sinDatos: string[] }
@@ -437,7 +437,7 @@ function grafico(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number) {
 // ---------------------------------------------------------------- filas: una variable entre presidentes, un presidente con varias variables, ranking
 type LienzoDe<T extends Lienzo["tipo"]> = Extract<Lienzo, { tipo: T }>;
 const MIN_FILA = { barras: 44, variables: 50, velas: 64, ranking: 42, correlacion: 54 } as const;   // alto mínimo legible de una fila (en px del lienzo)
-const MAX_FILA = { barras: 100, variables: 118, velas: 120, ranking: 96, correlacion: 84 } as const;
+const MAX_FILA = { barras: 150, variables: 118, velas: 120, ranking: 96, correlacion: 84 } as const;
 const ALTO_ENC = 32;      // renglón de encabezados de columnas
 const ALTO_SIN = 36;      // renglón "Sin datos: …"
 const sinDatosDe = (l: Lienzo): string[] => (l.tipo === "barras" || l.tipo === "velas" || l.tipo === "ranking" ? l.sinDatos : []);
@@ -497,10 +497,13 @@ function filasBarras(ctx: Ctx, r: Rect, L: LienzoDe<"barras">, pal: Paleta, esc:
   const abs = L.filas.flatMap((f) => (f.valor == null ? [] : [Math.abs(f.valor)])).sort((a, b) => a - b);
   const maxAbs = abs[abs.length - 1] ?? 0, q = abs[Math.floor(0.75 * (abs.length - 1))] ?? 0;
   const tope = !L.sinTope && abs.length >= 5 && q > 0 && maxAbs > q * 3 ? q * 3 : maxAbs;
-  const pos = Math.min(tope, Math.max(0, ...L.filas.map((f) => f.valor ?? 0))), neg = Math.min(tope, Math.max(0, ...L.filas.map((f) => -(f.valor ?? 0))));
+  // la línea de referencia (ej. 50 % = mayoría) entra en la escala aunque ninguna barra la alcance
+  const pos = Math.min(Math.max(tope, L.ref?.v ?? 0), Math.max(0, L.ref?.v ?? 0, ...L.filas.map((f) => f.valor ?? 0))), neg = Math.min(tope, Math.max(0, ...L.filas.map((f) => -(f.valor ?? 0))));
   const iw = g.cw - 8 - pad * 2, wA = iw * 0.4, wBar = iw * 0.26, wV = iw * 0.32;
   const segundo = (f: FilaBarra) => f.detalle ?? (f.ini != null && f.fin != null ? `${f.ini} → ${f.fin}` : "sin datos");
   const tamR = tamComun(ctx, pal, L.filas.map(segundo), { peso: 600, max: f2, min: 10, ancho: wA });
+  // los nombres, todos del mismo tamaño (el que hace entrar al más largo, sin bajar de 0,8 del normal; si aun así no entra, ese se achica solo)
+  const tamN = tamComun(ctx, pal, L.filas.map((f) => f.nombre), { peso: 800, max: f1, min: Math.max(12, f1 * 0.8), ancho: wA });
   const tamV = tamComun(ctx, pal, L.filas.map((f) => f.variacion ?? "–"), { peso: 900, max: f1 * 1.15, min: 12, ancho: wV });
   const geom = (cx: number) => { const left = cx + 8 + pad; return { left, xBar: left + wA + iw * 0.02, xV: left + iw - wV, v: left + iw }; };
   for (let c = 0; c < g.cols; c++) {
@@ -514,7 +517,7 @@ function filasBarras(ctx: Ctx, r: Rect, L: LienzoDe<"barras">, pal: Paleta, esc:
     if (i > 0) separador(ctx, pal, cx + pad, y, g.cw - pad * 2);
     ctx.fillStyle = pal.pres[f.id] ?? pal.eje; ctx.fillRect(cx + 8, y + 7, 6, g.rowH - 14);
     const color = f.cls === "neutro" ? pal.acento : colorCls(pal, f.cls);
-    const aN = ajustar(ctx, pal, f.nombre, { peso: 800, max: f1, min: 12, ancho: wA, lineas: 1 });
+    const aN = ajustar(ctx, pal, f.nombre, { peso: 800, max: tamN, min: 12, ancho: wA, lineas: 1 });
     const aR = ajustar(ctx, pal, segundo(f), { peso: 600, max: tamR, min: tamR, ancho: wA, lineas: 1 });
     const yt = y + (g.rowH - alto(aN, 1.2) - alto(aR, 1.2)) / 2;
     texto(ctx, pal, aN, 800, q0.left, yt, pal.tinta, 1.2); texto(ctx, pal, aR, 600, q0.left, yt + alto(aN, 1.2), pal.tintaSec, 1.2);
@@ -537,6 +540,23 @@ function filasBarras(ctx: Ctx, r: Rect, L: LienzoDe<"barras">, pal: Paleta, esc:
     texto(ctx, pal, aV, 900, q0.v, yv, f.variacion ? color : pal.tintaTenue, 1.2, "right");
     if (aNota) texto(ctx, pal, aNota, 600, q0.v, yv + alto(aV, 1.2), pal.tintaTenue, 1.2, "right");
   });
+  // línea de referencia punteada sobre las barras, con su nombre arriba (la misma que dice la frase: «Referencia: 50 % = mayoría»)
+  if (L.ref && pos + neg > 0) {
+    for (let c = 0; c < g.cols; c++) {
+      const filasCol = Math.min(g.per, n - c * g.per);
+      if (filasCol <= 0) continue;
+      const q0 = geom(r.x + c * (g.cw + g.gap)), xr = q0.xBar + (neg + L.ref.v) * (wBar / (pos + neg));
+      ctx.save(); ctx.strokeStyle = pal.tintaSec; ctx.lineWidth = 2; ctx.setLineDash([6, 5]);
+      ctx.beginPath(); ctx.moveTo(xr, g.y0 + 4); ctx.lineTo(xr, g.y0 + g.rowH * filasCol - 4); ctx.stroke(); ctx.restore();
+      const aRef = ajustar(ctx, pal, L.ref.txt, { peso: 700, max: f2, min: 10, ancho: wV, lineas: 1 });
+      // el rótulo va centrado sobre la línea, pero nunca encima del encabezado de la columna («Bancas», «Alícuota»)
+      ctx.font = fuenteDe(pal, 800, 15 * Math.max(esc, 0.9));
+      const finEnc = q0.xBar + ctx.measureText((L.enc?.valor ?? "Variación en el mandato").toUpperCase()).width + 12;
+      ctx.font = fuenteDe(pal, 700, aRef.tam);
+      const medio = Math.max(xr, finEnc + ctx.measureText(aRef.lineas[0] ?? "").width / 2);
+      texto(ctx, pal, aRef, 700, medio, r.y + 9, pal.tintaSec, 1.2, "center");
+    }
+  }
 }
 
 function filasVariables(ctx: Ctx, r: Rect, L: LienzoDe<"variables">, pal: Paleta, esc: number, horiz: boolean) {
@@ -687,7 +707,7 @@ function lienzoFilas(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number
   else if (L.tipo === "correlacion") filasCorrelacion(ctx, caja, L, pal, esc, horiz);
   else filasRanking(ctx, caja, L, pal, esc, horiz);
   if (sin.length) {
-    const a = ajustar(ctx, pal, `Sin datos: ${sin.join(", ")}`, { peso: 600, max: 22 * Math.max(esc, 0.9), min: 13, ancho: r.w - 40, lineas: 1 });
+    const a = ajustar(ctx, pal, `${(L.tipo === "barras" && L.sinTitulo) || "Sin datos"}: ${sin.join(", ")}`, { peso: 600, max: 22 * Math.max(esc, 0.9), min: 13, ancho: r.w - 40, lineas: 1 });
     texto(ctx, pal, a, 600, r.x + 20, r.y + r.h - hSin + (hSin - alto(a, 1.2)) / 2, pal.tintaSec, 1.2);
   }
   ctx.restore();
@@ -1136,8 +1156,10 @@ function componer(ctx: Ctx, d: DatosImagen, pal: Paleta, esc: number, pintar: bo
   const fPie = px(S(24)), minPie = px(S(17));
   const aUnidad = ajustar(ctx, pal, d.unidad, { peso: 600, max: fPie, min: minPie, ancho: W - 2 * m, lineas: 1 });
   const notaPie = d.nota ? ". " + d.nota : "";
-  let aFuente = ajustar(ctx, pal, `${d.fuente}${notaPie}`, { peso: 400, max: fPie, min: minPie, ancho: W - 2 * m, lineas: 2 });
-  if (aFuente.cortado && d.fuenteCorta) aFuente = ajustar(ctx, pal, `${d.fuenteCorta}${notaPie}`, { peso: 400, max: fPie, min: minPie, ancho: W - 2 * m, lineas: 2 });
+  // toda imagen dice «Fuente:» antes de la fuente, aunque quien la arma pase solo el nombre
+  const conFuente = (f: string) => (!f || /^fuentes?\b/i.test(f) ? f : `Fuente: ${f}`);
+  let aFuente = ajustar(ctx, pal, `${conFuente(d.fuente)}${notaPie}`, { peso: 400, max: fPie, min: minPie, ancho: W - 2 * m, lineas: 2 });
+  if (aFuente.cortado && d.fuenteCorta) aFuente = ajustar(ctx, pal, `${conFuente(d.fuenteCorta)}${notaPie}`, { peso: 400, max: fPie, min: minPie, ancho: W - 2 * m, lineas: 2 });
   const aInicio = d.inicioTxt ? ajustar(ctx, pal, d.inicioTxt, { peso: 600, max: fPie, min: minPie, ancho: W - 2 * m, lineas: 2 }) : null;
   const fBase = px(S(26));
   const hPie = alto(aUnidad, 1.25) + alto(aFuente, 1.25) + (aInicio ? alto(aInicio, 1.25) : 0) + fBase * 1.3 + S(30);

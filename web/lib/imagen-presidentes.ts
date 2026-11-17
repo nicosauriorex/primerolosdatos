@@ -276,7 +276,7 @@ function imagenHerencia(m: Motor, v: Extract<VistaPres, { tipo: "herencia" }>, o
     const corto = (t: string) => t.replace("la serie empieza en", "serie desde").replace("la serie termina en", "serie hasta");
     const nota = f.recibio && f.entrego ? `${f.recibio.mes} → ${f.entrego.mes}` : f.recibio ? `${f.recibio.mes} → sin dato (${corto(f.sinEntrego)})` : `sin dato (${corto(f.sinRecibio)}) → ${f.entrego!.mes}`;
     return {
-      grupo: f.grupo, nombre: f.nombre, unidad: f.unidad, ini: f.recibio?.txt ?? "–", fin: f.entrego?.txt ?? "–", variacion: f.cambio, cls: f.cls, nota,
+      grupo: f.grupo, nombre: f.def.img ?? f.nombre, unidad: f.unidad, ini: f.recibio?.txt ?? "–", fin: f.entrego?.txt ?? "–", variacion: f.cambio, cls: f.cls, nota,
       spark: c.v.slice(desde, hasta + 1),
     };
   });
@@ -286,7 +286,7 @@ function imagenHerencia(m: Motor, v: Extract<VistaPres, { tipo: "herencia" }>, o
   const textos = inf.filter((f) => f.def.tipo === "texto").map((f) =>
     neutro(`${f.def.nombre}: recibió «${f.recibio?.txt ?? "sin dato"}»; ${t.enCurso ? "hoy" : "entregó"} «${f.entrego?.txt ?? "sin dato"}».`));
   const aFila = (f: FilaInforme, marca: string): FilaVariable & { grupo: string } => ({
-    grupo: f.def.grupo, nombre: f.def.nombre, unidad: `${f.def.unidad} (${marca})`, ini: f.recibio?.txt ?? "–", fin: f.entrego?.txt ?? "–",
+    grupo: f.def.grupo, nombre: f.def.img ?? f.def.nombre, unidad: `${f.def.unidad} (${marca})`, ini: f.recibio?.txt ?? "–", fin: f.entrego?.txt ?? "–",
     variacion: f.cambio, cls: "neutro", nota: `${f.recibio?.mes ?? "sin dato"} → ${f.entrego?.mes ?? "sin dato"}`, spark: [],
   });
   const filasInf = inf.filter((f) => f.def.tipo !== "texto").map((f) => aFila(f, "dato de informe"));
