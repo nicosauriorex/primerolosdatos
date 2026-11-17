@@ -1,6 +1,6 @@
 // Motor de cálculo: port tipado de las líneas "datos / medidas / calc" de src/app.js.
 // Una sola fuente de verdad: todas las secciones usan estas funciones.
-import { fmtMes, nf0, nf1, fmtNum, ok, lastIdx, mul, r1 } from "./formato";
+import { fmtMes, nf0, nf1, fmtNum, fmtCant, ok, lastIdx, mul, r1 } from "./formato";
 import { NOMBRES } from "./nombres";
 
 export type Vals = (number | null)[];
@@ -21,6 +21,8 @@ export interface Expr {
 export interface Calculo {
   v: Vals; lo?: Vals; hi?: Vals; nombre: string; corto: string; unidad: string; dir: number;
   flujo?: boolean; ultimo?: boolean; pct: boolean; serie: Serie;
+  /** Cantidad entera: todos los valores son enteros (víctimas, personas, leyes…). Sus valores enteros se muestran sin decimal ("200", no "200,0"). */
+  entero?: boolean;
   /** La serie con la que se mide (`rel`), si la hay: su fuente también se nombra. */
   rel?: Serie;
 }
@@ -379,12 +381,16 @@ export function crearMotor(F: string[]) {
         r.unidad = `${uu.replace(/^personas$/, "")} por habitante`.trim(); r.nombre += " por habitante"; r.corto += " p/hab.";
       }
     }
-    const res: Calculo = { ...r, pct: /%/.test(r.unidad) && !/\$/.test(r.unidad), serie: A, ...(relUsada ? { rel: relUsada } : {}) };
+    const pct = /%/.test(r.unidad) && !/\$/.test(r.unidad);
+    const entero = !pct && r.v.some(ok) && r.v.every((x) => !ok(x) || Number.isInteger(x));
+    const res: Calculo = { ...r, pct, serie: A, ...(entero ? { entero } : {}), ...(relUsada ? { rel: relUsada } : {}) };
     cache.set(k, res);
     return res;
   }
 
-  const fmtC = (c: { pct: boolean }, x: number | null | undefined) => !ok(x) ? "–" : c.pct ? nf1.format(r1(x)) + " %" : fmtNum(x);   // sin "-0,0 %"
+  // Una cantidad entera se muestra sin decimal; un promedio de ella (no entero) conserva el suyo.
+  const fmtC = (c: { pct: boolean; entero?: boolean }, x: number | null | undefined) =>
+    !ok(x) ? "–" : c.pct ? nf1.format(r1(x)) + " %" : fmtCant(x, c.entero);   // sin "-0,0 %"
   const variacionTxt = (c: { pct: boolean }, desde: number | null, hasta: number | null) => {
     if (!ok(desde) || !ok(hasta)) return "–";
     // En puntos, la cuenta sale de los dos valores como se muestran (1,9 y 2,1 → 0,2), para que cierre a la vista.
@@ -395,7 +401,7 @@ export function crearMotor(F: string[]) {
   };
 
   /** Diferencia absoluta en la unidad del indicador ("+$ 45.000"). Vacío si el indicador es un porcentaje, un índice o falta algún dato. */
-  const difAbsTxt = (c: { pct: boolean; unidad: string; serie: { tipo: string } }, desde: number | null, hasta: number | null) => {
+  const difAbsTxt = (c: { pct: boolean; unidad: string; serie: { tipo: string }; entero?: boolean }, desde: number | null, hasta: number | null) => {
     if (c.pct || !ok(desde) || !ok(hasta) || desde === 0) return "";
     if (c.serie.tipo === "idx" || /índice/i.test(c.unidad)) return "";
     const d = hasta - desde, a = Math.abs(d), u = c.unidad;
@@ -406,15 +412,15 @@ export function crearMotor(F: string[]) {
     const abs = a * factor;
     let num: string, magTxt = "";
     // Debajo del millón (en la unidad de la serie) queda como siempre: "851 millones", "1.500 miles".
-    if (!mag) num = a >= 1e6 ? nf1.format(a / 1e6) + " M" : fmtNum(a);
-    else if (a < 1e6) { num = fmtNum(a); magTxt = " " + mag; }
+    if (!mag) num = a >= 1e6 ? nf1.format(a / 1e6) + " M" : fmtCant(a, c.entero);
+    else if (a < 1e6) { num = fmtCant(a, c.entero); magTxt = " " + mag; }
     else if (abs >= 1e12) { num = nf1.format(abs / 1e12); magTxt = " billones"; }
     else { num = nf1.format(abs / 1e6); magTxt = " millones"; }
     const suf = !pre && u.length <= 14 && !u.includes('"') ? " " + u : "";
     return `${d > 0 ? "+" : d < 0 ? "−" : ""}${pre}${num}${magTxt}${suf}`;
   };
   /** Variación en % (o en puntos) y, entre paréntesis, la diferencia absoluta. */
-  const variacionAbsTxt = (c: { pct: boolean; unidad: string; serie: { tipo: string } }, desde: number | null, hasta: number | null) => {
+  const variacionAbsTxt = (c: { pct: boolean; unidad: string; serie: { tipo: string }; entero?: boolean },desde: number | null, hasta: number | null) => {
     const v = variacionTxt(c, desde, hasta), a = difAbsTxt(c, desde, hasta);
     return a ? `${v} (${a})` : v;
   };

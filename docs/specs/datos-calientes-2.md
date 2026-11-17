@@ -104,7 +104,7 @@ Cambios generales que salieron al verificar:
 - La fuente de las transferencias perdía la primera serie al mostrarse (la web quita «, serie X»): ahora dice «series a, b, …» y `fuente-publica.ts` la acorta entera en las imágenes.
 - El buscador y Cambiar dato dicen «1 resultado» (antes «1 resultados»).
 
-Detalle conocido, sin corregir: las cantidades enteras menores de 1.000 se muestran con un decimal («200,0» víctimas de femicidio), porque el formato general del sitio no sabe qué series son cantidades enteras.
+Corregido el 2026-11-17 (`fmtCant` y `entero` en `web/lib/formato.ts` y `web/lib/motor.ts`): antes las cantidades enteras menores de 1.000 se muestran con un decimal («200,0» víctimas de femicidio), porque el formato general del sitio no sabe qué series son cantidades enteras.
 
 ## Dónde ver los cambios
 Local con la vista `web-out` (`http://localhost:3100<ruta>`); en el sitio (`https://primerolosdatos.com.ar<ruta>`) recién después del commit, el push y la corrida completa en verde. Lista con links: `docs/cambios/datos-calientes-2.html`.

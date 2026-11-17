@@ -16,6 +16,8 @@ export const fmtNum = (v: number): string => {
   const a = Math.abs(v);
   return a >= 1000 ? nf0.format(v) : a >= 10 ? nf1.format(v) : a >= 0.1 || a === 0 ? nf2.format(v) : nf3.format(v);
 };
+/** Como `fmtNum`, pero un valor entero de una cantidad entera (`entero`: víctimas, personas, leyes…) va sin decimal: "200", no "200,0". */
+export const fmtCant = (v: number, entero?: boolean): string => (entero && Number.isInteger(v) ? nf0.format(v) : fmtNum(v));
 export const ok = (v: number | null | undefined): v is number => v != null && isFinite(v);
 export const lastIdx = (arr: (number | null)[]): number => {
   for (let i = arr.length - 1; i >= 0; i--) if (ok(arr[i])) return i;

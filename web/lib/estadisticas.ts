@@ -1,6 +1,6 @@
 // Estadísticas de Histórico, mandatos, desempeño de presidentes y correlaciones de elecciones.
 // Port de src/app.js sin cambiar resultados. Todo recibe el motor y la configuración por parámetro.
-import { ok, mesNum, fmtNum, lastIdx, nf0, nf1, r1 } from "./formato";
+import { ok, mesNum, fmtCant, lastIdx, nf0, nf1, r1 } from "./formato";
 import { kDe, txtT, type BaseCfg } from "./config";
 import { ES_VAR, type Calculo, type Expr, type Motor, type Vals } from "./motor";
 
@@ -482,7 +482,7 @@ export function calcularMandato(m: Motor, PRES: Pres[], PRES_T0: Pres[], q: Para
   let fmtAxis: (v: number) => string, fmtTip: (v: number) => string, ref: number | null = null;
   if (c.pct && modo !== "valor") { fmtAxis = (v) => nf0.format(v); fmtTip = (v) => nf1.format(v) + " %"; ref = teo ? ancla : 0; }
   else if (modo === "var") { fmtAxis = (v) => nf0.format(v) + " %"; fmtTip = (v) => (v > 0 ? "+" : "") + nf1.format(v) + " %"; ref = 0; }
-  else { fmtAxis = (v) => c.pct ? nf0.format(v) + " %" : (Math.abs(v) >= 1e6 ? nf1.format(v / 1e6) + " M" : Math.abs(v) >= 1e4 ? nf0.format(v / 1e3) + " mil" : fmtNum(v)); fmtTip = (v) => m.fmtC(c, v); ref = teo ? ancla : null; }
+  else { fmtAxis = (v) => c.pct ? nf0.format(v) + " %" : (Math.abs(v) >= 1e6 ? nf1.format(v / 1e6) + " M" : Math.abs(v) >= 1e4 ? nf0.format(v / 1e3) + " mil" : fmtCant(v, c.entero)); fmtTip = (v) => m.fmtC(c, v); ref = teo ? ancla : null; }
   const vals = rows.flatMap((r) => pres.map((x) => r[x.id])).filter((v) => ok(v) && v > 0) as number[];
   const usarLog = !c.pct && modo !== "var" && vals.length > 1 && Math.max(...vals) / Math.min(...vals) > 30 && rows.every((r) => pres.every((x) => !ok(r[x.id]) || r[x.id] > 0));
   const paso = (hasta - desde) > 36 ? 6 : (hasta - desde) > 12 ? 3 : 1;

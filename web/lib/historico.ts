@@ -1,7 +1,7 @@
 // Cómo se lee Histórico desde la URL: parámetros de cada gráfico y del período. Lo usan la sección y la imagen de compartir.
 import { desdePreferido, type DesdePref } from "./config";
 import { claseVariacion, etiqueta, type EstRows, type Fila } from "./estadisticas";
-import { MESES, fechaDeDato, fmtNum, mesNum, nf0, nf1, ok, redondeadoComo, restaLimpia, rotuloAnterior } from "./formato";
+import { MESES, fechaDeDato, fmtCant, mesNum, partirNumero, nf0, nf1, ok, redondeadoComo, restaLimpia, rotuloAnterior } from "./formato";
 import { ES_VAR, type Expr, type Motor, type SerieMeta } from "./motor";
 import { decExpr, lista as listaUrl, unoDe } from "./url";
 import type { DeltaProps } from "@/components/sistema/Delta";
@@ -199,7 +199,9 @@ export function difAbsoluta(pct: boolean, valor: number | null | undefined, hast
   if (pct || !ok(valor) || !ok(hasta)) return "";
   const d = restaLimpia(redondeadoComo(mostrado, hasta), redondeadoComo(mostrado, valor));
   if (d === 0) return "0";
-  return `${d > 0 ? "+" : "−"}${fmtNum(Math.abs(d))}`;
+  // Con los mismos decimales que las cifras: si se ven sin decimal (cantidades enteras, miles), la diferencia también ("+28", no "+28,0").
+  const sinDecimal = partirNumero(mostrado(hasta))?.decimales === 0 && partirNumero(mostrado(valor))?.decimales === 0;
+  return `${d > 0 ? "+" : "−"}${fmtCant(Math.abs(d), sinDecimal)}`;
 }
 
 /** Las formas de ver la primera variable que tienen sentido, para el control "Cómo verlo" de la cabecera: hasta tres medidas [código, rótulo]

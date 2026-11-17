@@ -8,6 +8,7 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-16.
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
 Últimos bloques (todos publicados, corrida en verde):
+- Cantidades enteras sin decimal («200» femicidios, no «200,0»): `entero` en cada cálculo del motor (todos sus valores enteros; 30 series) y `fmtCant` en valores, diferencias y ejes; promedios y medianas conservan su decimal — 2026-11-17, sin subir
 - Imagen al compartir en Lo esperado, Viento, Resumen por hitos, Congreso y alícuotas de Ingresos Brutos; semáforo en la lupa; subpestañas legibles en tema claro — 2026-11-16, 3ba7993 (corrida en verde, run 43966469194) — [spec](specs/imagenes-y-lupa.md)
 - Tanda 14: el valor de una barra al pasar el mouse o tocarla (R32) en Resumen por hitos, Congreso año por año y Gasto por mes — 2026-11-16, 3ba7993 (corrida en verde, run 43966469194) — [spec](specs/ajustes-tanda-14.md)
 - Tanda 13 (Novedades): pestañas Novedades / Calendario, grilla chica con resumen del día (panel en PC, ventana en el celular), días desplegables, series en caja deslizable, Agendar (Google Calendar e .ics); compartir un dato suma mes anterior y hace un año (texto e imagen; reglas R30 y R31) — 2026-11-16, fe1b069 (corrida en verde, run 43956106566) — [spec](specs/ajustes-tanda-13.md)
@@ -51,7 +52,6 @@ A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunid
   - Banco Central: unos cinco días hábiles de atraso en todas las fuentes legibles; falta saber si es lo normal.
   - Precios contra el mundo: "La región" puede quedar con un mes viejo (ropa: dic-23); México corta comunicación, recreación y varios en jul-24; Chile, comunicación y recreación en dic-23; EE.UU. sin oct-25 (cierre del gobierno).
   - Deuda: el % del PIB de la web (dólar promedio, PIB de 12 meses) difiere unas décimas del de Finanzas (lo dice la ficha); imagen para compartir de las fichas nuevas sin mirar.
-  - Cantidades enteras menores de 1.000 se ven con un decimal («200,0» femicidios): el formato general no distingue cantidades.
   - Femicidios 2018 y 2020 salen del gráfico del informe 2025 (sin frase textual).
   - Las estimaciones propias de reservas netas dependen de supuestos fijos (swaps 20.000, SEDESA 2.000).
 

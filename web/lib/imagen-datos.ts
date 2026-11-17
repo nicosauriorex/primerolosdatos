@@ -5,7 +5,7 @@ import { admiteContexto, contextoDato } from "./contexto-dato";
 import { DATOS_GEN, DATOS_PRES, type ClaveFrase, type DatoGen, type DatoPres, type DesdePref, type FormatoImg, type OpcionesImagen } from "./config";
 import { leerComun, leerGrafico, frecuenciaOrigen, textoTemporalidad, TODOS_MESES } from "./historico";
 import type { ComparacionImg, DatosImagen, TarjetaDato, TarjetaImg } from "./imagen";
-import { fmtMes, nf0, nf1, fmtNum, norm, ok } from "./formato";
+import { fmtMes, nf0, nf1, fmtCant, norm, ok } from "./formato";
 import type { Calculo, Expr, Motor } from "./motor";
 import { fuentesCalc } from "./motor";
 import { filasDeTabla, tablaATexto } from "./tabla-texto";
@@ -42,8 +42,8 @@ export const limpiarComentario = (s: string): string =>
   s.replace(/[\p{Extended_Pictographic}\p{C}\p{Cs}‍️]/gu, " ").replace(/\s+/g, " ").trim().slice(0, MAX_COMENTARIO);
 
 /** Formato de los números del eje: porcentajes con %, miles abreviados. */
-export const fmtEjeDe = (c: { pct: boolean }) => (v: number) =>
-  c.pct ? nf0.format(v) + " %" : (Math.abs(v) >= 1e6 ? nf1.format(v / 1e6) + " M" : Math.abs(v) >= 1e4 ? nf0.format(v / 1e3) + " mil" : fmtNum(v));
+export const fmtEjeDe = (c: { pct: boolean; entero?: boolean }) => (v: number) =>
+  c.pct ? nf0.format(v) + " %" : (Math.abs(v) >= 1e6 ? nf1.format(v / 1e6) + " M" : Math.abs(v) >= 1e4 ? nf0.format(v / 1e3) + " mil" : fmtCant(v, c.entero));
 
 /** Título del gráfico según sus variables. */
 export const tituloGrafico = (lista: { c: Calculo }[], b100: boolean): string =>
