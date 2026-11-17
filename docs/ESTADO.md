@@ -47,7 +47,7 @@ A futuro, sin proponer hasta que el usuario lo pida: bloque 8 (cuentas y comunid
 - **Novedades:** las fechas estimadas (aparecen cuando cada fuente tenga dos meses registrados, hacia enero) y la primera entrada nueva del registro en una corrida (la del push dio 0, sin datos nuevos).
 - **Conteos:** el botón de Compartir real hasta la base (se probó el pedido al servidor, no el clic: el portapapeles falla con el panel oculto) y la pregunta con el menú de compartir de un celular real.
 - **En general:** celular real (Atrás, teclado, safe-area de la barra inferior) y aspecto en capturas de casi todas las páginas: el panel del navegador suele estar oculto y se verifica midiendo. Tema claro y 375 px medidos en ocho rutas el 2026-11-16 (sin desborde; contraste arreglado en las subpestañas).
-- **Imágenes compartidas:** todas miradas en captura el 2026-11-17 ([verificación](specs/verificacion-imagenes.md), con la segunda vuelta: escala en «<mes> de cada año» y frase de precios por presidente; sin commit todavía).
+- **Imágenes compartidas:** todas miradas en captura el 2026-11-17 ([verificación](specs/verificacion-imagenes.md), con la segunda vuelta: escala en «<mes> de cada año» y frase de precios por presidente; 4b492ce, corrida en verde, run 44157463589).
 - **Animaciones:** Mes a mes con lápiz, despliegue del parte del Banco Central, carrusel de la portada: con el panel oculto no corren ni el `IntersectionObserver` ni las animaciones CSS (comprobado el 2026-11-17 con una prueba aparte). Mirarlas con el panel a la vista.
 - **Datos:**
   - Universidades: lo que declaran en la Cuenta de Inversión 2024 no cierra con lo transferido (la página lo dice).
