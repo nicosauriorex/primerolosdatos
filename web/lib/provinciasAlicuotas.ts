@@ -1,7 +1,7 @@
 // Cuánto cobra cada provincia de Ingresos Brutos (/provincias/?vista=cuentas, docs/specs/provincias.md, fase 3): la alícuota TEÓRICA de la ley por actividad,
 // de las 24 jurisdicciones, según la Dirección Nacional de Asuntos Provinciales (DNAP, planilla "<año>_ib.xlsx", marcada por ella como provisoria).
 // El archivo `provincias_alicuotas.json` lo escribe pipeline/provincias_dnap.py. Sin ranking ni colores de bueno o malo (D-012): el orden es el de la alícuota y se puede invertir.
-import { restaLimpia } from "./formato";
+import { nfHasta2, restaLimpia } from "./formato";
 import { buscarProv, type Contexto } from "./provincias";
 import type { FormatoImg } from "./config";
 import type { DatosImagen, FilaBarra } from "./imagen";
@@ -77,16 +77,15 @@ export const opcionesActividadA = (d: DatosAlicuotas): [string, string][] => d.a
 export const opcionesAnioA = (d: DatosAlicuotas): [string, string][] => [...d.anios].reverse().map((a) => [String(a), String(a)]);
 
 // ---------------------------------------------------------------- la vista
-const nfA = new Intl.NumberFormat("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 const redondeo2 = (v: number) => Math.round(v * 100) / 100;
 /** "1,5 %"; el texto de la planilla tal cual; "Sin dato" si falta. */
-export const txtAlicuota = (v: ValorA): string => (typeof v === "number" ? `${nfA.format(redondeo2(v))} %` : v ?? "Sin dato");
+export const txtAlicuota = (v: ValorA): string => (typeof v === "number" ? `${nfHasta2.format(redondeo2(v))} %` : v ?? "Sin dato");
 /** Diferencia con el tope en puntos, con los valores redondeados que se ven: "−0,5 p.p.", "+0,3 p.p.", "igual". null si alguno no es número. */
 export function difConTope(v: ValorA, tope: ValorA): string | null {
   if (typeof v !== "number" || typeof tope !== "number") return null;
   const d = restaLimpia(redondeo2(v), redondeo2(tope));
   if (d === 0) return "igual";
-  return `${d < 0 ? "−" : "+"}${nfA.format(Math.abs(d))} p.p.`;
+  return `${d < 0 ? "−" : "+"}${nfHasta2.format(Math.abs(d))} p.p.`;
 }
 
 export interface AperturaFila { n: string; txt: string }

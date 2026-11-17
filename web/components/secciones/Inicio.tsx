@@ -15,7 +15,7 @@ import { Capitulo } from "../sistema/Capitulo";
 import { Delta } from "../sistema/Delta";
 import { Lamina, Laminas } from "../sistema/Lamina";
 import { IconoSeccion, IconoTema } from "../sistema/iconosTemas";
-import { nf1 } from "@/lib/formato";
+import { nf1, nf2 } from "@/lib/formato";
 import { contextoDato } from "@/lib/contexto-dato";
 import type { Comparacion, Comparaciones } from "@/lib/plantillas";
 import { ORGANISMOS } from "@/lib/fuentes";
@@ -53,7 +53,6 @@ const CIFRAS: DefCifra[] = [
   { titulo: "Dólar blue, en pesos de hoy", e: PLACAS.dolarBlue, fuente: "Ámbito y Bluelytics" },
 ];
 
-const nf2 = new Intl.NumberFormat("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 /** Cifras de 7 o más dígitos se abrevian a millones con dos decimales ("1.935.678" → "1,94 M"); el resto queda igual.
  *  Devuelve el texto corto y el completo (para lectores de pantalla). */
 export function abreviarCifra(val: string): { corto: string; completo: string } {
@@ -256,7 +255,8 @@ function FilaTema({ t, S }: { t: Tema; S: Record<string, SerieMeta> }) {
   const { ref, visible } = useVisible<HTMLAnchorElement>();
   const primero = useMemo(() => principalesDe(t, S)[0], [t, S]);
   const expr = useMemo<Expr | undefined>(() => (primero ? Object.values(PLACAS).find((x) => x.id === primero.id) ?? primero : undefined), [primero]);
-  useEffect(() => { if (visible && expr) cargar(archivosDe(idsDe(expr))); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [visible, expr]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- cargar y archivosDe se recrean cuando cambia `version`: el pedido solo se hace al aparecer la fila o al cambiar su expresión
+  useEffect(() => { if (visible && expr) cargar(archivosDe(idsDe(expr))); }, [visible, expr]);
   const ev = useMemo(() => {
     if (!visible || !motor || !primero || !expr) return null;
     return evaluar(motor, plantillaSuelta("t-" + t.slug, primero.nombre, expr)) ?? (expr !== primero ? evaluar(motor, plantillaSuelta("t-" + t.slug, primero.nombre, primero)) : null);
@@ -285,7 +285,8 @@ function Destacadas({ lista }: { lista: Plantilla[] }) {
   const { motor, cargar, archivosDe, version } = useDatos();
   const { ref, visible } = useVisible<HTMLDivElement>();
   const clave = lista.map((p) => p.id).join("|");
-  useEffect(() => { if (visible) cargar(archivosDe(lista.flatMap((p) => p.ids))); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [visible, clave]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- cargar y archivosDe se recrean cuando cambia `version` y `clave` ya resume a `lista`: el pedido solo se hace al aparecer el bloque o al cambiar la lista
+  useEffect(() => { if (visible) cargar(archivosDe(lista.flatMap((p) => p.ids))); }, [visible, clave]);
   const evs = useMemo(() => lista.map((pl) => (visible && motor ? evaluar(motor, pl) : null)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [visible, motor, clave, version]);

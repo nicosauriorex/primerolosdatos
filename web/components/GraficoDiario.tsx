@@ -24,6 +24,7 @@ export function GraficoDiario({ clave, serie, periodo, etiqueta }: { clave: Clav
   const clavePeriodo = claveDePeriodo(periodo);
   useEffect(() => setSel(null), [clave, clavePeriodo]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `periodo` es un objeto nuevo en cada render: se recorta de nuevo solo cuando cambia su contenido (`clavePeriodo`)
   const tramo = useMemo(() => recorte(clave, serie, periodo), [clave, serie, clavePeriodo]);
   const barras = tipoDiario(clave) === "flujo";
   const g = useMemo(() => {

@@ -1,0 +1,2 @@
+# Herramientas de desarrollo (no hacen falta para correr el pipeline)
+ruff==0.17.5

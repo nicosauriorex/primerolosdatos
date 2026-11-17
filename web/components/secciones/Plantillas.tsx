@@ -144,7 +144,8 @@ export function Plantillas() {
   const [texto, setTexto] = useState("");
   const [abiertos, setAbiertos] = useState<Set<string>>(new Set());
   const [aviso, setAviso] = useState<string | null>(null);
-  useEffect(() => { if (montado) setTexto(p.get("q") ?? ""); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [montado]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- el texto del buscador se toma de la URL una sola vez, al montar; después manda lo que se escribe
+  useEffect(() => { if (montado) setTexto(p.get("q") ?? ""); }, [montado]);
 
   const S = useMemo(() => Object.fromEntries(metas.map((s) => [s.id, s])), [metas, listo]);   // eslint-disable-line react-hooks/exhaustive-deps
   const generales = useMemo(() => (listo ? crearPlantillas(metas) : []), [listo, metas]);

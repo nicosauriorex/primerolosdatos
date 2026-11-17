@@ -262,7 +262,7 @@ export function VistaCompleta({ archivo, titulo, onCerrar }: { archivo: File; ti
   }, [esLaDeArriba]);
   return createPortal(
     <div className="comp-completa" role="dialog" aria-modal="true" aria-label={`Vista previa a pantalla completa: ${titulo}`} onClick={cerrarAtras}>
-      {url && /* eslint-disable-next-line @next/next/no-img-element */ <img src={url} alt={`Imagen para compartir: ${titulo}`} />}
+      {url && <img src={url} alt={`Imagen para compartir: ${titulo}`} />}
       <button ref={boton} type="button" className="comp-completa-cerrar" aria-label="Cerrar la vista a pantalla completa" onClick={(ev) => { ev.stopPropagation(); cerrarAtras(); }}>×</button>
     </div>, document.body);
 }

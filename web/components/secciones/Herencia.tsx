@@ -16,7 +16,7 @@ import { CompartirHoja } from "../sistema/CompartirHoja";
 import { BarraResumen } from "./Ranking";
 import { CeldaVar, Valor } from "./comunes";
 import { crearPres, type Pres } from "@/lib/estadisticas";
-import { fmtMes } from "@/lib/formato";
+import { fmtMes, nf0 } from "@/lib/formato";
 import {
   BASE_HERENCIA, FALTA_CARGAR, FILAS_HERENCIA, GRUPOS_HERENCIA, MAX_ATRASO, NO_MEDIBLE, defPorClave, fraseHerencia, fraseTraspasos, idsHerencia, tablaHerencia, traspasos,
   type FilaHerencia, type Punto,
@@ -60,7 +60,7 @@ function VentanaCita({ d, x, onCerrar }: { d: DefInforme; x: DatoInforme; onCerr
   );
 }
 
-const fmtUS = (v: number) => `${v < 0 ? "−" : ""}${Math.abs(v).toLocaleString("es-AR", { maximumFractionDigits: 0 })}`;
+const fmtUS = (v: number) => `${v < 0 ? "−" : ""}${nf0.format(Math.abs(v))}`;
 const fechaTxt = (f: string) => f.split("-").reverse().join("/");
 
 /** Una estimación propia de reservas netas: la cuenta con sus componentes, los supuestos con su cita y cuánto se apartó de la cifra publicada

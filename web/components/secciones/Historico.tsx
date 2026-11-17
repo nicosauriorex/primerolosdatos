@@ -86,7 +86,6 @@ export function Historico() {
   const E = useMemo((): Comun | null => {
     if (!listo || !motor || !montado) return null;
     return leerComun(p, motor.F, config.desde);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listo, motor, montado, p, config.desde]);
 
   // Los gráficos del link, sin huecos: si falta el 2.º y está el 3.º, el 3.º pasa a ser el 2.º.

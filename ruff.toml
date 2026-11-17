@@ -1,0 +1,5 @@
+target-version = "py314"
+include = ["pipeline/**/*.py"]
+
+[lint]
+select = ["F", "E722"]

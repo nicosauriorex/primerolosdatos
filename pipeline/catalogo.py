@@ -148,18 +148,17 @@ def ipc_indec(token, idx):
             continue
         base = ["Precios", "IPC INDEC (índices, dic-2016 = 100)", reg]
         if clas == "IPC":
-            ruta, nom = base, "Nivel general"
+            ruta = base
         elif clas.startswith("Bienes"):
-            ruta, nom = base + ["Bienes y servicios"], desc
+            ruta = base + ["Bienes y servicios"]
         elif clas.startswith("Estacional"):
-            ruta, nom = base + ["Estacional, núcleo y regulados"], desc
+            ruta = base + ["Estacional, núcleo y regulados"]
         else:  # COICOP: división / grupo / clase / producto anidados por código
             partes = cod.split(".")
             ruta = base[:]
             for k in range(1, len(partes)):
                 pref = ".".join(partes[:k])
                 ruta.append(f"{pref} {nombres_cod.get(pref, '')}".strip())
-            nom = desc if len(partes) > 1 else f"{desc} (división completa)"
             if len(partes) == 1:
                 ruta.append(f"{cod} {desc}")
         out.append(S(f"ipc_{slug(reg)}_{slug(cod)}_{slug(clas)[:6]}", f"IPC {desc} ({reg})" if clas != "IPC" else f"IPC nivel general ({reg})",
@@ -275,7 +274,7 @@ def _trim_a_mes(s, idx, repartir=False):
 
 
 def datos_gob(idx, ipc=None):
-    A, E, EX, FI, SA = ["Actividad"], ["Empleo, pobreza e ingresos"], ["Sector externo"], ["Fiscal"], ["Salarios"]
+    A, EX, FI, SA = ["Actividad"], ["Sector externo"], ["Fiscal"], ["Salarios"]
     CN, CO, EM = ["Actividad", "Cuentas nacionales (trimestral)"], ["Actividad", "Consumo e indicadores de demanda"], ["Empleo, pobreza e ingresos", "Empleo registrado (SIPA)"]
     EPH = ["Empleo, pobreza e ingresos", "Mercado de trabajo (EPH, trimestral)"]
     EN = ["Sector externo", "Energía"]

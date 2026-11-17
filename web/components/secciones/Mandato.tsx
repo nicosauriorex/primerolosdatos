@@ -117,7 +117,6 @@ export function Mandato() {
     };
     raf = requestAnimationFrame(paso);
     return () => cancelAnimationFrame(raf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [play, ms, maxAnim]);
   // al cambiar los cuadros (o cortarse la animación) el recorte se vuelve a poner donde corresponde
   useLayoutEffect(() => { if (!anim) { if (envoltura.current) envoltura.current.style.clipPath = ""; return; } aplicarRecorte(); });

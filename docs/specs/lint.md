@@ -1,6 +1,6 @@
 # Lint: Ruff en el pipeline y ESLint en la web
 
-Estado: lista para implementar
+Estado: implementada (2026-11-17)
 
 ## Objetivo
 
@@ -33,11 +33,23 @@ Nada cambia en el sitio: los números de Herencia, Inicio, Banco Central y Provi
 
 ### ESLint (web)
 
-4. Dependencias de desarrollo en `web/package.json`: `eslint@^9`, `typescript-eslint` (solo como parser) y `eslint-plugin-react-hooks@^5`. Si `typescript-eslint` avisa por la versión de TypeScript (el proyecto usa TypeScript 7), alcanza con que el parser funcione; anotarlo en la spec si pasa.
+4. Dependencias de desarrollo en `web/package.json`: `eslint@^9`, `@typescript-eslint/parser` (solo el parser) y `eslint-plugin-react-hooks@^5`.
+   **Al implementar:** typescript-eslint 8 no acepta TypeScript 7: pide `typescript <6.1` y falla al cargarse. Se resolvió así:
+   - `@typescript/typescript6` (la API de TypeScript 6 que publica Microsoft) como dependencia de desarrollo;
+   - al principio de `eslint.config.mjs`, el `require("typescript")` de los paquetes `@typescript-eslint/*` y `ts-api-utils` se redirige a ese paquete (con `Module._resolveFilename`);
+   - `web/.npmrc` con `legacy-peer-deps=true`, para que `npm ci` no falle por el peer.
+
+   `tsc` y `npm run tipos` siguen con TypeScript 7. Es frágil ante cambios de versión de typescript-eslint: si el lint se rompe por eso, sale con error en el workflow y en el hook (no pasa en silencio). Cuando typescript-eslint acepte TypeScript 7, se saca todo esto.
 5. `web/eslint.config.mjs` (configuración plana) para `app/`, `components/` y `lib/` (`.ts` y `.tsx`). Quedan afuera `scripts/`, `functions/`, `out/`, `.next/` y `node_modules/`. No se activa ningún conjunto "recommended": solo las reglas de esta lista.
 6. `react-hooks/rules-of-hooks` y `react-hooks/exhaustive-deps` en `error`.
 7. `linterOptions.reportUnusedDisableDirectives: "error"`: se borran los `eslint-disable` que ya no hacen nada y los dos que nombran reglas inexistentes.
 8. Las 4 `exhaustive-deps` se corrigen sin cambiar el comportamiento. Si sumar la dependencia cambia cuándo corre el efecto (por ejemplo, porque `cargar` es una función nueva en cada render), se resuelve con `useCallback` o con un `eslint-disable-next-line react-hooks/exhaustive-deps -- <por qué>`, y la razón es obligatoria. Cada caso se anota en el informe con la solución elegida.
+   **Al implementar**, los cuatro casos se resolvieron con `eslint-disable-next-line` y su motivo. Ninguno llevó `useCallback`, porque eso tocaba `DatosProvider`:
+   - `GraficoDiario.tsx`: `periodo` es un objeto nuevo en cada render; manda `clavePeriodo`.
+   - `Inicio.tsx`, filas de tema y destacadas: `cargar` y `archivosDe` cambian con `version`, y sumarlos volvería a pedir archivos. Además, `clave` resume a `lista`.
+   - `Plantillas.tsx`: el buscador toma el texto de la URL una sola vez, al montar.
+
+   Los tres comentarios viejos estaban dentro de un `/* */` en la misma línea y no hacían efecto.
 9. Script `"lint": "eslint app components lib --max-warnings 0"` en `web/package.json`.
 
 ### Reglas propias (`no-restricted-syntax`, en `error`)
@@ -47,7 +59,7 @@ Cada mensaje está en español y dice qué usar en su lugar.
 10. **Sin `<select>` nativo**: `JSXOpeningElement[name.name="select"]`. Mensaje: usar `Selector`, `Seg` o `Desplegable` de `components/ui.tsx`.
 11. **Números solo con `lib/formato.ts`**: se marcan `CallExpression[callee.property.name="toLocaleString"]` y `NewExpression` de `Intl.NumberFormat`, en todo el alcance salvo `lib/formato.ts` (excepción por `files`). No se tocan `toLocaleDateString` ni `toLocaleTimeString`.
 12. Los 4 casos medidos pasan a `formato.ts`. `Inicio.nf2` y `diario.ts:401` usan `nf2` y `nfDec(dec)`. `provinciasAlicuotas.nfA` y `Herencia.fmtUS` usan una función existente de `formato.ts` que dé el mismo texto o, si no hay, una nueva exportada desde ahí. El texto que se ve tiene que ser idéntico: mismos decimales, mismo signo «−».
-13. **Sin colores hex en JSX**: un literal de color hex (`#rgb`, `#rrggbb`, `#rrggbbaa`) dentro de un atributo JSX, `style={{…}}` incluido. Mensaje: usar las variables CSS (`--series-N`, tokens de `globals.css`). El dibujo en canvas fuera de JSX no se marca (por ejemplo, el respaldo `"#8a9…"` de `Grafico.tsx:390`).
+13. **Sin colores hex en JSX**: un color hex (`#rgb`, `#rrggbb`, `#rrggbbaa`) en los atributos que llevan color (`style`, `fill`, `stroke`, `color`, `stopColor`…), también dentro de un texto más largo (`"1px solid #ccc"`, un degradado). Ajuste del revisor: al principio era cualquier atributo, y eso marcaba `href="#cafe"`. Mensaje: usar las variables CSS (`--series-N`, tokens de `globals.css`). El dibujo en canvas fuera de JSX no se marca (por ejemplo, el respaldo `"#8a9…"` de `Grafico.tsx:390`).
 
 ### Workflow
 
@@ -106,6 +118,40 @@ No hay datos nuevos. Archivos nuevos: `ruff.toml`, `requirements-dev.txt`, `web/
 
 ## Dónde ver los cambios
 
-(Se completa al implementar.) No cambia nada visible en el sitio. Se ven:
-- en la corrida de GitHub Actions, el paso "Revisar código";
-- en `docs/cambios/lint.html`, la lista de archivos y la comparación de números de Herencia, portada, Banco Central y Provincias.
+En el sitio no cambia nada que se vea; los renglones del sitio son para comprobar que los números siguen iguales. Página con casillas: `docs/cambios/lint.html` (Artifact). Local: `http://localhost:3100<ruta>`. Publicado: `https://primerolosdatos.com.ar<ruta>`, después del push y la corrida en verde.
+
+1. **Portada**
+   - 1.1 Cifras abreviadas en millones con `nf2` de `formato.ts`: `/#mas-buscados`. Agregado por mí (regla de números).
+2. **Presidentes · Herencia**
+   - 2.1 Cuenta de reservas netas con `nf0`: `/herencia/`. Agregado por mí.
+3. **Provincias**
+   - 3.1 Alícuotas y su diferencia con `nfHasta2`: `/provincias/?vista=cuentas`. Agregado por mí.
+4. **Banco Central**
+   - 4.1 Eje de los gráficos con `nfDec`: `/bcra/`. Agregado por mí.
+   - 4.2 El mismo eje en el semáforo: `/semaforo/`. Agregado por mí.
+5. **Fuera del sitio**
+   - 5.1 Paso «Revisar código» en la corrida de GitHub Actions. Pediste: «paso en actualizar.yml…».
+   - 5.2 Ruff. Pediste: «Ruff en pipeline/».
+   - 5.3 ESLint con hooks. Pediste: «ESLint en web/ con rules-of-hooks y exhaustive-deps».
+   - 5.4 Reglas propias. Pediste: «reglas propias con no-restricted-syntax».
+   - 5.5 Hook al editar. Elegido en la entrevista.
+
+## Verificación (2026-11-17)
+
+- `python -m ruff check pipeline`: 0.
+- `npm ci` (desde cero) + `npm run lint` + `npm run tipos` + `npm run build`: 0.
+- Reglas propias: los casos de prueba marcan `<select>`, `toLocaleString`, `new Intl.NumberFormat` y hex en `style`/`fill`, también dentro de un texto. No marcan `toFixed`, `toLocaleDateString`, `href="#cafe"` ni `data-x="#add"`.
+- Hook:
+  - frena con rc 2 un `.py` con F821 y un `.tsx` con errores (rutas relativas y absolutas de Windows);
+  - deja pasar con 0 lo limpio y lo fuera de alcance;
+  - probado también dentro de una sesión real de Claude Code: devolvió el F821 al escribir el archivo.
+- Formatos viejos contra nuevos: 20.012 números, 0 diferencias.
+- Texto de `/`, `/bcra/`, `/semaforo/` y `/provincias/?vista=cuentas`: idéntico antes y después. En `/herencia/` la única diferencia fue el botón «Volver», que depende de cómo se llegó a la página.
+- Revisor: sin problemas graves. Se corrigieron:
+  - el selector de hex (atributos de color y dentro de textos);
+  - `python3` como alternativa en el hook;
+  - la expresión de barras del hook;
+  - la desviación de TS 7 y las soluciones de hooks anotadas acá y en D-028.
+
+  Quedaron sin tocar, a propósito: `toLocaleString` también marca fechas (hoy no hay usos) y dos `eslint-disable` viejos sin motivo en Inicio y Plantillas (la regla de motivo es solo para los nuevos).
+- Sin verificar: la corrida de GitHub Actions con el paso nuevo (después del push).

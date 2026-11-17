@@ -1,7 +1,7 @@
 // Parte diario del Banco Central (docs/specs/parte-diario-bcra.md): decodifica `diario_bcra.json` y calcula todo lo que muestran la página /bcra/,
 // la imagen para compartir, el texto para copiar y la vista previa en redes. Funciones puras, sin React ni acceso al DOM.
 // Regla "las cuentas cierran": toda diferencia, porcentaje o acumulado se calcula con los valores ya redondeados como se muestran.
-import { MESES, nf0, nf1, nf2, redondeadoComo, restaLimpia, r1 } from "./formato";
+import { MESES, nfDec, nf0, nf1, nf2, redondeadoComo, restaLimpia, r1 } from "./formato";
 
 // ---------------------------------------------------------------- datos crudos (formato del pipeline)
 export const CLAVES = ["compras", "reservas", "minorista", "mayorista", "tamar", "badlar", "base", "depositos"] as const;
@@ -398,7 +398,7 @@ export function marcasY(min: number, max: number, n = 4): { marcas: number[]; pa
 /** Número del eje con los decimales que pide el paso entre marcas. */
 export function fmtEjeY(v: number, paso: number): string {
   const dec = paso >= 1 ? 0 : paso >= 0.1 ? 1 : 2;
-  return new Intl.NumberFormat("es-AR", { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(v);
+  return nfDec(dec).format(v);
 }
 /** Días de las marcas del eje horizontal (repartidas parejo) y su texto: con año si el rango pasa de un año. */
 export function marcasX(d0: number, d1: number, n: number): { dia: number; txt: string }[] {

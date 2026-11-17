@@ -11,6 +11,8 @@ export const fechaDeDato = (s: string | null | undefined, frec?: string): string
 export const nf0 = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 });
 export const nf1 = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1, minimumFractionDigits: 1 });
 export const nf2 = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+/** Hasta dos decimales, sin ceros de relleno: "1,5", "2", "0,25" (alícuotas). */
+export const nfHasta2 = new Intl.NumberFormat("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 export const nf3 = new Intl.NumberFormat("es-AR", { maximumSignificantDigits: 3 });
 export const fmtNum = (v: number): string => {
   const a = Math.abs(v);

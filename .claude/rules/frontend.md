@@ -10,7 +10,7 @@ paths:
 - Colores de series vía variables CSS `--series-N` en `web/app/globals.css`; no hardcodear colores.
 - Números siempre con los `Intl.NumberFormat("es-AR")` de `web/lib/formato.ts`. Meses con `fmtMes`.
 - Los filtros viven en el query string (`web/lib/url.ts`); un parámetro inválido cae al valor por defecto.
-- Tras cualquier cambio: `cd web && npm run tipos && npm run build`, y revisar la sección afectada en el navegador (también a 375 px).
+- Tras cualquier cambio: `cd web && npm run tipos && npm run lint && npm run build`, y revisar la sección afectada en el navegador (también a 375 px).
 
 # Reglas de interfaz (salen de los pedidos del usuario; valen para todo el sitio)
 
@@ -28,6 +28,7 @@ paths:
 - **El valor de una barra al pasar el mouse o tocarla** (R32): con `ConCartel` (`components/sistema/ConCartel.tsx`) y `data-cartel` en cada barra; nunca solo con `title`.
 - **Verde = mejor, rojo = peor**, siempre con signo o texto; nunca solo color.
 - **Chips compactos (R24)**: los controles que están en la página (filas de chips, barra de vista, Ajustes, botones que abren una ventana) se ven de 32 px con borde fino y fondo de superficie, y se tocan en 44 px. Un control nuevo usa `.chip-c` (bloque R24 al final de `globals.css`). Las listas de opciones dentro de una hoja siguen de 44 px (una fila de chips es compacta en todos lados).
+- Las reglas de `<select>` nativo, números fuera de `formato.ts` y colores hex en JSX las controla el lint (`web/eslint.config.mjs`).
 - Sin `<select>` nativo: `Selector`, `Seg`, `Desplegable` y `Modal` de `web/components/ui.tsx`.
 - Las clases CSS nuevas no repiten nombres existentes (buscar antes con grep: `.marca` ya es el logo).
 - Después de una tanda: barrido por código de todas las rutas a 360 px y 1280 px (desborde horizontal, pantalla de error, errores de consola) y de cada ventana abierta.

@@ -74,6 +74,5 @@ export function useDeslizable(ref: RefObject<HTMLElement | null>, paseo = false,
       eventos.forEach((e) => el.removeEventListener(e, frenar));
       cierres.forEach((f) => f());
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref, paseo, dep]);
 }

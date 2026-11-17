@@ -11,6 +11,8 @@ on:
       - "web/**"
       - "pipeline/**"
       - "requirements.txt"
+      - "requirements-dev.txt"
+      - "ruff.toml"
       - ".github/workflows/actualizar.yml"
   workflow_dispatch:
     inputs:
@@ -52,7 +54,7 @@ jobs:
           elif [ "${{ github.event_name }}" = "push" ]; then
             ANTES="${{ github.event.before }}"
             if CAMBIOS=$(git diff --name-only "$ANTES" "${{ github.sha }}" 2>/dev/null) && [ -n "$CAMBIOS" ] \
-               && ! echo "$CAMBIOS" | grep -qE '^(pipeline/|datos/|requirements\.txt$|\.github/workflows/)'; then
+               && ! echo "$CAMBIOS" | grep -qE '^(pipeline/|datos/|requirements\.txt$|requirements-dev\.txt$|ruff\.toml$|\.github/workflows/)'; then
               MODO=sitio
             fi
           fi
@@ -71,6 +73,16 @@ jobs:
           node-version: "24"
           cache: npm
           cache-dependency-path: web/package-lock.json
+
+      - name: Revisar código
+        # En los dos modos y antes de bajar datos: si hay un error de lint la corrida termina acá (no baja, no commitea, no publica).
+        shell: bash
+        run: |
+          pip install -r requirements-dev.txt
+          python -m ruff check pipeline
+          cd web
+          npm ci
+          npm run lint
 
       - name: Bajar datos y generar los JSON de la web
         env:
@@ -123,7 +135,6 @@ jobs:
         # En los dos modos: `npm run previas` dibuja las imágenes de vista previa de los links (public/previas/, no versionado)
         # a partir de los JSON recién generados, y después se compila (las páginas /dato/<slug>/ leen public/previas/_datos.json).
         run: |
-          npm ci
           npm run previas
           npm run build
           {

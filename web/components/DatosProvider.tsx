@@ -79,7 +79,6 @@ export function DatosProvider({ children }: { children: React.ReactNode }) {
     cargar: async (archivos) => { await Promise.all([...new Set(archivos)].filter((a) => a !== "base").map(pedir)); },
     archivosDe: (ids) => [...new Set(ids.map((id) => metasRef.current.find((m) => m.id === id)?.archivo).filter(Boolean) as string[])],
     todosLosArchivos: () => [...new Set(metasRef.current.map((m) => m.archivo))],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [listo, errorGeneral, version, errores, pedir]);
 
   return <DatosCtx.Provider value={valor}>{children}</DatosCtx.Provider>;

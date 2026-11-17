@@ -351,7 +351,7 @@ export function buscar(archivos: ArchivoAnio[], q: string, max = 30, enCurso: Se
     }
   }
   return [...porClave.values()].sort((a, b) => b.ultimo - a.ultimo || b.peso - a.peso).slice(0, max)
-    .map(({ peso: _p, ultimo: _u, rutas, ...r }) => {   // eslint-disable-line @typescript-eslint/no-unused-vars
+    .map(({ peso: _p, ultimo: _u, rutas, ...r }) => {
       const cerrados = r.anios.filter((a) => !enCurso.has(a)), anio = Math.max(...(cerrados.length ? cerrados : r.anios));
       return { ...r, anio, ruta: rutas.get(anio) ?? r.ruta };
     });

@@ -18,5 +18,18 @@
       "Read(./.env.*)",
       "Read(./datos/cache/**)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint.mjs\""
+          }
+        ]
+      }
+    ]
   }
 }
