@@ -8,7 +8,7 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-16.
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
 Últimos bloques (todos publicados, corrida en verde):
-- Cantidades enteras sin decimal («200» femicidios, no «200,0»): `entero` en cada cálculo del motor (todos sus valores enteros; 30 series) y `fmtCant` en valores, diferencias y ejes; promedios y medianas conservan su decimal — 2026-11-17, sin subir
+- Cantidades enteras sin decimal («200» femicidios, no «200,0»): `entero` en cada cálculo del motor (todos sus valores enteros; 30 series) y `fmtCant` en valores, diferencias y ejes; promedios y medianas conservan su decimal — 2026-11-17, c4b76b4 (corrida en verde, run 44067698585)
 - Imagen al compartir en Lo esperado, Viento, Resumen por hitos, Congreso y alícuotas de Ingresos Brutos; semáforo en la lupa; subpestañas legibles en tema claro — 2026-11-16, 3ba7993 (corrida en verde, run 43966469194) — [spec](specs/imagenes-y-lupa.md)
 - Tanda 14: el valor de una barra al pasar el mouse o tocarla (R32) en Resumen por hitos, Congreso año por año y Gasto por mes — 2026-11-16, 3ba7993 (corrida en verde, run 43966469194) — [spec](specs/ajustes-tanda-14.md)
 - Tanda 13 (Novedades): pestañas Novedades / Calendario, grilla chica con resumen del día (panel en PC, ventana en el celular), días desplegables, series en caja deslizable, Agendar (Google Calendar e .ics); compartir un dato suma mes anterior y hace un año (texto e imagen; reglas R30 y R31) — 2026-11-16, fe1b069 (corrida en verde, run 43956106566) — [spec](specs/ajustes-tanda-13.md)
