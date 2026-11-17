@@ -1,6 +1,6 @@
 # Foco del teclado en las ventanas
 
-Estado: en curso (2026-11-17)
+Estado: implementada (2026-11-17) — 47a1752, corrida en verde (run 44176179074)
 
 ## Problema
 `Modal` (`web/components/ui.tsx`) es la ventana de casi todo el sitio (Configuración, Elegir variable, Configurar variable, Compartir como imagen, Resumen del día, De dónde sale en Herencia, el detalle del semáforo…). Al abrirse no mueve el foco: quien navega con teclado o lector de pantalla sigue parado en el botón de atrás de la ventana, y Tab recorre la página tapada. Al cerrarse, el foco no vuelve al botón que la abrió. Lo mismo pasa con la vista ampliada de un gráfico (`Expandido`, `web/components/Grafico.tsx`).
