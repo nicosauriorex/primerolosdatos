@@ -154,4 +154,4 @@ En el sitio no cambia nada que se vea; los renglones del sitio son para comproba
   - la desviación de TS 7 y las soluciones de hooks anotadas acá y en D-028.
 
   Quedaron sin tocar, a propósito: `toLocaleString` también marca fechas (hoy no hay usos) y dos `eslint-disable` viejos sin motivo en Inicio y Plantillas (la regla de motivo es solo para los nuevos).
-- Sin verificar: la corrida de GitHub Actions con el paso nuevo (después del push).
+- Corrida de GitHub Actions: 049e245, run 44162901957, completa y en verde. El paso «Revisar código» tardó 44 s.
