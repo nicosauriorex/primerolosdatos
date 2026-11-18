@@ -1,0 +1,238 @@
+{
+ "descripcion": "Indicadores del semáforo de actividad cargados a mano de notas de prensa (solo variaciones, sin nivel). Cada mes lleva el link y la cita textual de la nota leída; sin cita o sin link no se carga (pipeline/semaforo.py). Se actualiza a mano cada mes. Signo: «por debajo» es negativo.",
+ "actualizado": "2026-11-18",
+ "indicadores": {
+  "came": {
+   "grupo": "Consumo",
+   "nombre": "Ventas minoristas pymes (CAME)",
+   "fuente": "CAME (carga a mano de notas de prensa)",
+   "unidad": "variación interanual real, %",
+   "meses": [
+    {
+     "mes": "2025-10",
+     "var_ia": -1.4,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/14390/las-ventas-minoristas-pyme-descendieron-14-interanual-en-octubre",
+     "cita": "En octubre, las ventas minoristas pymes registraron una variación interanual de -1,4% a precios constantes."
+    },
+    {
+     "mes": "2025-11",
+     "var_ia": -4.1,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/14424/las-ventas-minoristas-pyme-descendieron-41-interanual-en-noviembre",
+     "cita": "En noviembre, las ventas minoristas pymes registraron una variación interanual de -4,1% a precios constantes."
+    },
+    {
+     "mes": "2025-12",
+     "var_ia": -5.2,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/14449/las-ventas-minoristas-pyme-bajaron-52-interanual-en-diciembre",
+     "cita": "En diciembre, el comercio minorista pyme experimentó un retroceso del 5,2% interanual a precios constantes."
+    },
+    {
+     "mes": "2026-01",
+     "var_ia": -4.8,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/advf/documentos/2026/03/69a71faf72b50.pdf",
+     "cita": "registraron una contracción interanual del 4,8% medida a precios constantes (informe PDF «Índice de Ventas Minoristas Pyme», enero 2026; no se encontró la nota de prensa)"
+    },
+    {
+     "mes": "2026-02",
+     "var_ia": -5.6,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/14492/las-ventas-minoristas-pyme-descendieron-56-interanual-en-febrero",
+     "cita": "En febrero, el sector minorista pyme registró un descenso del 5,6% interanual a valores constantes."
+    },
+    {
+     "mes": "2026-03",
+     "var_ia": -0.6,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/14530/las-ventas-minoristas-pyme-bajaron-06-interanual-en-marzo",
+     "cita": "registraron una contracción interanual del 0,6% medida a precios constantes"
+    },
+    {
+     "mes": "2026-04",
+     "var_ia": -3.2,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/14566/las-ventas-minoristas-pyme-descendieron-32-interanual-en-abril",
+     "cita": "La actividad minorista pyme registró en abril una contracción interanual del 3,2% a valores constantes."
+    },
+    {
+     "mes": "2026-05",
+     "var_ia": -1.2,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/14603/las-ventas-minoristas-pyme-descendieron-12-interanual-en-mayo",
+     "cita": "Las ventas minoristas pyme registraron una contracción interanual del 1,2% a valores constantes durante el mes de mayo."
+    },
+    {
+     "mes": "2026-06",
+     "var_ia": 0.9,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/14637/las-ventas-minoristas-pyme-crecieron-09-interanual-en-junio",
+     "cita": "evidenciaron una suba interanual del 0,9% a valores constantes."
+    },
+    {
+     "mes": "2026-07",
+     "var_ia": -3.8,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/14670/las-ventas-minoristas-pyme-bajaron-38-interanual-en-julio",
+     "cita": "Las ventas minoristas pyme registraron un descenso interanual del 3,8% durante el mes de julio."
+    },
+    {
+     "mes": "2026-08",
+     "var_ia": -0.2,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/574311137/las-ventas-minoristas-pyme-descendieron-02-interanual-en-agosto",
+     "cita": "tuvieron una caída interanual del 0,2% en términos reales"
+    },
+    {
+     "mes": "2026-09",
+     "var_ia": 0.3,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/574311162/las-ventas-minoristas-pyme-aumentaron-03-interanual-en-septiembre",
+     "cita": "las ventas minoristas pyme registraron una suba real del 0,3% interanual"
+    },
+    {
+     "mes": "2026-10",
+     "var_ia": -1.6,
+     "var_mm": null,
+     "fuente": "CAME, informe mensual de ventas minoristas pyme",
+     "url": "https://www.redcame.org.ar/novedades/574311215/las-ventas-minoristas-pyme-bajaron-16-interanual-en-octubre",
+     "cita": "Durante octubre, las ventas minoristas pyme cayeron el 1,6% interanual real,"
+    }
+   ]
+  },
+  "construya": {
+   "grupo": "Construcción",
+   "nombre": "Índice Construya",
+   "fuente": "Grupo Construya (carga a mano de notas de prensa)",
+   "unidad": "variación en %: interanual y mensual sin estacionalidad",
+   "meses": [
+    {
+     "mes": "2025-10",
+     "var_ia": 10.1,
+     "var_mm": -2.21,
+     "fuente": "Grupo Construya (índice Construya), según la nota de Mercado",
+     "url": "https://mercado.com.ar/ladrillos-y-proyectos/indice-construya-muestra-caida-mensual-y-crecimiento-interanual-en-insumos-para-la-construccion-en-octubre",
+     "cita": "En octubre de 2025, el Índice Construya (IC) registró una baja mensual desestacionalizada de 2,21% / En la comparación interanual, el IC se ubicó 10,1% arriba respecto al mismo mes de 2024."
+    },
+    {
+     "mes": "2025-11",
+     "var_ia": -5.5,
+     "var_mm": -7.11,
+     "fuente": "Grupo Construya (índice Construya), según la nota de Mercado",
+     "url": "https://mercado.com.ar/ladrillos-y-proyectos/el-indice-construya-cayo-711-en-noviembre-y-se-ubico-55-por-debajo-de-2024",
+     "cita": "registró una baja mensual desestacionalizada de 7,11% / el indicador se ubicó 5,5% por debajo del nivel alcanzado en noviembre de 2024."
+    },
+    {
+     "mes": "2026-01",
+     "var_ia": -1.1,
+     "var_mm": -11.6,
+     "fuente": "Grupo Construya (índice Construya), según la nota de Mercado",
+     "url": "https://mercado.com.ar/ladrillos-y-proyectos/el-indice-construya-cayo-116-mensual-en-enero-y-quedo-debajo-de-2025",
+     "cita": "El Índice Construya (IC) registró en enero una caída de 11,6% mensual desestacionalizada / se ubicó 1,1% por debajo de enero de 2025"
+    },
+    {
+     "mes": "2026-02",
+     "var_ia": -2.7,
+     "var_mm": 15.91,
+     "fuente": "Grupo Construya (índice Construya), según la nota de Mercado",
+     "url": "https://mercado.com.ar/ladrillos-y-proyectos/indice-construya-ventas-de-insumos-para-la-construccion-bajaron-19-en-el-bimestre",
+     "cita": "registró en febrero una suba mensual desestacionalizada de 15,91% / En la comparación interanual, el indicador se ubicó 2,7% por debajo de febrero de 2025."
+    },
+    {
+     "mes": "2026-03",
+     "var_ia": 11.1,
+     "var_mm": 1.3,
+     "fuente": "Grupo Construya (índice Construya), según la nota de Mercado",
+     "url": "https://mercado.com.ar/ladrillos-y-proyectos/indice-construya-los-despachos-de-insumos-subieron-13-en-marzo",
+     "cita": "registró en marzo una suba de 1,3% mensual desestacionalizada / En la comparación interanual, el indicador se ubicó 11,1% por encima de marzo de 2025."
+    },
+    {
+     "mes": "2026-04",
+     "var_ia": -4.7,
+     "var_mm": 4.98,
+     "fuente": "Grupo Construya (índice Construya), según la nota de Mercado",
+     "url": "https://mercado.com.ar/ladrillos-y-proyectos/indice-construya-la-venta-de-insumos-subio-498-en-abril-y-cayo-47-interanual",
+     "cita": "registró una suba del 4,98% mensual desestacionalizada en la venta de insumos para la construcción al sector privado / el indicador se ubicó 4,7% por debajo de abril de 2025."
+    },
+    {
+     "mes": "2026-05",
+     "var_ia": 1.5,
+     "var_mm": 1.94,
+     "fuente": "Grupo Construya (índice Construya), según la nota de Mercado",
+     "url": "https://mercado.com.ar/ladrillos-y-proyectos/el-indice-construya-registro-en-mayo-una-suba-mensual-desestacionalizada-de-194",
+     "cita": "registró en mayo un alza de 1,94% mensual desestacionalizada / En la comparación interanual, el indicador exhibió una recuperación de 1,5%."
+    },
+    {
+     "mes": "2026-06",
+     "var_ia": -0.6,
+     "var_mm": -1.99,
+     "fuente": "Grupo Construya (índice Construya), según la nota de Mercado",
+     "url": "https://mercado.com.ar/ladrillos-y-proyectos/el-indice-construya-bajo-199-en-junio-y-cayo-06-interanual",
+     "cita": "registró en junio un descenso de 1,99% mensual desestacionalizado / En la comparación interanual, el indicador mostró una baja de 0,6%."
+    },
+    {
+     "mes": "2026-07",
+     "var_ia": -6.5,
+     "var_mm": -0.81,
+     "fuente": "Grupo Construya (índice Construya), según Infobae",
+     "url": "https://www.infobae.com/economia/2026/08/10/la-venta-de-insumos-para-la-construccion-cayo-65-interanual-en-julio/",
+     "cita": "registraron una caída del 0,81% mensual desestacionalizada y una baja del 6,5% interanual"
+    },
+    {
+     "mes": "2026-08",
+     "var_ia": -5.3,
+     "var_mm": -3.46,
+     "fuente": "Grupo Construya (índice Construya), según la nota de Mercado",
+     "url": "https://mercado.com.ar/ladrillos-y-proyectos/el-indice-construya-cayo-346-en-agosto-y-bajo-53-interanual",
+     "cita": "registró en agosto un descenso de 3,46% mensual desestacionalizado / una baja de 5,3% interanual"
+    },
+    {
+     "mes": "2026-09",
+     "var_ia": -2.9,
+     "var_mm": -0.65,
+     "fuente": "Grupo Construya (índice Construya), según la nota de Mercado",
+     "url": "https://mercado.com.ar/economia/el-indice-construya-bajo-065-en-septiembre-y-cayo-29-interanual/",
+     "cita": "El Índice Construya (IC) registró en septiembre un descenso de 0,65% mensual desestacionalizado / y una baja de 2,9% interanual"
+    },
+    {
+     "mes": "2026-10",
+     "var_ia": -9.0,
+     "var_mm": -3.53,
+     "fuente": "Grupo Construya (índice Construya), según la nota de Mercado",
+     "url": "https://mercado.com.ar/ladrillos-y-proyectos/el-indice-construya-cayo-353-en-octubre-y-bajo-9-interanual",
+     "cita": "El Índice Construya (IC) registró en octubre un descenso de 3,53 % mensual desestacionalizado / y una baja interanual de 9 % en las cantidades vendidas al sector privado"
+    }
+   ]
+  },
+  "escrituras_pba": {
+   "grupo": "Construcción",
+   "nombre": "Escrituras en la Provincia de Buenos Aires",
+   "fuente": "Colegio de Escribanos de la Provincia (carga a mano de notas de prensa; hay pocos meses con el dato publicado)",
+   "unidad": "variación interanual de las compraventas, %",
+   "meses": [
+    {
+     "mes": "2026-09",
+     "var_ia": -10.0,
+     "var_mm": null,
+     "fuente": "Colegio de Escribanos de la Provincia de Buenos Aires, según La Nación",
+     "url": "https://www.lanacion.com.ar/propiedades/casas-y-departamentos/los-dos-datos-que-confirman-que-el-mercado-inmobiliario-tuvo-su-mejor-mes-del-ano-en-septiembre-nid22102026/",
+     "cita": "Durante septiembre se registraron 12.971 compraventas de inmuebles en la provincia de Buenos Aires / La cifra representó un descenso interanual del 10% respecto a las 14.366 operaciones concretadas en el mismo mes de 2025."
+    }
+   ]
+  }
+ }
+}

@@ -18,6 +18,10 @@ Respaldos versionados en datos/cache/:
 - universidades_meta.json: el día de la última bajada (como mucho una por día).
 Con `con_red=False` (--solo-json) se arma solo con los respaldos.
 
+Historia por universidad (`hist`, spec docs/specs/pendientes-de-datos.md, parte B): 1998-2014 de los anuarios de la SPU
+(datos/manual/universidades_spu.json, lo escribe pipeline/extraer_anuarios_spu.py) y 2023-2024 del PIU. No hay datos por
+universidad de 2015 a 2022. Las dos fuentes cuentan distinto. Los egresados solo están en la SPU (el PIU no los trae).
+
 Controles (si no cierran, este módulo levanta RuntimeError y la corrida sigue sin universidades.json):
 - por año: suma de universidades + "Sin asignar a una universidad" + "Otros gastos del programa" = total del programa
   (devengado y vigente, tolerancia 1 millón);
@@ -59,6 +63,7 @@ UBA_2024_DEV = 602898.1   # millones; coincide con la tabla de la p. 4 de coment
 UBA_2018_DEV_AGN = 19383.7  # informe AGN 2023-004 (Cuenta de Inversión 2018)
 SIN_ASIGNAR = "Sin asignar a una universidad"
 SIN_ASIGNAR_CLAVES = {_clave("Universidades sin Discriminar"), _clave("Otras Universidades no especificadas")}
+ARCHIVO_SPU = red.CACHE.parent / "manual" / "universidades_spu.json"
 COLS_LARGO = ["uni", "anio", "titulo", "condicion", "cant", "url"]
 
 # Nombres que cambian entre años o entre fuentes -> el nombre que se muestra (oficial). Las claves de arriba salen de _clave,
@@ -245,6 +250,16 @@ def _estudiantes():
     return est, nombres, tot61
 
 
+def _historia_spu():
+    """-> ({clave canónica: {"est": {año: n}, "nuevos": {...}, "egresados": {...}}}, texto de la fuente, años cubiertos)."""
+    if not ARCHIVO_SPU.exists():
+        raise RuntimeError(f"falta {ARCHIVO_SPU.name}: lo escribe pipeline/extraer_anuarios_spu.py")
+    d = json.loads(ARCHIVO_SPU.read_text(encoding="utf-8"))
+    por_clave = {_canonica(u["n"]): {k: {int(a): n for a, n in u[k].items()} for k in ("est", "nuevos", "egresados")}
+                 for u in d["universidades"]}
+    return por_clave, d["fuente"], sorted(int(a) for a in d["totales"])
+
+
 # ---------- transferencias ----------
 
 def _cargar_presupuesto():
@@ -293,11 +308,25 @@ def _fallo(msg):
     raise RuntimeError(f"universidades: {msg}; no se escribe el archivo")
 
 
+def _hist(c, spu, est):
+    """Historia de una universidad: {"est": {año: n}, "nuevos": {...}, "egresados": {...}} con 1998-2014 de la SPU y 2023-2024
+    del PIU (estudiantes y nuevos inscriptos; el PIU no trae egresados). None si no hay ningún dato."""
+    h = {k: dict(v) for k, v in spu.get(c, {"est": {}, "nuevos": {}, "egresados": {}}).items()}
+    for a in ANIOS_EST:
+        if (c, a) in est:
+            h["est"][a] = est[(c, a)]["total"]
+            h["nuevos"][a] = est[(c, a)]["nuevos"]
+    if not any(h.values()):
+        return None
+    return {k: {str(a): n for a, n in sorted(v.items())} for k, v in h.items() if v}
+
+
 def construir(con_red=True):
     """Devuelve {"universidades.json": objeto}. Si un control no pasa, levanta RuntimeError."""
     CACHE.mkdir(parents=True, exist_ok=True)
     _actualizar_respaldos(con_red)
     est, nombres_piu, tot61 = _estudiantes()
+    spu, fuente_spu, anios_spu = _historia_spu()
     datos = _cargar_presupuesto()
     pibs = _pib_por_anio()
     anios = sorted(datos)
@@ -336,6 +365,14 @@ def construir(con_red=True):
         # no se frena todo: esas universidades quedan sin estudiantes hasta que se agregue el alias
         print(f"  AVISO universidades: del PIU sin emparejar con el presupuesto (agregar un alias en ALIAS): {sin_presupuesto}")
 
+    # emparejamiento SPU <-> presupuesto: las universidades de los anuarios que no están en el presupuesto no se pierden en silencio
+    sin_fila = sorted(c for c in spu if c not in claves_pres)
+    print(f"  anuarios SPU sin fila en el presupuesto ({len(sin_fila)}): {sin_fila}")
+    if sin_fila:
+        print(f"  AVISO universidades: de los anuarios SPU sin emparejar con el presupuesto (corregir `n` en universidades_spu.json o ALIAS): {sin_fila}")
+    sin_spu = sorted(mostrar[c] for c in claves_pres if c not in spu)
+    print(f"  presupuesto sin anuarios SPU ({len(sin_spu)}): son las creadas desde 2015 y las que no tienen dato")
+
     # controles de estudiantes
     for (nombre, a), esperado in ESTUDIANTES_CONTROL.items():
         c = _clave(nombre)
@@ -370,7 +407,7 @@ def construir(con_red=True):
     universidades = []
     for c, nombre in mostrar.items():
         e = {str(a): est[(c, a)] for a in ANIOS_EST if (c, a) in est}
-        universidades.append({"n": nombre, "dev": serie(c, 2), "vig": serie(c, 1), "est": e or None})
+        universidades.append({"n": nombre, "dev": serie(c, 2), "vig": serie(c, 1), "est": e or None, "hist": _hist(c, spu, est)})
     universidades.sort(key=lambda u: (-next((x for x in reversed(u["dev"]) if x is not None), 0), u["n"]))
 
     def par(i, k):
@@ -384,7 +421,9 @@ def construir(con_red=True):
         programa[k] = [_r(sum(u[k][i] or 0 for u in universidades) + sin_asignar[k][i] + otros_programa[k][i]) for i in range(len(anios))]
     obj = {"generado": date.today().isoformat(), "fuente": FUENTE_TXT, "anios": anios, "pib": [pibs.get(a) for a in anios],
            "universidades": universidades, "sin_asignar": sin_asignar, "otros_programa": otros_programa, "programa": programa,
-           "estudiantes_61": {str(a): tot61[a] for a in ANIOS_EST}}
+           "estudiantes_61": {str(a): tot61[a] for a in ANIOS_EST},
+           "hist_fuentes": {"spu": {"desde": anios_spu[0], "hasta": anios_spu[-1], "fuente": fuente_spu},
+                            "piu": {"desde": ANIOS_EST[0], "hasta": ANIOS_EST[-1]}}}
     return {"universidades.json": obj}
 
 

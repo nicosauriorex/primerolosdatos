@@ -30,7 +30,8 @@ for (const [med, nombre] of MEDIDAS) {
       // las cuentas cierran: la celda es la variación de los valores crudos, redondeada a un decimal
       if (f.admite) f.celdas.forEach((c, k) => {
         const m = t.meses[k], lista = med === "ia" ? f.ind.orig : f.ind.sa, ahora = lista[m - f.ind.mes0] ?? null, antes = lista[m - f.ind.mes0 - (med === "ia" ? 12 : 1)] ?? null;
-        const bruta = ahora != null && antes != null && antes > 0 ? Math.round(((ahora / antes - 1) * 100) * 10) / 10 : null;
+        const manual = (med === "ia" ? f.ind.var_ia : f.ind.var_mm)?.[m - f.ind.mes0] ?? null;   // los cargados a mano traen la variación ya calculada
+        const bruta = f.ind.ajuste === "manual" ? (manual == null ? null : Math.round(manual * 10) / 10) : ahora != null && antes != null && antes > 0 ? Math.round(((ahora / antes - 1) * 100) * 10) / 10 : null;
         espero(`${f.ind.clave} ${txtMes(m)}: celda ${c?.valor ?? null} contra cuenta directa ${bruta}`, (c?.valor ?? null) === bruta || (bruta != null && c != null && Math.abs(c.valor - bruta) <= 0.1001));
         espero(`${f.ind.clave} ${txtMes(m)}: texto sin "-0,0" ni "−0,0"`, !c || !/^[-−]0,0$/.test(c.txt));
         espero(`${f.ind.clave} ${txtMes(m)}: variacionEn coincide`, (variacionEn(f.ind, med, m) ?? null) === (c?.valor ?? null));

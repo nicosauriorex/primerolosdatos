@@ -68,6 +68,23 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Instalar X-13 (ajuste estacional del semáforo)
+        # statsmodels llama al programa x13as del Census. Si falta, el semáforo usa promedios móviles y la corrida sigue igual.
+        shell: bash
+        run: |
+          if sudo apt-get install -y x13as >/dev/null 2>&1 && command -v x13as >/dev/null; then
+            echo "x13as instalado con apt: $(command -v x13as)"
+          else
+            echo "x13as no está en apt: se baja el binario oficial del Census"
+            mkdir -p "$RUNNER_TEMP/x13" && cd "$RUNNER_TEMP/x13"
+            if curl -fsSL -o x13.tar.gz https://www2.census.gov/software/x-13arima-seats/x13as/unix-linux/program-archives/x13as_ascii-v1-1-b62.tar.gz && tar xzf x13.tar.gz && [ -f x13as/x13as_ascii ]; then
+              mkdir bin && cp x13as/x13as_ascii bin/x13as && chmod +x bin/x13as
+              echo "X13PATH=$RUNNER_TEMP/x13/bin" >> "$GITHUB_ENV"
+            else
+              echo "::warning::No se pudo instalar x13as; el semáforo usa promedios móviles"
+            fi
+          fi
+
       - uses: actions/setup-node@v4
         with:
           node-version: "24"

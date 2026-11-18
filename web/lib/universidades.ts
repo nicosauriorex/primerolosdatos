@@ -6,15 +6,19 @@
 import type { FormatoImg } from "./config";
 import type { DatosImagen, FilaBarra } from "./imagen";
 import { FUENTE_GASTO, SIGLAS, aDec, conSigno, decPctDe, escalaDe, fechaLarga, mostrado, repartir, type Deflactor, type Escala, type Medida } from "./gasto";
-import { fmtMillones, nfDec, norm, r1, restaLimpia, unidadMontoDe, valorMostrado } from "./formato";
+import { fmtMillones, nf0, nfDec, norm, r1, restaLimpia, unidadMontoDe, valorMostrado } from "./formato";
 
 // ---------------------------------------------------------------- formato del archivo (contrato con el pipeline)
 export interface Par { dev: (number | null)[]; vig: (number | null)[] }
 export interface Est { total: number | null; nuevos: number | null }
-export interface Univ { n: string; dev: (number | null)[]; vig: (number | null)[]; est: Record<number, Est> | null }
+/** Historia de una universidad: 1998-2014 de los anuarios de la SPU y 2023-2024 del PIU (año -> cantidad). Los egresados solo están en la SPU. */
+export interface Hist { est: Record<number, number>; nuevos: Record<number, number>; egresados: Record<number, number> }
+export interface Univ { n: string; dev: (number | null)[]; vig: (number | null)[]; est: Record<number, Est> | null; hist: Hist | null }
+/** Qué años salen de cada fuente (spu: anuarios; piu: Portal de Información Universitaria). */
+export interface HistFuentes { spuDesde: number; spuHasta: number; piuDesde: number; piuHasta: number }
 export interface DatosUniv {
   generado: string; fuente: string; anios: number[]; pib: (number | null)[]; enCurso: number[];
-  universidades: Univ[]; sinAsignar: Par; otrosPrograma: Par; programa: Par; estudiantes61: Record<number, number>;
+  universidades: Univ[]; sinAsignar: Par; otrosPrograma: Par; programa: Par; estudiantes61: Record<number, number>; histFuentes: HistFuentes | null;
 }
 
 const numeros = (v: unknown, n: number): (number | null)[] =>
@@ -24,6 +28,16 @@ const parDe = (v: unknown, n: number): Par => {
   return { dev: numeros(o.dev, n), vig: numeros(o.vig, n) };
 };
 const aEntero = (k: string) => (/^\d{4}$/.test(k) ? Number(k) : null);
+const porAnio = (v: unknown): Record<number, number> => {
+  const out: Record<number, number> = {};
+  if (v && typeof v === "object") for (const [k, x] of Object.entries(v as Record<string, unknown>)) { const y = aEntero(k); if (y != null && typeof x === "number" && x >= 0) out[y] = x; }
+  return out;
+};
+const histDe = (v: unknown): Hist | null => {
+  if (!v || typeof v !== "object") return null;
+  const o = v as Record<string, unknown>, h = { est: porAnio(o.est), nuevos: porAnio(o.nuevos), egresados: porAnio(o.egresados) };
+  return Object.keys(h.est).length ? h : null;
+};
 
 /** Valida el archivo con tolerancia: lo que falta queda en null. null si no trae años ni universidades. */
 export function decodificarUniv(c: unknown): DatosUniv | null {
@@ -46,18 +60,21 @@ export function decodificarUniv(c: unknown): DatosUniv | null {
         if (total != null) (est ??= {})[y] = { total, nuevos };
       }
     }
-    universidades.push({ n: o.n, dev: numeros(o.dev, n), vig: numeros(o.vig, n), est });
+    universidades.push({ n: o.n, dev: numeros(o.dev, n), vig: numeros(o.vig, n), est, hist: histDe(o.hist) });
   }
   if (!universidades.length) return null;
   const e61: Record<number, number> = {};
   if (r.estudiantes_61 && typeof r.estudiantes_61 === "object") {
     for (const [k, v] of Object.entries(r.estudiantes_61 as Record<string, unknown>)) { const y = aEntero(k); if (y != null && typeof v === "number" && v > 0) e61[y] = v; }
   }
+  const hf = (r.hist_fuentes && typeof r.hist_fuentes === "object" ? r.hist_fuentes : {}) as Record<string, Record<string, unknown> | undefined>;
+  const [sd, sh, pd, ph] = [hf.spu?.desde, hf.spu?.hasta, hf.piu?.desde, hf.piu?.hasta];
+  const histFuentes = [sd, sh, pd, ph].every((x) => Number.isInteger(x)) ? { spuDesde: sd as number, spuHasta: sh as number, piuDesde: pd as number, piuHasta: ph as number } : null;
   const ec = r.en_curso;
   const enCurso = (Array.isArray(ec) ? ec : typeof ec === "number" ? [ec] : []).filter((x): x is number => Number.isInteger(x));
   return {
     generado: typeof r.generado === "string" ? r.generado : "", fuente: typeof r.fuente === "string" ? r.fuente : "", anios, pib: numeros(r.pib, n), enCurso,
-    universidades, sinAsignar: parDe(r.sin_asignar, n), otrosPrograma: parDe(r.otros_programa, n), programa: parDe(r.programa, n), estudiantes61: e61,
+    universidades, sinAsignar: parDe(r.sin_asignar, n), otrosPrograma: parDe(r.otros_programa, n), programa: parDe(r.programa, n), estudiantes61: e61, histFuentes,
   };
 }
 
@@ -312,6 +329,54 @@ export const extremoTxt = (p: PuntoEvo) => `${p.anio}${p.enCurso ? " (en curso)"
 export function enCursoTxt(c: Contexto, anio: number): string {
   const f = fechaLarga(c.actualizado(anio));
   return `${anio} está en curso: todavía no terminó${f ? ` y los datos llegan hasta el ${f}` : ""}, por eso no se compara con el año anterior.`;
+}
+
+// ---------------------------------------------------------------- estudiantes a lo largo del tiempo (1998-2014 y 2023-2024)
+export type FuenteHist = "spu" | "piu";
+export interface PuntoHist { anio: number; valor: number | null; fuente: FuenteHist | null; txt: string | null; cartel: string; alto: number; hueco: boolean; etiqueta: boolean }
+export interface Historia {
+  puntos: PuntoHist[]; primero: PuntoHist | null; ultimo: PuntoHist | null;
+  /** Años sin dato entre dos datos (2015-2022 en las que tienen las dos fuentes) o después del último (las que solo tienen anuarios: «sin datos desde 2015»). */
+  hueco: { desde: number; hasta: number; sinDesde: boolean } | null;
+  /** Una fila por año con dato: estudiantes, nuevos inscriptos y egresados. */
+  filas: { anio: number; fuente: FuenteHist; est: string | null; nuevos: string | null; egresados: string | null }[];
+}
+export const FUENTE_HIST_TXT: Record<FuenteHist, string> = { spu: "anuarios de la SPU", piu: "Portal de Información Universitaria" };
+export const NOTA_HIST = "De 1998 a 2014, anuarios de la SPU; 2023 y 2024, Portal de Información Universitaria (datos del CIN). No hay datos por universidad de 2015 a 2022. Las dos fuentes cuentan distinto: compará con cuidado.";
+
+/** Serie de estudiantes de una universidad, desde su primer año con dato hasta el último año del PIU, con los años sin dato a la vista (sin unir los puntos).
+ *  null si la universidad no tiene ningún dato de estudiantes en las dos fuentes. */
+export function armarHistoria(d: DatosUniv, u: Univ): Historia | null {
+  const h = u.hist, f = d.histFuentes;
+  if (!h || !f) return null;
+  const fuenteDe = (a: number): FuenteHist | null => (a >= f.spuDesde && a <= f.spuHasta ? "spu" : a >= f.piuDesde && a <= f.piuHasta ? "piu" : null);
+  const conDato = Object.keys(h.est).map(Number).sort((a, b) => a - b);
+  if (!conDato.length) return null;
+  const desde = conDato[0], hasta = f.piuHasta;
+  const mayor = Math.max(...conDato.map((a) => h.est[a]));
+  const anios = Array.from({ length: hasta - desde + 1 }, (_, i) => desde + i);
+  const sinDato = anios.filter((a) => h.est[a] == null);
+  const hueco = sinDato.length ? { desde: sinDato[0], hasta: sinDato[sinDato.length - 1], sinDesde: sinDato[sinDato.length - 1] === hasta && !conDato.some((a) => a >= f.piuDesde) } : null;
+  // rótulos de año: el primero, los múltiplos de 5 y el último, sin que dos queden a menos de tres columnas
+  let ult = -9;
+  const rotulo = (a: number) => {
+    const quiere = a === desde || a === hasta || a % 5 === 0 || a === f.spuHasta || a === f.piuDesde;
+    if (!quiere || a - ult < 3 || (a !== hasta && hasta - a < 3)) return false;
+    ult = a; return true;
+  };
+  const puntos: PuntoHist[] = anios.map((a) => {
+    const v = h.est[a] ?? null, fu = v != null ? fuenteDe(a) : null;
+    const txt = v != null ? nf0.format(v) : null;
+    return {
+      anio: a, valor: v, fuente: fu, txt, hueco: v == null,
+      cartel: v != null ? `${a}: ${txt} estudiantes (${FUENTE_HIST_TXT[fu ?? "spu"]})` : `${a}: sin datos por universidad`,
+      alto: v != null && mayor > 0 ? Math.max(0.03, v / mayor) : 0, etiqueta: rotulo(a),
+    };
+  });
+  const con = puntos.filter((p) => p.valor != null);
+  const fmt = (x: Record<number, number>, a: number) => (x[a] != null ? nf0.format(x[a]) : null);
+  const filas = conDato.map((a) => ({ anio: a, fuente: fuenteDe(a) ?? "spu", est: fmt(h.est, a), nuevos: fmt(h.nuevos, a), egresados: fmt(h.egresados, a) })).reverse();
+  return { puntos, primero: con[0] ?? null, ultimo: con[con.length - 1] ?? null, hueco, filas };
 }
 
 // ---------------------------------------------------------------- textos, imagen y vista previa

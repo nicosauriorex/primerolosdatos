@@ -15,7 +15,7 @@ import { CompartirHoja } from "../sistema/CompartirHoja";
 import { ConCartel } from "../sistema/ConCartel";
 import { nf0, nf1, ok } from "@/lib/formato";
 import {
-  CAMARAS, INDICADORES, armarImagenCongreso, bancasDe, fraseCapacidad, indicadorTieneDatos, periodoMandato as periodoDe, mandatos, primerIndicadorConDatos, queHayCargado, pctAliados, pctPropios, quorumPct, resumenApoyo, resumenBancas, resumenDnu, resumenLeyes, resumenVetos, valorIndicador,
+  CAMARAS, INDICADORES, armarImagenCongreso, bancasDe, fraseCapacidad, indicadorTieneDatos, periodoMandato as periodoDe, mandatos, primerIndicadorConDatos, queHayCargado, pctAliados, pctPropios, quorumPct, resumenApoyo, resumenBancas, resumenDnu, resumenLeyes, resumenVetos, textoLeyes, valorIndicador,
   type Camara, type DatosCap, type Indicador, type Mandato,
 } from "@/lib/capacidad";
 import { PRES_DEF, nombreCorto } from "@/lib/estadisticas";
@@ -82,13 +82,13 @@ function Cuerpo({ d, ultimo, p, set }: { d: DatosCap; ultimo: string; p: URLSear
   const hrefPag = window.location.pathname + window.location.search;
 
   // Valor corto que va arriba de cada columna (los mismos redondeos que muestra la tabla) y cuántos decimales se comparan.
-  const corto = (v: number) => (ind === "bancas" || ind === "leyes" ? `${nf0.format(v)} %` : nf1.format(v));
+  const corto = (v: number, id: string) => (ind === "bancas" || ind === "leyes" ? `${ind === "leyes" && d.leyes[id]?.aprox ? "≈" : ""}${nf0.format(v)} %` : ind === "apoyo" && d.leyes[id]?.aprox ? `≈${nf1.format(v)}` : nf1.format(v));
   const dec = ind === "bancas" || ind === "leyes" ? 0 : 1;
   const columnas: ColGob[] = M.map((m) => {
     const x = valorIndicador(d, m.id, m, ind);
-    return { id: m.id, nombre: m.n, corto: nombreCorto(m.n), valor: x ? x.v : null, txt: x ? corto(x.v) : "", texto: x ? x.txt : "sin dato" };
+    return { id: m.id, nombre: m.n, corto: nombreCorto(m.n), valor: x ? x.v : null, txt: x ? corto(x.v, m.id) : "", texto: x ? x.txt : "sin dato" };
   });
-  const nota = ind === "bancas" ? "Diputados: % de bancas propias y aliadas al asumir." : ind === "leyes" ? "Leyes del Ejecutivo aprobadas, en % de las enviadas." : ind === "apoyo" ? "Leyes por apoyo: % de leyes del Ejecutivo aprobadas ÷ % de bancas propias y aliadas en Diputados (promedio del mandato). 1,0 = aprobó en la misma proporción que su apoyo; más de 1, más leyes que su apoyo; menos de 1, menos. Solo gobiernos con leyes y bancas cargadas." : ind === "dnu" ? "DNU por año de mandato." : sinTotalVetos ? "Vetos que el Congreso insistió, por año de mandato. Falta cargar el total de vetos; solo se conocen los insistidos." : "Vetos por año de mandato.";
+  const nota = ind === "bancas" ? "Diputados: % de bancas propias y aliadas al asumir." : ind === "leyes" ? "Leyes del Ejecutivo aprobadas, en % de las enviadas. ≈ = cifra aproximada (ver «¿Cómo se cuenta?»)." : ind === "apoyo" ? "Leyes por apoyo: % de leyes del Ejecutivo aprobadas ÷ % de bancas propias y aliadas en Diputados (promedio del mandato). 1,0 = aprobó en la misma proporción que su apoyo; más de 1, más leyes que su apoyo; menos de 1, menos. Solo gobiernos con leyes y bancas cargadas. ≈ = cifra aproximada porque las leyes del Ejecutivo lo son (ver «¿Cómo se cuenta?»)." : ind === "dnu" ? "DNU por año de mandato." : sinTotalVetos ? "Vetos que el Congreso insistió, por año de mandato. Falta cargar el total de vetos; solo se conocen los insistidos." : "Vetos por año de mandato.";
 
   const nombreInd = INDICADORES.find((x) => x[0] === ind)?.[1] ?? "";
   const linea = ind === "bancas" ? { v: 50, txt: "mayoría" } : ind === "apoyo" ? { v: 1, txt: "igual a su apoyo" } : undefined;
@@ -139,8 +139,8 @@ function Cuerpo({ d, ultimo, p, set }: { d: DatosCap; ultimo: string; p: URLSear
                   </td>
                   {hay.bancas && <td>{ok(dip.alEmpezar) ? <>{pc(dip.alEmpezar)} · {pc(dip.promedio)}</> : SIN}</td>}
                   {hay.bancas && <td>{ok(sen.alEmpezar) ? <>{pc(sen.alEmpezar)} · {pc(sen.promedio)}</> : SIN}</td>}
-                  {hay.leyes && <td>{l ? <>{nf0.format(l.aprobadas)} de {nf0.format(l.enviadas)} ({pc(l.pct)})</> : SIN}</td>}
-                  {hay.apoyo && <td>{ap ? <>{nf1.format(ap.veces)} veces<small>{nf0.format(ap.pctLeyes)} % ÷ {nf0.format(ap.pctBancas)} %</small></> : SIN}</td>}
+                  {hay.leyes && <td>{l ? <>{textoLeyes(l)}</> : SIN}</td>}
+                  {hay.apoyo && <td>{ap ? <>{ap.aprox ? "≈" : ""}{nf1.format(ap.veces)} veces<small>{ap.aprox ? "≈" : ""}{nf0.format(ap.pctLeyes)} % ÷ {nf0.format(ap.pctBancas)} %</small></> : SIN}</td>}
                   {hay.dnu && <td>{n ? <>{nf0.format(n.total)} · {nf1.format(n.porAnio as number)}</> : SIN}</td>}
                   {hay.vetos && <td>{v ? (v.total != null ? <>{nf0.format(v.total)} ({nf0.format(v.totales as number)} tot. + {nf0.format(v.parciales as number)} parc.) · {nf1.format(v.porAnio as number)} · {nf0.format(v.insistidos)} insistidos</> : <>{nf0.format(v.insistidos)} insistidos<small>{nf1.format(v.insistidosPorAnio)} por año</small></>) : SIN}</td>}
                 </tr>
@@ -160,8 +160,8 @@ function Cuerpo({ d, ultimo, p, set }: { d: DatosCap; ultimo: string; p: URLSear
           <li><b>Aliados:</b> bancas de los bloques que integraban la alianza formal del oficialismo en el Congreso en cada corte. Se fija a mano por corte, con la fuente de cada asignación. No cuentan los acuerdos puntuales para una votación.</li>
           <li><b>Cortes:</b> la composición se toma al 1 de marzo de cada año (inicio de sesiones ordinarias) y el día que asume cada presidente. El «al empezar» es el corte de la asunción; el promedio usa todos los cortes del mandato. Diputados: informes de la Dirección de Información Parlamentaria al 1 de marzo; el día de la asunción (y algún 1 de marzo sin cuadro legible) se reconstruye del listado de diputados con sus bloques y fechas, hasta 2019. Para Milei el primer corte es el 1 de marzo de 2024. Senado: el informe da la composición cada dos años, así que el «al empezar» es el primer corte del mandato.</li>
           <li><b>Porcentaje del total de la cámara</b> en ese corte, porque el tamaño cambió (Diputados pasó de 254 a 257 bancas; el Senado, de 48 a 72). Las bancas vacantes no se cuentan.</li>
-          <li><b>Leyes del Ejecutivo:</b> enviadas = proyectos de ley con origen en el Poder Ejecutivo ingresados durante el mandato; aprobadas = las enviadas que se sancionaron antes de que terminara. El Presupuesto cuenta como cualquier otra ley.</li>
-          <li><b>Leyes por apoyo:</b> % de leyes del Ejecutivo aprobadas dividido por el % de bancas propias y aliadas en Diputados (promedio de los cortes del mandato), los dos redondeados a enteros como se muestran y el cociente con un decimal. 1,0 = aprobó en la misma proporción que su apoyo; más de 1, más leyes que su apoyo; menos de 1, menos. Solo para gobiernos con leyes y bancas cargadas. Límites: no pesa qué ley es, no cuenta el Senado ni los acuerdos puntuales.</li>
+          <li><b>Leyes del Ejecutivo:</b> enviadas = proyectos de ley con origen en el Poder Ejecutivo ingresados durante el mandato; aprobadas = las enviadas que se sancionaron antes de que terminara. El Presupuesto cuenta como cualquier otra ley. «≈» = cifra aproximada: de Menem 1 a Duhalde (y las enviadas de Kirchner y CFK 1) la Cámara de Diputados informa por período parlamentario, no por mandato, y el total de cada período se repartió por días entre los mandatos que cruza. En esos gobiernos «aprobadas» son las leyes de origen del Ejecutivo sancionadas durante el mandato, aunque se hayan enviado antes; por eso el porcentaje de De la Rúa sale inflado. Desde diciembre de 2011 se cuenta proyecto por proyecto y es exacto.</li>
+          <li><b>Leyes por apoyo:</b> % de leyes del Ejecutivo aprobadas dividido por el % de bancas propias y aliadas en Diputados (promedio de los cortes del mandato), los dos redondeados a enteros como se muestran y el cociente con un decimal. 1,0 = aprobó en la misma proporción que su apoyo; más de 1, más leyes que su apoyo; menos de 1, menos. Es aproximado (≈) en los gobiernos cuyas leyes del Ejecutivo lo son. Solo para gobiernos con leyes y bancas cargadas. Límites: no pesa qué ley es, no cuenta el Senado ni los acuerdos puntuales.</li>
           <li><b>DNU:</b> decretos de necesidad y urgencia firmados en el mandato. Antes de la reforma de 1994 la figura no existía en la Constitución: para Menem 1 se usa el conteo de la fuente.</li>
           <li><b>Vetos:</b> leyes vetadas en el mandato, totales y parciales. Insistidos = leyes vetadas que el Congreso aprobó de nuevo con dos tercios en ambas cámaras (también las insistidas solo en parte), contadas para el presidente que vetó y por fecha del veto. Totales y parciales hasta 2002: estadística oficial de la Dirección de Información Parlamentaria. Desde 2003: decretos de veto de la base de normas Infoleg (no hay un recuento oficial); contra la estadística oficial de 1995 a 2002, ese método da, por presidente, entre 20 % menos y 4 % más.</li>
           <li><b>Por año de mandato:</b> DNU y vetos divididos por los años que duró el mandato (Duhalde duró 1,4 años); el mandato en curso se cuenta hasta el último dato.</li>

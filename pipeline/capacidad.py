@@ -8,7 +8,7 @@ web/public/datos/capacidad.json. No usa red: --solo-json y la corrida completa d
 Archivos (columnas):
   congreso_bancas.csv   fecha_corte, camara (dip|sen), presidente, propios, aliados, total, fuente, nota
   congreso_bloques.csv  fecha_corte, camara, bloque, bancas, rol (propio|aliado|otro), fuente
-  leyes_ejecutivo.csv   presidente, enviadas, aprobadas, fuente, nota
+  leyes_ejecutivo.csv   presidente, enviadas, aprobadas, aprox, fuente, nota   (aprox: vacío, enviadas, aprobadas o ambas = cifras repartidas por días, se muestran con «≈»)
   vetos.csv             presidente, anio, totales, parciales, insistidos, fuente
   dnu.csv               presidente, anio, cantidad, fuente
   notas.csv             presidente, nota   (avisos por presidente que se muestran en la página)
@@ -31,6 +31,7 @@ MANUAL = RAIZ / "datos" / "manual"
 PRESIDENTES = ["menem1", "menem2", "delarua", "duhalde", "nk", "cfk1", "cfk2", "macri", "af", "milei"]
 CAMARAS = ("dip", "sen")
 ROLES = ("propio", "aliado", "otro")
+APROX = ("", "enviadas", "aprobadas", "ambas")
 
 
 # Fechas reales de asunción (los DNU, vetos y leyes se asignan por fecha de firma o ingreso, no por mes). Último: fin del mandato.
@@ -220,7 +221,10 @@ def cargar(auto=None):
         e, a = _entero(N, f, "enviadas"), _entero(N, f, "aprobadas")
         if a > e:
             raise _error(N, f, f"aprobadas ({a}) es mayor que enviadas ({e})")
-        leyes[f["presidente"]] = {"enviadas": e, "aprobadas": a, **({"nota": f["nota"]} if f["nota"] else {})}
+        aprox = f.get("aprox", "")
+        if aprox not in APROX:
+            raise _error(N, f, f"'aprox' tiene que ser vacío, enviadas, aprobadas o ambas (vale '{aprox}')")
+        leyes[f["presidente"]] = {"enviadas": e, "aprobadas": a, **({"aprox": aprox} if aprox else {}), **({"nota": f["nota"]} if f["nota"] else {})}
 
     # ---- vetos
     N = "vetos.csv"

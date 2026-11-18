@@ -1,7 +1,7 @@
 # Herencia: recibido contra entregado
 
 Estado: fases 1, 2 y 3 implementadas (2026-11-12).
-Fase 2: 42 datos en `datos/manual/herencia.json` (deuda pública bruta, % del PIB y en moneda extranjera desde 2007; deuda con el FMI en DEG y acuerdo vigente desde 2003; cepo desde 2011; deuda de importadores de los informes desde 2019; BOPREAL), cada uno verificado contra su documento. `traspaso` = mes de asunción del que recibe o "hoy". Filas sin color; deuda de importadores de los informes en fila aparte (otro relevamiento). Sin cargar: cepo de 2003 y 2007, FMI anterior a 2003. El nombre y la unidad que se muestran salen de `FILAS_INFORME` (`web/lib/herencia-informes.ts`), no de cada entrada: el JSON no lleva `nombre`.
+Fase 2: 62 datos en `datos/manual/herencia.json` (deuda pública bruta, % del PIB y en moneda extranjera desde 2007; deuda con el FMI en DEG y acuerdo vigente desde 1995; cepo desde 2002 (tope de US$ 100.000 por mes, Com. A 3722; en 2011 vino el sistema de validación previa); deuda de importadores de los informes desde 2019; BOPREAL), cada uno verificado contra su documento. `traspaso` = mes de asunción del que recibe o "hoy". Filas sin color; deuda de importadores de los informes en fila aparte (otro relevamiento). Sin cargar: cepo de 1995, 1999 y 2002 (no investigado), FMI anterior a 1995. El nombre y la unidad que se muestran salen de `FILAS_INFORME` (`web/lib/herencia-informes.ts`), no de cada entrada: el JSON no lleva `nombre`.
 Decisiones de la implementación: un dato vale como "recibió" o "entregó" si tiene hasta 12 meses de atraso (`MAX_ATRASO` en `web/lib/herencia.ts`); precios regulados contra el nivel general en base dic-16 = 100 (sin enlace a la ficha, que usa otra escala); pasivos / base monetaria como cuenta propia (el motor no admite esa relación); las reservas de la tabla son el promedio del mes en dólares de hoy, no el saldo de un día: no coinciden con las cifras de "Cómo se verifica".
 Ideas: "Herencia: recibido contra entregado" (IDEAS.md, 2026-11-12).
 
@@ -25,7 +25,7 @@ Cada tema quedó en una de tres clases. Esto ordena las fases.
 | Deuda pública (bruta, % del PIB, en moneda extranjera) | B | Informes mensuales de la Secretaría de Finanzas (PDF y planilla); no hay serie en datos.gob.ar |
 | Deuda con el FMI y estado de los acuerdos | B | Documentos del FMI por país (PDF): acuerdos de 2018, 2022 y 2025 |
 | BOPREAL (colocado por serie) | B | Resultados de licitaciones del BCRA |
-| Cepo vigente al asumir (sí/no, desde cuándo) | B | Comunicaciones del BCRA (fechas: 2011, 2015, 2019, 2025) |
+| Cepo vigente al asumir (sí/no, desde cuándo) | B | Comunicaciones del BCRA (fechas: 2002, 2011, 2015, 2019, 2025) |
 | Reservas netas | C | No hay serie oficial: solo en documentos del FMI y estimaciones privadas; el swap con China y los encajes en dólares no están en la API |
 | SIRA / permisos de importación pendientes | C | Sin dato oficial del stock |
 | Puts de los bancos | C | Sin dato oficial del stock |

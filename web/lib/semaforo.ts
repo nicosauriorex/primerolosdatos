@@ -5,10 +5,16 @@
 import { fmtMes, mesNum, nf0, nf1, r1 } from "./formato";
 
 // ---------------------------------------------------------------- datos crudos (formato del pipeline)
-export type Ajuste = "oficial" | "propia" | "ninguno";
+export type Ajuste = "oficial" | "propia" | "ninguno" | "manual";
+/** Una nota leída a mano: la variación de un mes con su link y su cita textual (solo los indicadores con ajuste "manual"). */
+export interface RegistroManual { mes: string; var_ia: number | null; var_mm: number | null; url: string; cita: string }
 export interface IndicadorCrudo {
   clave: string; grupo: string; nombre: string; fuente: string; unidad: string; ajuste: Ajuste; real: boolean;
   id: string | null; f0: string; orig: (number | null)[]; sa: (number | null)[];
+  /** Cómo se sacó la estacionalidad: "x13" (X-13 ARIMA-SEATS), "promedios" (promedios móviles), "oficial", "ninguno" o "manual". */
+  metodo?: string | null;
+  /** Solo "manual": variaciones ya calculadas por mes desde `f0` (interanual y mes contra mes sin estacionalidad) y las notas de donde salen. */
+  var_ia?: (number | null)[]; var_mm?: (number | null)[]; registros?: RegistroManual[];
 }
 export interface ControlCrudo { clave: string; error_medio_pp: number; meses: number }
 export interface SemaforoCrudo { actualizado: string; control: ControlCrudo[]; indicadores: IndicadorCrudo[] }
@@ -23,11 +29,13 @@ const CORTOS: Record<string, string> = {
   cemento: "Cemento", gas: "Gas", electricidad: "Electricidad", naftas: "Naftas", faena_vacuna: "Faena vacuna", faena_aves: "Faena de aves",
   trigo: "Harina de trigo", soja: "Molienda de soja", pesca: "Pesca", divisas_agro: "Divisas del agro", supermercados: "Supermercados",
   shoppings: "Centros de compra", confianza: "Confianza consumidor", iva: "IVA (real)", debcred: "Créditos y débitos (real)",
+  patentamientos: "Patentamientos de autos", petroleo: "Petróleo", leche: "Leche", escrituras_caba: "Escrituras en la Ciudad",
+  came: "Ventas minoristas (CAME)", construya: "Índice Construya", escrituras_pba: "Escrituras en la Provincia",
   segsocial: "Seguridad social (real)", prest_personales: "Préstamos personales", prest_comerciales: "Préstamos comerciales",
   expo: "Exportaciones", impo: "Importaciones", expo_brasil: "Exportaciones a Brasil", impo_brasil: "Importaciones de Brasil", empleo: "Empleo privado",
 };
 
-const AJUSTES: Ajuste[] = ["oficial", "propia", "ninguno"];
+const AJUSTES: Ajuste[] = ["oficial", "propia", "ninguno", "manual"];
 const esLista = (l: unknown): l is (number | null)[] => Array.isArray(l) && l.every((x) => x == null || typeof x === "number");
 
 /** Valida el archivo y arma los indicadores. Devuelve null si no trae ninguno utilizable (la página lo dice). */
@@ -36,6 +44,7 @@ export function decodificar(c: SemaforoCrudo | null | undefined): Semaforo | nul
   const indicadores: Indicador[] = [];
   for (const i of c.indicadores) {
     if (!i || typeof i.clave !== "string" || !/^\d{4}-\d{2}$/.test(i.f0) || !esLista(i.orig) || !AJUSTES.includes(i.ajuste)) continue;
+    if (i.ajuste === "manual" && !(esLista(i.var_ia) && esLista(i.var_mm ?? []))) continue;
     const sa = esLista(i.sa) ? i.sa : [];
     indicadores.push({ ...i, sa, mes0: mesNum(i.f0), corto: CORTOS[i.clave] ?? i.nombre });
   }
@@ -61,11 +70,15 @@ const valorEn = (l: (number | null)[], mes0: number, m: number): number | null =
 };
 
 const tieneDatos = (l: (number | null)[]): boolean => l.some((v) => v != null);
+/** La lista de la que sale cada medida: la serie original (interanual) o la sin estacionalidad (mes contra mes). Los indicadores cargados a mano
+ *  traen directamente las variaciones (no tienen nivel), así que sus listas son las de variaciones. */
+const listaDe = (i: Indicador, med: Medida): (number | null)[] => (i.ajuste === "manual" ? (med === "ia" ? i.var_ia : i.var_mm) ?? [] : med === "ia" ? i.orig : i.sa);
 /** ¿El indicador entra en esta medida? Mes contra mes solo con series sin estacionalidad oficiales (o que no la necesitan). */
-export const admiteMedida = (i: Indicador, med: Medida): boolean => (med === "ia" ? tieneDatos(i.orig) : i.ajuste !== "propia" && tieneDatos(i.sa));
+export const admiteMedida = (i: Indicador, med: Medida): boolean => (i.ajuste === "manual" ? tieneDatos(listaDe(i, med)) : med === "ia" ? tieneDatos(i.orig) : i.ajuste !== "propia" && tieneDatos(i.sa));
 
 /** Variación en % del mes `m`, redondeada a un decimal como se muestra (y sin "-0,0"). null si falta un dato o el valor anterior es cero o negativo. */
 export function variacionEn(i: Indicador, med: Medida, m: number): number | null {
+  if (i.ajuste === "manual") { const v = valorEn(listaDe(i, med), i.mes0, m); return v == null ? null : r1(v); }
   const lista = med === "ia" ? i.orig : i.sa;
   const ahora = valorEn(lista, i.mes0, m), antes = valorEn(lista, i.mes0, m - (med === "ia" ? 12 : 1));
   if (ahora == null || antes == null || antes <= 0) return null;
@@ -74,13 +87,13 @@ export function variacionEn(i: Indicador, med: Medida, m: number): number | null
 
 /** Último mes con variación calculable de una medida (null si no hay ninguno). */
 export function ultimoMesConVariacion(i: Indicador, med: Medida): number | null {
-  const lista = med === "ia" ? i.orig : i.sa;
+  const lista = listaDe(i, med);
   for (let k = lista.length - 1; k >= 0; k--) if (lista[k] != null && variacionEn(i, med, i.mes0 + k) != null) return i.mes0 + k;
   return null;
 }
 /** Último mes con dato de la lista que usa la medida (el "último dato" de la fila). */
 export function ultimoMesDato(i: Indicador, med: Medida): number | null {
-  const lista = med === "ia" ? i.orig : i.sa;
+  const lista = listaDe(i, med);
   for (let k = lista.length - 1; k >= 0; k--) if (lista[k] != null) return i.mes0 + k;
   return null;
 }
@@ -192,6 +205,7 @@ export function armarTabla(sem: Semaforo, med: Medida): Tabla | null {
 export interface PuntoGrafico { mes: number; orig: number | null; sa: number | null }
 /** Los últimos 5 años del indicador (60 meses terminando en su último dato). La serie sin estacionalidad solo si es oficial: la estimación propia no se muestra. */
 export function serieGrafico(i: Indicador, meses = 60): { puntos: PuntoGrafico[]; conSa: boolean } {
+  if (i.ajuste === "manual") return { puntos: [], conSa: false };   // sin nivel: la ventana muestra las notas, no un gráfico
   const fin = Math.max(ultimoMesDato(i, "ia") ?? i.mes0, i.ajuste === "oficial" ? ultimoMesDato(i, "mm") ?? i.mes0 : i.mes0);
   const conSa = i.ajuste === "oficial";
   const puntos: PuntoGrafico[] = [];
@@ -211,13 +225,8 @@ export function controlTxt(sem: Semaforo): { nombre: string; txt: string }[] {
 
 /** Indicadores que se quisieron incluir y no tienen una fuente que un programa pueda leer. */
 export const NO_INCLUIDOS: [string, string][] = [
-  ["Ventas minoristas pymes", "CAME"],
-  ["Patentamientos de autos y motos", "ACARA y ACARA Motos"],
-  ["Índice Construya", "Grupo Construya"],
-  ["Escrituras", "Colegio de Escribanos"],
-  ["Producción de leche", "Ministerio de Agricultura"],
+  ["Patentamientos de motos", "ACARA Motos (el registro de motos tiene otro archivo, que todavía no leemos)"],
   ["Producción de autos", "ADEFA (la serie disponible no coincide con los datos de ADEFA)"],
-  ["Producción de petróleo", "Secretaría de Energía (la serie oficial quedó en nov-25)"],
 ];
 
 /** Mes del semáforo (el de la columna que lo resume) de una tabla. */

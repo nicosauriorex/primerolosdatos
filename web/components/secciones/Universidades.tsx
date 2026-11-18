@@ -19,11 +19,12 @@ import { FilaChips } from "../sistema/FilaChips";
 import { InfoPunto } from "../sistema/InfoPunto";
 import { CompartirHoja } from "../sistema/CompartirHoja";
 import { ListaBarras, type FilaBarra } from "../sistema/ListaBarras";
+import { ConCartel } from "../sistema/ConCartel";
 import { nf0 } from "@/lib/formato";
 import { FUENTE_GASTO, crearDeflactor, fechaLarga } from "@/lib/gasto";
 import {
   MEDIDAS_U, MEDIDA_U_DEFECTO, ORDENES_U, ORDEN_U_DEFECTO, anioDefectoU, anioValidoU, armarEvolucion, armarImagenU, armarVistaU, buscarUniv, crearContexto, enCursoTxt,
-  esMedidaU, esOrdenU, extremoTxt, filtrar, fraseUniversidades, hrefU, opcionesAnioU, tituloU, txtPorEstudiante,
+  armarHistoria, esMedidaU, esOrdenU, extremoTxt, FUENTE_HIST_TXT, NOTA_HIST, type Historia, filtrar, fraseUniversidades, hrefU, opcionesAnioU, tituloU, txtPorEstudiante,
   NOMBRE_PROGRAMA, type Contexto, type DatosUniv, type Evolucion, type FilaU, type MedidaU, type OrdenU, type VistaU,
 } from "@/lib/universidades";
 import { useParams } from "@/lib/url";
@@ -241,12 +242,14 @@ function Lista({ c, v, q, orden, abierta, medida, acciones, onQ, onOrden, onAbri
 function Detalle({ c, f, medida, onCerrar }: { c: Contexto; f: FilaU; medida: MedidaU; onCerrar: () => void }) {
   const u = f.u!;
   const evo = useMemo(() => armarEvolucion(c, medida, u.dev), [c, medida, u]);
+  const hist = useMemo(() => armarHistoria(c.d, u), [c, u]);
   const anios = Object.keys(u.est ?? {}).map(Number).sort();
   const enCurso = c.d.anios.find((a) => c.enCurso.has(a));
   return (
     <div className="uni-detalle">
       <button type="button" className="uni-cerrar" onClick={onCerrar}>Cerrar {u.n}</button>
       <Evo evo={evo} elegido={null} etiqueta={u.n} nota={enCurso != null && evo.hayEnCurso ? enCursoTxt(c, enCurso) : null} />
+      <EstudiantesEnElTiempo h={hist} />
       {anios.length > 0 && (
         <p className="note">Estudiantes de pregrado y grado: {anios.map((a) => `${nf0.format(u.est![a].total ?? 0)} en ${a}${u.est![a].nuevos != null ? ` (${nf0.format(u.est![a].nuevos!)} nuevos inscriptos)` : ""}`).join("; ")}. Los provee el Consejo Interuniversitario Nacional y la Auditoría General no los audita.</p>
       )}
@@ -258,6 +261,50 @@ function Detalle({ c, f, medida, onCerrar }: { c: Contexto; f: FilaU; medida: Me
             <tbody>
               {evo.filas.map((x) => (
                 <tr key={x.anio}><th scope="row">{x.anio}{x.enCurso ? " (en curso)" : ""}</th><td>{x.txt ?? "–"}</td><td>{x.parte ?? "–"}</td><td>{x.vari ?? "–"}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  );
+}
+
+/** «Estudiantes a lo largo del tiempo»: una columna por año, 1998-2014 (anuarios de la SPU) y 2023-2024 (Portal de Información Universitaria), con los años sin dato
+ *  a la vista y sin unir los puntos. Las dos fuentes se distinguen por color y por el cartel de cada columna. */
+function EstudiantesEnElTiempo({ h }: { h: Historia | null }) {
+  if (!h) return <p className="note">Sin dato de estudiantes: esta universidad no figura en los anuarios de la SPU ni en el Portal de Información Universitaria.</p>;
+  const hu = h.hueco;
+  return (
+    <div className="uni-hist">
+      <figure className="uni-evo-fig">
+        <figcaption className="uni-evo-tit">Estudiantes a lo largo del tiempo</figcaption>
+        <ConCartel>
+          <ol className="uni-evo" aria-label="Estudiantes de pregrado y grado por año">
+            {h.puntos.map((pt) => (
+              <li key={pt.anio}>
+                <div className="uni-evo-btn uni-evo-quieta" role="img" aria-label={pt.cartel} data-cartel={pt.cartel}>
+                  <span className="uni-evo-col" style={pt.hueco ? { borderBottom: "1px dashed var(--text-muted)" } : undefined}>
+                    {!pt.hueco && <span className={`uni-evo-barra${pt.fuente === "piu" ? " uni-evo-elegida" : ""}`} style={{ height: `${(pt.alto * 100).toFixed(1)}%` }} />}
+                  </span>
+                  <span className="uni-evo-anio">{pt.etiqueta ? pt.anio : " "}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </ConCartel>
+        {h.primero && h.ultimo && h.primero !== h.ultimo && <p className="uni-evo-ext"><span>{h.primero.anio}: {h.primero.txt}</span><span>{h.ultimo.anio}: {h.ultimo.txt}</span></p>}
+        {hu && <p className="note">{hu.sinDesde ? `Sin datos desde ${hu.desde}: ` : `Sin datos de ${hu.desde} a ${hu.hasta}: `}{hu.sinDesde ? "esta universidad no figura en el Portal de Información Universitaria. " : ""}Los años sin columna no tienen cifra por universidad.</p>}
+        <p className="note">{NOTA_HIST} 1998-2014 (gris): {FUENTE_HIST_TXT.spu}; 2023-2024 (azul): {FUENTE_HIST_TXT.piu}.</p>
+      </figure>
+      <details className="uni-mas">
+        <summary>Ver estudiantes, nuevos inscriptos y egresados año por año</summary>
+        <div className="tablewrap">
+          <table>
+            <thead><tr><th scope="col">Año</th><th scope="col">Estudiantes</th><th scope="col">Nuevos inscriptos</th><th scope="col">Egresados</th><th scope="col">Fuente</th></tr></thead>
+            <tbody>
+              {h.filas.map((x) => (
+                <tr key={x.anio}><th scope="row">{x.anio}</th><td>{x.est ?? "–"}</td><td>{x.nuevos ?? "–"}</td><td>{x.egresados ?? "–"}</td><td>{FUENTE_HIST_TXT[x.fuente]}</td></tr>
               ))}
             </tbody>
           </table>

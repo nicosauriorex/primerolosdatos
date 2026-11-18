@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-11-17",
- "fuente": "Secretaría de Políticas Universitarias (SPU), Departamento de Información Universitaria: Anuarios de Estadísticas Universitarias 2006, 2008 y 2010 y Síntesis de Información Estadísticas Universitarias 2020-2021 y 2022-2023. Datos del sistema SIU-Araucano.",
- "nota": "Total del país: universidades e institutos universitarios de gestión estatal y privada, carreras de pregrado y grado (sin posgrado). Estudiantes = alumnos del año; nuevos inscriptos y egresados del año. Cada año sale del documento más reciente que lo trae; los años 1996-1997 y 2000-2010 son suma de estatal y privada (o la fila «Total» del cuadro). Cortes y reparos: (1) las fuentes cambian entre 1997/1998, 1999/2000, 2010/2011 y las cifras de un anuario a otro se revisan (ej. 2003: 1.489.243 estudiantes en el anuario 2010 y 1.493.556 en el 1999/2003); el salto de 2010 (1.718.507) a 2011 (1.808.415) es de +5,2 % y puede incluir cambios de cobertura o de método entre el anuario y la síntesis. (2) 2007 baja por correcciones de las universidades del Aconcagua y Nacional de Lanús (nota 2 del cuadro 1.3 del anuario 2008). (3) Egresados: el anuario 1999/2003 rotula las cohortes un año corrido respecto de los anuarios 2006 en adelante; se usa el año del anuario 2006 (que coincide con 2008 y 2010 en los años que se superponen). (4) 1996-1997 salen del anuario 2006 (cuadros estatal y privada, suma propia); 1998 y 1999 del anuario 2008 (corrige Morón). (5) No se cargan 2023 y 2024 (ver faltantes). Regla: sin cita no se carga; los valores se compararon con el texto de cada PDF y las sumas estatal + privada cierran.",
+ "actualizado": "2026-11-18",
+ "fuente": "Secretaría de Políticas Universitarias (SPU), Departamento de Información Universitaria: Anuarios de Estadísticas Universitarias 2006, 2008 y 2010 y Síntesis de Información Estadísticas Universitarias 2020-2021, 2022-2023 y 2023-2024. Datos del sistema SIU-Araucano.",
+ "nota": "Total del país: universidades e institutos universitarios de gestión estatal y privada, carreras de pregrado y grado (sin posgrado). Estudiantes = alumnos del año; nuevos inscriptos y egresados del año. Cada año sale del documento más reciente que lo trae; los años 1996-1997 y 2000-2010 son suma de estatal y privada (o la fila «Total» del cuadro). Cortes y reparos: (1) las fuentes cambian entre 1997/1998, 1999/2000, 2010/2011 y las cifras de un anuario a otro se revisan (ej. 2003: 1.489.243 estudiantes en el anuario 2010 y 1.493.556 en el 1999/2003); el salto de 2010 (1.718.507) a 2011 (1.808.415) es de +5,2 % y puede incluir cambios de cobertura o de método entre el anuario y la síntesis. (2) 2007 baja por correcciones de las universidades del Aconcagua y Nacional de Lanús (nota 2 del cuadro 1.3 del anuario 2008). (3) Egresados: el anuario 1999/2003 rotula las cohortes un año corrido respecto de los anuarios 2006 en adelante; se usa el año del anuario 2006 (que coincide con 2008 y 2010 en los años que se superponen). (4) 1996-1997 salen del anuario 2006 (cuadros estatal y privada, suma propia); 1998 y 1999 del anuario 2008 (corrige Morón). (5) 2023 sale de la Síntesis 2023-2024 (cuadro de la p. 8, pregrado y grado, sin posgrado); 2024 no se carga (ver faltantes). Regla: sin cita no se carga; los valores se compararon con el texto de cada PDF y las sumas estatal + privada cierran.",
  "anios": [
   {
    "anio": 1996,
@@ -218,17 +218,20 @@
    "egresados": 145728,
    "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
    "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior). 2022 también en el cuadro resumen de la p. 8: pregrado y grado, estudiantes 2.540.854 (estatal 2.030.633 + privado 510.221), nuevos inscriptos 719.669 (543.041 + 176.628), egresados 145.728 (98.728 + 47.000)."
+  },
+  {
+   "anio": 2023,
+   "estudiantes": 2567251,
+   "nuevos_inscriptos": 713467,
+   "egresados": 139182,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_anuario_2023-2024.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2023-2024 (SPU, DIU), p. 8 del PDF (impresa 8), cuadro «Nuevos inscriptos, reinscriptos, estudiantes y egresados por nivel y sector de gestión. Año 2023», fila «Pregrado y grado», Total: estudiantes 2.567.251 (estatal 2.011.498 + privado 555.753), nuevos inscriptos 713.467 (520.819 + 192.648), egresados 139.182 (88.288 + 50.894); sin posgrado. Los mismos valores 2023 figuran en la p. 28 (gráfico de evolución 2013-2023). El PDF es de imágenes: se leyó a ojo, página renderizada."
   }
  ],
  "faltantes": [
   {
-   "anio": 2023,
-   "motivo": "La Síntesis 2023-2024 (https://www.argentina.gob.ar/sites/default/files/sintesis_anuario_2023-2024.pdf, 33 MB) es un PDF de imágenes: no tiene texto extraíble y no se pudo leer (no hay OCR ni render de páginas en este entorno). Hay que mirar a ojo el gráfico o cuadro de pregrado y grado.",
-   "a_buscar": "estudiantes, nuevos inscriptos y egresados 2023"
-  },
-  {
    "anio": 2024,
-   "motivo": "No se encontró síntesis ni anuario con datos de 2024 (la 2023-2024 no se pudo leer, ver 2023); revisar en https://www.argentina.gob.ar/educacion/universidades/informacion/publicaciones/sintesis.",
+   "motivo": "No se encontró síntesis ni anuario con datos de 2024 por total del país (la Síntesis 2023-2024 trae 2023 como último año del cuadro de pregrado y grado); revisar en https://www.argentina.gob.ar/educacion/universidades/informacion/publicaciones/sintesis.",
    "a_buscar": "estudiantes, nuevos inscriptos y egresados 2024"
   }
  ]

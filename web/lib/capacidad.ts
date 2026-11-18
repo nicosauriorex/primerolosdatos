@@ -12,7 +12,7 @@ export interface Bloque { b: string; n: number; rol: "propio" | "aliado" | "otro
 export interface DatosCap {
   bancas: Banca[];
   bloques: Record<string, Bloque[]>;                                  // "AAAA-MM-DD|cam" -> bloques del corte
-  leyes: Record<string, { enviadas: number; aprobadas: number; nota?: string }>;
+  leyes: Record<string, { enviadas: number; aprobadas: number; aprox?: "enviadas" | "aprobadas" | "ambas"; nota?: string }>;   // aprox: cifras repartidas por días entre mandatos (se muestran con «≈»)
   dnu: Record<string, Record<string, number>>;                        // presidente -> año -> cantidad
   vetos: Record<string, Record<string, { t: number | null; p: number | null; i: number }>>;   // t y p null = sin fuente de totales: solo se conocen los insistidos
   ultima_carga: string | null;
@@ -53,13 +53,21 @@ export function resumenBancas(d: DatosCap, pres: string, cam: Camara): ResBancas
   return { alEmpezar: ps[0], fechaInicio: bs[0].fecha, promedio: ps.reduce((a, c) => a + c, 0) / ps.length, cortes: bs.length };
 }
 
-export interface ResLeyes { enviadas: number; aprobadas: number; pct: number | null }
+export interface ResLeyes { enviadas: number; aprobadas: number; pct: number | null; aprox?: "enviadas" | "aprobadas" | "ambas" }
+/** Qué cifras de leyes son aproximadas: enviadas, aprobadas y el porcentaje (aproximado si cualquiera de las dos lo es). */
+export const aproxLeyes = (l: Pick<ResLeyes, "aprox">) => ({ env: l.aprox === "enviadas" || l.aprox === "ambas", apr: l.aprox === "aprobadas" || l.aprox === "ambas", pct: !!l.aprox });
+/** "≈389 de ≈627 (≈62 %)": «≈» delante de cada cifra aproximada. Con `sinPct` omite el porcentaje. */
+export function textoLeyes(l: ResLeyes, sinPct = false): string {
+  const a = aproxLeyes(l), s = (b: boolean) => (b ? "≈" : "");
+  const base = `${s(a.apr)}${nf0.format(l.aprobadas)} de ${s(a.env)}${nf0.format(l.enviadas)}`;
+  return sinPct || !ok(l.pct) ? base : `${base} (${s(a.pct)}${nf0.format(l.pct)} %)`;
+}
 export function resumenLeyes(d: DatosCap, pres: string): ResLeyes | null {
   const l = d.leyes[pres];
   return l ? { ...l, pct: pct(l.aprobadas, l.enviadas) } : null;
 }
 
-export interface ResApoyo { pctLeyes: number; pctBancas: number; veces: number }
+export interface ResApoyo { pctLeyes: number; pctBancas: number; veces: number; aprox: boolean }
 /** Leyes por apoyo: % de leyes del Ejecutivo aprobadas ÷ % de bancas propias y aliadas en Diputados (promedio del mandato).
  *  Las cuentas cierran: ambos porcentajes se redondean a enteros como se muestran y el cociente se redondea a un decimal. null = falta leyes o bancas. */
 export function resumenApoyo(d: DatosCap, pres: string): ResApoyo | null {
@@ -67,7 +75,7 @@ export function resumenApoyo(d: DatosCap, pres: string): ResApoyo | null {
   if (!l || !ok(l.pct) || !ok(b.promedio)) return null;
   const pctLeyes = Math.round(l.pct), pctBancas = Math.round(b.promedio);
   if (pctBancas <= 0) return null;
-  return { pctLeyes, pctBancas, veces: r1(pctLeyes / pctBancas) };
+  return { pctLeyes, pctBancas, veces: r1(pctLeyes / pctBancas), aprox: !!l.aprox };
 }
 
 export interface ResDnu { total: number; porAnio: number | null; anios: number }
@@ -100,11 +108,11 @@ export function valorIndicador(d: DatosCap, pres: string, m: Mandato, ind: Indic
   }
   if (ind === "leyes") {
     const r = resumenLeyes(d, pres);
-    return r && ok(r.pct) ? { v: r.pct as number, txt: `${nf(r.aprobadas)} de ${nf(r.enviadas)} (${nf(r.pct as number)} %)` } : null;
+    return r && ok(r.pct) ? { v: r.pct as number, txt: textoLeyes(r) } : null;
   }
   if (ind === "apoyo") {
     const r = resumenApoyo(d, pres);
-    return r ? { v: r.veces, txt: `${nf(r.veces, 1)} veces` } : null;
+    return r ? { v: r.veces, txt: `${r.aprox ? "≈" : ""}${nf(r.veces, 1)} veces` } : null;
   }
   if (ind === "dnu") {
     const r = resumenDnu(d, pres, m);
@@ -124,7 +132,7 @@ export function lineaContexto(d: DatosCap, pres: string, m: Mandato): string | n
   else if (ok(dip.alEmpezar)) partes.push(`${nf(dip.alEmpezar as number)} % de Diputados propios o aliados al empezar`);
   else if (ok(sen.alEmpezar)) partes.push(`${nf(sen.alEmpezar as number)} % del Senado propios o aliados al empezar`);
   const l = resumenLeyes(d, pres);
-  if (l) partes.push(`${nf(l.aprobadas)} de ${nf(l.enviadas)} leyes del Ejecutivo aprobadas`);
+  if (l) partes.push(`${textoLeyes(l, true)} leyes del Ejecutivo aprobadas`);
   const n = resumenDnu(d, pres, m);
   if (n) partes.push(`${nf(n.total)} DNU`);
   const v = resumenVetos(d, pres, m);
@@ -196,9 +204,11 @@ export function fraseCapacidad(d: DatosCap, ind: Indicador, pres: Mandato, M: Ma
     if (!l || !ok(l.pct)) return null;
     const todos = M.map((m) => resumenLeyes(d, m.id)?.pct).filter(ok).map((v) => Math.round(v));
     const k = puestoDe(todos, Math.round(l.pct));
+    const a = aproxLeyes(l), s = (b: boolean) => (b ? "≈" : "");
+    const mezcla = a.pct || M.some((m) => resumenLeyes(d, m.id)?.aprox);
     return {
-      titulo: "Leyes del Ejecutivo aprobadas", cifra: `${nf(Math.round(l.pct))} %`, fecha: per,
-      frase: `${pres.n}: ${nf(l.aprobadas)} de las ${nf(l.enviadas)} leyes que envió el Ejecutivo se aprobaron (${nf(Math.round(l.pct))} %). Entre los ${todos.length} gobiernos con dato, puesto ${k} de mayor a menor porcentaje.`,
+      titulo: "Leyes del Ejecutivo aprobadas", cifra: `${s(a.pct)}${nf(Math.round(l.pct))} %`, fecha: per,
+      frase: `${pres.n}: ${s(a.apr)}${nf(l.aprobadas)} de las ${s(a.env)}${nf(l.enviadas)} leyes que envió el Ejecutivo se aprobaron (${s(a.pct)}${nf(Math.round(l.pct))} %).${a.pct ? " Cifras aproximadas: los informes cuentan por período parlamentario y se repartieron por días entre mandatos." : ""} Entre los ${todos.length} gobiernos con dato, puesto ${k} de mayor a menor porcentaje${mezcla ? " (el orden mezcla cifras aproximadas)" : ""}.`,
     };
   }
   if (ind === "apoyo") {
@@ -206,9 +216,11 @@ export function fraseCapacidad(d: DatosCap, ind: Indicador, pres: Mandato, M: Ma
     if (!a) return null;
     const todos = M.map((m) => resumenApoyo(d, m.id)?.veces).filter(ok);
     const k = puestoDe(todos, a.veces);
+    const ap = (b: boolean) => (b ? "≈" : "");
+    const mezcla = a.aprox || M.some((m) => resumenApoyo(d, m.id)?.aprox);
     return {
-      titulo: "Leyes por apoyo", cifra: nf1.format(a.veces), unidad: "veces", fecha: per,
-      frase: `${pres.n}: se aprobó el ${nf(a.pctLeyes)} % de las leyes del Ejecutivo con un ${nf(a.pctBancas)} % de bancas propias y aliadas en Diputados (promedio del mandato), ${nf1.format(a.veces)} veces. Entre los ${todos.length} gobiernos con dato, puesto ${k} de mayor a menor.`,
+      titulo: "Leyes por apoyo", cifra: `${ap(a.aprox)}${nf1.format(a.veces)}`, unidad: "veces", fecha: per,
+      frase: `${pres.n}: se aprobó el ${ap(a.aprox)}${nf(a.pctLeyes)} % de las leyes del Ejecutivo con un ${nf(a.pctBancas)} % de bancas propias y aliadas en Diputados (promedio del mandato), ${ap(a.aprox)}${nf1.format(a.veces)} veces.${a.aprox ? " Cifra aproximada: las leyes del Ejecutivo se repartieron por días entre mandatos." : ""} Entre los ${todos.length} gobiernos con dato, puesto ${k} de mayor a menor${mezcla ? " (el orden mezcla cifras aproximadas)" : ""}.`,
     };
   }
   if (ind === "dnu") {

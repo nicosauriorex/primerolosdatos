@@ -34,7 +34,7 @@ export const FILAS_INFORME: DefInforme[] = [
   { clave: "bopreal", img: "BOPREAL (importadores)", grupo: "Banco Central", nombre: "Bonos del Banco Central para importadores (BOPREAL)", unidad: "millones de US$ colocados", tipo: "monto",
     nota: "Bonos en dólares que el Banco Central empezó a colocar en diciembre de 2023 para la deuda de importadores con el exterior." },
   { clave: "cepo", grupo: "Dólar", nombre: "Restricciones para comprar dólares (personas)", unidad: "vigentes o no, y desde cuándo", tipo: "texto",
-    nota: "Si una persona podía comprar dólares para ahorro sin tope ni permiso. Sale de las normas del Banco Central y del Boletín Oficial." },
+    nota: "Si una persona podía comprar dólares para ahorro sin tope ni permiso. Sale de las normas del Banco Central y del Boletín Oficial. Hubo restricciones antes de 2011: desde el 06-09-2002, un tope de US$ 100.000 por mes y, por encima, permiso del Banco Central." },
   { clave: "cobertura_luz", img: "Luz: % del costo en tarifa", grupo: "Precios", nombre: "Parte del costo de la electricidad que pagan las tarifas", unidad: "% (precio estacional / costo medio del sistema)", tipo: "pct",
     nota: "Precio estacional que pagan las distribuidoras dividido el precio monómico (costo medio) del mercado eléctrico mayorista, según la Secretaría de Energía. Solo electricidad." },
   { clave: "precios_acordados", img: "Precios acordados", grupo: "Precios", nombre: "Precios en programas acordados (Precios Justos y otros)", unidad: "% de los precios relevados en el GBA", tipo: "pct", dec: 2,

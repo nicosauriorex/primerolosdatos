@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-11-12",
+ "actualizado": "2026-11-18",
  "leeme": "Herencia, fase 2 (docs/specs/herencia.md). Datos oficiales copiados a mano de informes y planillas. traspaso = mes de asunción del que recibe (como en PRES_DEF) o 'hoy' (último publicado). Cada dato lleva documento, url, página y cita; sin cita no se carga (pipeline/herencia_informes.py lo controla). Verificado contra el documento el 2026-11-12.",
  "datos": [
   {
@@ -238,6 +238,45 @@
   },
   {
    "clave": "fmi_deuda",
+   "traspaso": "1995-07",
+   "valor": 3738.82,
+   "unidad": "millones de DEG",
+   "fecha_dato": "1995-07-31",
+   "organismo": "FMI",
+   "documento": "Argentina: History of Lending Commitments as of July 31, 1995",
+   "url": "https://www.imf.org/external/np/fin/tad/extarr2.aspx?memberKey1=30&date1key=1995-07-31",
+   "pagina": "tabla, fila Total, columna Amount Outstanding",
+   "cita": "Total 10,310,750 (Amount Agreed); 7,057,960 (Amount Drawn); 3,738,815 (Amount Outstanding) (In Thousands of SDRs)",
+   "nota": "Saldo pendiente según el historial de compromisos del FMI (en miles de DEG, acá en millones). Es la tabla de compromisos, no la página «Financial Position», que empieza en 1996."
+  },
+  {
+   "clave": "fmi_deuda",
+   "traspaso": "1999-12",
+   "valor": 3262.6,
+   "unidad": "millones de DEG",
+   "fecha_dato": "1999-12-31",
+   "organismo": "FMI",
+   "documento": "Financial Position in the Fund for Argentina as of December 31, 1999",
+   "url": "https://www.imf.org/external/np/fin/tad/exfin2.aspx?memberKey1=30&date1key=1999-12-31",
+   "pagina": "sección IV, Outstanding Purchases and Loans",
+   "cita": "Stand-by Arrangements 593.50; Extended Arrangements 2,669.10 (SDR Million)",
+   "nota": "Suma de las dos líneas (593,50 + 2.669,10): la página no da el total."
+  },
+  {
+   "clave": "fmi_deuda",
+   "traspaso": "2002-01",
+   "valor": 11050.46,
+   "unidad": "millones de DEG",
+   "fecha_dato": "2002-01-31",
+   "organismo": "FMI",
+   "documento": "Financial Position in the Fund for Argentina as of January 31, 2002",
+   "url": "https://www.imf.org/external/np/fin/tad/exfin2.aspx?memberKey1=30&date1key=2002-01-31",
+   "pagina": "sección IV, Outstanding Purchases and Loans",
+   "cita": "Stand-by Arrangements 9,836.56; Extended Arrangements 1,213.90 (SDR Million)",
+   "nota": "Suma de las dos líneas (9.836,56 + 1.213,90): la página no da el total."
+  },
+  {
+   "clave": "fmi_deuda",
    "traspaso": "2003-05",
    "valor": 10501.78,
    "unidad": "millones de DEG",
@@ -322,6 +361,45 @@
    "pagina": "sección IV, Outstanding Purchases and Loans",
    "cita": "Extended Arrangements 41,968.67 (SDR Million)",
    "nota": "Último dato publicado."
+  },
+  {
+   "clave": "fmi_acuerdo",
+   "traspaso": "1995-07",
+   "valor": "Facilidad Extendida de marzo de 1992, por 4.020 millones de DEG",
+   "unidad": "texto",
+   "fecha_dato": "1995-07-31",
+   "organismo": "FMI",
+   "documento": "Argentina: History of Lending Commitments as of July 31, 1995",
+   "url": "https://www.imf.org/external/np/fin/tad/extarr2.aspx?memberKey1=30&date1key=1995-07-31",
+   "pagina": "tabla, primera fila",
+   "cita": "Extended Fund Facility, Mar 31, 1992, expiration Mar 30, 1996, amount agreed 4,020,250, amount drawn 3,251,700 (In Thousands of SDRs)",
+   "nota": "El acuerdo más reciente de la tabla, vigente al traspaso: 4.020,25 millones de DEG acordados, 3.251,70 girados."
+  },
+  {
+   "clave": "fmi_acuerdo",
+   "traspaso": "1999-12",
+   "valor": "Facilidad Extendida de febrero de 1998, por 2.080 millones de DEG (sin girar)",
+   "unidad": "texto",
+   "fecha_dato": "1999-12-31",
+   "organismo": "FMI",
+   "documento": "Financial Position in the Fund for Argentina as of December 31, 1999",
+   "url": "https://www.imf.org/external/np/fin/tad/exfin2.aspx?memberKey1=30&date1key=1999-12-31",
+   "pagina": "sección V, Latest Financial Commitments",
+   "cita": "EFF, Feb 04, 1998, expiration Feb 03, 2001, amount approved 2,080.00, amount drawn 0.00 (SDR Million)",
+   "nota": "No se carga el vencimiento: las páginas del FMI no coinciden entre sí. La deuda que figura al traspaso viene de acuerdos anteriores (Stand-By y Facilidad Extendida, según la misma página)."
+  },
+  {
+   "clave": "fmi_acuerdo",
+   "traspaso": "2002-01",
+   "valor": "Stand-By de marzo de 2000, ampliado en 2001, por 16.937 millones de DEG; sin desembolsos desde diciembre de 2001",
+   "unidad": "texto",
+   "fecha_dato": "2002-01-31",
+   "organismo": "FMI",
+   "documento": "Financial Position in the Fund for Argentina as of January 31, 2002",
+   "url": "https://www.imf.org/external/np/fin/tad/exfin2.aspx?memberKey1=30&date1key=2002-01-31",
+   "pagina": "sección V, Latest Financial Commitments",
+   "cita": "Stand-By, Mar 10, 2000, expiration Mar 09, 2003, amount approved 16,936.80, amount drawn 9,756.31; of which SRF, Jan 12, 2001, amount approved 6,086.66 (SDR Million)",
+   "nota": "Ampliado con el Servicio de Reserva Suplementaria de enero de 2001. Los desembolsos se cortaron en diciembre de 2001: «In December, however, the fifth review of the program was not completed, which marked the effective cutoff of IMF financial support» (Oficina de Evaluación Independiente del FMI, The IMF and Argentina, 1991-2001, 2004, resumen ejecutivo, p. 4: https://www.imf.org/external/np/ieo/2004/arg/eng/pdf/report.pdf)."
   },
   {
    "clave": "fmi_acuerdo",
@@ -414,6 +492,32 @@
   },
   {
    "clave": "cepo",
+   "traspaso": "2003-05",
+   "valor": "Sí, desde el 06-09-2002; tope de US$ 100.000 por mes (más, con permiso del Banco Central)",
+   "unidad": "texto",
+   "fecha_dato": "2002-09-06",
+   "organismo": "Banco Central",
+   "documento": "Comunicación \"A\" 3722 (06-09-2002) y \"A\" 3998 (15-08-2003)",
+   "url": "https://www.bcra.gob.ar/archivos/Pdfs/comytexord/A3722.pdf",
+   "pagina": "A 3722, puntos a y b; A 3998, punto 1",
+   "cita": "A 3722, con vigencia a partir del 06/09/2002: \"deberán contar con la conformidad previa de este Banco para la realización de compras de billetes y divisas en moneda extranjera [...] y compra para tenencias de billetes extranjeros en el país\"; \"no supere un nivel de compras por el total de los conceptos mencionados, del equivalente de dólares estadounidenses 100.000\" por mes calendario. A 3998 (15/08/2003), punto 1: \"adicionalmente a los montos máximos establecidos en la Comunicación \"A\" 3722 y complementarias\"",
+   "nota": "Hasta US$ 100.000 por mes en el conjunto de las entidades no hacía falta permiso; más, sí. El tope seguía vigente el 15-08-2003 (A 3998, segunda url: https://www.bcra.gob.ar/archivos/Pdfs/comytexord/A3998.pdf). Mismo criterio que el resto de la fila: tope o permiso para que una persona compre dólares para ahorro. El encaje del 30 % del Decreto 616/2005 es para ingresos de capitales: no cuenta."
+  },
+  {
+   "clave": "cepo",
+   "traspaso": "2007-12",
+   "valor": "Sí, desde el 06-09-2002; tope de US$ 100.000 por mes (más, con permiso del Banco Central)",
+   "unidad": "texto",
+   "fecha_dato": "2007-10-19",
+   "organismo": "Banco Central",
+   "documento": "Comunicaciones \"A\" 4724 (19-10-2007) y \"A\" 4764 (17-01-2008)",
+   "url": "https://www.bcra.gob.ar/archivos/Pdfs/comytexord/A4724.pdf",
+   "pagina": "A 4724, punto 1; A 4764, punto I",
+   "cita": "A 4724, con vigencia a partir del 19.10.07: \"Exceptuar de los límites establecidos en la Comunicación \"A\" 3722 y complementarias [...] el acceso al mercado de cambios de los Fondos de Jubilaciones y Pensiones\". A 4764, a partir del 18.01.08: \"Exceptuar a las personas físicas y jurídicas residentes en el país del límite establecido en la Comunicación \"A\" 3722 y complementarias para la formación de activos externos, en la medida que los fondos adquiridos por sobre los límites mencionados, sean destinados a la suscripción primaria en moneda extranjera de títulos públicos emitidos por el Gobierno Nacional\"",
+   "nota": "Las dos normas citan el límite de la A 3722 como vigente antes y después del traspaso (10-12-2007): solo agregan excepciones (fondos de jubilaciones, compra de títulos públicos, empresas con destino específico), no lo levantan. La A 4764 está en https://www.bcra.gob.ar/archivos/Pdfs/comytexord/A4764.pdf. No se verificó cuándo terminó este tope."
+  },
+  {
+   "clave": "cepo",
    "traspaso": "2011-12",
    "valor": "Sí, desde el 31-10-2011",
    "unidad": "texto",
@@ -423,7 +527,7 @@
    "url": "https://www.bcra.gob.ar/archivos/Pdfs/comytexord/A5239.pdf",
    "pagina": "puntos 1 y 2",
    "cita": "con vigencia a partir del 31.10.2011 inclusive [...] sólo podrán dar acceso al mercado local de cambios a las operaciones con clientes que obtengan la validación en el sistema mencionado",
-   "nota": "Cada compra de dólares pasó a necesitar la validación previa de la AFIP (Resolución General 3210/2011)."
+   "nota": "Cada compra de dólares pasó a necesitar la validación previa de la AFIP (Resolución General 3210/2011). Es el sistema de validación previa de 2011; antes había un tope de US$ 100.000 por mes desde el 06-09-2002 (Comunicación \"A\" 3722). No se verificó cuándo terminó ese tope."
   },
   {
    "clave": "cepo",

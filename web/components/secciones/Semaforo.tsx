@@ -16,7 +16,7 @@ import { InfoPunto } from "../sistema/InfoPunto";
 import { GraficoSemaforo } from "../GraficoSemaforo";
 import { PanelSemaforo } from "../PanelSemaforo";
 import { medidaInicial } from "@/lib/config";
-import { MESES } from "@/lib/formato";
+import { MESES, mesNum } from "@/lib/formato";
 import { medDefaultDe } from "@/lib/motor";
 import {
   MEDIDA_DEFECTO, MEDIDAS, NO_INCLUIDOS, admiteMedida, armarTabla, controlTxt, esMedida, fraseSemaforo, idCatalogo, txtMes, txtVariacion, ultimoMesConVariacion, variacionEn,
@@ -177,8 +177,24 @@ function VentanaFila({ ind, onCerrar }: { ind: Indicador; onCerrar: () => void }
   return (
     <Modal titulo={ind.nombre} cabecera={ind.nombre} onCerrar={onCerrar} ancho>
       <div className="parte-modal">
-        <p className="note">{ind.fuente}. {ind.unidad}. Datos mensuales, últimos 5 años.</p>
-        <GraficoSemaforo ind={ind} />
+        {ind.ajuste === "manual" ? (
+          <>
+            <p className="note">{ind.fuente}. {ind.unidad}. Solo se conocen las variaciones, no el nivel: no hay gráfico. Cada mes lleva la cita de la nota de donde se leyó.</p>
+            <ul className="method">
+              {[...(ind.registros ?? [])].reverse().map((r) => (
+                <li key={r.mes}>
+                  <b>{txtMes(mesNum(r.mes))}</b>: {r.var_ia != null ? `${txtVariacion(r.var_ia)} % interanual` : ""}{r.var_ia != null && r.var_mm != null ? ", " : ""}{r.var_mm != null ? `${txtVariacion(r.var_mm)} % contra el mes anterior, sin estacionalidad` : ""}.{" "}
+                  «{r.cita}» <a href={r.url} target="_blank" rel="noopener noreferrer">Ver la nota</a>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <>
+            <p className="note">{ind.fuente}. {ind.unidad}. Datos mensuales, últimos 5 años.</p>
+            <GraficoSemaforo ind={ind} />
+          </>
+        )}
         <dl className="parte-extremos">
           <div><dt>Último interanual</dt><dd>{ultimas[0].texto}</dd></div>
           <div><dt>Último mes contra mes</dt><dd>{ultimas[1].texto}</dd></div>
@@ -191,6 +207,8 @@ function VentanaFila({ ind, onCerrar }: { ind: Indicador; onCerrar: () => void }
 
 function ComoSeCalcula({ datos, act }: { datos: Semaforo; act: string | null }) {
   const control = controlTxt(datos);
+  const metodos = new Set(datos.indicadores.filter((i) => i.ajuste === "propia").map((i) => i.metodo));
+  const conX13 = metodos.has("x13"), conPromedios = metodos.has("promedios"), manuales = datos.indicadores.filter((i) => i.ajuste === "manual").map((i) => i.nombre);
   const reales = datos.indicadores.filter((i) => i.real).map((i) => i.nombre.replace(/\s*\(.*\)$/, ""));
   return (
     <details>
@@ -204,11 +222,12 @@ function ComoSeCalcula({ datos, act }: { datos: Semaforo; act: string | null }) 
         <li><b>Meses de cada columna</b>: los últimos 7 meses, hasta el dato más nuevo que haya. Cada indicador se publica con una demora distinta, por eso las columnas más nuevas tienen celdas vacías.</li>
         <li><b>Sin dato</b>: si el valor del mes anterior es cero o negativo, la variación no se calcula y la celda queda vacía.</li>
         {reales.length > 0 && <li><b>En términos reales</b>: {reales.join(", ")} están en pesos y se descuenta la inflación (IPC), para comparar cantidades y no precios.</li>}
+        {manuales.length > 0 && <li><b>Cargados a mano</b>: {manuales.join(", ")}. No hay una serie que un programa pueda leer: se cargan una vez por mes a partir de la nota de prensa, con su cita y su link (se ven al tocar la fila). Solo traen variaciones, sin nivel ni gráfico, y entran en la medida que su nota publica. Un mes que todavía no se cargó queda vacío.</li>}
         <li>Los organismos revisan sus datos: un mes ya publicado puede cambiar cuando sale el siguiente. No se corrigen feriados ni días hábiles.</li>
       </ul>
       <h3 className="sem-sub">Por qué mes contra mes no incluye todos los indicadores</h3>
       <p className="method">
-        Probamos calcular nosotros la serie sin estacionalidad de los indicadores que no la traen y la comparamos con la oficial en los que sí la tienen.{control.length > 0 && " La variación de un mes se apartaba de la oficial, en promedio:"}
+        Calculamos nosotros la serie sin estacionalidad de los indicadores que no la traen{conX13 ? " con X-13 ARIMA-SEATS, el método que usan los institutos de estadística (incluido el INDEC), con corrección por días hábiles pero sin los feriados argentinos" : ""}{conX13 && conPromedios ? "; donde ese método no pudo estimarse," : ""}{conPromedios ? `${conX13 ? " se usan" : " con"} promedios móviles, un método más simple` : ""}, y la comparamos con la oficial en los que sí la tienen.{control.length > 0 && " La variación de un mes se apartaba de la oficial, en promedio:"}
       </p>
       {control.length > 0 && <ul className="method">{control.map((c) => <li key={c.nombre}>{c.nombre}: {c.txt}</li>)}</ul>}
       <p className="method">
