@@ -98,7 +98,7 @@ Investigado: fuentes, IDs, ranking y qué no se puede en `docs/investigaciones/d
 - ~~AUH, Tarjeta Alimentar, cobertura de la canasta y pensiones por invalidez~~ ✅ 2026-11-16 → spec: docs/specs/auh-pensiones.md
 - El resto (homicidios, empleo público nacional, recaudación por impuesto, universidades por inciso, Malvinas…): sin elegir.
 
-## Deuda neta del sector público consolidado (2026-11-17)
+## Deuda neta del sector público consolidado (2026-11-17) → spec: docs/specs/deuda-neta.md
 - El usuario trajo otra forma de medir la deuda consolidada (texto pegado, citado a Infobae y al BCRA): Tesoro USD 260.638 millones = deuda bruta (484.917) menos la deuda en manos del propio sector público (BCRA, FGS y otros); BCRA USD 18.869 millones = pasivos monetarios ($68.006.428 millones al 31/08/2026) menos reservas netas. Mide lo que el Estado le debe a terceros.
 - Diferencia con la nuestra (D-024): nosotros restamos solo lo que el Tesoro le debe al Banco Central según el boletín (letras y adelantos) y sumamos solo los pasivos remunerados; por eso la nuestra es un techo. Esta resta además lo que tienen el FGS, el Banco Nación y las Lecap del Banco Central, y del lado del Banco Central suma la base monetaria y resta las reservas netas.
 - Fuentes: investigadas en `docs/investigaciones/deuda-neta-2026-11-17.md` (presentación trimestral de Finanzas por acreedor, a mano; pasivos monetarios del BCRA, variable 1247; metodología de Facimex).
