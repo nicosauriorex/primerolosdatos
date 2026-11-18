@@ -31,7 +31,7 @@ import { anioDefecto, armarImagenGasto, armarVista, crearDeflactor, decodificarA
 import { anioDefectoU, armarImagenU, armarVistaU, crearContexto, decodificarUniv, textosPreviaU } from "../lib/universidades";
 import { anioDefectoP, armarImagenP, armarVistaP, crearContexto as crearContextoP, decodificarProv, textosPreviaP } from "../lib/provincias";
 import { anioDefectoC, armarImagenC, armarVistaC, crearCtxC, decodificarCuentas, textosPreviaC } from "../lib/provinciasCuentas";
-import { BASE_HERENCIA, idsHerencia, tablaHerencia, textosPreviaHerencia } from "../lib/herencia";
+import { idsHerencia, tablaHerencia, textosPreviaHerencia } from "../lib/herencia";
 import type { DatoInforme, DatosInformes, ReservasNetas } from "../lib/herencia-informes";
 
 const RAIZ = path.resolve(__dirname, "..");
@@ -175,13 +175,13 @@ function previaDeHerencia(m: Motor, metas: SerieMeta[], pal: ReturnType<typeof p
     const ids = idsHerencia().filter((id) => metas.some((s) => s.id === id));
     const archivos = new Set(ids.map((id) => metas.find((s) => s.id === id)!.archivo));
     for (const a of archivos) m.agregar(metas.filter((s) => s.archivo === a), leerJson<Record<string, SerieDatos>>(`${a}.json`));
-    const presId = PRES_DEF[PRES_DEF.length - 1].id, t = tablaHerencia(m, presId);
+    const presId = PRES_DEF[PRES_DEF.length - 1].id, baseH = baseDeConfig(DEFECTO, PRES_DEF.map((p) => p.id)), t = tablaHerencia(m, presId, baseH);
     // datos de informes (fase 2): si el archivo no está, la imagen sale solo con las series, como la página
     let informes: DatoInforme[] = [];
     if (fs.existsSync(path.join(DATOS, "herencia_informes.json"))) informes = leerJson<DatosInformes>("herencia_informes.json").datos ?? [];
     else avisar("herencia: sin herencia_informes.json, la imagen va sin los datos de informes");
     const rn = fs.existsSync(path.join(DATOS, "reservas_netas.json")) ? leerJson<ReservasNetas>("reservas_netas.json") : null;
-    const datos = t && armarImagenPres(m, { tipo: "herencia", presId, ids, base: BASE_HERENCIA, informes, rn }, { formato: "16x9", comentario: "" });
+    const datos = t && armarImagenPres(m, { tipo: "herencia", presId, ids, base: baseH, informes, rn }, { formato: "16x9", comentario: "" });
     if (!t || !datos) { avisar("herencia: no hay datos para armar la imagen (/herencia/ usa la imagen general)"); return false; }
     fs.writeFileSync(path.join(SALIDA, "herencia.png"), aPng((cv) => dibujarImagen(cv, datos, pal, DIBUJO), DIBUJO));
     const ult = Math.max(...t.filas.map((f) => f.entrego?.i ?? -1)), fecha = m.F[Math.max(0, ult)];

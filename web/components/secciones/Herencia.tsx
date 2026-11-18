@@ -14,11 +14,12 @@ import { Capitulo } from "../sistema/Capitulo";
 import { Hoja } from "../sistema/Hoja";
 import { CompartirHoja } from "../sistema/CompartirHoja";
 import { BarraResumen } from "./Ranking";
-import { CeldaVar, Valor } from "./comunes";
-import { crearPres, type Pres } from "@/lib/estadisticas";
+import { CeldaVar, LineaInicio, Valor, useBase } from "./comunes";
+import { PRES_DEF, crearPres, oracionInicio, type Pres } from "@/lib/estadisticas";
+import { esBaseDeFabrica } from "@/lib/config";
 import { fmtMes, nf0 } from "@/lib/formato";
 import {
-  BASE_HERENCIA, FALTA_CARGAR, FILAS_HERENCIA, GRUPOS_HERENCIA, MAX_ATRASO, NO_MEDIBLE, defPorClave, fraseHerencia, fraseTraspasos, idsHerencia, tablaHerencia, traspasos,
+  FALTA_CARGAR, FILAS_HERENCIA, GRUPOS_HERENCIA, MAX_ATRASO, NO_MEDIBLE, defPorClave, fraseHerencia, fraseTraspasos, idsHerencia, tablaHerencia, traspasos,
   type FilaHerencia, type Punto,
 } from "@/lib/herencia";
 import {
@@ -30,6 +31,7 @@ import { unoDe, useParams } from "@/lib/url";
 import type { Motor } from "@/lib/motor";
 
 const IDS = idsHerencia();
+const IDS_PRES = PRES_DEF.map((x) => x.id);
 
 /** Celda de un dato: el valor y su mes; si no hay, "sin dato" y por qué. */
 function CeldaDato({ p, motivo, rotulo }: { p: Punto | null; motivo: string; rotulo?: string }) {
@@ -171,6 +173,7 @@ function Opciones({ opciones, valor, onElegir, etiqueta }: { opciones: [string, 
 
 export function Herencia() {
   const [p, set, montado] = useParams();
+  const info = useBase("herencia", p, set, montado), b = info.b;
   const sec = useSeccion(IDS);
   const { motor: m } = sec;
   const inf = useHerenciaInformes();
@@ -204,7 +207,7 @@ export function Herencia() {
   const vista = unoDe(p.get("vista"), ["uno", "traspasos"] as const, "uno");
   const pv = p.get("v") ?? "";
   const clave = defPorClave(pv)?.clave ?? (pv.startsWith(PREF_INF) && cargadas.has(pv.slice(PREF_INF.length)) ? pv : FILAS_HERENCIA[0].clave);
-  const tabla = tablaHerencia(m, pres.id);
+  const tabla = tablaHerencia(m, pres.id, b);
   if (!tabla) return <Cargando />;
   const filasInf = filasInforme(datosInf, PRES, tabla.k).filter((f) => f.def.grupo !== "Estimaciones"), filasEst = filasEstimaciones(datosInf, rn, PRES, tabla.k);
   const faltan = FALTA_CARGAR.filter(([, , claves]) => !claves.every((c) => cargadas.has(c)));
@@ -219,14 +222,14 @@ export function Herencia() {
   ];
   const opcionesVar: [string, string][] = varsTraspaso.map(([v, n, g]) => [v, `${g}: ${n}`]);
   const gruposVar = [...new Set(varsTraspaso.map(([, , g]) => g))].map((g) => ({ g, ops: varsTraspaso.filter((x) => x[2] === g).map(([v, n]) => [v, n] as [string, string]) }));
-  const enCurso = tabla.enCurso, finTxt = fmtMes(m.F[Math.min(pres.i1, m.F.length - 1)]);
+  const enCurso = tabla.enCurso, finTxt = fmtMes(m.F[tabla.finI]), deFabrica = esBaseDeFabrica(b, IDS_PRES);
   const colFin = enCurso ? "Hoy" : "Entregó";
   const query = p.toString(), hrefPag = `/herencia/${query ? "?" + query : ""}`;
   const elegirVar = (v: string) => set({ v: v === FILAS_HERENCIA[0].clave ? null : v });
 
   // la respuesta de arriba: la de un presidente, o la de la variable elegida en "Todos los traspasos"
   const esInf = clave.startsWith(PREF_INF);
-  const tr = vista === "traspasos" && !esInf ? traspasos(m, clave) : null;
+  const tr = vista === "traspasos" && !esInf ? traspasos(m, clave, b) : null;
   const ti = vista === "traspasos" && esInf ? traspasosInforme(datosInf, clave.slice(PREF_INF.length), PRES) : null;
   const respUno = fraseHerencia(tabla);
   let respTr: { titulo: string; unidad: string; cifra: string; fecha: string; frase: string } | null = null;
@@ -242,15 +245,15 @@ export function Herencia() {
   const textoFuente = "Fuente: datos oficiales (INDEC, Banco Central, Ministerio de Economía y otros); detalle en Primero los Datos.";
   const resumen = vista === "uno" ? `Un presidente · ${pres.n}` : `Todos los traspasos · ${opcionesVar.find(([v]) => v === clave)?.[1] ?? clave}`;
   const abrirImagen = () => {
-    setImg({ tipo: "herencia", presId: pres.id, ids: IDS.filter((id) => !!m.SER[id]), base: BASE_HERENCIA, informes: datosInf, rn } as VistaCompartir);
+    setImg({ tipo: "herencia", presId: pres.id, ids: IDS.filter((id) => !!m.SER[id]), base: b, informes: datosInf, rn } as VistaCompartir);
   };
 
   const notaT = (
     <details className="her-plegado">
       <summary>Cómo se calcula</summary>
       <ul className="method">
-        <li>Acá el inicio es siempre el mes anterior a asumir (T-1), sin importar la configuración de inicio de mandato: la herencia es el dato al traspaso.</li>
-        <li>Cuentas públicas en % del PIB (resultado primario, financiero y cuasifiscal): “Recibió” es el año calendario cerrado del traspaso (para quien asume en diciembre, el año que termina ese diciembre; si no, el último año completo antes de asumir), no los 12 meses a T-1. Si ese año no tiene los 12 meses publicados, se usan los 12 meses a T-1 y se avisa. “{colFin}” sigue con los últimos 12 meses.</li>
+        <li>{deFabrica ? "De fábrica, “Recibió” es el mes de asunción (T) y “Entregó”, el mes en que asume el siguiente (F): de diciembre a diciembre. " : `Acá el inicio y el fin siguen tu configuración: ${oracionInicio(b)} `}Se cambia en Configuración (inicio y fin del mandato; la sección Herencia puede quedar afuera).</li>
+        <li>Cuentas públicas en % del PIB (resultado primario, financiero y cuasifiscal): “Recibió” es el año calendario cerrado del traspaso (para quien asume en diciembre, el año que termina ese diciembre; si no, el último año completo antes de asumir), no los 12 meses al mes de inicio. Si ese año no tiene los 12 meses publicados, se usan los 12 meses al mes de inicio y se avisa. “{colFin}” sigue con los últimos 12 meses.</li>
         <li>En series trimestrales o semestrales (pobreza, cuenta corriente, subsidios) se usa el último dato publicado hasta ese mes, que puede ser de varios meses antes; por eso cada valor lleva su mes. Un dato con más de {MAX_ATRASO} meses de antigüedad no cuenta: la celda dice “sin dato” y por qué.</li>
         {vista === "uno" && <li>Cambio: en puntos (p.p.) si el dato es un porcentaje; si no, en %, con la diferencia debajo. Se calcula con los valores tal como se ven.</li>}
         {vista === "uno" && <li>Verde y rojo siguen la dirección de cada dato en el resto del sitio (más reservas o salario, en verde; más inflación, pobreza o riesgo país, en rojo); el signo siempre está escrito. Sin color: datos en los que subir o bajar no se califica (pasivos remunerados, tipo de cambio real, precios regulados, subsidios).</li>}
@@ -271,6 +274,7 @@ export function Herencia() {
         <BarraResumen resumen={resumen} onAjustes={() => setHoja(true)}
           extras={<button type="button" className="vistabar-ajustes" onClick={() => set({ vista: vista === "uno" ? "traspasos" : null })}>{vista === "uno" ? "Todos los traspasos" : "Un presidente"}</button>} />
       </div>
+      <LineaInicio info={info} F={m.F} />
       <Hoja titulo="Ajustes" abierta={hoja} onCerrar={() => setHoja(false)}>
         {(cerrar) => vista === "uno" ? (
           <div className="her-hoja-sec">
@@ -295,7 +299,7 @@ export function Herencia() {
       {vista === "uno" ? (
         <>
           <Capitulo id="her-tabla" titulo="Recibido y entregado"
-            bajada={`${pres.n} asumió en ${fmtMes(pres.ini)}. Recibió: último dato en o antes de ${tabla.mesT1 ?? "el mes anterior a asumir"}. ${colFin}: ${enCurso ? "último dato publicado de cada variable." : `último dato en o antes de ${finTxt}, el último mes del mandato.`}`}
+            bajada={`${pres.n} asumió en ${fmtMes(pres.ini)}. Recibió: último dato en o antes de ${tabla.mesIni ?? "el mes anterior a asumir"}. ${colFin}: ${enCurso ? "último dato publicado de cada variable." : `último dato en o antes de ${finTxt}${tabla.finI === pres.i1 ? ", el último mes del mandato" : ""}.`}`}
             acciones={<CompartirHoja href={hrefPag} titulo={`Herencia de ${pres.n}`} texto={`${respUno.frase} ${textoFuente}`} onImagen={abrirImagen} />}>
             <div className="tablewrap fija her-tabla her-ap"><table>
               <thead><tr><th>Variable</th><th>Recibió</th><th>{colFin}</th><th>Cambio</th></tr></thead>
@@ -354,7 +358,7 @@ export function Herencia() {
       ) : tr ? (
         <Capitulo id="traspasos" titulo="Cada traspaso presidencial" acciones={<CompartirHoja href={hrefPag} titulo={`${tr.nombre} en cada traspaso presidencial`} texto={`${respTr?.frase ?? ""} ${textoFuente}`} />}>
           <p className="note">
-            {tr.href ? <Link prefetch={false} href={tr.href}>{tr.nombre}</Link> : tr.nombre}{tr.unidad ? ` (${tr.unidad})` : ""}: el último dato en o antes del mes anterior a cada asunción.
+            {tr.href ? <Link prefetch={false} href={tr.href}>{tr.nombre}</Link> : tr.nombre}{tr.unidad ? ` (${tr.unidad})` : ""}: el último dato en o antes del mes de inicio de cada presidente (el de asunción, salvo que elijas otro en Configuración).
             {tr.def.nota ? ` ${tr.def.nota}` : ""}
           </p>
           <div className="tablewrap fija her-tabla"><table>

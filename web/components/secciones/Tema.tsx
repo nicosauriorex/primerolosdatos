@@ -90,7 +90,7 @@ export function TemaPagina({ t }: { t: Tema }) {
   const principales = useMemo(() => (listo ? principalesDe(t, S) : []), [listo, t, S]);
   // Para las tarjetas se bajan los datos de los principales; la ficha pide los de su variable.
   const sec = useSeccion(principales.flatMap(idsDe));
-  const info = useBase(p, set, montado);
+  const info = useBase("fichas", p, set, montado);
   const fichaRef = useRef<HTMLElement>(null), tituloFicha = useRef<HTMLHeadingElement>(null);
   const plantillas = useMemo(() => (listo ? crearPlantillas(metas) : []), [listo, metas]);
   const delTemaTodas = useMemo(() => seriesDe(t, metas), [t, metas]);

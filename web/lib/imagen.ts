@@ -815,7 +815,7 @@ function columnasMeses(ctx: Ctx, r: Rect, L: LienzoDe<"meses">, pal: Paleta, esc
   if (ref) { ctx.fillStyle = pal.accion; ctx.fillText(recortarPuntos(ctx, ref.t, x1 - x0), ref.x, ref.y); }
   if (act) { ctx.fillStyle = pal.acento; ctx.fillText(recortarPuntos(ctx, act.t, x1 - x0), act.x, act.y); }
   // escala: sin eje, una línea punteada a la altura de la columna más alta con su valor y su año (si no es ya la del año actual o la de referencia),
-  // en el primer costado donde el texto no tape ninguna columna ni la columna (o la guía) del año actual o de referencia.
+  // pegado a esa columna (o, si no entra, en un costado) donde el texto no tape ninguna columna ni la columna (o la guía) del año actual o de referencia.
   // Si la actual o la de referencia empatan con la más alta, ya tienen su rótulo: no se dibuja.
   const vMax = Math.max(...vals), iMax = vals.indexOf(vMax);
   const empata = (i: number) => i >= 0 && vals[i] === vMax;
@@ -832,11 +832,21 @@ function columnasMeses(ctx: Ctx, r: Rect, L: LienzoDe<"meses">, pal: Paleta, esc
     const arriba = yl - 8, sobra = (xa: number) =>
       [act, ref].every((q) => !q || q.x >= xa + w + 12 || q.x + q.w <= xa - 12 || Math.abs(q.y - arriba) >= renglon)
       && [iAct, iRef].every((i) => i < 0 || xCol(i) + bw / 2 < xa - 8 || xCol(i) + bw / 2 > xa + w + 8);   // ni su guía vertical
-    const pos = libre(x0) ? { x: x0, y: base } : libre(x1 - w) ? { x: x1 - w, y: base }
-      : arriba - fEsc >= r.y + 4 && sobra(x0) ? { x: x0, y: arriba } : arriba - fEsc >= r.y + 4 && sobra(x1 - w) ? { x: x1 - w, y: arriba } : null;
+    // primero pegado a la columna más alta (a su izquierda o a su derecha), así la línea queda corta; si no hay lugar, en un costado del gráfico
+    const cMax = xCol(iMax) + bw / 2, hayArriba = arriba - fEsc >= r.y + 4;
+    const cerca = [cMax - 10 - w, cMax + 10].map((xa) => Math.max(x0, Math.min(x1 - w, xa)));
+    const lugares: { x: number; y: number; ok: boolean }[] = [
+      ...cerca.flatMap((xa) => [{ x: xa, y: base, ok: libre(xa) }, { x: xa, y: arriba, ok: hayArriba && sobra(xa) }]),
+      { x: x0, y: base, ok: libre(x0) }, { x: x1 - w, y: base, ok: libre(x1 - w) },
+      { x: x0, y: arriba, ok: hayArriba && sobra(x0) }, { x: x1 - w, y: arriba, ok: hayArriba && sobra(x1 - w) },
+    ];
+    const pos = lugares.find((l) => l.ok) ?? null;
     if (pos) {
-      ctx.strokeStyle = pal.tintaSec; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.5; ctx.setLineDash([6, 6]);
-      ctx.beginPath(); ctx.moveTo(x0, yl); ctx.lineTo(x1, yl); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+      // la línea arranca en el centro de la columna más alta (con un punto) y llega solo hasta el otro extremo del rótulo: marca esa columna, no el último dato
+      const la = Math.min(cMax, pos.x), lb = Math.max(cMax, pos.x + w);
+      ctx.strokeStyle = pal.tintaSec; ctx.globalAlpha = 0.6; ctx.lineWidth = 1.5; ctx.setLineDash([6, 6]);
+      ctx.beginPath(); ctx.moveTo(la, yl); ctx.lineTo(lb, yl); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = pal.tintaSec; ctx.beginPath(); ctx.arc(cMax, yl, px(Math.max(3, 4 * esc)), 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
       ctx.fillStyle = pal.tintaSec; ctx.textAlign = "left"; ctx.fillText(t, pos.x, pos.y);
     }
   }

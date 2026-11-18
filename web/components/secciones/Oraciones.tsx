@@ -12,7 +12,7 @@ import { FilaChips } from "../sistema/FilaChips";
 import { Delta } from "../sistema/Delta";
 import { IconoCerrar } from "../sistema/iconos";
 import { palabrasBusqueda, textoBusqueda } from "@/lib/catalogo";
-import { baseDeConfig } from "@/lib/config";
+import { baseDeSeccion } from "@/lib/config";
 import { type SerieMeta } from "@/lib/motor";
 import { PRES_DEF } from "@/lib/estadisticas";
 import {
@@ -215,7 +215,7 @@ export function Oraciones({ S }: { S: Record<string, SerieMeta> }) {
     return x.filter(Boolean) as string[];
   }, [actual, producto, salario, p2, p3, monto, a, b]);
   const listo = useCargar(catalogo ? archivosDe(idsPregunta) : []) && catalogo;
-  const base = useMemo(() => baseDeConfig(config, IDS_PRES), [config]);
+  const base = useMemo(() => baseDeSeccion(config, "presidentes", IDS_PRES), [config]);
   const respuesta = useMemo<Respuesta | null>(() => {
     if (!motor || !listo) return null;
     switch (actual) {

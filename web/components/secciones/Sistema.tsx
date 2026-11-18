@@ -20,7 +20,7 @@ import { MenuMas } from "../sistema/MenuMas";
 import { ListaBarras, type FilaBarra } from "../sistema/ListaBarras";
 import { TablaMandatos, type FilaMandato } from "../sistema/TablaMandatos";
 import { Lamina, Laminas } from "../sistema/Lamina";
-import { baseDeConfig } from "@/lib/config";
+import { baseDeSeccion } from "@/lib/config";
 import { contextoDato } from "@/lib/contexto-dato";
 import { PRES_DEF, crearPres, etiqueta, statsMandato } from "@/lib/estadisticas";
 import { nf1, ok, r1 } from "@/lib/formato";
@@ -77,14 +77,14 @@ export function Sistema() {
   // Por presidente: Inicio, Cierre y Promedio de la inflación mensual (D-023: sin la "variación" entre dos meses sueltos)
   const pres = useMemo(() => {
     if (!m || !m.SER.ipc_empalme || !m.SER.sipa_med) return null;
-    const b = baseDeConfig(config, IDS_PRES);
+    const b = baseDeSeccion(config, "presidentes", IDS_PRES);
     const PRES = crearPres(m.F);
     const cI = m.calc(PLACAS.inflacion), cS = m.calc(PLACAS.salario);
     const filas: FilaMandato[] = [], promedios: FilaBarra[] = [], salario: FilaBarra[] = [];
     for (const x of PRES) {
       const st = statsMandato(m.F, cI.v, x, b);
       const desde = datosDesde(m.F, cI.v, x);
-      const periodoTxt = periodoMandato(m.F, x) + (desde ? ` (${desde})` : "");
+      const periodoTxt = periodoMandato(m.F, x, b) + (desde ? ` (${desde})` : "");
       if (st.n > 0) {
         filas.push({ id: x.id, nombre: x.corto, periodo: periodoTxt, color: x.color, celdas: {
           ini: { texto: m.fmtC(cI, st.ini) }, fin: { texto: m.fmtC(cI, st.fin) }, prom: { texto: m.fmtC(cI, st.prom), valor: st.prom ?? null },
@@ -96,12 +96,12 @@ export function Sistema() {
       const desdeS = datosDesde(m.F, cS.v, x);
       if (ss.n > 0 && ok(ss.ini) && ok(ss.fin) && ss.ini !== 0) {
         const v = r1((ss.fin / ss.ini - 1) * 100);
-        salario.push({ id: x.id, nombre: x.corto, valor: v, texto: `${signo(v)} %`, sub: periodoMandato(m.F, x) + (desdeS ? ` (${desdeS})` : ""), tono: v * cS.dir > 0 ? "bueno" : v * cS.dir < 0 ? "malo" : null });
+        salario.push({ id: x.id, nombre: x.corto, valor: v, texto: `${signo(v)} %`, sub: periodoMandato(m.F, x, b) + (desdeS ? ` (${desdeS})` : ""), tono: v * cS.dir > 0 ? "bueno" : v * cS.dir < 0 ? "malo" : null });
       }
     }
     return { filas, promedios, salario, unidad: cI.unidad };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [m, version, config.t0, JSON.stringify(config.t0p)]);
+  }, [m, version, config.t0, JSON.stringify(config.t0p), config.tf, JSON.stringify(config.tfp), config.aplica.includes("presidentes"), JSON.stringify(config.aplicaP)]);
 
   const laminas = useMemo(() => (m ? destacadas.map((p) => ({ p, ev: evaluar(m, p) })).filter((x) => x.ev) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -430,3 +430,12 @@ Idea del usuario: «fijate si tenemos empleados por empresa. porque a veces cier
 - El usuario trajo otra forma de medir la deuda consolidada (texto pegado, citado a Infobae y al BCRA): Tesoro USD 260.638 millones = deuda bruta (484.917) menos la deuda en manos del propio sector público (BCRA, FGS y otros); BCRA USD 18.869 millones = pasivos monetarios ($68.006.428 millones al 31/08/2026) menos reservas netas. Mide lo que el Estado le debe a terceros.
 - Diferencia con la nuestra (D-024): nosotros restamos solo lo que el Tesoro le debe al Banco Central según el boletín (letras y adelantos) y sumamos solo los pasivos remunerados; por eso la nuestra es un techo. Esta resta además lo que tienen el FGS, el Banco Nación y las Lecap del Banco Central, y del lado del Banco Central suma la base monetaria y resta las reservas netas.
 - Fuentes: investigadas en `docs/investigaciones/deuda-neta-2026-11-17.md` (presentación trimestral de Finanzas por acreedor, a mano; pasivos monetarios del BCRA, variable 1247; metodología de Facimex).
+
+## ~~Tanda de ajustes (2026-11-17)~~ ✅ 2026-11-18
+→ spec: docs/specs/ajustes-tanda-15.md
+- Ficha de un dato → «Mes a mes desde que asumió»: la animación no es tan fluida como la de Presidentes, y no deja filtrar hasta un cierto mes (elegir el mes final).
+- «¿Cómo fue octubre en otros años?» → Compartir → Imagen: la línea punteada de «El más alto: 8,3 % (2023)» tendría que ser más corta y arrancar desde el centro de la barra; hoy parece que marca el último dato.
+
+## ~~Presidentes y mandato: fin de mandato configurable~~ ✅ 2026-11-18
+→ spec: docs/specs/ajustes-tanda-15.md (además: lo de fábrica pasa a dic a dic, panel «Mandatos» por presidente, Herencia vinculada)
+- Mes de **fin** de mandato configurable, igual que ya se puede elegir el de inicio (2026-11-17). Ejemplo del usuario: computar la inflación interanual de cada presidente de diciembre a diciembre, así Alberto Fernández va de dic-19 a dic-23.

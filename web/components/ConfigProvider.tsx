@@ -1,12 +1,13 @@
 "use client";
 // Contexto de la configuración global + panel (botón ⚙ y ventana). Ver docs/specs/configuracion-global.md.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { Modal, Selector, Seg, useCerrarModal } from "./ui";
+import { Desplegable, Modal, Selector, Seg, useCerrarModal } from "./ui";
 import { IconoAjustes } from "./Iconos";
-import { PRES_DEF } from "@/lib/estadisticas";
+import { AYUDA_F, AYUDA_IGUAL, PRES_DEF, mesF, mesMas } from "@/lib/estadisticas";
+import { fmtMes } from "@/lib/formato";
 import {
-  CLAVE, DEFECTO, DESDES, aplicarColPres, DOLARES, MEDIDAS, TEMAS, T_MAX, T_MIN, aplicarTema, guardar, leer, txtTLargo,
-  type Config,
+  CLAVE, DEFECTO, DESDES, SECCIONES_BASE, aplicaDe, aplicarColPres, DOLARES, MEDIDAS, TEMAS, T_MAX, T_MIN, TF_MAX, TF_MIN, aplicarTema, guardar, leer, txtF, txtFLargo, txtT, txtTLargo,
+  type Config, type SeccionBase,
 } from "@/lib/config";
 
 interface Ctx {
@@ -84,6 +85,46 @@ function SelectT({ valor, onElegir, etiqueta, igual }: { valor: number | undefin
       onElegir={(v) => onElegir(v === "" ? undefined : Number(v))} />
   );
 }
+const RANGO_F = Array.from({ length: TF_MAX - TF_MIN + 1 }, (_, i) => TF_MIN + i);
+function SelectF({ valor, onElegir, etiqueta, igual }: { valor: number | undefined; onElegir: (k: number | undefined) => void; etiqueta: string; igual?: string }) {
+  return (
+    <Selector etiqueta={etiqueta} valor={valor === undefined ? "" : String(valor)}
+      opciones={[...(igual ? [["", igual] as [string, string]] : []), ...RANGO_F.map((k) => [String(k), txtFLargo(k)] as [string, string])]}
+      onElegir={(v) => onElegir(v === "" ? undefined : Number(v))} />
+  );
+}
+/** Desde / Hasta de un presidente: el mes real y, entre paréntesis, su T (o su F). La primera opción, «= <mes> (<T>)», es lo que da «Para todos» (corta, para que el mes se vea en el botón). */
+function SelPres({ c, id, fin, onElegir }: { c: Config; id: string; fin: boolean; onElegir: (k: number | undefined) => void }) {
+  const p = PRES_DEF.find((x) => x.id === id)!;
+  const ancla = fin ? mesF(p) : p.ini;
+  if (!ancla) return null;
+  const k0 = fin ? (c.tf ?? c.t0p[id] ?? c.t0) : c.t0;
+  const rango = fin ? RANGO_F : RANGO_T, txt = fin ? txtF : txtT, mes = (k: number) => fmtMes(mesMas(ancla, k));
+  const valor = (fin ? c.tfp[id] : c.t0p[id]);
+  return (
+    <Selector etiqueta={`${fin ? "Hasta" : "Desde"} de ${p.n}`} valor={valor === undefined ? "" : String(valor)}
+      opciones={[["", `= ${mes(k0)} (${txt(k0)})`], ...rango.map((k) => [String(k), `${mes(k)} (${txt(k)})`] as [string, string])]}
+      onElegir={(v) => onElegir(v === "" ? undefined : Number(v))} />
+  );
+}
+/** «Dónde»: las secciones en que vale, en un desplegable con casillas (chips). `lista` = las marcadas. */
+function Donde({ lista, onCambiar, etiqueta, deshabilitado }: { lista: readonly SeccionBase[]; onCambiar: (l: SeccionBase[]) => void; etiqueta: string; deshabilitado?: boolean }) {
+  if (deshabilitado) return <button type="button" className="btn drop cfgm-nulo" disabled aria-label={`${etiqueta}: sin excepción`}><span className="et">—</span></button>;
+  const n = lista.length, todas = n === SECCIONES_BASE.length;
+  const texto = todas ? "Todas" : n === 0 ? "Ninguna" : `${n} ${n === 1 ? "sección" : "secciones"}`;
+  const poner = (l: SeccionBase[]) => onCambiar(SECCIONES_BASE.map((x) => x[0]).filter((x) => l.includes(x)));
+  return (
+    <Desplegable etiqueta={<><span className="sr-solo">{etiqueta}: </span>{texto}</>} className="cfgm-donde">
+      <div className="cfgg-chips" role="group" aria-label={etiqueta} ref={(el) => { if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "nearest" })); }}>
+        <button type="button" className="chip-c" aria-pressed={todas} onClick={() => poner(SECCIONES_BASE.map((x) => x[0]))}>Todas</button>
+        {SECCIONES_BASE.map(([id, nombre]) => {
+          const on = lista.includes(id);
+          return <button key={id} type="button" className="chip-c" aria-pressed={on} onClick={() => poner(on ? lista.filter((x) => x !== id) : [...lista, id])}>{nombre}</button>;
+        })}
+      </div>
+    </Desplegable>
+  );
+}
 function Opciones<T extends string>({ etiqueta, valor, opciones, onElegir }: { etiqueta: string; valor: T; opciones: [T, string][]; onElegir: (v: T) => void }) {
   // `Seg` (R12): riel para una opción; si no entra en el renglón (Período por defecto, 7 opciones) pasa solo a píldoras sueltas
   return <Seg etiqueta={etiqueta} valor={valor} opciones={opciones} onElegir={(v) => onElegir(v as T)} />;
@@ -115,10 +156,27 @@ function PieConfig({ reiniciar }: { reiniciar: () => void }) {
 
 function Panel({ onCerrar, guardado }: { onCerrar: () => void; guardado: boolean }) {
   const { config: c, cambiar, reiniciar } = useConfig();
+  // Si un presidente se queda sin excepciones, su «Dónde» vuelve a «todas».
+  const sinExc = (id: string, t0p: Record<string, number>, tfp: Record<string, number>) => t0p[id] == null && tfp[id] == null;
+  const limpiarDonde = (id: string, t0p: Record<string, number>, tfp: Record<string, number>) => {
+    const aplicaP = { ...c.aplicaP };
+    if (sinExc(id, t0p, tfp)) delete aplicaP[id];
+    return aplicaP;
+  };
   const setPres = (id: string, k: number | undefined) => {
     const t0p = { ...c.t0p };
     if (k === undefined) delete t0p[id]; else t0p[id] = k;
-    cambiar({ t0p });
+    cambiar({ t0p, aplicaP: limpiarDonde(id, t0p, c.tfp) });
+  };
+  const setFin = (id: string, k: number | undefined) => {
+    const tfp = { ...c.tfp };
+    if (k === undefined) delete tfp[id]; else tfp[id] = k;
+    cambiar({ tfp, aplicaP: limpiarDonde(id, c.t0p, tfp) });
+  };
+  const setDonde = (id: string, l: SeccionBase[]) => {
+    const aplicaP = { ...c.aplicaP };
+    if (l.length === SECCIONES_BASE.length) delete aplicaP[id]; else aplicaP[id] = l;
+    cambiar({ aplicaP });
   };
   return (
     <Modal titulo="Configuración" cabecera="Configuración" onCerrar={onCerrar}>
@@ -127,13 +185,38 @@ function Panel({ onCerrar, guardado }: { onCerrar: () => void; guardado: boolean
         <Grupo titulo="Apariencia">
           <Fila rotulo="Tema"><Opciones etiqueta="Tema" valor={c.tema} opciones={TEMAS} onElegir={(tema) => cambiar({ tema })} /></Fila>
         </Grupo>
-        <Grupo titulo="Inicio del mandato">
-          <p className="cfgg-ayuda cfgg-intro">Desde qué mes se cuenta cada mandato (Por presidente, Meses de mandato, Curiosidades y Elecciones). T es el mes de asunción.</p>
-          <Fila rotulo="Para todos"><SelectT valor={c.t0} etiqueta="Inicio del mandato para todos" onElegir={(k) => cambiar({ t0: k ?? DEFECTO.t0 })} /></Fila>
+        <Grupo titulo="Mandatos">
+          <p className="cfgg-ayuda cfgg-intro">Desde y hasta qué mes se cuenta cada mandato, y en qué secciones. {AYUDA_F} {AYUDA_IGUAL} Para el presidente en ejercicio, F es el fin previsto de su mandato ({fmtMes(mesF(PRES_DEF[PRES_DEF.length - 1]))}): mientras no haya datos hasta ese mes se cuenta hasta el último dato.</p>
+          <div className="cfgg-fila cfgm-cab" aria-hidden="true">
+            <span className="cfgg-rot" />
+            <div className="cfgm-ctls"><span>Desde</span><span>Hasta</span><span>Dónde</span></div>
+          </div>
+          <div className="cfgg-fila">
+            <span className="cfgg-rot">Para todos</span>
+            <div className="cfgg-ctl cfgm-ctl">
+              <div className="cfgm-ctls">
+                <div className="cfgm-c"><span className="cfgm-et">Desde</span><SelectT valor={c.t0} etiqueta="Inicio del mandato para todos" onElegir={(k) => cambiar({ t0: k ?? DEFECTO.t0 })} /></div>
+                <div className="cfgm-c"><span className="cfgm-et">Hasta</span><SelectF valor={c.tf ?? undefined} etiqueta="Fin del mandato para todos" igual="Igual que el inicio" onElegir={(k) => cambiar({ tf: k ?? null })} /></div>
+                <div className="cfgm-c"><span className="cfgm-et">Dónde</span>
+                  <Donde lista={c.aplica} etiqueta="Secciones donde se aplica el inicio y el fin de Para todos"
+                    onCambiar={(aplica) => cambiar({ aplica })} /></div>
+              </div>
+              <p className="cfgg-ayuda">Una sección que no esté en «Dónde» usa lo de fábrica (T, fin igual que el inicio). En cada presidente, «=» es lo que da Para todos. Un link compartido siempre muestra lo que trae.</p>
+            </div>
+          </div>
           {PRES_DEF.map((p) => (
-            <Fila key={p.id} rotulo={p.n}>
-              <SelectT valor={c.t0p[p.id]} etiqueta={`Inicio del mandato de ${p.n}`} igual="Igual que todos" onElegir={(k) => setPres(p.id, k)} />
-            </Fila>
+            <div key={p.id} className="cfgg-fila">
+              <span className="cfgg-rot">{p.n}</span>
+              <div className="cfgg-ctl cfgm-ctl">
+                <div className="cfgm-ctls">
+                  <div className="cfgm-c"><span className="cfgm-et">Desde</span><SelPres c={c} id={p.id} fin={false} onElegir={(k) => setPres(p.id, k)} /></div>
+                  <div className="cfgm-c"><span className="cfgm-et">Hasta</span><SelPres c={c} id={p.id} fin onElegir={(k) => setFin(p.id, k)} /></div>
+                  <div className="cfgm-c"><span className="cfgm-et">Dónde</span>
+                    <Donde lista={aplicaDe(c, p.id)} etiqueta={`Secciones donde vale la excepción de ${p.n}`} deshabilitado={sinExc(p.id, c.t0p, c.tfp)}
+                      onCambiar={(l) => setDonde(p.id, l)} /></div>
+                </div>
+              </div>
+            </div>
           ))}
         </Grupo>
         <Grupo titulo="Datos">

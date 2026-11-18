@@ -74,13 +74,14 @@ export function velasDe(m: Motor, c: Calculo, filas: { x: Pres; st: StatsM }[]):
 
 /** Meses de mandato con los valores por defecto de esa sección, solo con los presidentes que tienen datos.
  *  Si el punto de partida por defecto (mes 0 de Milei) no tiene dato (serie discontinuada), parte del último dato.
+ *  `md`/`mh`: filtro de meses (parámetros de URL `md`/`mh` de /mandato/, tal cual).
  *  Null si no hay ningún presidente con datos desde su mes 0 (serie corta o que no es mensual). */
-export function mandatoFicha(m: Motor, PRES: Pres[], PRES_T0: Pres[], e: Expr, b: BaseCfg, extra: string | null) {
+export function mandatoFicha(m: Motor, PRES: Pres[], PRES_T0: Pres[], e: Expr, b: BaseCfg, extra: string | null, md: string | null = null, mh: string | null = null) {
   const ids = new Set(PRES_MANDATO_DEF);
   if (extra && PRES_T0.some((x) => x.id === extra)) ids.add(extra);
   // con una tasa, el valor real de cada mes (C1): no hay "mismo punto de partida"
   const modo: ModoMandato = m.SER[e.id] && m.calc(e).pct ? "valor" : MODO_MANDATO_DEF;
-  const q = { expr: e, modo, banda: false, b, presIds: ids, anc: null as string | null, md: null, mh: null };
+  const q = { expr: e, modo, banda: false, b, presIds: ids, anc: null as string | null, md, mh };
   let r = calcularMandato(m, PRES, PRES_T0, q);
   if (r && !ok(r.ancla)) { q.anc = "ultimo"; r = calcularMandato(m, PRES, PRES_T0, q); }
   if (!r) return null;
@@ -105,7 +106,7 @@ export function sinMandatoTxt(m: Motor, c: Calculo, frec: FrecOrigen): string {
 /** Parámetros del inicio de mandato que trae la URL (para que "Abrir completo" muestre lo mismo). */
 export const paramsInicio = (p: URLSearchParams): Record<string, string> => {
   const out: Record<string, string> = {};
-  for (const k of ["t0", "t0p"]) { const v = p.get(k); if (v) out[k] = v; }
+  for (const k of ["t0", "t0p", "tf", "tfp"]) { const v = p.get(k); if (v) out[k] = v; }
   return out;
 };
 const qs = (o: Record<string, string | null | undefined>): string =>
@@ -115,8 +116,8 @@ const qs = (o: Record<string, string | null | undefined>): string =>
 export const hrefPresidentesDe = (e: Expr, velas: boolean, inicio: Record<string, string>): string =>
   `/presidentes/?${qs({ pv: encExpr(e), pvista: velas ? "velas" : null, ...inicio })}`;
 /** "Abrir completo" de Meses de mandato: la variable y lo que la ficha cambió (presidentes, punto de partida). */
-export const hrefMandatoDe = (e: Expr, o: { mp: string | null; anc: string | null }, inicio: Record<string, string>): string =>
-  `/mandato/?${qs({ mv: encExpr(e), mp: o.mp, anc: o.anc, ...inicio })}`;
+export const hrefMandatoDe = (e: Expr, o: { mp: string | null; anc: string | null; md?: string | null; mh?: string | null }, inicio: Record<string, string>): string =>
+  `/mandato/?${qs({ mv: encExpr(e), mp: o.mp, anc: o.anc, md: o.md, mh: o.mh, ...inicio })}`;
 
 // ------------------------------------------------------------ Capítulo "Ahora": la cabecera de la ficha
 export const MESES_LARGOS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -292,7 +293,7 @@ export interface TablaFicha { filas: FilaMandato[]; columnas: ColumnaMandato[]; 
  *  o porque los datos empiezan después ("Cuenta desde ene-95 (inicio de los datos)"). Sin diferencia, undefined. */
 export function cuentaDesde(F: string[], arr: ArrayLike<number | null | undefined>, x: Pres, b: BaseCfg, st: StatsM): string | undefined {
   if (st.iniI == null) return undefined;
-  const comun = baseIdx(F, x, { t0: b.t0, t0p: {} });   // dónde arrancaría con la regla general
+  const comun = baseIdx(F, x, { ...b, t0p: {} });   // dónde arrancaría con la regla general
   if (st.iniI === comun) return undefined;
   const propia = baseIdx(F, x, b);
   const desde = fechaDeDato(F[st.iniI], frecuenciaOrigen(Array.from(arr, (v) => v ?? null)));
@@ -335,7 +336,7 @@ export function filasMandatosFicha(m: Motor, e: Expr, b: BaseCfg): TablaFicha {
       celdas.u6 = st.finI == null ? sin : promedio(st.finI - 5, 6);
       celdas.u12 = st.finI == null ? sin : promedio(st.finI - 11, 12);
     }
-    filas.push({ id: x.id, nombre: x.corto, periodo: periodoMandato(F, x), cuenta: cuentaDesde(F, c.v, x, b, st), color: x.color, celdas });
+    filas.push({ id: x.id, nombre: x.corto, periodo: periodoMandato(F, x, b), cuenta: cuentaDesde(F, c.v, x, b, st), color: x.color, celdas });
   }
   const base: ColumnaMandato[] = [{ clave: "ini", titulo: "Inicio" }, { clave: "fin", titulo: "Cierre" }, { clave: "var", titulo: "Variación", principal: true }];
   if (tasa) {

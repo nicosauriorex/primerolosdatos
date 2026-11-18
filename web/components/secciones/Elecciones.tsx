@@ -131,7 +131,7 @@ function Dispersion({ o, color, metrica, hoy }: { o: Corr; color: string; metric
 export function Elecciones() {
   const [p, set, montado] = useParams();
   const sec = useSeccion("todo");
-  const info = useBase(p, set, montado), b = info.b;
+  const info = useBase("elecciones", p, set, montado), b = info.b;
   const { motor: m, version } = sec;
   const [ord, setOrd] = useState<{ k: string; d: number }>({ k: "abs", d: -1 });
   const [buscar, setBuscar] = useState("");

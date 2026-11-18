@@ -3,7 +3,7 @@
 // Se dibuja siempre la tabla, aunque en pantalla se vean las barras.
 import type { DatosImagen, FilaGrillaImg } from "./imagen";
 import type { FormatoImg } from "./config";
-import { baseIdx, oracionInicio, type Pres, type BaseCfg, type CeldaHito, type ModoMandato } from "./estadisticas";
+import { baseIdx, finIdx, oracionInicio, type Pres, type BaseCfg, type CeldaHito, type ModoMandato } from "./estadisticas";
 import { fuenteLegible, limpiarComentario, notaInflacion, slug } from "./imagen-datos";
 import { fuentesCalc, type Motor } from "./motor";
 
@@ -21,7 +21,7 @@ interface MandatoHitos {
 export function armarImagenHitos(m: Motor, D: MandatoHitos, hitosDe: CeldaHito[][], hitos: number[], b: BaseCfg, formato: FormatoImg, comentario = ""): DatosImagen {
   const enc = ["Mes 0", ...hitos.map((h) => `Mes ${h}`), "Final"];
   const filas: FilaGrillaImg[] = D.pres.map((x, k) => {
-    const fin = x.i1 - baseIdx(m.F, x, b), fila = hitosDe[k];
+    const fin = finIdx(m.F, x, b) - baseIdx(m.F, x, b), fila = hitosDe[k];
     const celda = (t: number, extra = "") => {
       const ce = fila.find((q) => q.t === t), txt = D.cel(x, t);
       return { texto: txt + extra, cls: txt === "–" ? "neutro" as const : ce?.tono ?? "neutro" as const, calor: ce?.tono ? ce.frac : 0 };

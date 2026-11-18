@@ -136,7 +136,7 @@ export function defCurios(S: Record<string, SerieMeta>): DefCurio[] {
 }
 
 // ---------------------------------------------------------------- Curiosidades generadas por presidente
-import { baseIdx, nivelComparable, statsMandato, type Pres } from "./estadisticas";
+import { baseIdx, finIdx, nivelComparable, statsMandato, type Pres } from "./estadisticas";
 import type { BaseCfg } from "./config";
 import type { Indic } from "./catalogo";
 
@@ -154,10 +154,10 @@ export function generarCuriosidades(m: Motor, PRES: Pres[], INDIC: Indic[], INDI
   const F = m.F, out: CurioGen[] = [];
   const ultimo = F.length - 1;
   const ultMes = (v: Vals) => { for (let i = ultimo; i >= 0; i--) if (ok(v[i])) return i; return ultimo; };
-  const hasta = (p: Pres, v: Vals) => fmtMes(F[Math.min(p.i1, ultMes(v))]);
+  const hasta = (p: Pres, v: Vals) => fmtMes(F[Math.min(finIdx(F, p, b), ultMes(v))]);
   const enCurso = (p: Pres) => p.i1 >= ultimo;
   const suf = (p: Pres, v: Vals) => (enCurso(p) ? ` (hasta ${hasta(p, v)})` : "");
-  const mandato = (p: Pres) => ({ desde: F[baseIdx(F, p, b)], hasta: F[p.i1] });
+  const mandato = (p: Pres) => ({ desde: F[baseIdx(F, p, b)], hasta: F[finIdx(F, p, b)] });
   const quien = (p: Pres) => (p.id === "menem1" || p.id === "menem2" || p.id === "cfk1" || p.id === "cfk2" ? p.n.replace(/ (\d)$/, " (mandato $1)") : p.n);
 
   [...INDIC, ...INDIC_PP].forEach((ind) => {

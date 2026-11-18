@@ -1,7 +1,7 @@
 // Datos de la imagen de compartir para las secciones de presidentes (Por presidente, Meses de mandato y Ranking). No dibuja: eso es `imagen.ts`.
 // Usa los mismos cálculos que la página (statsMandato, claseVariacion, calcularMandato, rankingPresidentes) para que den lo mismo.
 import {
-  baseIdx, baseTxt, oracionInicio, calcularMandato, claseVariacion, crearPres, rankingPresidentes, statsMandato, nivelComparable, TITULOS_MANDATO, nombreCorto, varNum,
+  baseIdx, baseTxt, finIdx, oracionInicio, calcularMandato, claseVariacion, crearPres, rankingPresidentes, statsMandato, nivelComparable, TITULOS_MANDATO, nombreCorto, varNum,
   type BaseCfg, type CritRk, type IndRk, type ModoMandato,
 } from "./estadisticas";
 import type { DatosImagen, FilaBarra, FilaGrillaImg, FilaMes, FilaRank, FilaVariable, FilaVela } from "./imagen";
@@ -12,7 +12,7 @@ import type { Expr, Motor } from "./motor";
 import { fuentesCalc } from "./motor";
 import { grupoDe } from "./catalogo";
 import { datosDesde, variacionMostrada } from "./tablas";
-import { BASE_HERENCIA, GRUPOS_HERENCIA, tablaHerencia } from "./herencia";
+import { GRUPOS_HERENCIA, tablaHerencia } from "./herencia";
 import { filasEstimaciones, filasInforme, type DatoInforme, type FilaInforme, type ReservasNetas } from "./herencia-informes";
 import { mesesIguales } from "./ficha";
 import { GRILLA_DATOS, grillaPresidentes } from "./presidentes";
@@ -30,7 +30,7 @@ export type VistaPres =
   // resaltados: ids de presidentes que la pantalla muestra con línea gruesa (los demás, atenuados); vacío o sin esto = todos iguales
   | { tipo: "mandato"; expr: Expr; modo: ModoMandato; presIds: string[]; anc: string | null; md: string | null; mh: string | null; valorFinal?: boolean; resaltados?: string[]; base: BaseCfg }
   | { tipo: "ranking"; crit: CritRk; inds: IndRk[]; usaVars: boolean; base: BaseCfg }
-  | { tipo: "herencia"; presId: string; ids: string[]; base: BaseCfg; informes?: DatoInforme[]; rn?: ReservasNetas | null } // ids: series de la tabla que están en el catálogo (base fija T-1); informes: datos cargados a mano (fase 2)
+  | { tipo: "herencia"; presId: string; ids: string[]; base: BaseCfg; informes?: DatoInforme[]; rn?: ReservasNetas | null } // ids: series de la tabla que están en el catálogo (base: la de la configuración de la sección Herencia); informes: datos cargados a mano (fase 2)
   | { tipo: "grilla"; calor: boolean; base: BaseCfg }   // "Todos los presidentes, de un vistazo": una fila por presidente, una columna por dato clave
   | { tipo: "meses"; expr: Expr; desde: number; hasta: number }   // el mismo mes en cada año, de `desde` a `hasta` (años); no es de presidentes, pero se arma igual
   | VistaElec   // Elecciones (V7): llevan los números ya calculados por la página; ver imagen-elecciones.ts
@@ -93,7 +93,7 @@ export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosI
       filas.push({
         id: p.id, nombre: p.n, valor: prom ? (st.prom as number) : dif, variacion: prom ? m.fmtC(c, st.prom as number) : variacionMostrada(m, c, ini, fin),
         cls: prom ? "neutro" : claseVariacion(c.dir, c.pct, ini, fin),
-        ini: m.fmtC(c, ini), fin: m.fmtC(c, fin), nota: notaParcial(F, st, baseIdx(F, p, b), p.i1),
+        ini: m.fmtC(c, ini), fin: m.fmtC(c, fin), nota: notaParcial(F, st, baseIdx(F, p, b), finIdx(F, p, b)),
       });
     });
     if (!filas.length) return null;
@@ -138,7 +138,7 @@ export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosI
   if (v.tipo === "variables") {
     const p = PRES.find((x) => x.id === v.presId);
     if (!p || !v.exprs.length) return null;
-    const bi = baseIdx(F, p, b), calcs = v.exprs.map((e) => m.calc(e));
+    const bi = baseIdx(F, p, b), fi = finIdx(F, p, b), calcs = v.exprs.map((e) => m.calc(e));
     const filas: FilaVariable[] = calcs.map((c): FilaVariable => {
       const st = statsMandato(F, c.v, p, b), sinDatos = !st.n || st.iniI === st.finI;
       const nombre = c.corto, unidad = c.unidad;
@@ -146,11 +146,11 @@ export function armarImagenPres(m: Motor, v: VistaPres, o: OpcionesPres): DatosI
       const ini = st.ini as number, fin = st.fin as number, desde = ok(c.v[bi]) ? bi : (st.iniI as number);
       return {
         nombre, unidad, ini: m.fmtC(c, ini), fin: m.fmtC(c, fin), variacion: variacionMostrada(m, c, ini, fin), cls: claseVariacion(c.dir, c.pct, ini, fin),
-        nota: notaParcial(F, st, bi, p.i1), spark: c.v.slice(desde, p.i1 + 1),
+        nota: notaParcial(F, st, bi, fi), spark: c.v.slice(desde, fi + 1),
       };
     });
     // con un solo presidente se dice el mes exacto (no la oración general del inicio de mandato)
-    const fin = Math.min(p.i1, F.length - 1);
+    const fin = Math.min(fi, F.length - 1);
     const d = esqueleto(m, o, b, `${p.n}: de ${fmtMes(F[bi])} (mes inicial) ${p.i1 < F.length - 1 ? `a ${fmtMes(F[fin])} (fin del mandato)` : "a hoy (último dato de cada variable)"}`, F[fin]);
     d.inicioTxt = null;
     d.frases = [neutro("Si los datos de una variable no cubren todo el período, la fila lo indica.")];
@@ -265,7 +265,7 @@ function imagenMeses(m: Motor, v: Extract<VistaPres, { tipo: "meses" }>, o: Opci
 /** Herencia de un presidente (docs/specs/herencia.md): el dibujo de "un presidente, varias variables" con los rótulos Recibió y Entregó (u Hoy).
  *  Los valores, meses y cambios salen de `tablaHerencia`, los mismos de la página. Las filas sin ningún dato no van. */
 function imagenHerencia(m: Motor, v: Extract<VistaPres, { tipo: "herencia" }>, o: OpcionesPres): DatosImagen | null {
-  const t = tablaHerencia(m, v.presId);
+  const t = tablaHerencia(m, v.presId, v.base);
   if (!t) return null;
   const conDato = t.filas.filter((f) => f.c && (f.recibio || f.entrego));
   if (!conDato.length) return null;
@@ -293,11 +293,11 @@ function imagenHerencia(m: Motor, v: Extract<VistaPres, { tipo: "herencia" }>, o
   // estimaciones (fase 3): al final, con quién estima en la unidad
   const filasEst = filasEstimaciones(v.informes ?? [], v.rn ?? null, crearPres(m.F), t.k).map((f) => aFila(f, `estimación: ${f.def.quien}`));
   const filas: FilaVariable[] = [...GRUPOS_HERENCIA.flatMap((g) => [...filasSerie, ...filasInf].filter((x) => x.grupo === g)), ...filasEst].map(({ grupo: _g, ...x }) => x);
-  const fin = Math.min(p.i1, F.length - 1);
-  const d = esqueleto(m, o, BASE_HERENCIA, `Herencia de ${p.n}: lo que recibió${t.mesT1 ? ` (${t.mesT1})` : ""} y ${t.enCurso ? "el último dato" : `lo que entregó (${fmtMes(F[fin])})`}`, F[fin]);
+  const fin = t.finI;
+  const d = esqueleto(m, o, v.base, `Herencia de ${p.n}: lo que recibió${t.mesIni ? ` (${t.mesIni})` : ""} y ${t.enCurso ? "el último dato" : `lo que entregó (${fmtMes(F[fin])})`}`, F[fin]);
   d.inicioTxt = null;
   const sin = t.filas.length - conDato.length;
-  d.frases = [neutro(`Recibió: último dato en o antes del mes anterior a asumir. ${t.enCurso ? "Hoy: último dato publicado" : "Entregó: último dato del mandato"}.${sin ? ` ${sin} ${sin === 1 ? "variable no tiene" : "variables no tienen"} datos para este período.` : ""}`), ...textos];
+  d.frases = [neutro(`Recibió: último dato en o antes ${t.mesIni ? `de ${t.mesIni}` : "del mes anterior a asumir"}. ${t.enCurso ? "Hoy: último dato publicado" : "Entregó: último dato del mandato"}.${sin ? ` ${sin} ${sin === 1 ? "variable no tiene" : "variables no tienen"} datos para este período.` : ""}`), ...textos];
   d.lienzo = { tipo: "variables", filas, presId: p.id, enc: { ini: "Recibió", fin: t.enCurso ? "Hoy" : "Entregó", vr: "Cambio", sp: "Recorrido", sinDato: "sin dato" } };
   d.unidad = "Cambio en % (en puntos si el dato ya es un porcentaje). Debajo, los meses de los dos datos";
   const calcs = conDato.map((f) => f.c!);

@@ -8,7 +8,7 @@ import { useConfig } from "./ConfigProvider";
 import { useCargar, useDatos } from "./DatosProvider";
 import { exprsUsadas } from "@/lib/historico";
 import { PRES_DEF } from "@/lib/estadisticas";
-import { baseDeConfig, DATOS_GEN, DATOS_PRES, FORMATOS_IMG, MAX_DATOS_GEN, MAX_DATOS_PRES, MAX_FRASES_IMG, TARJETAS_IMG, type ClaveFrase, type FormatoImg, type OpcionesImagen, type TarjetasImg } from "@/lib/config";
+import { baseDeSeccion, baseDeUrl, DATOS_GEN, DATOS_PRES, FORMATOS_IMG, MAX_DATOS_GEN, MAX_DATOS_PRES, MAX_FRASES_IMG, TARJETAS_IMG, type ClaveFrase, type FormatoImg, type OpcionesImagen, type TarjetasImg } from "@/lib/config";
 import { contextoDato, admiteContexto } from "@/lib/contexto-dato";
 import {
   archivoPng, avisoCompartir, avisoImagen, avisoTabla, compartir, compartirImagen, copiarImagen, copiarTexto, descargarImagen, puedeCompartirArchivo, puedeCopiarImagen, type ResultadoImagen,
@@ -108,7 +108,7 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
     cambiarImg({ frases: on ? [...sin, k].slice(0, MAX_FRASES_IMG) : sin });
   };
   const cambiarImg = (c: Partial<OpcionesImagen>) => cambiar({ imagen: { ...img, ...c } });
-  const kBase = `${config.t0}|${JSON.stringify(config.t0p)}`;
+  const kBase = `${config.t0}|${JSON.stringify(config.t0p)}|${config.tf}|${JSON.stringify(config.tfp)}`;
 
   // el comentario se aplica al dejar de escribir
   useEffect(() => { const t = setTimeout(() => setComentarioAplicado(comentario), 200); return () => clearTimeout(t); }, [comentario]);
@@ -126,7 +126,7 @@ function PanelImagen({ vista, href, titulo, onCerrar }: Props) {
           ? armarImagenPres(motor, (vista.tipo === "mandato" || vista.tipo === "ctx-lineas") && resaltados ? { ...vista, resaltados } : vista, { formato, comentario: comentarioAplicado })
           : armarImagen(motor, { ...vista, exprs: exprsUsadas(motor, vista), desde: per?.desde ?? vista.desde, hasta: per?.hasta ?? vista.hasta }, {
             formato, comentario: comentarioAplicado, personal: img, periodoEnTitulo,
-            base: baseDeConfig(config, PRES_DEF.map((p) => p.id)), colPres: config.colPres,
+            base: baseDeUrl(new URLSearchParams(window.location.search)) ?? baseDeSeccion(config, "fichas", PRES_DEF.map((p) => p.id)), colPres: config.colPres,   // la misma base que la pantalla: la del link o, si no trae, la de «Fichas y temas»
           });
       } catch { datos = null; }
       if (!vivo) return;

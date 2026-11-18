@@ -1,21 +1,20 @@
 // Herencia: cómo estaba cada variable cuando asumió cada presidente ("Recibió") y cómo la dejó ("Entregó", o "Hoy" si está en funciones).
 // Ver docs/specs/herencia.md (fase 1). Todos los cálculos de la sección están acá; la página y la imagen solo dibujan lo que sale de este archivo.
 //
-// - La herencia es por definición el dato al traspaso: siempre T-1 (último mes del antecesor), sin mirar la configuración de inicio de mandato.
-// - "Recibió" = el último dato en o antes de T-1: es el cierre (`fin` de `statsMandato`) del mandato del antecesor.
-//   "Entregó" = el último dato en o antes del último mes del mandato: el cierre de `statsMandato` del propio mandato.
+// - La herencia sigue la configuración de inicio y fin de mandato (sección «herencia» de Configuración, `useBase`): con la de fábrica es el dato al
+//   traspaso: T (mes de asunción) y F (mes en que asume el siguiente), de diciembre a diciembre.
+// - "Recibió" = el último dato en o antes del mes de inicio del que asume (`baseIdx`; T de fábrica): el cierre del mandato del antecesor.
+//   "Entregó" = el último dato en o antes del fin del mandato (`finIdx`): el cierre de `statsMandato` del propio mandato.
 // - Un dato con más de `MAX_ATRASO` meses de antigüedad respecto del traspaso no cuenta como recibido ni entregado (una serie que se dejó
 //   de publicar no "se entrega" años después): la celda dice "sin dato" y por qué.
 // - Las cuentas se hacen con los valores tal como se muestran (`m.fmtC`), así el cambio cierra a la vista.
 // - Palabras neutras (D-012): recibió, entregó, cambio. Sin calificar la herencia.
-import { claseVariacion, crearPres, statsMandato, type BaseCfg, type Pres } from "./estadisticas";
+import { baseIdx, claseVariacion, crearPres, finIdx, statsHasta, statsMandato, type BaseCfg, type Pres } from "./estadisticas";
 import { fmtMes, ok, r1, valorMostrado } from "./formato";
 import { hrefDato } from "./temas";
 import { NOMBRES } from "./nombres";
 import type { Calculo, Expr, Motor, SerieMeta } from "./motor";
 
-/** Inicio fijo de la herencia: T-1 para todos, sin excepciones (no depende de la configuración). */
-export const BASE_HERENCIA: BaseCfg = { t0: -1, t0p: {} };
 /** Antigüedad máxima (en meses) del dato respecto del mes del traspaso para contarlo como recibido o entregado. */
 export const MAX_ATRASO = 12;
 
@@ -34,7 +33,7 @@ export interface DefFila {
   /** Llevar la serie a 100 en su primer mes con dato (para índices relativos, que en "real" quedan en puntos de hoy). */
   base100?: { unidad: string };
   /** "Recibió" = el año calendario cerrado del traspaso (para quien asume en diciembre, el año que termina ese diciembre; si no, el último año completo
-   *  antes de asumir), en lugar de los 12 meses a T-1. Solo para flujos en % del PIB (suma de 12 meses). */
+   *  antes de asumir), en lugar de los 12 meses al mes de inicio. Solo para flujos en % del PIB (suma de 12 meses). */
   anioCerrado?: boolean;
   /** La fila es `id` menos la serie `menos` (las dos en % del PIB, con los valores como se ven). */
   menos?: { clave: string };
@@ -140,7 +139,7 @@ const punto = (m: Motor, c: Calculo, v: number, i: number): Punto => {
 const primerDato = (v: ArrayLike<number | null>): number => { for (let i = 0; i < v.length; i++) if (ok(v[i])) return i; return -1; };
 const ultimoDato = (v: ArrayLike<number | null>): number => { for (let i = v.length - 1; i >= 0; i--) if (ok(v[i])) return i; return -1; };
 
-/** Por qué no hay dato en el mes `ref` (T-1 o el cierre del mandato): la serie empieza después, terminó antes, o hay un hueco. */
+/** Por qué no hay dato en el mes `ref` (el mes de inicio del que asume o el cierre del mandato): la serie empieza después, terminó antes, o hay un hueco. */
 function motivoSinDato(F: string[], v: ArrayLike<number | null>, ref: number): string {
   const a = primerDato(v), z = ultimoDato(v);
   if (a < 0) return "sin datos en la serie";
@@ -152,24 +151,25 @@ function motivoSinDato(F: string[], v: ArrayLike<number | null>, ref: number): s
 /** Índice del mes de asunción (T) de un presidente; -1 si es anterior al primer mes de datos. */
 export const mesAsuncion = (F: string[], p: Pres): number => F.indexOf(p.ini);
 
-/** Lo que recibió el presidente `k`: el cierre del mandato del antecesor (último dato en o antes de T-1). */
-export function recibio(m: Motor, c: Calculo, PRES: Pres[], k: number): { p: Punto | null; motivo: string } {
+/** Lo que recibió el presidente `k`: el cierre del mandato del antecesor (último dato en o antes del mes de inicio del que asume: T de fábrica, o el que diga la configuración). */
+export function recibio(m: Motor, c: Calculo, PRES: Pres[], k: number, b: BaseCfg): { p: Punto | null; motivo: string } {
   const F = m.F, t = mesAsuncion(F, PRES[k]), ant = PRES[k - 1];
   if (t <= 0 || !ant) {
     const a = primerDato(c.v);
     return { p: null, motivo: a < 0 ? "sin datos en la serie" : `la serie empieza en ${fmtMes(F[a])}` };
   }
-  const st = statsMandato(F, c.v, ant, BASE_HERENCIA);
-  if (st.n && st.finI != null && st.finI >= t - 1 - MAX_ATRASO) return { p: punto(m, c, st.fin as number, st.finI), motivo: "" };
+  const ref = baseIdx(F, PRES[k], b);   // el mes de inicio del que asume (T de fábrica)
+  const st = statsHasta(F, c.v, ant, b, ref);
+  if (st.n && st.finI != null && st.finI >= ref - MAX_ATRASO) return { p: punto(m, c, st.fin as number, st.finI), motivo: "" };
   // mandato corto sin dato propio (series trimestrales o semestrales): el último dato anterior, si no pasa del tope de atraso
-  for (let i = Math.min(ant.i0 - 1, t - 1); i >= Math.max(0, t - 1 - MAX_ATRASO); i--) if (ok(c.v[i])) return { p: punto(m, c, c.v[i] as number, i), motivo: "" };
-  return { p: null, motivo: motivoSinDato(F, c.v, t - 1) };
+  for (let i = Math.min(ant.i0 - 1, ref); i >= Math.max(0, ref - MAX_ATRASO); i--) if (ok(c.v[i])) return { p: punto(m, c, c.v[i] as number, i), motivo: "" };
+  return { p: null, motivo: motivoSinDato(F, c.v, ref) };
 }
 
 /** Lo que recibió, en un flujo en % del PIB: el año calendario cerrado del traspaso (Milei: 2023 completo; Macri: 2015; Alberto F.: 2019). Para quien asume
- *  en otro mes, el último año completo antes de asumir. Si ese año no tiene los 12 meses publicados, cae a los 12 meses a T-1 con una nota en el punto. */
-export function recibioCerrado(m: Motor, c: Calculo, PRES: Pres[], k: number): { p: Punto | null; motivo: string } {
-  const F = m.F, t = mesAsuncion(F, PRES[k]), base = recibio(m, c, PRES, k);
+ *  en otro mes, el último año completo antes de asumir. Si ese año no tiene los 12 meses publicados, cae a los 12 meses al mes de inicio con una nota en el punto. */
+export function recibioCerrado(m: Motor, c: Calculo, PRES: Pres[], k: number, b: BaseCfg): { p: Punto | null; motivo: string } {
+  const F = m.F, t = mesAsuncion(F, PRES[k]), base = recibio(m, c, PRES, k, b);
   if (t <= 0 || !PRES[k - 1]) return base;
   let i = F[t].endsWith("-12") ? t : -1;
   if (i < 0) for (let j = t - 1; j >= 0; j--) if (F[j].endsWith("-12")) { i = j; break; }
@@ -182,13 +182,13 @@ export function recibioCerrado(m: Motor, c: Calculo, PRES: Pres[], k: number): {
   return { p: base.p ? { ...base.p, nota: `El año ${anio} no tiene los 12 meses publicados: se muestra el dato de los 12 meses a ${base.p.mes}.` } : null, motivo: base.motivo };
 }
 
-/** Qué función arma "Recibió" de una fila: el año cerrado solo vale para flujos en % del PIB (si la serie no admite esa escala, 12 meses a T-1). */
+/** Qué función arma "Recibió" de una fila: el año cerrado solo vale para flujos en % del PIB (si la serie no admite esa escala, 12 meses al mes de inicio). */
 const recibioDe = (d: DefFila, c: Calculo) => (d.anioCerrado && /% del PIB/.test(c.unidad) ? recibioCerrado : recibio);
 
 /** Lo que entregó (o tiene hoy) el presidente `k`: el cierre de su mandato (último dato en o antes del último mes). */
-export function entrego(m: Motor, c: Calculo, PRES: Pres[], k: number): { p: Punto | null; motivo: string } {
-  const F = m.F, p = PRES[k], st = statsMandato(F, c.v, p, BASE_HERENCIA);
-  const ref = Math.min(p.i1, F.length - 1);
+export function entrego(m: Motor, c: Calculo, PRES: Pres[], k: number, b: BaseCfg): { p: Punto | null; motivo: string } {
+  const F = m.F, p = PRES[k], st = statsMandato(F, c.v, p, b);
+  const ref = Math.min(finIdx(F, p, b), F.length - 1);
   if (st.n && st.finI != null && st.finI >= ref - MAX_ATRASO) return { p: punto(m, c, st.fin as number, st.finI), motivo: "" };
   return { p: null, motivo: motivoSinDato(F, c.v, ref) };
 }
@@ -207,26 +207,28 @@ export interface FilaHerencia {
   recibio: Punto | null; sinRecibio: string; notaRecibio: string; entrego: Punto | null; sinEntrego: string;
   cambio: string; cambioAbs: string; cls: "bueno" | "malo" | "neutro";
 }
-export interface TablaHerencia { pres: Pres; k: number; enCurso: boolean; mesT1: string | null; filas: FilaHerencia[] }
+/** `mesIni`: el mes del que sale "Recibió" (T de fábrica); `finI`: el último mes del que sale "Entregó" (F de fábrica). */
+export interface TablaHerencia { pres: Pres; k: number; enCurso: boolean; mesIni: string | null; finI: number; filas: FilaHerencia[] }
 
 /** Nombre de una fila sin datos cargados (la serie todavía no está en el catálogo). */
 const nombreSinSerie = (d: DefFila): string => d.nombre ?? NOMBRES[d.id] ?? d.id;
 
 /** La tabla de un presidente: una fila por variable, en el orden de `FILAS_HERENCIA`. */
-export function tablaHerencia(m: Motor, presId: string): TablaHerencia | null {
+export function tablaHerencia(m: Motor, presId: string, b: BaseCfg): TablaHerencia | null {
   const PRES = crearPres(m.F), k = PRES.findIndex((x) => x.id === presId);
   if (k < 0) return null;
   const p = PRES[k], t = mesAsuncion(m.F, p);
   const filas = FILAS_HERENCIA.map((d): FilaHerencia => {
     const e = exprDe(m, d);
     if (!e) return { def: d, grupo: d.grupo, nombre: nombreSinSerie(d), unidad: "", expr: null, c: null, href: null, recibio: null, sinRecibio: "la serie todavía no está cargada", notaRecibio: "", entrego: null, sinEntrego: "la serie todavía no está cargada", cambio: "–", cambioAbs: "", cls: "neutro" };
-    const c = calcDe(m, d, e), r = recibioDe(d, c)(m, c, PRES, k), en = entrego(m, c, PRES, k), cb = cambio(m, c, r.p, en.p, !!d.neutra);
+    const c = calcDe(m, d, e), r = recibioDe(d, c)(m, c, PRES, k, b), en = entrego(m, c, PRES, k, b), cb = cambio(m, c, r.p, en.p, !!d.neutra);
     return {
       def: d, grupo: d.grupo, nombre: d.nombre ?? c.corto, unidad: c.unidad, expr: e, c, href: d.cociente || d.base100 || d.menos ? null : hrefDato(e, { pd: p.id }),
       recibio: r.p, sinRecibio: r.motivo, notaRecibio: r.p?.nota ?? "", entrego: en.p, sinEntrego: en.motivo, cambio: cb.txt, cambioAbs: cb.abs, cls: cb.cls,
     };
   });
-  return { pres: p, k, enCurso: p.i1 >= m.F.length - 1, mesT1: t > 0 ? fmtMes(m.F[t - 1]) : null, filas };
+  const finI = Math.min(finIdx(m.F, p, b), m.F.length - 1);
+  return { pres: p, k, enCurso: finIdx(m.F, p, b) >= m.F.length - 1, mesIni: t > 0 ? fmtMes(m.F[baseIdx(m.F, p, b)]) : null, finI, filas };
 }
 
 /** Una fila de "Todos los traspasos": quién entregó, quién recibió, el mes del traspaso y el valor recibido. */
@@ -234,7 +236,7 @@ export interface Traspaso { de: Pres; a: Pres; mes: string; dato: Punto | null; 
 export interface VistaTraspasos { def: DefFila; nombre: string; unidad: string; expr: Expr | null; href: string | null; filas: Traspaso[]; hoy: { p: Pres; dato: Punto | null; motivo: string } }
 
 /** Una variable en todos los traspasos (la misma información de la tabla por presidente, girada). */
-export function traspasos(m: Motor, clave: string): VistaTraspasos | null {
+export function traspasos(m: Motor, clave: string, b: BaseCfg): VistaTraspasos | null {
   const d = defPorClave(clave);
   if (!d) return null;
   const PRES = crearPres(m.F), e = exprDe(m, d);
@@ -247,10 +249,10 @@ export function traspasos(m: Motor, clave: string): VistaTraspasos | null {
   for (let k = 1; k < PRES.length; k++) {
     const t = mesAsuncion(m.F, PRES[k]);
     if (t <= 0) continue;
-    const r = recibioDe(d, c)(m, c, PRES, k);
+    const r = recibioDe(d, c)(m, c, PRES, k, b);
     filas.push({ de: PRES[k - 1], a: PRES[k], mes: fmtMes(m.F[t]), dato: r.p, motivo: r.motivo });
   }
-  const ult = PRES.length - 1, hoy = entrego(m, c, PRES, ult);
+  const ult = PRES.length - 1, hoy = entrego(m, c, PRES, ult, b);
   return { def: d, nombre: d.nombre ?? c.corto, unidad: c.unidad, expr: e, href: d.cociente || d.base100 || d.menos ? null : hrefDato(e), filas, hoy: { p: PRES[ult], dato: hoy.p, motivo: hoy.motivo } };
 }
 
@@ -306,7 +308,7 @@ export const FALTA_CARGAR: [string, string, string[]][] = [
 export function textosPreviaHerencia(t: TablaHerencia): { titulo: string; descripcion: string } {
   const n = t.filas.filter((f) => f.recibio && f.entrego).length;
   return {
-    titulo: `Herencia: lo que recibió ${t.pres.n}${t.mesT1 ? ` (${t.mesT1})` : ""} y el último dato`,
+    titulo: `Herencia: lo que recibió ${t.pres.n}${t.mesIni ? ` (${t.mesIni})` : ""} y el último dato`,
     descripcion: `${n} datos oficiales, al asumir y ${t.enCurso ? "hoy" : "al entregar"}: reservas, dólar, cuentas públicas, inflación, deuda, pobreza y salario. Y lo mismo para cada traspaso presidencial, desde que hay datos.`,
   };
 }

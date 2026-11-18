@@ -99,7 +99,7 @@ function Comparacion({ m, tablas, PRES, crit, conUnidad }: { m: Motor; tablas: T
 export function Ranking() {
   const [p, set, montado] = useParams();
   const sec = useSeccion("todo");
-  const info = useBase(p, set, montado), b = info.b;
+  const info = useBase("ranking", p, set, montado), b = info.b;
   const [puntajeAbierto, setPuntajeAbierto] = useState(true);   // la tabla de puntajes arranca desplegada; si se pliega, queda plegada
   const [hoja, setHoja] = useState(false);
   const [hojaGrupos, setHojaGrupos] = useState(false);
@@ -210,7 +210,7 @@ export function Ranking() {
                 <Fragment key={f.p.id}>
                   <tr className={`clic${ab ? " abierto" : ""}`} tabIndex={0} aria-expanded={ab} onClick={() => alternarAb(f.p.id)}
                     onKeyDown={(ev) => { if (ev.key === "Enter") alternarAb(f.p.id); }}>
-                    <CeldaPres n={px.n} corto={px.corto} periodo={periodoMandato(F, px)} aparte={mejorEn ? `Mejor en: ${mejorEn}` : null} pos={k + 1} />
+                    <CeldaPres n={px.n} corto={px.corto} periodo={periodoMandato(F, px, b)} aparte={mejorEn ? `Mejor en: ${mejorEn}` : null} pos={k + 1} />
                     <Valor tono={colPuntaje.tono[k]} f={(f.score as number) / 100} modo="izq" marca={colPuntaje.marca[k]}>{nf0.format(f.score as number)}</Valor><td>{f.items.length}</td>
                     <td className="unidad rk-col-mejor">{mejorEn}</td>
                     <td className="unidad">{f.items.slice(-3).reverse().map((i) => i.nombre).join(" · ")}</td>

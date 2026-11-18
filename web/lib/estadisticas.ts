@@ -1,7 +1,7 @@
 // Estadísticas de Histórico, mandatos, desempeño de presidentes y correlaciones de elecciones.
 // Port de src/app.js sin cambiar resultados. Todo recibe el motor y la configuración por parámetro.
 import { ok, mesNum, fmtCant, lastIdx, nf0, nf1, r1 } from "./formato";
-import { kDe, txtT, type BaseCfg } from "./config";
+import { kDe, kfDe, txtT, txtF, type BaseCfg } from "./config";
 import { ES_VAR, type Calculo, type Expr, type Motor, type Vals } from "./motor";
 
 // ---------------------------------------------------------------- Histórico
@@ -89,7 +89,7 @@ export function aBase100(rows: Fila[], keys: string[]): Record<string, string> {
 
 // ---------------------------------------------------------------- Presidentes
 /** `corto`: nombre abreviado para columnas angostas y para la imagen (si no se indica, es el mismo nombre). */
-export interface Pres { id: string; n: string; corto: string; ini: string; color: string; dash?: boolean; i0: number; i1: number }
+export interface Pres { id: string; n: string; corto: string; ini: string; color: string; dash?: boolean; i0: number; i1: number; finPrevisto?: string }
 export const PRES_DEF = [
   { id: "menem1", n: "Menem 1", ini: "1989-07", color: "--pres-menem1", base: "--neutral", dash: true },
   { id: "menem2", n: "Menem 2", ini: "1995-07", color: "--pres-menem2", base: "--neutral", dash: true },
@@ -100,7 +100,7 @@ export const PRES_DEF = [
   { id: "cfk2", n: "CFK 2", ini: "2011-12", color: "--pres-cfk2", base: "--series-4" },
   { id: "macri", n: "Macri", ini: "2015-12", color: "--pres-macri", base: "--series-3" },
   { id: "af", n: "Alberto Fernández", corto: "Alberto F.", ini: "2019-12", color: "--pres-af", base: "--series-2" },
-  { id: "milei", n: "Milei", ini: "2023-12", color: "--pres-milei", base: "--series-1" },
+  { id: "milei", n: "Milei", ini: "2023-12", color: "--pres-milei", base: "--series-1", finPrevisto: "2027-12" },
 ];
 export interface Franja { ini: number; fin: number; nombre: string; color: string }
 /** Franjas de colores de los mandatos para los gráficos. Cada una empieza en el mes que la configuración toma como inicio y llega hasta el inicio de la siguiente. */
@@ -127,17 +127,68 @@ export function baseIdx(F: string[], p: Pres, b: BaseCfg): number {
   const asume = F.indexOf(p.ini) >= 0 ? F.indexOf(p.ini) : p.i0;
   return Math.max(0, Math.min(asume + kDe(b, p.id), p.i1));
 }
+/** "AAAA-MM" desplazado `k` meses. */
+export function mesMas(ym: string, k: number): string {
+  const n = mesNum(ym) + k;
+  return `${Math.floor(n / 12)}-${String((n % 12) + 1).padStart(2, "0")}`;
+}
+/** F del presidente: el mes en que asume su sucesor o, para el que está en ejercicio, el fin previsto de su mandato (`finPrevisto`). */
+export const mesF = (p: { id: string }): string | null => {
+  const k = PRES_DEF.findIndex((x) => x.id === p.id);
+  return PRES_DEF[k + 1]?.ini ?? (PRES_DEF[k] as { finPrevisto?: string } | undefined)?.finPrevisto ?? null;
+};
+/** Último mes que se cuenta del mandato: su F + k (F = asunción del sucesor o, para el presidente en ejercicio, su fin previsto), sin pasar del último mes con datos
+ *  ni de `baseIdx + 1` (tope: el último dato). Con F-1 (el último mes del mandato) da `p.i1`; el presidente en ejercicio, mientras no haya datos hasta su F+k, se cuenta hasta el último dato.
+ *  `p.i1` solo sigue siendo "quién gobernaba ese mes". */
+export function finIdx(F: string[], p: Pres, b: BaseCfg): number {
+  const k = PRES_DEF.findIndex((x) => x.id === p.id), sig = PRES_DEF[k + 1], kf = kfDe(b, p.id), N = F.length;
+  if (!sig) {
+    const prev = (PRES_DEF[k] as { finPrevisto?: string } | undefined)?.finPrevisto;
+    if (!prev || !N) return p.i1;
+    const iPrev = N - 1 + (mesNum(prev) - mesNum(F[N - 1]));   // índice (puede estar más allá de los datos) del F previsto
+    return Math.min(N - 1, Math.max(baseIdx(F, p, b) + 1, iPrev + kf));
+  }
+  const asumeSig = F.indexOf(sig.ini);
+  if (asumeSig < 0 || kf === -1) return p.i1;   // F-1 (el de fábrica) es siempre p.i1, aunque un inicio tardío deje la base en ese mismo mes
+  return Math.max(baseIdx(F, p, b) + 1, Math.min(asumeSig + kf, F.length - 1));
+}
 const mesesTxt = (k: number) => `${k} ${Math.abs(k) === 1 ? "mes" : "meses"}`;
+/** k del fin para todos: el propio de `tf`, o (igual que el inicio) el del inicio para todos. */
+const kfGral = (b: BaseCfg, id: string): number => b.tf ?? kDe(b, id);
+/** ¿El inicio es el de fábrica (T para todos, sin excepciones)? */
+export const iniDeFabrica = (b: BaseCfg): boolean => b.t0 === 0 && PRES_DEF.every((p) => b.t0p[p.id] == null || b.t0p[p.id] === b.t0);
 /** Cómo se explica la base: una frase si es igual para todos, o el resumen con las excepciones. */
 export function baseTxt(b: BaseCfg): string {
   const hay = Object.keys(b.t0p).length > 0;
   const k = b.t0;
   const gral = k === -1 ? "último mes del antecesor (T-1)" : k === 0 ? "mes de asunción (T)"
     : k > 0 ? `${mesesTxt(k)} después de asumir (T+${k})` : `${mesesTxt(-k)} antes de asumir (T${k})`;
-  return hay ? `${gral}, con excepciones: ${resumenExcepciones(b)}` : gral;
+  const ini = hay ? `${gral}, con excepciones: ${resumenExcepciones(b)}` : gral;
+  if (b.tf === null) return finConExc(b).length || !iniDeFabrica(b) ? `${ini}; hasta ${finTxtCorto(b.t0)}${finConExc(b).length ? `, con excepciones: ${resumenExcepcionesFin(b)}` : ""}` : ini;
+  return `${ini}; hasta ${finTxtCorto(b.tf)}${finConExc(b).length ? `, con excepciones: ${resumenExcepcionesFin(b)}` : ""}`;
+}
+/** ¿El fin es el de fábrica (igual que el inicio, sin excepciones)? */
+export const finDeFabrica = (b: BaseCfg): boolean => b.tf === null && finConExc(b).length === 0;
+export const finConExc = (b: BaseCfg) => PRES_DEF.filter((p) => b.tfp[p.id] != null && b.tfp[p.id] !== kfGral(b, p.id));
+const finTxtCorto = (k: number): string => k === -1 ? "el último mes del mandato (F-1)" : k === 0 ? "el mes en que asume el siguiente (F)"
+  : k > 0 ? `${mesesTxt(k)} después de que asuma el siguiente (F+${k})` : `${mesesTxt(-k)} antes de que asuma el siguiente (F${k})`;
+function resumenExcepcionesFin(b: BaseCfg): string {
+  return finConExc(b).map((p) => `${p.n} ${txtF(b.tfp[p.id])}`).join(", ");
+}
+/** El mes final en palabras: "el mes en que asume el siguiente", "el mes antes de que asuma el siguiente", "3 meses después de que asuma el siguiente". */
+export function mesFinTxt(k: number): string {
+  if (k === 0) return "el mes en que asume el siguiente";
+  const n = Math.abs(k), cuando = k < 0 ? "antes" : "después";
+  return n === 1 ? `el mes ${cuando} de que asuma el siguiente` : `${n} meses ${cuando} de que asuma el siguiente`;
 }
 function resumenExcepciones(b: BaseCfg): string {
   return PRES_DEF.filter((p) => b.t0p[p.id] != null).map((p) => `${p.n} ${txtT(b.t0p[p.id])}`).join(", ");
+}
+/** El fin de un presidente en palabras. El que está en ejercicio dice su fin previsto: "dic-27 (fin previsto; mientras no haya datos hasta ahí, hasta el último dato)". */
+function finPresTxt(id: string, k: number): string {
+  const f = mesF({ id });
+  if (PRES_DEF[PRES_DEF.length - 1].id !== id || !f) return mesFinTxt(k);
+  return `${fmtMes(mesMas(f, k))} (fin previsto; mientras no haya datos hasta ahí, hasta el último dato)`;
 }
 /** El mes de partida en palabras (sin T-1): "el mes antes de asumir", "el mes de asunción", "el mes después de asumir", "3 meses después de asumir". */
 export function mesInicioTxt(k: number): string {
@@ -146,16 +197,29 @@ export function mesInicioTxt(k: number): string {
   return n === 1 ? `el mes ${cuando} de asumir` : `${n} meses ${cuando} de asumir`;
 }
 /** El inicio del mandato en una oración, en palabras: "Se cuenta desde el mes antes de asumir, excepto Milei: desde el mes después de asumir."
- *  Con más de tres excepciones, "con excepciones". */
+ *  Con más de tres excepciones, "con excepciones". Con el fin de fábrica (igual que el inicio) y el inicio de fábrica no dice nada del fin;
+ *  con el fin igual que el inicio y otro inicio, lo dice derivado ("… hasta el mes en que asume el siguiente"). */
 export function oracionInicio(b: BaseCfg): string {
-  const exc = PRES_DEF.filter((p) => b.t0p[p.id] != null && b.t0p[p.id] !== b.t0).map((p) => `${p.n}: desde ${mesInicioTxt(b.t0p[p.id])}`);
+  const igual = b.tf === null;   // con el fin igual al inicio, la frase dice siempre hasta cuándo (también de fábrica: «desde el mes de asunción hasta el mes en que asume el siguiente»)
+  const ultimo = PRES_DEF[PRES_DEF.length - 1].id, conFin = new Set(finConExc(b).map((p) => p.id));
+  // una excepción por presidente, con su desde y su hasta juntos: «Milei: desde el mes después de asumir hasta dic-27 (…)»
+  const exc = PRES_DEF.map((p) => {
+    const ini = b.t0p[p.id] != null && b.t0p[p.id] !== b.t0;
+    const hasta = conFin.has(p.id) ? finPresTxt(p.id, b.tfp[p.id]) : ini && igual && p.id !== ultimo ? mesFinTxt(b.t0p[p.id]) : null;
+    if (!ini && !hasta) return null;
+    return `${p.n}: ${[ini ? `desde ${mesInicioTxt(b.t0p[p.id])}` : "", hasta ? `hasta ${hasta}` : ""].filter(Boolean).join(" ")}`;
+  }).filter((x): x is string => x != null);
   const cola = !exc.length ? "" : exc.length > 3 ? ", con excepciones" : `, excepto ${exc.join("; ")}`;
-  return `Se cuenta desde ${mesInicioTxt(b.t0)}${cola}.`;
+  return `Se cuenta desde ${mesInicioTxt(b.t0)} hasta ${mesFinTxt(igual ? b.t0 : (b.tf as number))}${cola}.`;
 }
 /** Qué significa T, para acompañar a `oracionInicio`. */
 export const AYUDA_T = "T = mes de asunción. T-1 = último mes del antecesor. T+1 = un mes después de asumir.";
+export const AYUDA_F = "F = mes en que asume el siguiente presidente. F-1 = último mes completo del mandato.";
+export const AYUDA_IGUAL = "Igual que el inicio: si se cuenta desde T+1, se cuenta hasta F+1; así cada mandato dura lo mismo.";
 export const baseResumen = (b: BaseCfg): string =>
-  [txtT(b.t0), ...PRES_DEF.filter((p) => b.t0p[p.id] != null).map((p) => `${p.n} ${txtT(b.t0p[p.id])}`)].join(" · ");
+  [txtT(b.t0), ...PRES_DEF.filter((p) => b.t0p[p.id] != null).map((p) => `${p.n} ${txtT(b.t0p[p.id])}`)].join(" · ")
+  + (finDeFabrica(b) ? (iniDeFabrica(b) ? "" : " · Fin: igual")
+    : ` · Fin: ${[b.tf === null ? "igual" : txtF(b.tf), ...finConExc(b).map((p) => `${p.n} ${txtF(b.tfp[p.id])}`)].join(" · ")}`);
 
 export interface StatsM {
   n: number; total?: number; ini?: number; iniI?: number; fin?: number; finI?: number;
@@ -171,18 +235,22 @@ export function pasoDatos(arr: ArrayLike<number | null | undefined>): number {
   return d[Math.floor(d.length / 2)];
 }
 export function statsMandato(F: string[], arr: Vals, p: Pres, b: BaseCfg): StatsM {
+  return statsHasta(F, arr, p, b, finIdx(F, p, b));
+}
+/** Lo mismo que `statsMandato` pero contando hasta el mes `fi` (sin pasar por `finIdx`): Herencia lo usa para "lo que recibió" (hasta el inicio del sucesor). */
+export function statsHasta(F: string[], arr: Vals, p: Pres, b: BaseCfg, fi: number): StatsM {
   const res: StatsM = { n: 0 };
   const vals: [number, number][] = [];
-  for (let i = p.i0; i <= p.i1; i++) { const x = arr[i]; if (ok(x)) vals.push([x, i]); }
+  for (let i = p.i0; i <= fi; i++) { const x = arr[i]; if (ok(x)) vals.push([x, i]); }
   if (!vals.length) return res;
   const bi = baseIdx(F, p, b);
-  res.n = vals.length; res.total = p.i1 - p.i0 + 1;
+  res.n = vals.length; res.total = fi - p.i0 + 1;
   if (bi >= 0 && ok(arr[bi])) { res.ini = arr[bi] as number; res.iniI = bi; } else { res.ini = vals[0][0]; res.iniI = vals[0][1]; }
   let u = vals[vals.length - 1];
   // Serie anual (un dato cada 12 meses o más, como las de diciembre): si hay dato en el mes siguiente al último del mandato (el de
   // asunción del sucesor), ese es el cierre; si no, el último año no se le contaría a nadie. Solo cierra: no entra en mínimo, máximo ni promedio.
-  const sig = p.i1 + 1;
-  if (pasoDatos(arr) >= 12 && p.i1 - u[1] >= 6 && sig < arr.length && ok(arr[sig])) u = [arr[sig] as number, sig];
+  const sig = fi + 1;
+  if (pasoDatos(arr) >= 12 && fi - u[1] >= 6 && sig < arr.length && ok(arr[sig])) u = [arr[sig] as number, sig];
   res.fin = u[0]; res.finI = u[1];
   const mn = vals.reduce((a, c) => c[0] < a[0] ? c : a), mx = vals.reduce((a, c) => c[0] > a[0] ? c : a);
   res.min = mn[0]; res.minI = mn[1]; res.max = mx[0]; res.maxI = mx[1];
@@ -226,7 +294,7 @@ export function desempeno(m: Motor, F: string[], ind: Expr, p: Pres, c: Calculo,
   const st = statsMandato(F, c.v, p, b);
   if (!st.n || st.n < Math.min(6, Math.ceil((st.total as number) / 2)) || !ok(st.ini) || !ok(st.fin) || !c.dir) return null;
   let cruza = false;
-  for (let i = p.i0; i <= p.i1; i++) { const x = c.v[i]; if (ok(x) && x <= 0) { cruza = true; break; } }
+  for (let i = p.i0, fi = finIdx(F, p, b); i <= fi; i++) { const x = c.v[i]; if (ok(x) && x <= 0) { cruza = true; break; } }
   const enPuntos = c.pct || cruza || st.ini <= 0;
   const meses = Math.max(1, (st.finI as number) - (st.iniI as number));
   const cambio = enPuntos ? st.fin - st.ini : st.fin / st.ini - 1;
@@ -466,11 +534,12 @@ export function calcularMandato(m: Motor, PRES: Pres[], PRES_T0: Pres[], q: Para
     if (teo) return ok(ancla) ? ancla * xv / x0 : null;
     return xv;
   };
-  const maxMes = Math.max(1, ...pres.map((x) => x.i1 - baseIdx(F, x, b)));
+  const finX = (x: Pres) => finIdx(F, x, b);
+  const maxMes = Math.max(1, ...pres.map((x) => finX(x) - baseIdx(F, x, b)));
   const todas: Fila[] = Array.from({ length: maxMes + 1 }, (_, t) => ({ t }));
   pres.forEach((x) => {
     const bi = baseIdx(F, x, b), x0 = arr[bi];
-    for (let t = 0; t <= x.i1 - bi; t++) {
+    for (let t = 0; t <= finX(x) - bi; t++) {
       todas[t][x.id] = conv(arr[bi + t], x0);
       if (bnd) { todas[t][x.id + "_lo"] = conv(bnd[0][bi + t], x0); todas[t][x.id + "_hi"] = conv(bnd[1][bi + t], x0); }
       todas[t]["_f_" + x.id] = F[bi + t];

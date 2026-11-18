@@ -21,7 +21,7 @@ import { GrillaPresidentes } from "../sistema/GrillaPresidentes";
 import { grillaPresidentes, tablaPresidentes } from "@/lib/presidentes";
 import { fechaDeDato, fmtMes } from "@/lib/formato";
 import { frecuenciaOrigen } from "@/lib/historico";
-import { baseIdx, claseMandato, crearPres, resumenClases, type BaseCfg, type ClaseMandato, nivelComparable, ordenar, statsMandato, type Pres } from "@/lib/estadisticas";
+import { baseIdx, claseMandato, finConExc, finDeFabrica, finIdx, iniDeFabrica, mesFinTxt, crearPres, resumenClases, type BaseCfg, type ClaseMandato, nivelComparable, ordenar, statsMandato, type Pres } from "@/lib/estadisticas";
 import { bajadaTablaMandatos, velasDe } from "@/lib/ficha";
 import { grupoDe, ordenarGrupos, textoBusqueda } from "@/lib/catalogo";
 import { monedaEnSerie } from "@/lib/monedas";
@@ -35,7 +35,8 @@ import { decExpr, encExpr, lista, unoDe, useParams } from "@/lib/url";
 function inicioCorto(b: BaseCfg): string {
   const k = b.t0;
   const gral = k === -1 ? "el mes antes de asumir" : k === 0 ? "el mes de asunción" : k > 0 ? `${k} ${k === 1 ? "mes" : "meses"} después de asumir` : `${-k} meses antes de asumir`;
-  return Object.keys(b.t0p).length ? `${gral}, con excepciones` : gral;
+  const ini = Object.keys(b.t0p).length ? `${gral}, con excepciones` : gral;
+  return finDeFabrica(b) && iniDeFabrica(b) ? ini : `${ini}, hasta ${mesFinTxt(b.tf ?? b.t0)}${finConExc(b).length ? ", con excepciones" : ""}`;
 }
 
 /** Estrella de "Mis variables" (44 px): llena si la variable ya está en la lista, vacía si no. */
@@ -66,7 +67,7 @@ export function Presidentes() {
   const [p, set, montado] = useParams();
   const sec = useSeccion("todo");
   const { config } = useConfig();
-  const info = useBase(p, set, montado), b = info.b;
+  const info = useBase("presidentes", p, set, montado), b = info.b;
   const [hoja, setHoja] = useState(false);
   const [hojaA, setHojaA] = useState(false);
   const [ordA, setOrdA] = useState<Orden>({ k: null, d: -1 });
@@ -136,7 +137,7 @@ export function Presidentes() {
   const paPres = PRES.find((x) => x.id === p.get("pap")) || PRES[PRES.length - 1];
   const medsArs = m.medArs();
   const medPref = medidaPreferida(config);
-  const paBi = baseIdx(F, paPres, b), paFin = Math.min(paPres.i1, F.length - 1), paCierra = paPres.i1 < F.length - 1;
+  const paBi = baseIdx(F, paPres, b), paFin = Math.min(finIdx(F, paPres, b), F.length - 1), paCierra = paPres.i1 < F.length - 1;
   const textoPaPres = `${paPres.n}: de ${fmtMes(F[paBi])} (mes inicial) ${paCierra ? `a ${fmtMes(F[paFin])} (fin del mandato)` : "a hoy (último dato de cada variable)"}`;
   /** Cuando los datos de la variable no cubren todo el período, la fila lo dice. */
   const rango = (st: ReturnType<typeof statsMandato>, v: (number | null)[]) => {
@@ -201,7 +202,7 @@ export function Presidentes() {
     items.forEach(({ s, c: cc, st, aplica }) => filasA.push(
       <tr key={s.id}><CeldaVar nombre={s.n} unidad={cc.unidad} info={<BotonInfo id={s.id} />}
         extra={<>{rango(st, cc.v)}{!aplica && !grupoSinMoneda && <small className="c-per">la moneda no aplica a esta variable</small>}</>} /><CeldasStats m={m} c={cc} st={st} cols={cols} />
-        <td><div className="spark"><Sparkline v={cc.v.slice(0, paPres.i1 + 1)} color={paPres.color} desde={paBi} /></div></td>
+        <td><div className="spark"><Sparkline v={cc.v.slice(0, paFin + 1)} color={paPres.color} desde={paBi} /></div></td>
         <td className="pres-estrella-celda"><Estrella activa={idsMis.has(s.id)} nombre={s.n} deshabilitada={!idsMis.has(s.id) && mis.length >= 10}
           onClick={() => sacarOPoner({ id: s.id, med: mo0(s, paMed), rel: null, modo: "compra", esc: "" })} /></td></tr>,
     ));
@@ -332,7 +333,7 @@ export function Presidentes() {
                   <tr key={k + e.id}>
                     <CeldaVar nombre={cc.corto} unidad={cc.unidad} info={<BotonInfo id={e.id} />} extra={rango(st, cc.v)} />
                     <CeldasStats m={m} c={cc} st={st} cols={cols} />
-                    <td><div className="spark"><Sparkline v={cc.v.slice(0, paPres.i1 + 1)} color={paPres.color} desde={paBi} /></div></td>
+                    <td><div className="spark"><Sparkline v={cc.v.slice(0, paFin + 1)} color={paPres.color} desde={paBi} /></div></td>
                     <td className="pres-estrella-celda"><Estrella activa nombre={cc.corto} onClick={() => setMis(mis.filter((_, j) => j !== k))} /></td>
                   </tr>
                 );

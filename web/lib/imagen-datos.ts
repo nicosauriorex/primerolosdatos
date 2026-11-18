@@ -1,6 +1,6 @@
 // Arma los datos de la imagen de compartir a partir de una vista de Histórico (variables, período, frecuencia). No dibuja: eso es `imagen.ts`.
 // Usa las mismas funciones que el gráfico de la página (filasGrafico, statsMandato, franjasPres, contextoDato) para que den lo mismo.
-import { aBase100, claseVariacion, crearPres, estadisticasRows, filasGrafico, franjasPres, baseIdx, oracionInicio, type BaseCfg, type EstRows, type Fila } from "./estadisticas";
+import { aBase100, claseVariacion, crearPres, estadisticasRows, filasGrafico, franjasPres, baseIdx, finIdx, oracionInicio, type BaseCfg, type EstRows, type Fila } from "./estadisticas";
 import { admiteContexto, contextoDato } from "./contexto-dato";
 import { DATOS_GEN, DATOS_PRES, type ClaveFrase, type DatoGen, type DatoPres, type DesdePref, type FormatoImg, type OpcionesImagen } from "./config";
 import { leerComun, leerGrafico, frecuenciaOrigen, textoTemporalidad, TODOS_MESES } from "./historico";
@@ -146,12 +146,13 @@ const dato = (rotulo: string, valor: string | null, cls: TarjetaDato["cls"] = "n
 /** Tarjetas por presidente: cada uno con los meses del mandato que caen dentro del período. */
 function tarjetasPres(m: Motor, c: Calculo, o: { base: BaseCfg; desde: string; hasta: string; datos: DatoPres[]; conNegativos: boolean }): TarjetaImg[] {
   const F = m.F, N = F.length, { iD, iH } = mesesIdx(F, o.desde, o.hasta);
-  return crearPres(F).filter((p) => p.i1 >= iD && p.i0 <= iH).map((p): TarjetaImg => {
-    const lo = Math.max(p.i0, iD), hi = Math.min(p.i1, iH), bi = baseIdx(F, p, o.base);
+  return crearPres(F).filter((p) => finIdx(F, p, o.base) >= iD && p.i0 <= iH).map((p): TarjetaImg => {
+    const pf = finIdx(F, p, o.base);   // último mes que se cuenta del mandato (F+k)
+    const lo = Math.max(p.i0, iD), hi = Math.min(pf, iH), bi = baseIdx(F, p, o.base);
     let ultDato = -1; for (let i = N - 1; i >= 0; i--) if (ok(c.v[i])) { ultDato = i; break; }
     // parcial "hasta": el período corta el mandato antes de su cierre (no cuenta que la serie todavía no tenga los últimos meses)
     // parcial "desde": el mandato empezó antes del período. Si empieza dentro, "Recibió" es su mes inicial (aunque T-1 caiga un mes antes del período), igual que en Por presidente
-    const desdeParcial = bi < iD && p.i0 < iD, hastaParcial = p.i1 > iH && iH < ultDato;
+    const desdeParcial = bi < iD && p.i0 < iD, hastaParcial = pf > iH && iH < ultDato;
     const vals: number[] = [];
     let primero: number | null = null, ultimo: number | null = null, ultimoI = -1;
     for (let i = lo; i <= hi; i++) { const x = c.v[i]; if (ok(x)) { vals.push(x); if (primero == null) primero = x; ultimo = x; ultimoI = i; } }

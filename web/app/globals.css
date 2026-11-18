@@ -2410,6 +2410,7 @@ button.info-btn { background: none; padding: 0; }
 .cfgg-rot { font-size: var(--t-sm); font-weight: 700; color: var(--text-secondary); min-width: 0; overflow-wrap: anywhere; }
 .cfgg-ctl { display: flex; flex-direction: column; align-items: flex-start; gap: var(--e-2); min-width: 0; max-width: 100%; }
 .cfgg-ayuda { margin: 0; font-size: var(--t-xs); line-height: 1.45; color: var(--text-muted); max-width: 56ch; }
+.cfgg-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 8px; }
 .cfgg-intro { margin-top: calc(-1 * var(--e-2)); }
 .cfgg-color { width: 64px; height: 36px; padding: 2px; border: 0; border-radius: var(--r-pleno); background: var(--relleno); cursor: pointer; }
 .cfgg-fila-sola { align-items: flex-start; }
@@ -2417,6 +2418,27 @@ button.info-btn { background: none; padding: 0; }
   .cfgg-fila { display: grid; grid-template-columns: 11rem minmax(0, 1fr); column-gap: var(--e-4); align-items: start; }
   .cfgg-rot { padding-top: 8px; }
   .cfgg-fila-sola { display: block; padding-left: calc(11rem + var(--e-4)); }
+}
+/* Mandatos (⚙): por presidente, Desde / Hasta / Dónde. Celular: un control por renglón con su rótulo al lado; desde 600 px, tres columnas alineadas con un encabezado único */
+.cfgm-ctl { width: 100%; }
+.cfgm-ctls { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--e-2); width: 100%; min-width: 0; }
+.cfgm-c { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); align-items: center; gap: var(--e-2); min-width: 0; }
+.cfgm-et { font-size: var(--t-xs); font-weight: 700; color: var(--text-muted); }
+.cfgm-c .sel, .cfgm-c .desplegable { display: block; width: 100%; min-width: 0; }
+.cfgm-c .sel-btn, .cfgm-c .btn.drop { width: 100%; justify-content: space-between; }
+.cfgm-nulo { color: var(--text-muted); }
+.cfgm-cab { display: none; }
+@media (min-width: 600px) {
+  .cfgm-ctls { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.25fr) minmax(0, .8fr); gap: var(--e-3); }
+  .cfgm-c { display: block; }
+  .cfgm-c .cfgm-et { display: none; }
+  .cfgm-cab { display: grid; }
+  .cfgm-cab .cfgm-ctls span { font-size: var(--t-xs); font-weight: 700; color: var(--text-muted); }
+  .cfgm-cab .cfgg-rot { padding: 0; }
+}
+@media (min-width: 641px) {
+  .cfgm-c { position: relative; }
+  .cfgm-donde .panel { position: absolute; z-index: 5; right: 0; top: 100%; width: min(24rem, 80vw); box-shadow: var(--sombra-2); }
 }
 .modal footer.cfgg-pie { justify-content: space-between; }
 @media (max-width: 599px) { .modal footer.cfgg-pie > button { flex: 1 1 0; min-height: var(--toque); justify-content: center; text-align: center; white-space: normal; } }

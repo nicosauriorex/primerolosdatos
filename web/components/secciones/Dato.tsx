@@ -16,7 +16,7 @@ import { decExpr, encExpr, unoDe, useParams } from "@/lib/url";
 export function Dato({ fija }: { fija?: Expr } = {}) {
   const [p, set, montado] = useParams();
   const { listo, metas, motor: m, errorGeneral } = useSeccion([]);
-  const info = useBase(p, set, montado);
+  const info = useBase("fichas", p, set, montado);
   // Parámetro inválido o ausente: la inflación mensual (si no estuviera en el catálogo, la primera serie).
   const e = useMemo(() => {
     if (!listo || !montado || !metas.length) return null;

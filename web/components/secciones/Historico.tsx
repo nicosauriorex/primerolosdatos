@@ -22,7 +22,7 @@ import { admiteContexto, contextoDato } from "@/lib/contexto-dato";
 import { MAX_GRAFICOS, MAX_MISMA_UNIDAD, PG, TODOS_MESES, claseVariacionMostrada, comparacionesCabecera, deltaDeComparacion, exprsUsadas, fraseUltimoVs, frecuenciaOrigen, leerComun, leerGrafico, opcionesComoVerlo, sfx, textoPeriodo, textoTemporalidad, type Comun, type GEst } from "@/lib/historico";
 import { fmtEjeDe, notaInflacion, tituloGrafico, type VistaImg } from "@/lib/imagen-datos";
 import { useConfig } from "../ConfigProvider";
-import { baseDeConfig, medidaInicial, medidaPreferida } from "@/lib/config";
+import { baseDeSeccion, medidaInicial, medidaPreferida } from "@/lib/config";
 import { encExpr, useParams } from "@/lib/url";
 import { avisoTabla, copiarTexto } from "@/lib/compartir";
 import { contarCompartir } from "@/lib/conteo";
@@ -508,8 +508,8 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [m, version, kExprs, E.modo, E.desde, E.hasta, kMeses, E.freq, E.ag, E.escala, E.banda, E.eje, E.cero, kRefs, compacto]);
   const { lista, dos, hayBanda, bd, rows, hist, puedeLog, cruzaCero, st, series } = D;
-  const kBase = `${cfg.t0}|${JSON.stringify(cfg.t0p)}`;
-  const franjas = useMemo(() => (conFranjas ? franjasPres(F, baseDeConfig(cfg, PRES_DEF.map((x) => x.id))) : undefined),
+  const kBase = `${cfg.t0}|${JSON.stringify(cfg.t0p)}|${cfg.aplica.join(",")}|${JSON.stringify(cfg.aplicaP)}`;
+  const franjas = useMemo(() => (conFranjas ? franjasPres(F, baseDeSeccion(cfg, "fichas", PRES_DEF.map((x) => x.id))) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [conFranjas, F, kBase]);
   const opts = useMemo(() => (franjas ? { ...D.opts, franjas } : D.opts), [D.opts, franjas]);

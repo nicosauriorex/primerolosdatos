@@ -2,12 +2,16 @@
 // Los componentes solo dibujan lo que sale de acá.
 import { fechaDeDato, fmtMes, nf1, ok } from "./formato";
 import { frecuenciaOrigen } from "./historico";
-import { claseVariacion, rankScores, type Pres } from "./estadisticas";
+import { baseIdx, claseVariacion, finIdx, rankScores, type BaseCfg, type Pres } from "./estadisticas";
 
 /** "dic-15 a nov-19"; el mandato en curso termina en "hoy". */
 // con guion que no corta ("nov‑07" no se parte en dos renglones)
 const mesSinCorte = (f: string) => fmtMes(f).replace("-", "‑");
-export const periodoMandato = (F: string[], x: Pres): string => `${mesSinCorte(x.ini)} a ${x.i1 >= F.length - 1 ? "hoy" : mesSinCorte(F[x.i1])}`;
+/** Con `b`, el período que se cuenta: desde el mes de inicio (T+k) hasta el fin (F+k); sin `b`, de la asunción al mes antes de que asuma el sucesor. */
+export const periodoMandato = (F: string[], x: Pres, b?: BaseCfg): string => {
+  const fi = b ? finIdx(F, x, b) : x.i1, ini = b && F.indexOf(x.ini) >= 0 ? F[baseIdx(F, x, b)] : x.ini;   // si la serie de meses arranca después de la asunción, el mes de asunción
+  return `${mesSinCorte(ini)} a ${fi >= F.length - 1 ? "hoy" : mesSinCorte(F[fi])}`;
+};
 
 /** "datos desde ene-95" cuando la serie empieza después del inicio del mandato; si no, null. */
 export function datosDesde(F: string[], arr: ArrayLike<number | null | undefined>, x: Pres): string | null {

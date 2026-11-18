@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, type Ref } from "
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useSeccion } from "./useSeccion";
+import { msPorMes, useLapiz } from "./useLapiz";
 import { useConfig } from "./ConfigProvider";
 import { Cargando, Seg } from "./ui";
 import { Grafico, type Fila, type OpcionesG, type SerieG } from "./Grafico";
@@ -25,7 +26,7 @@ import { AjustesTabla, TablaMandatos } from "./sistema/TablaMandatos";
 import { GraficosListos } from "./GraficosListos";
 import { BarrasMes } from "./sistema/BarrasMes";
 import { unoDe } from "@/lib/url";
-import { baseDeConfig } from "@/lib/config";
+import { baseDeSeccion } from "@/lib/config";
 import { AYUDA_T, PRES_DEF, baseTxt, crearPres, etiqueta, franjasPres, nivelComparable, nombreCorto, statsMandato } from "@/lib/estadisticas";
 import { fmtMes } from "@/lib/formato";
 import { frecuenciaOrigen, opcionesComoVerlo, textoTemporalidad } from "@/lib/historico";
@@ -98,11 +99,12 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
   const b = info.b;
   const PRES = useMemo(() => crearPres(m.F), [m]);
   // Meses de mandato se calcula acá: su nota de cálculo va en "Cómo se mide"
+  const md = p.get("md"), mh = p.get("mh");   // filtro de meses de "Mes a mes" (los mismos parámetros que Meses de mandato)
   const mandato = useMemo(() => {
     const PRES_T0 = PRES.filter((x) => m.idxDe(x.ini) > 0);
-    return mandatoFicha(m, PRES, PRES_T0, e, b, pd);
+    return mandatoFicha(m, PRES, PRES_T0, e, b, pd, md, mh);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [m, version, kE, b, pd, PRES]);
+  }, [m, version, kE, b, pd, PRES, md, mh]);
   const fuente = fuentesCalc(c).map(fuentePublica).join("; ");
   const V = useViene(m, e, version, p);   // el período del gráfico: lo usan el capítulo "¿Cómo viene?" y su Compartir
   const hrefV = hrefHistorico(e, V.per ? { d: V.D.E.desde, h: V.D.E.hasta } : {});
@@ -124,7 +126,7 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
       <CapMeses key={kE} m={m} e={e} version={version} nivel={nivel} nombre={nombre} />
       <CapPresidentes m={m} e={e} info={info} nivel={nivel} pd={pd} inicio={inicio} nombre={nombre}
         velas={unoDe(p.get("pvista"), ["tabla", "velas"] as const, "tabla") === "velas"} onVista={(v) => set({ pvista: v ? "velas" : null })} />
-      <CapMandato m={m} e={e} D={mandato} nivel={nivel} pd={pd} inicio={inicio} b={b} />
+      <CapMandato m={m} e={e} D={mandato} nivel={nivel} pd={pd} inicio={inicio} b={b} md={md} mh={mh} set={set} />
       <GraficosListos m={m} e={e} metas={metas} nivel={nivel} nombre={S[e.id]?.n ?? c.nombre} />
       <details className="fi-metodo">
         <summary>Cómo se mide</summary>
@@ -187,9 +189,9 @@ type Viene = ReturnType<typeof useViene>;
 function CapViene({ m, e, nivel, set, V, compartir }: { m: Motor; e: Expr; nivel: Nivel; set: SetFn; V: Viene; compartir: ReactNode }) {
   const { config } = useConfig();
   const { opciones, per, D } = V;
-  const franjas = useMemo(() => (config.franjas ? franjasPres(m.F, baseDeConfig(config, PRES_DEF.map((x) => x.id))) : undefined),
+  const franjas = useMemo(() => (config.franjas ? franjasPres(m.F, baseDeSeccion(config, "fichas", PRES_DEF.map((x) => x.id))) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [config.franjas, m, config.t0, JSON.stringify(config.t0p)]);
+    [config.franjas, m, config.t0, JSON.stringify(config.t0p), config.aplica.join(","), JSON.stringify(config.aplicaP)]);
   const opts = useMemo(() => (franjas ? { ...D.opts, franjas } : D.opts), [D.opts, franjas]);
   const { c, E } = D;
   const href = hrefHistorico(e, per ? { d: E.desde, h: E.hasta } : {});
@@ -291,61 +293,33 @@ function CapPresidentes({ m, e, info, nivel, pd, inicio, velas: enVelas, onVista
 }
 
 // ------------------------------------------------------------ Mes a mes: el dibujo mes por mes (E1.2)
-const MS_POR_MES = 120;   // a velocidad normal
 const VELOCIDADES: [string, string][] = [["0.5", "Lenta 0,5×"], ["1", "Normal 1×"], ["2", "Rápida 2×"]];
-/** Estado del dibujo mes por mes: espera a que el gráfico esté a la vista (y quieto el resto), se pausa al tocarlo y, con "reducir movimiento"
- *  (o sin IntersectionObserver), no anima: `n` = null (todo a la vista) y sin controles. `n` = cantidad de meses ya dibujados. */
-function useAnimMeses(total: number) {
-  const [quieto] = useState(() => typeof window === "undefined" || typeof IntersectionObserver === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  const [n, setN] = useState<number | null>(quieto ? null : 0);
-  const [visto, setVisto] = useState(false);
-  const [marcha, setMarcha] = useState(true);
-  const [vel, setVel] = useState("1");
-  const caja = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = caja.current;
-    if (quieto || !el) return;
-    const io = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { setVisto(true); io.disconnect(); } }, { threshold: 0.4 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [quieto, total]);
-  useEffect(() => {
-    if (n == null || !visto || !marcha || n >= total) return;
-    const t = window.setTimeout(() => setN(n + 1), MS_POR_MES / Number(vel));
-    return () => window.clearTimeout(t);
-  }, [n, visto, marcha, vel, total]);
-  const termino = n != null && n >= total;
-  return {
-    n, caja, vel, marcha, termino, controles: !quieto,
-    tocar: () => { if (!quieto && marcha && !termino) setMarcha(false); },
-    repetir: () => { setN(0); setMarcha(true); setVisto(true); },
-    alternar: () => setMarcha((x) => !x),
-    velocidad: setVel,
-  };
-}
-type AnimMeses = ReturnType<typeof useAnimMeses>;
 const IconoRepetir = () => (
   <svg className="icono" viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter" aria-hidden="true" focusable="false">
     <path d="M4 10a6 6 0 1 0 2-4.5M4 3v4h4" />
   </svg>
 );
 /** Controles chicos debajo del gráfico: Repetir, Pausa/Seguir y Velocidad. */
-function ControlesMeses({ a }: { a: AnimMeses }) {
+function ControlesMeses({ marcha, termino, esperando, vel, onRepetir, onAlternar, onVelocidad }: {
+  marcha: boolean; termino: boolean; esperando: boolean; vel: string; onRepetir: () => void; onAlternar: () => void; onVelocidad: (v: string) => void;
+}) {
   return (
     <div className="fi-anim" role="group" aria-label="Animación mes a mes">
-      <button type="button" className="fi-anim-btn" onClick={a.repetir} aria-label="Repetir la animación"><IconoRepetir /><span>Repetir</span></button>
-      <button type="button" className="fi-anim-btn" onClick={a.alternar} disabled={a.termino} aria-pressed={!a.marcha}
-        aria-label={a.marcha ? "Pausar la animación" : "Seguir la animación"}>
-        {a.marcha ? <><IconoPausa /><span>Pausa</span></> : <><IconoSeguir /><span>Seguir</span></>}
+      <button type="button" className="fi-anim-btn" onClick={onRepetir} aria-label="Repetir la animación"><IconoRepetir /><span>Repetir</span></button>
+      <button type="button" className="fi-anim-btn" onClick={onAlternar} disabled={termino || esperando} aria-pressed={!marcha}
+        aria-label={marcha ? "Pausar la animación" : "Seguir la animación"}>
+        {marcha ? <><IconoPausa /><span>Pausa</span></> : <><IconoSeguir /><span>Seguir</span></>}
       </button>
-      <Seg opciones={VELOCIDADES} valor={a.vel} onElegir={a.velocidad} etiqueta="Velocidad" />
+      <Seg opciones={VELOCIDADES} valor={vel} onElegir={onVelocidad} etiqueta="Velocidad" />
     </div>
   );
 }
 
 // ------------------------------------------------------------ Mes a mes, desde que asumió (Meses de mandato con sus valores por defecto)
 type DatosMandato = NonNullable<ReturnType<typeof mandatoFicha>>;
-function CapMandato({ m, e, D, nivel, pd, inicio, b }: { m: Motor; e: Expr; D: DatosMandato | null; nivel: Nivel; pd: string | null; inicio: Record<string, string>; b: InicioMandato["b"] }) {
+function CapMandato({ m, e, D, nivel, pd, inicio, b, md, mh, set }: {
+  m: Motor; e: Expr; D: DatosMandato | null; nivel: Nivel; pd: string | null; inicio: Record<string, string>; b: InicioMandato["b"]; md: string | null; mh: string | null; set: SetFn;
+}) {
   const [res, setRes] = useState<string | null>(null);   // presidente resaltado (solo de la vista)
   const G = useMemo(() => {
     if (!D) return null;
@@ -358,31 +332,61 @@ function CapMandato({ m, e, D, nivel, pd, inicio, b }: { m: Motor; e: Expr; D: D
     };
     return { series, opts };
   }, [D]);
-  const N = D?.rows.length ?? 0;
-  const anim = useAnimMeses(N);
-  // líneas suavizadas y, si se tocó un presidente en la leyenda, solo él opaco y grueso (las demás al 25 %); `revelar`: los meses que ya se dibujaron
-  const opts = useMemo(() => (G ? { ...G.opts, suave: true, resaltar: res, revelar: anim.n } : null), [G, res, anim.n]);
+  // El dibujo (el lápiz de Meses de mandato, useLapiz): espera a que el gráfico esté a la vista (y quieto el resto), se pausa al tocarlo y, con "reducir
+  // movimiento" (o sin IntersectionObserver), no anima: todo a la vista y sin controles.
+  const [quieto] = useState(() => typeof window === "undefined" || typeof IntersectionObserver === "undefined" || window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const [visto, setVisto] = useState(false);
+  const [vel, setVel] = useState("1");
+  const caja = useRef<HTMLDivElement>(null);
+  const ts = useMemo(() => (D ? D.rows.map((f) => f.t as number) : []), [D]);
+  const lapiz = useLapiz(ts, Math.round(msPorMes(Math.max(0, ts.length - 1)) / Number(vel)), !quieto);
+  const hayD = !!D;
+  useEffect(() => {
+    const el = caja.current;
+    if (quieto || !el) return;
+    const io = new IntersectionObserver((es) => { if (es.some((x) => x.isIntersecting)) { setVisto(true); io.disconnect(); } }, { threshold: 0.4 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [quieto, hayD]);
+  // arranca al verse y vuelve a empezar (desde el nuevo "desde") cuando cambia el filtro de meses o la variable
+  const claveAnim = `${e.id}~${e.med}~${e.rel}~${e.modo}~${e.esc}|${D?.desde}|${D?.hasta}`;
+  const { reiniciar } = lapiz;
+  useEffect(() => { if (visto && !quieto) reiniciar(true); }, [visto, quieto, claveAnim, reiniciar]);
+  // líneas suavizadas y, si se tocó un presidente en la leyenda, solo él opaco y grueso (las demás al 25 %)
+  const opts = useMemo(() => (G ? { ...G.opts, suave: true, resaltar: res } : null), [G, res]);
   const titulo = "Mes a mes, desde que asumió";
   if (!D || !G || !opts) {
     const c = m.calc(e);
     return <Capitulo id="fi-mandato" nivel={nivel} titulo={titulo}><p className="note">{sinMandatoTxt(m, c, frecuenciaOrigen(c.v))}</p></Capitulo>;
   }
-  const href = hrefMandatoDe(e, { mp: D.mp, anc: D.ancParam }, inicio);
+  const href = hrefMandatoDe(e, { mp: D.mp, anc: D.ancParam, md, mh }, inicio);
   const bajada = D.modo === "teorico"
     ? `Si todos arrancaran en el mismo punto: cada presidente parte del valor del mes 0 de Milei y sigue con sus propias variaciones. Unidad: ${D.c.unidad}.`
     : "El valor de cada mes, contado desde el mes 0 de cada presidente.";
   return (
     <Capitulo id="fi-mandato" nivel={nivel} titulo={titulo} bajada={bajada} acciones={
       <Acciones donde="Meses de mandato" href={href} compartir={
-        <Compartir titulo={`${D.c.corto} por mes de mandato`} href={linkCompartir(e, href, { ...inicio, ...(pd ? { pd } : {}) })}
-          vista={() => ({ tipo: "mandato", expr: e, modo: D.modo, presIds: D.pres.map((x) => x.id), anc: D.ancParam, md: null, mh: null, base: b })} />} />}>
+        <Compartir titulo={`${D.c.corto} por mes de mandato`} href={linkCompartir(e, href, { ...inicio, ...(pd ? { pd } : {}), ...(md ? { md } : {}), ...(mh ? { mh } : {}) })}
+          vista={() => ({ tipo: "mandato", expr: e, modo: D.modo, presIds: D.pres.map((x) => x.id), anc: D.ancParam, md, mh, base: b })} />} />}>
       <div className="legend e1-leyenda" role="group" aria-label="Presidentes: tocá uno para resaltarlo">
         {D.pres.map((x) => (
           <button key={x.id} type="button" style={vcolor(x.color)} aria-pressed={res === x.id} onClick={() => setRes(res === x.id ? null : x.id)}>{x.n}</button>
         ))}
       </div>
-      <div className="fi-grafico" ref={anim.caja} onPointerDown={anim.tocar}><Grafico rows={D.rows} series={G.series} opts={opts} /></div>
-      {anim.controles && <ControlesMeses a={anim} />}
+      <div className="fi-grafico" ref={caja} onPointerDown={() => { if (lapiz.play) lapiz.pausar(); }}>
+        <div ref={lapiz.envoltura} className="mand-lapiz"><Grafico rows={lapiz.rowsVista(D.rows)} series={G.series} opts={opts} /></div>
+      </div>
+      {D.maxMes >= 2 && (
+        <div className="controls mand-meses">
+          <label>Meses</label><label htmlFor="fi_desde">desde</label>
+          <input type="range" id="fi_desde" min={0} max={D.maxMes - 1} step={1} value={D.desde} onChange={(ev) => { const d = +ev.target.value; set({ md: d ? String(d) : null, mh: d >= D.hasta ? String(d + 1) : undefined }); }} />
+          <label htmlFor="fi_hasta">hasta</label>
+          <input type="range" id="fi_hasta" min={1} max={D.maxMes} step={1} value={D.hasta} onChange={(ev) => { const h = +ev.target.value; set({ mh: h === D.maxMes ? null : String(h), md: D.desde >= h ? String(h - 1) : undefined }); }} />
+          <span className="lbl">mes {D.desde} a {D.hasta}{D.hasta === D.maxMes && D.desde === 0 ? " (todo)" : ""}</span>
+        </div>
+      )}
+      {!quieto && <ControlesMeses marcha={!visto || lapiz.play} termino={lapiz.termino} esperando={!visto} vel={vel}
+        onRepetir={() => { setVisto(true); lapiz.reiniciar(true); }} onAlternar={() => (lapiz.play ? lapiz.pausar() : lapiz.seguir())} onVelocidad={setVel} />}
       {D.modo !== "teorico" && <p className="fi-nota">Unidad: {D.c.unidad}.</p>}
     </Capitulo>
   );

@@ -10,7 +10,7 @@ import { InfoPunto } from "../sistema/InfoPunto";
 import { CompartirHoja } from "../sistema/CompartirHoja";
 import { Grafico, type Fila, type OpcionesG, type SerieG } from "../Grafico";
 import { useConfig } from "../ConfigProvider";
-import { baseDeConfig } from "@/lib/config";
+import { baseDeSeccion } from "@/lib/config";
 import { PALETA, vcolor } from "../util";
 import { BotonCompartir } from "../PanelCompartir";
 import { IconoCompartir } from "../Iconos";
@@ -444,8 +444,8 @@ function GraficoMensual({ rows, series, opts, F }: { rows: Fila[]; series: Serie
   const { config } = useConfig();
   const [local, setLocal] = useState<boolean | null>(null);
   const on = local ?? config.franjas;
-  const kBase = `${config.t0}|${JSON.stringify(config.t0p)}`;
-  const franjas = useMemo(() => (on ? franjasPres(F, baseDeConfig(config, PRES_DEF.map((x) => x.id))) : undefined),
+  const kBase = `${config.t0}|${JSON.stringify(config.t0p)}|${config.aplica.join(",")}|${JSON.stringify(config.aplicaP)}`;
+  const franjas = useMemo(() => (on ? franjasPres(F, baseDeSeccion(config, "fichas", PRES_DEF.map((x) => x.id))) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [on, F, kBase]);
   const o = useMemo(() => (franjas ? { ...opts, franjas } : opts), [opts, franjas]);

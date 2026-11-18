@@ -110,7 +110,7 @@ export function grillaPresidentes(m: Motor, b: BaseCfg, S: Record<string, SerieM
       del.forEach((ce, k) => { ce.calor = (k + 1) / del.length; });
     }
   });
-  const filas: FilaGrilla[] = pres.map((x, k) => ({ pres: x, periodo: periodoMandato(F, x), celdas: porColumna.map((col) => col[k]) }))
+  const filas: FilaGrilla[] = pres.map((x, k) => ({ pres: x, periodo: periodoMandato(F, x, b), celdas: porColumna.map((col) => col[k]) }))
     .filter((f) => f.celdas.some((ce) => ce.href));
   return { columnas, filas };
 }

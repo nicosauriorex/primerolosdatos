@@ -5,32 +5,33 @@ import { Modal } from "../ui";
 import { Hoja, type CerrarHoja } from "../sistema/Hoja";
 import { fmtMes, ok } from "@/lib/formato";
 import type { Calculo, Motor } from "@/lib/motor";
-import { AYUDA_T, PRES_DEF, baseIdx, baseTxt, crearPres, oracionInicio, varNum, type Pres, type StatsM } from "@/lib/estadisticas";
+import { AYUDA_F, AYUDA_IGUAL, AYUDA_T, PRES_DEF, finConExc, finDeFabrica, iniDeFabrica, baseIdx, baseTxt, crearPres, mesF, mesMas, oracionInicio, varNum, type Pres, type StatsM } from "@/lib/estadisticas";
 import { colorPuesto, columnaPresidentes, datosDesde, lecturaTono, periodoMandato, tonoDeVariacion, variacionMostrada, type ColComp, type MarcaCol, type Tono } from "@/lib/tablas";
-import { DEFECTO, txtT, baseDeConfig, baseDeUrl, encT0p, esBaseDeFabrica, limpiarBase, mismaBase, type BaseCfg } from "@/lib/config";
+import { txtF, txtT, baseDeSeccion, baseDeUrl, esBaseDeFabrica, limpiarBase, mismaBase, paramsDeBase, type BaseCfg, type SeccionBase } from "@/lib/config";
 
 export const COLS: [string, string][] = [["ini", "Inicio"], ["fin", "Cierre"], ["var", "Variación"], ["min", "Mínimo"], ["max", "Máximo"], ["prom", "Promedio"], ["med", "Mediana"], ["n", "Meses"]];
 const IDS_PRES = PRES_DEF.map((x) => x.id);
-export interface InicioMandato { b: BaseCfg; delLink: boolean; usarMio: () => void }
+/** `aplica`: false si la configuración no se aplica a esta sección (usa el de fábrica) y el link no trae otro. */
+export interface InicioMandato { b: BaseCfg; delLink: boolean; usarMio: () => void; aplica: boolean }
 
-/** Inicio del mandato de la vista: el del link (`t0`, `t0p` o los viejos `b` y `n`) si lo trae; si no, el de la configuración.
+/** Inicio del mandato de la vista: el del link (`t0`, `t0p`, `tf`, `tfp` o los viejos `b` y `n`) si lo trae; si no, el de la configuración.
  *  Mantiene la URL en sintonía: con una configuración distinta de la de fábrica agrega `t0`/`t0p` (así el link se ve igual para cualquiera),
  *  y si se cambia algo en el panel saca lo que traía el link. */
-export function useBase(p: URLSearchParams, set: (c: Record<string, string | null>) => void, montado: boolean): InicioMandato {
+export function useBase(sec: SeccionBase, p: URLSearchParams, set: (c: Record<string, string | null>) => void, montado: boolean): InicioMandato {
   const { config, rev } = useConfig();
-  const cfgBase = useMemo(() => baseDeConfig(config, IDS_PRES), [config]);
+  const cfgBase = useMemo(() => baseDeSeccion(config, sec, IDS_PRES), [config, sec]);
   const urlBase = useMemo(() => baseDeUrl(p), [p]);
   const b = useMemo(() => limpiarBase(urlBase ?? cfgBase, IDS_PRES), [urlBase, cfgBase]);
   const delLink = !!urlBase && !mismaBase(urlBase, cfgBase, IDS_PRES);
   const revVista = useRef(rev);
   useEffect(() => {
     if (!montado) return;
-    const paramsDe = (x: BaseCfg) => ({ t0: x.t0 === DEFECTO.t0 ? null : String(x.t0), t0p: encT0p(x.t0p) || null });
+    const paramsDe = paramsDeBase;
     if (rev !== revVista.current) { revVista.current = rev; set({ b: null, n: null, ...paramsDe(cfgBase) }); return; }
     if (!urlBase && !esBaseDeFabrica(cfgBase, IDS_PRES)) set(paramsDe(cfgBase));
   }, [montado, rev, cfgBase, urlBase, set]);
-  const usarMio = useCallback(() => set({ b: null, n: null, t0: null, t0p: null }), [set]);
-  return { b, delLink, usarMio };
+  const usarMio = useCallback(() => set({ b: null, n: null, t0: null, t0p: null, tf: null, tfp: null }), [set]);
+  return { b, delLink, usarMio, aplica: !!urlBase || config.aplica.includes(sec) };
 }
 
 /** Oración del inicio de mandato ("Se cuenta desde el mes antes de asumir, excepto Milei: desde el mes después de asumir.") con un ícono de información que abre la explicación y el botón Configurar.
@@ -44,6 +45,9 @@ export function LineaInicio({ info, F, children, texto, sinAviso }: { info: Inic
     <>
       <div className="linea-inicio"><span>{texto ?? oracionInicio(b)}</span>
         <button type="button" className="btn-info" aria-label="Cómo se elige el mes inicial de cada presidente" aria-haspopup="dialog" onClick={() => setAbierto(true)}><span className="info-btn" aria-hidden>i</span></button></div>
+      {!info.aplica && !sinAviso && (
+        <p className="aviso-link" role="status">Esta sección usa lo de fábrica (T){Object.keys(b.t0p).length || Object.keys(b.tfp).length ? ", salvo las excepciones por presidente de arriba" : ""} · <button type="button" className="enlace" onClick={abrirPanel}>Configurar</button></p>
+      )}
       {info.delLink && !sinAviso && (
         <p className="aviso-link" role="status">Estás viendo el inicio de mandato del link · <button type="button" className="enlace" onClick={info.usarMio}>Usar el mío</button></p>
       )}
@@ -51,12 +55,15 @@ export function LineaInicio({ info, F, children, texto, sinAviso }: { info: Inic
         <Modal titulo="Mes inicial de cada presidente" cabecera="Mes inicial de cada presidente" onCerrar={() => setAbierto(false)}>
           <div className="info-cuerpo">
             <p>{AYUDA_T}</p>
+            {(!finDeFabrica(b) || !iniDeFabrica(b)) && <p>{AYUDA_F}</p>}
+            {b.tf === null && !iniDeFabrica(b) && <p>{AYUDA_IGUAL}</p>}
             <p>Ahora: <b>{baseTxt(b)}</b>{F && milei ? <>; para Milei, {fmtMes(F[baseIdx(F, milei, b)])}</> : null}.</p>
             <ul>
               {b.t0 === -1 && <li>Con T-1 la variación incluye todo lo que pasó en el mandato (p.ej. la devaluación de dic-2023 cuenta para Milei).</li>}
               {b.t0 === 0 && <li>El mes de asunción es un promedio que incluye días del antecesor.</li>}
               {b.t0 > 0 && <li>Con T+{b.t0} el mes de partida ya tiene días del mandato y la variación deja afuera el primer salto.</li>}
-              {Object.keys(b.t0p).length > 0 && <li>Excepciones: {PRES_DEF.filter((x) => b.t0p[x.id] != null).map((x) => `${x.n} (${txtT(b.t0p[x.id])})`).join(", ")}.</li>}
+              {(!finDeFabrica(b) || !iniDeFabrica(b)) && <li>Fin: {b.tf === null ? "igual que el inicio" : txtF(b.tf)}{finConExc(b).length > 0 ? `; excepciones: ${finConExc(b).map((x) => `${x.n}: hasta ${fmtMes(mesMas(mesF(x) ?? x.ini, b.tfp[x.id]))} (${txtF(b.tfp[x.id])})`).join(", ")}` : ""}.</li>}
+              {Object.keys(b.t0p).length > 0 && <li>Excepciones: {PRES_DEF.filter((x) => b.t0p[x.id] != null).map((x) => `${x.n}: desde ${fmtMes(mesMas(x.ini, b.t0p[x.id]))} (${txtT(b.t0p[x.id])})`).join(", ")}.</li>}
             </ul>
             {children}
             <footer>
@@ -94,8 +101,8 @@ export function CeldaPres({ n, corto, periodo, aparte, sel, pos }: { n: string; 
   );
 }
 /** Igual que `CeldaPres` para un presidente de `crearPres`, con su período de mandato. */
-export function CeldaPresMandato({ x, F, arr, pos }: { x: Pres; F: string[]; arr?: ArrayLike<number | null | undefined>; pos?: number }) {
-  return <CeldaPres n={x.n} corto={x.corto} periodo={periodoMandato(F, x)} aparte={arr ? datosDesde(F, arr, x) : null} pos={pos} />;
+export function CeldaPresMandato({ x, F, arr, pos, b }: { x: Pres; F: string[]; arr?: ArrayLike<number | null | undefined>; pos?: number; b?: BaseCfg }) {
+  return <CeldaPres n={x.n} corto={x.corto} periodo={periodoMandato(F, x, b)} aparte={arr ? datosDesde(F, arr, x) : null} pos={pos} />;
 }
 /** Primera columna de las tablas con una variable por fila: el nombre en hasta dos renglones y la unidad debajo. */
 export function CeldaVar({ nombre, unidad, extra, info }: { nombre: React.ReactNode; unidad?: string; extra?: React.ReactNode; info?: React.ReactNode }) {

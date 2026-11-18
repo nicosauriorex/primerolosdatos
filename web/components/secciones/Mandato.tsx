@@ -1,9 +1,10 @@
 "use client";
-import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PanelGasto } from "../PanelGasto";
 import { armarImagenHitos } from "@/lib/imagen-hitos";
 import type { FormatoImg } from "@/lib/config";
 import { useSeccion } from "../useSeccion";
+import { msPorMes, useLapiz } from "../useLapiz";
 import { Cargando, Selector, Seg, alternar } from "../ui";
 import { FilaVariable } from "../Variables";
 import { VentanaConfig } from "./VentanaConfig";
@@ -15,7 +16,7 @@ import { ConCartel } from "../sistema/ConCartel";
 import { Grafico, type Fila, type SerieG } from "../Grafico";
 import { CeldaPresMandato, LineaInicio, useBase } from "./comunes";
 import { fmtMes } from "@/lib/formato";
-import { baseIdx, calcularMandato, celdasHitos, crearPres, nombreCorto, TITULOS_MANDATO as TITULOS, type CeldaHito, type ModoMandato } from "@/lib/estadisticas";
+import { baseIdx, calcularMandato, celdasHitos, finIdx, crearPres, nombreCorto, TITULOS_MANDATO as TITULOS, type CeldaHito, type ModoMandato } from "@/lib/estadisticas";
 import type { Expr } from "@/lib/motor";
 import { MODO_MANDATO_DEF, PRES_MANDATO_DEF } from "@/lib/ficha";
 import { decExpr, enteroEn, encExpr, lista, unoDe, useParams } from "@/lib/url";
@@ -42,7 +43,7 @@ export function Mandato() {
   const defecto = sinParams.current ?? true;
   const set = (c: Record<string, string | null | undefined>) => set0(defecto && !p.has("mv") && !("mv" in c) ? { mv: encExpr(E_BLUE), ...c } : c);
   const [resSel, setResSel] = useState<string | null | undefined>(undefined);   // undefined = el de por defecto (Milei, solo sin parámetros)
-  const info = useBase(p, set0, montado), b = info.b;
+  const info = useBase("mandato", p, set0, montado), b = info.b;
   const e0 = decExprSeguro(p.get("mv"));
   const sec = useSeccion(e0 ? [e0.id, ...(e0.rel ? [e0.rel] : [])] : [defecto ? E_BLUE.id : "fx_oficial"]);
   const { motor: m, metas, version } = sec;
@@ -51,11 +52,8 @@ export function Mandato() {
   const PRES = useMemo(() => (m ? crearPres(m.F) : []), [m]);
   const PRES_T0 = useMemo(() => (m ? PRES.filter((x) => m.idxDe(x.ini) > 0) : []), [m, PRES]);
 
-  // animación: mes actual y si avanza; cualquier cambio de filtro la corta
-  const [anim, setAnim] = useState<{ t: number; play: boolean } | null>(null);
   const [valorFinal, setValorFinal] = useState(false);   // opción de la imagen: el valor de cada presidente en el último mes visible
   const clave = p.toString() + JSON.stringify(b);
-  useEffect(() => { setAnim(null); }, [clave]);
 
   const modoUrl = unoDe(p.get("mmo"), ["teorico", "var", "indice", "valor"] as const, MODO_MANDATO_DEF);   // "indice" (links viejos) = Variación %
   const modo: ModoMandato = modoUrl === "indice" ? "var" : modoUrl;
@@ -79,67 +77,25 @@ export function Mandato() {
   }, [m, version, sec.ocupado, eB.id, eB.med, eB.rel, eB.modo, eB.esc, modo, banda, b, p, PRES_T0]);
 
   const modoEf: ModoMandato = D ? D.modo : modo;   // con una tasa, "mismo punto de partida" se muestra como valor del período
-  const maxAnim = D ? D.rows.length - 1 : 0;
-  const ms = Math.round(Math.max(6000 / Math.max(1, maxAnim), Math.min(150, 12000 / Math.max(1, maxAnim))));
-  const play = !!anim?.play;
-  // Posición continua del dibujo (en meses, con decimales): el lápiz avanza entre un mes y el siguiente. `anim.t` es solo su parte entera.
-  const pos = useRef(0);
-  const envoltura = useRef<HTMLDivElement>(null);
-  const tsRef = useRef<number[]>([]);
-  tsRef.current = D ? D.rows.map((r) => r.t as number) : [];
-  /** Recorta el gráfico a la derecha del lápiz: el último tramo (ya dibujado hasta el mes siguiente) se descubre de a poco. */
-  const aplicarRecorte = () => {
-    const el = envoltura.current;
-    if (!el) return;
-    const ts = tsRef.current, fin = ts.length - 1;
-    const over = el.querySelector(".u-over");
-    if (!over || fin < 1 || pos.current >= fin) { el.style.clipPath = ""; return; }
-    const i = Math.max(0, Math.min(Math.floor(pos.current), fin - 1));
-    const tt = ts[i] + (ts[i + 1] - ts[i]) * (pos.current - i);
-    const fr = (tt - ts[0]) / ((ts[fin] - ts[0]) || 1);
-    const er = el.getBoundingClientRect(), or = over.getBoundingClientRect();
-    const x = or.left - er.left + Math.max(0, Math.min(1, fr)) * or.width;
-    el.style.clipPath = `inset(-12px ${Math.max(0, er.width - x)}px -12px 0)`;
-  };
-  useEffect(() => {
-    if (!play) return;
-    // si el sistema pide reducir el movimiento (también si cambió con la animación andando), no avanza sola
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setAnim(null); return; }
-    let ultimo = performance.now(), raf = 0;
-    const paso = (ahora: number) => {
-      const dt = Math.min(100, ahora - ultimo);   // una pestaña en segundo plano no salta de golpe
-      ultimo = ahora;
-      pos.current = Math.min(maxAnim, pos.current + dt / ms);
-      const entero = Math.floor(pos.current), llego = pos.current >= maxAnim;
-      setAnim((a) => (!a || !a.play ? a : llego ? { t: maxAnim, play: false } : a.t === entero ? a : { t: entero, play: true }));
-      aplicarRecorte();
-      if (!llego) raf = requestAnimationFrame(paso);
-    };
-    raf = requestAnimationFrame(paso);
-    return () => cancelAnimationFrame(raf);
-  }, [play, ms, maxAnim]);
-  // al cambiar los cuadros (o cortarse la animación) el recorte se vuelve a poner donde corresponde
-  useLayoutEffect(() => { if (!anim) { if (envoltura.current) envoltura.current.style.clipPath = ""; return; } aplicarRecorte(); });
-  const animar = () => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setAnim(null); return; }
-    pos.current = 0;
-    setAnim({ t: 0, play: true });
-  };
-  // el cuadro actual nunca pasa del último mes visible: al achicar "Hasta" con la animación terminada, anim.t queda fuera de rango hasta que el efecto de arriba la corta
-  const cuadro = anim ? Math.max(0, Math.min(anim.t, maxAnim)) : 0;
+  // animación (el lápiz, useLapiz): cualquier cambio de filtro la corta
+  const tsLapiz = useMemo(() => (D ? D.rows.map((r) => r.t as number) : []), [D]);
+  const lapiz = useLapiz(tsLapiz, msPorMes(Math.max(0, tsLapiz.length - 1)));
+  const { anim, cuadro, play, maxAnim } = lapiz;
+  const { cortar } = lapiz;
+  useEffect(() => { cortar(); }, [clave, cortar]);
   // se dibuja un mes de más: el recorte deja ver solo hasta donde llegó el lápiz
-  const rowsVista = D && anim ? D.rows.map((r, i) => (i <= cuadro + 1 ? r : { t: r.t })) : D?.rows;
+  const rowsVista = D ? lapiz.rowsVista(D.rows) : undefined;
 
   // imagen del resumen por hitos: siempre la tabla (misma función de colores y cifras que la pantalla)
   const [imagenHitos, setImagenHitos] = useState(false);
-  const armarHitos = useCallback((f: FormatoImg) => armarImagenHitos(m!, D!, celdasHitos(D!.todas, D!.pres, D!.pres.map((x) => x.i1 - baseIdx(m!.F, x, b)), HITOS, D!.c), HITOS, b, f), [m, D, b]);
+  const armarHitos = useCallback((f: FormatoImg) => armarImagenHitos(m!, D!, celdasHitos(D!.todas, D!.pres, D!.pres.map((x) => finIdx(m!.F, x, b) - baseIdx(m!.F, x, b)), HITOS, D!.c), HITOS, b, f), [m, D, b]);
 
   if (sec.errorGeneral) return <p className="error" role="alert">{sec.errorGeneral}</p>;
   if (!m || !montado) return <Cargando />;
   const errs = Object.values(sec.errores);
   const resEf = D && (resSel === undefined ? (defecto && selIds.has("milei") ? "milei" : null) : resSel);
   const resaltar = D && resEf && D.pres.some((x) => x.id === resEf) ? resEf : null;
-  const hitosDe = D ? celdasHitos(D.todas, D.pres, D.pres.map((x) => x.i1 - baseIdx(m.F, x, b)), HITOS, D.c) : [];
+  const hitosDe = D ? celdasHitos(D.todas, D.pres, D.pres.map((x) => finIdx(m.F, x, b) - baseIdx(m.F, x, b)), HITOS, D.c) : [];
 
   return (
     <section>
@@ -184,10 +140,10 @@ export function Mandato() {
               title="Armar una imagen de este gráfico para compartir" aria-label="Compartir como imagen: meses de mandato"
               crearVista={() => ({ tipo: "mandato", expr: eB, modo: modoEf, presIds: D.pres.map((x) => x.id), anc: p.get("anc"), md: p.get("md"), mh: p.get("mh"), valorFinal, base: b, ...(resaltar ? { resaltados: [resaltar] } : {}) })}><IconoCompartir />Compartir</BotonCompartir>}>
             <div className="anim-barra">
-              {!anim ? <button type="button" className="btn" onClick={animar}>▶ Animar</button>
-                : anim.play ? <button type="button" className="btn" onClick={() => setAnim({ ...anim, play: false })}>⏸ Pausa</button>
-                : <><button type="button" className="btn" onClick={() => { pos.current = cuadro >= maxAnim ? 0 : pos.current; setAnim(cuadro >= maxAnim ? { t: 0, play: true } : { t: cuadro, play: true }); }}>▶ Seguir</button>
-                  <button type="button" className="btn" onClick={() => { pos.current = 0; setAnim({ t: 0, play: true }); }}>↺ Reiniciar</button></>}
+              {!anim ? <button type="button" className="btn" onClick={() => lapiz.reiniciar(true)}>▶ Animar</button>
+                : anim.play ? <button type="button" className="btn" onClick={lapiz.pausar}>⏸ Pausa</button>
+                : <><button type="button" className="btn" onClick={lapiz.seguir}>▶ Seguir</button>
+                  <button type="button" className="btn" onClick={() => lapiz.reiniciar(true)}>↺ Reiniciar</button></>}
               {anim && <span className="lbl" role="status">Mes {D.rows[cuadro]?.t as number}</span>}
             </div>
             {/* la leyenda es tocable: resalta la línea del presidente (y la vuelve a sacar al tocarla de nuevo) */}
@@ -198,7 +154,7 @@ export function Mandato() {
               ))}
             </div>
             {/* tocar el gráfico pausa la animación */}
-            <div ref={envoltura} className="mand-lapiz" onPointerDown={() => { if (play) setAnim((a) => (a ? { ...a, play: false } : a)); }}><Grafico rows={rowsVista || D.rows} series={D.series} opts={{ ...D.opts, resaltar }} /></div>
+            <div ref={lapiz.envoltura} className="mand-lapiz" onPointerDown={() => { if (play) lapiz.pausar(); }}><Grafico rows={rowsVista || D.rows} series={D.series} opts={{ ...D.opts, resaltar }} /></div>
             <div className="controls mand-meses">
               <label>Meses</label><label htmlFor="mm_desde">desde</label>
               <input type="range" id="mm_desde" min={0} max={D.maxMes - 1} step={1} value={D.desde} onChange={(ev) => { const d = +ev.target.value; set({ md: d ? String(d) : null, mh: d >= D.hasta ? String(d + 1) : undefined }); }} />
@@ -223,9 +179,9 @@ export function Mandato() {
                 <div className="tablewrap fija"><table className="pres-hm-tabla">
                   <thead><tr><th>Presidente</th><th>Mes 0</th>{HITOS.map((x) => <th key={x}>Mes {x}</th>)}<th>Final</th></tr></thead>
                   <tbody>{D.pres.map((x, k) => {
-                    const fin = x.i1 - baseIdx(m.F, x, b), fila = hitosDe[k];
+                    const fin = finIdx(m.F, x, b) - baseIdx(m.F, x, b), fila = hitosDe[k];
                     const celda = (t: number, extra?: React.ReactNode) => <CeldaMapa ce={fila.find((q) => q.t === t)} txt={D.cel(x, t)} extra={extra} />;
-                    return <tr key={x.id}><CeldaPresMandato x={x} F={m.F} />{celda(0)}{HITOS.map((h) => h <= fin ? <Fragment key={h}>{celda(h)}</Fragment> : <td key={h} />)}{celda(fin, <small>mes {fin}</small>)}</tr>;
+                    return <tr key={x.id}><CeldaPresMandato x={x} F={m.F} b={b} />{celda(0)}{HITOS.map((h) => h <= fin ? <Fragment key={h}>{celda(h)}</Fragment> : <td key={h} />)}{celda(fin, <small>mes {fin}</small>)}</tr>;
                   })}</tbody>
                 </table></div>
                 <p className="note">{D.c.dir ? "Color: cómo cambió desde el mes 0. Verde = mejoró y rojo = empeoró (también está escrito); más intenso = el cambio más grande de ese hito entre presidentes." : "Sin verde ni rojo: subir o bajar no es ni bueno ni malo en sí mismo. Más intenso = el cambio más grande de ese hito."}</p>

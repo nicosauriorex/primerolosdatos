@@ -71,7 +71,7 @@ function CuriosGeneradas({ m, PRES, I, b, p, set }: {
 export function Curiosidades() {
   const [p, set, montado] = useParams();
   const sec = useSeccion("todo");
-  const info = useBase(p, set, montado), b = info.b;
+  const info = useBase("curiosidades", p, set, montado), b = info.b;
   const { motor: m, version } = sec;
   const PRES = useMemo(() => (m ? crearPres(m.F) : []), [m]);
   const I = useMemo(() => (m && !sec.ocupado ? crearIndicadores(m) : null), [m, sec.ocupado, version]);  // eslint-disable-line react-hooks/exhaustive-deps
