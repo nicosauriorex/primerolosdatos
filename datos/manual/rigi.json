@@ -3,7 +3,7 @@
  "fuente": "Ministerio de Economía, planilla oficial de proyectos RIGI aprobados (Google Sheet 1eytHJrzUjIFOXI-P1Hx_wbmZiSqPxVle059Djdos6u8, hoja dataset), con fechas tomadas de cada norma de aprobación (Resoluciones del Ministerio de Economía en argentina.gob.ar/normativa y Boletín Oficial); ingresado: BCRA (presentación de Werning, abril 2026).",
  "url_planilla": "https://docs.google.com/spreadsheets/d/1eytHJrzUjIFOXI-P1Hx_wbmZiSqPxVle059Djdos6u8/gviz/tq?tqx=out:csv&sheet=dataset",
  "fecha_descarga": "2026-11-17",
- "nota": "Un proyecto por fila (las filas repetidas por provincia están agrupadas en provincias): 30 proyectos, monto total comprometido USD 79649 millones (monto = columna inv-comprometida de la planilla, millones de US$). fecha = fecha de firma de la resolución de aprobación (legislationDate de argentina.gob.ar/normativa o fecha de la resolución en el Boletín Oficial); fecha_publicacion = día del Boletín Oficial. El proyecto sin norma (Parque Eólico la Rinconada) queda con fecha null. Los empleos son los de la planilla (directos e indirectos, como los informa la empresa/gobierno), no un dato medido. La planilla es la lista del Ministerio; no distingue lo anunciado de lo ejecutado.",
+ "nota": "Un proyecto por fila (las filas repetidas por provincia están agrupadas en provincias): 30 proyectos, monto total comprometido USD 79649 millones (monto = columna inv-comprometida de la planilla, millones de US$). fecha = fecha de firma de la resolución de aprobación (legislationDate de argentina.gob.ar/normativa o fecha de la resolución en el Boletín Oficial); fecha_publicacion = día del Boletín Oficial. Los empleos son los de la planilla (directos e indirectos, como los informa la empresa/gobierno), no un dato medido. La planilla es la lista del Ministerio; no distingue lo anunciado de lo ejecutado.",
  "proyectos": [
   {
    "nombre": "Parque Solar El Quemado y Anexos",
@@ -240,11 +240,11 @@
    "monto": 891.0,
    "empleos": 6300,
    "descripcion": "Desarrollo, extracción y procesamiento de cobre con recuperación de oro mediante una mina a cielo abierto y una planta concentradora, con una capacidad estimada de procesamiento de diez millones de toneladas anuales de mineralización de cobre y oro.",
-   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-426315",
-   "norma_id": "Resolución 809/2026",
-   "fecha": "2026-06-01",
-   "fecha_publicacion": "2026-06-02",
-   "cita_norma": "Resolución 809/2026 (Ministerio de Economía), firmada el 2026-06-01 y publicada el 2026-06-02: DASE POR DESIGNADA TRANSITORIAMENTE, A PARTIR DEL 2 DE FEBRERO DE 2026 Y POR EL PLAZO DE CIENTO OCHENTA (180) DIAS HABILES, A LA MEDICA VETERINARIA ALICIA MERCEDES BEARZI (MI N° 28.045.000), EN EL CARGO DE COORDINADORA REGIONAL DE INOCUIDAD Y CALIDAD AGROALIMENTARIA DE LA DIRECCION DE CENTRO REGIONAL CORDOBA DEPENDIENTE DE LA DIRECCION NACIONAL DE OPERACIONES DEL SERVICIO NACIO"
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-426172",
+   "norma_id": "Resolución 801/2026",
+   "fecha": "2026-05-26",
+   "fecha_publicacion": "2026-05-28",
+   "cita_norma": "Resolución 801/2026 (Ministerio de Economía), firmada el 2026-05-26 y publicada el 2026-05-28: APRUEBASE LA SOLICITUD DE ADHESION AL REGIMEN DE INCENTIVO PARA GRANDES INVERSIONES (RIGI), ENMARCADO EN EL SECTOR “MINERIA”, SUBSECTOR “MINERALES DE PRIMERA Y SEGUNDA CATEGORIA DEL CODIGO DE MINERIA DE LA NACION (EXCLUIDOS POTASIO Y LITIO)”, Y EL PLAN DE INVERSION PRESENTADOS POR MINERA SAN JORGE. (Corregida el 2026-11-18: antes figuraba la Resolución 809/2026, que es otra norma.)"
   },
   {
    "nombre": "Ampliación Cauchari Olaroz",
@@ -488,12 +488,12 @@
    "monto": 231.0,
    "empleos": 902,
    "descripcion": "Desarrollo y explotación de un parque eólico de 94,5 MW, en Olavarría, provincia de Buenos Aires",
-   "norma": null,
-   "norma_id": null,
-   "fecha": null,
-   "fecha_publicacion": null,
-   "cita_norma": null,
-   "nota": "La planilla oficial no trae enlace a la norma para este proyecto y no se encontró la resolución de aprobación (la prensa de 2025 lo mostraba como en evaluación); la fecha queda sin cargar."
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/norma-432255",
+   "norma_id": "Resolución 1983/2026",
+   "fecha": "2026-11-13",
+   "fecha_publicacion": "2026-11-16",
+   "cita_norma": "Resolución 1983/2026 (Ministerio de Economía), firmada el 2026-11-13 y publicada el 2026-11-16: APRUEBASE LA SOLICITUD DE ADHESION AL (RIGI), ENMARCADO EN EL SECTOR “ENERGIA”, Y EL PLAN DE INVERSION PRESENTADOS POR VIENTOS LA RINCONADA S.A.U. [...] TITULAR DEL PROYECTO UNICO DENOMINADO “PARQUE EOLICO LA RINCONADA”",
+   "nota": "La planilla oficial no trae el enlace a la norma; la Resolución 1983/2026 se encontró en argentina.gob.ar/normativa el 2026-11-18."
   }
  ],
  "ingresado": {
@@ -525,5 +525,292 @@
    }
   ],
   "mas_nuevo_oficial": "No se encontró ninguna cifra oficial posterior de lo efectivamente invertido o ingresado. Chequeado (2026-10-02) solo trae proyecciones oficiales de ingresos de capital: US$ 6.200 millones en 2026, 6.251 en 2027 y 6.644 en 2028 (no son datos efectivos)."
- }
+ },
+ "totales": [
+  {
+   "fecha": "2026-06-11",
+   "aprobados": {
+    "n": 16,
+    "monto": 29892
+   },
+   "evaluacion": {
+    "n": 25,
+    "monto": 111037,
+    "empleos": 142168
+   },
+   "presentados": {
+    "n": 41,
+    "monto": null
+   },
+   "fuente": "Ministerio de Economía, nota oficial del lanzamiento de la web del RIGI (argentina.gob.ar)",
+   "url": "https://www.argentina.gob.ar/node/504545",
+   "cita": "Proyectos aprobados por resolución 16 proyectos US$ 29.892 millones de inversión 54.495 empleos directos e indirectos Proyectos en evaluación - 25 proyectos - US$ 111.037 millones de inversión - 142.168 empleos directos e indirectos; entre proyectos aprobados y en evaluación, el RIGI ya moviliza un universo de 41 iniciativas que representan inversiones por más de US$ 140.000 millones (nota del 11 de junio de 2026, leída el 2026-11-18)."
+  },
+  {
+   "fecha": "2026-10-29",
+   "aprobados": {
+    "n": 30,
+    "monto": 80000
+   },
+   "evaluacion": null,
+   "presentados": {
+    "n": 48,
+    "monto": 210000
+   },
+   "fuente": "Luis Caputo, ministro de Economía, en la Ronda de Negocios RIGI de Rosario, según Mirador Provincial (nota de prensa, no un documento del Ministerio)",
+   "url": "https://www.miradorprovincial.com/2026/10/29/luis-caputo-en-rosario-el-gobierno-confirmo-48-proyectos-por-us-210-000-millones-bajo-el-rigi/",
+   "cita": "hasta el momento, se presentaron 48 proyectos vinculados con el RIGI por un monto cercano a los US$ 210.000 millones. De ese total, indicó que 30 fueron aprobados, por alrededor de US$ 80.000 millones. Los montos son aproximados (dichos en un discurso)."
+  },
+  {
+   "fecha": "2026-11-18",
+   "aprobados": null,
+   "evaluacion": {
+    "n": 21,
+    "monto": 140204,
+    "empleos": 108487
+   },
+   "presentados": null,
+   "fuente": "Ministerio de Economía, planilla oficial del RIGI (hoja «evaluación»; la hoja no trae fecha: es la del día en que se bajó)",
+   "url": "https://docs.google.com/spreadsheets/d/1eytHJrzUjIFOXI-P1Hx_wbmZiSqPxVle059Djdos6u8/gviz/tq?tqx=out:csv&sheet=evaluacion",
+   "cita": "Hoja evaluacion: cantidad 21, inversión 140204, empleos 108487 (por sector: energía 2, petróleo 11, minería 7, siderurgia 0, infraestructura 1, tecnología 0). La hoja no trae fecha propia: la fecha es la de descarga."
+  }
+ ],
+ "pendientes": [
+  {
+   "nombre": "Argentina LNG",
+   "empresa": "YPF S.A. (Argentina); Eni S.p.A. (Italia); XRG (Emiratos Árabes Unidos)",
+   "provincias": [
+    "Neuquén",
+    "Río Negro"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 51000.0,
+   "fecha_presentacion": "2026-08-13",
+   "estado": "evaluacion",
+   "url": "https://www.lanacion.com.ar/economia/un-proyecto-por-us51000-millones-impulsado-por-ypf-solicito-la-adhesion-al-rigi-nid13082026/",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "LLL Oil",
+   "empresa": "YPF S.A. (Argentina)",
+   "provincias": [
+    "Neuquén"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 25000.0,
+   "fecha_presentacion": "2026-05-15",
+   "estado": "evaluacion",
+   "url": "https://econojournal.com.ar/destacada/ypf-presento-rigi-acelerar-produccion-petroleo-vaca-muerta/",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "El Trapial",
+   "empresa": "Chevron (Estados Unidos)",
+   "provincias": [
+    "Neuquén"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 13800.0,
+   "fecha_presentacion": "2026-06-02",
+   "estado": "evaluacion",
+   "url": "https://www.infobae.com/economia/2026/06/02/chevron-presento-un-megaproyecto-bajo-el-rigi-para-invertir-usd-13800-millones-en-vaca-muerta/",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "El Pachón",
+   "empresa": "Glencore (Suiza)",
+   "provincias": [
+    "San Juan"
+   ],
+   "sector": "Minería",
+   "monto": 9500.0,
+   "fecha_presentacion": "2025-08-18",
+   "estado": "evaluacion",
+   "url": "https://www.glencore.com/media-and-insights/news/glencore-submits-RIGI-applications-in-respect-of-its-argentine-copper-projects",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "Bajo del Toro",
+   "empresa": "YPF S.A. (Argentina); Vista Energy Argentina S.A.U. (Argentina)",
+   "provincias": [
+    "Neuquén"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 8729.0,
+   "fecha_presentacion": "2026-10-30",
+   "estado": "evaluacion",
+   "url": "https://www.rionegro.com.ar/sociedad/ypf-presento-su-solicitud-para-ingresar-al-rigi-con-una-inversion-de-us8-729-millones-en-vaca-muerta-4779357/",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "Bandurria Norte",
+   "empresa": "Vista Energy (Argentina)",
+   "provincias": [
+    "Neuquén"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 5800.0,
+   "fecha_presentacion": "2026-07-21",
+   "estado": "evaluacion",
+   "url": "https://econojournal.com.ar/oilgas/vista-energy-pidio-la-adhesion-al-rigi-para-un-proyecto-de-us-5-800-millones-en-vaca-muerta/",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "Pozuelos Pastos Grandes (PPG)",
+   "empresa": "Ganfeng Lithium (China); Lithium Argentina AG (Suiza)",
+   "provincias": [
+    "Salta"
+   ],
+   "sector": "Minería",
+   "monto": 4245.0,
+   "fecha_presentacion": "2026-02-28",
+   "estado": "evaluacion",
+   "url": "https://www.salta.gob.ar/prensa/noticias/avanza-en-salta-el-proyecto-de-litio-pozuelos-pastos-grandes-104827",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "Pampa Exploración S.A.",
+   "empresa": "NGEx Minerals Ltd. (Canadá)",
+   "provincias": [
+    "San Juan"
+   ],
+   "sector": "Minería",
+   "monto": 2437.0,
+   "fecha_presentacion": null,
+   "estado": "evaluacion",
+   "url": "https://www.panorama-minero.com/es/mining-compendium/argentina/project/lunahuasi",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "PAE Cerro Dragón",
+   "empresa": "Pan American Energy (PAE) (Argentina)",
+   "provincias": [
+    "Chubut"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 1200.0,
+   "fecha_presentacion": "2026-10-01",
+   "estado": "evaluacion",
+   "url": "https://www.lanacion.com.ar/economia/pan-american-energy-busca-ingresar-al-rigi-con-una-inversion-de-us1200-millones-para-revitalizar-nid01102026/",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "Jama Solaroz",
+   "empresa": "CNGR Advanced Material Co., Ltd. (China)",
+   "provincias": [
+    "Jujuy"
+   ],
+   "sector": "Minería",
+   "monto": 1151.0,
+   "fecha_presentacion": "2026-03-30",
+   "estado": "evaluacion",
+   "url": "https://eltribunodejujuy.com/informacion-general/2026-4-1-0-0-0-proyecto-de-litio-en-jujuy-busca-la-adhesion-al-rigi",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "Loma Jarillosa Este y Puesto Silva Oeste",
+   "empresa": "GeoPark (Colombia); Gas y Petróleo del Neuquén S.A. (Argentina)",
+   "provincias": [
+    "Neuquén"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 1000.0,
+   "fecha_presentacion": "2026-05-15",
+   "estado": "evaluacion",
+   "url": "https://www.geo-park.com/es/news/geopark-solicita-adhesion-al-rigi-por-proyecto-de-inversion/",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "Sal de Vida",
+   "empresa": "Rio Tinto (Reino Unido)",
+   "provincias": [
+    "Catamarca"
+   ],
+   "sector": "Minería",
+   "monto": 818.0,
+   "fecha_presentacion": "2025-04-11",
+   "estado": "evaluacion",
+   "url": "https://www.riotinto.com/en/news/releases/2025/rio-tinto-confirmed-as-preferred-partner-on-world-class-salares-altoandinos-lithium-project",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "Ángeles Argentina",
+   "empresa": "Xizang Zhufeng Resources Co., Ltd. (China)",
+   "provincias": [
+    "Salta"
+   ],
+   "sector": "Minería",
+   "monto": 726.0,
+   "fecha_presentacion": "2025-01-14",
+   "estado": "evaluacion",
+   "url": "https://www.salta.gob.ar/prensa/noticias/vinculos-con-empresa-minera-china-para-el-ingreso-de-productos-saltenios-al-pais-asiatico-104841",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "Duplicar Norte",
+   "empresa": "Oldelval (Argentina)",
+   "provincias": [
+    "Neuquén",
+    "Río Negro"
+   ],
+   "sector": "Petróleo y gas",
+   "monto": 380.0,
+   "fecha_presentacion": "2025-07-21",
+   "estado": "evaluacion",
+   "url": "https://www.oldelval.com/oldelval-confirmo-la-ejecucion-del-proyecto-duplicar-norte/",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "Arenas de Cercanía",
+   "empresa": "Minera del Mojotoro (Argentina); Minera Orosmayo (Argentina)",
+   "provincias": [
+    "Río Negro"
+   ],
+   "sector": "Minería",
+   "monto": 232.0,
+   "fecha_presentacion": "2025-08-05",
+   "estado": "evaluacion",
+   "url": "https://rionegro.gov.ar/articulo/53275/rio-negro-fortalece-su-rol-en-el-abastecimiento-de-arena-para-vaca-muerta",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "NCA+ (Nuevo Central Argentino)",
+   "empresa": "Nuevo Central Argentino S.A. (Argentina)",
+   "provincias": [
+    "Buenos Aires",
+    "Santa Fe",
+    "Santiago del Estero",
+    "Chaco"
+   ],
+   "sector": "Infraestructura",
+   "monto": 200.0,
+   "fecha_presentacion": null,
+   "estado": "evaluacion",
+   "url": "https://www.argentina.gob.ar/normativa/nacional/resoluci%C3%B3n-39-2025-415411/texto",
+   "fecha_rechazo": null
+  },
+  {
+   "nombre": "Mariana",
+   "empresa": "Ganfeng (China)",
+   "provincias": [
+    "Salta"
+   ],
+   "sector": "Minería",
+   "monto": 273.0,
+   "fecha_presentacion": null,
+   "estado": "rechazado",
+   "url": "https://www.lanacion.com.ar/economia/el-gobierno-aprobo-el-sexto-proyecto-del-rigi-y-confirmo-el-primer-rechazo-nid23072025/",
+   "fecha_rechazo": "2025-07-23",
+   "cita": "La Nación, 23/07/2025: «el Comité Evaluador del RIGI también confirmó el primer rechazo: se trata del proyecto de litio “Mariana”, presentado por la empresa china Ganfeng, por US$273 millones». La fecha es la del anuncio; la de presentación no tiene fuente (la nota dice «a principios de este año»)."
+  }
+ ],
+ "fuente_pendientes": "Monitor RIGI (DESIP-IIEP), base de datos no oficial, actualizada al 2026-11-17",
+ "url_pendientes": "https://monitor-rigi-desip-iiep.github.io/RIGI/base-datos.html",
+ "fecha_descarga_pendientes": "2026-11-18",
+ "control_pendientes": {
+  "evaluacion_n": 16,
+  "evaluacion_monto": 126218,
+  "cita": "Portada del Monitor (17/11/2026): 47 proyectos relevados, 30 aprobados, 16 en evaluación, 1 rechazado; En evaluación USD 126.218 millones."
+ },
+ "nota_pendientes": "La planilla oficial cuenta 21 proyectos en evaluación (la nota del 11/06/2026 decía 25) y la lista con nombres del Monitor tiene 16: no se sabe cuáles faltan. Los montos son los de la solicitud según el Monitor y pueden diferir de lo anunciado. Bajo del Toro figura en evaluación: la resolución que el Monitor le asocia (1976/2026) es la de otro proyecto ya aprobado (Midstream de Gas del Sur)."
 }

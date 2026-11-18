@@ -439,3 +439,9 @@ Idea del usuario: «fijate si tenemos empleados por empresa. porque a veces cier
 ## ~~Presidentes y mandato: fin de mandato configurable~~ ✅ 2026-11-18
 → spec: docs/specs/ajustes-tanda-15.md (además: lo de fábrica pasa a dic a dic, panel «Mandatos» por presidente, Herencia vinculada)
 - Mes de **fin** de mandato configurable, igual que ya se puede elegir el de inicio (2026-11-17). Ejemplo del usuario: computar la inflación interanual de cada presidente de diciembre a diciembre, así Alberto Fernández va de dic-19 a dic-23.
+
+## Datos calientes, preguntas y pedidos (2026-11-17)
+- ~~RIGI: sumar los proyectos **presentados y pendientes** (o no aprobados), no solo los aprobados. Hoy `/rigi/` y `rigi_aprobado` tienen solo los aprobados.~~ ✅ 2026-11-18 (docs/specs/datos-calientes-5.md)
+- ~~El 57,4 % de pobreza (UCA, ene-24): hoy aparece solo en la nota de la serie de pobreza mensual de Di Tella (`/historico/?v=pobreza_utdt~asis~~compra~`), explicado como simulación, no como punto del gráfico. Ver si conviene hacerlo más visible.~~ ✅ 2026-11-18 (docs/specs/datos-calientes-5.md)
+- ~~Pobreza infantil (0 a 14 años, EPH del INDEC por edad, semestral): no está; sumarla.~~ ✅ 2026-11-18 (docs/specs/datos-calientes-5.md)
+- ~~Consumo de huevo por habitante: ver si hay fuente.~~ ✅ 2026-11-18 (docs/specs/datos-calientes-5.md, E: anuarios avícolas de Agricultura y CAPIA 2015-2019)

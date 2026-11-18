@@ -701,3 +701,6 @@ vacuna_bcg
 vacuna_dtp3
 vacuna_sarampion1
 vacuna_sarampion2
+pob_infantil
+indig_infantil
+consumo_huevo

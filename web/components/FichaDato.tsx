@@ -34,6 +34,7 @@ import { datoFijoDe, hrefFijo } from "@/lib/datos-fijos";
 import { fmtEjeDe, notaInflacion, tituloVariable } from "@/lib/imagen-datos";
 import { fuentePublica } from "@/lib/fuente-publica";
 import type { Expr, Motor, SerieMeta } from "@/lib/motor";
+import { marcasEnGrafico } from "@/lib/marcas";
 import { fuentesCalc } from "@/lib/motor";
 import { hrefDato, hrefHistorico, idsDe } from "@/lib/temas";
 import {
@@ -175,7 +176,8 @@ function useViene(m: Motor, e: Expr, version: number, p: URLSearchParams) {
     const c = m.calc(e);
     const { E, rows } = historicoFicha(m, c, config.desde, per);
     const fmt = (v: number) => m.fmtC(c, v);
-    const series: SerieG[] = [{ key: "s0", name: c.corto, color: PALETA[0], fmt }];
+    // Puntos sueltos de otra fuente (UCA sobre Di Tella): solo con la serie en valores tal cual; las filas ya no se usan para cálculos
+    const series: SerieG[] = [{ key: "s0", name: c.corto, color: PALETA[0], fmt }, ...marcasEnGrafico(c, rows, "s0", PALETA[0], fmt)];
     const opts: OpcionesG = { fmtAxis: fmtEjeDe(c), fmtTip: fmt, tipTitle: (r: Fila) => etiqueta(r, frecuenciaOrigen(c.v)), label: c.corto,
       marcas: [{ key: "s0", color: PALETA[0], fmt, tipos: new Set(["ult", "max", "min"]) }] };
     const temporal = textoTemporalidad({ freq: "M", ag: "promedio", meses: E.meses, suma: !!c.flujo, origen: frecuenciaOrigen(c.v) });

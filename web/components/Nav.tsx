@@ -29,7 +29,7 @@ const SUB_CONTEXTO: [string, string, string][] = [
 const conBarra = (ruta: string) => (ruta.endsWith("/") ? ruta : ruta + "/");
 const TITULOS: Record<string, string> = {
   historico: "Histórico", presidentes: "Por presidente", ranking: "Ranking de presidentes", mandato: "Meses de mandato", herencia: "Herencia",
-  curiosidades: "Curiosidades", congreso: "Gobierno y Congreso", elecciones: "Elecciones", contexto: "El mundo y la Argentina", bcra: "Parte del Banco Central", semaforo: "Semáforo de actividad", rigi: "RIGI: grandes inversiones aprobadas", tarifas: "Tarifas y subsidios", novedades: "Novedades y calendario", gasto: "En qué gasta la Nación", universidades: "Cuánto reciben las universidades", provincias: "Las provincias", plantillas: "Gráficos listos", fuentes: "Fuentes",
+  curiosidades: "Curiosidades", congreso: "Gobierno y Congreso", elecciones: "Elecciones", contexto: "El mundo y la Argentina", bcra: "Parte del Banco Central", semaforo: "Semáforo de actividad", rigi: "RIGI: grandes inversiones aprobadas y en evaluación", tarifas: "Tarifas y subsidios", novedades: "Novedades y calendario", gasto: "En qué gasta la Nación", universidades: "Cuánto reciben las universidades", provincias: "Las provincias", plantillas: "Gráficos listos", fuentes: "Fuentes",
 };
 /** Páginas donde aparece "Volver" si se llegó desde otra página del sitio. */
 /** Páginas cuyo título de sección no es el h1: lo es el nombre del dato que muestran (la página pone su propio h1). */

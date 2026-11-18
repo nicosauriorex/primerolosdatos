@@ -32,6 +32,8 @@ export interface TarjetaDato { rotulo: string; valor: string; cls: Cls; sub?: st
 export interface TarjetaImg { id?: string; nombre: string; nota?: string | null; datos: TarjetaDato[] }
 export interface LineaRef { tipo: "prom" | "med" | "ult"; valor: number; texto: string }
 export interface MarcaExt { tipo: "max" | "min"; x: number; valor: number; texto: string }
+/** Punto suelto de otra fuente sobre la serie (marcas del catálogo): `sim` = simulación (relleno rojo y etiqueta); si no, medición (círculo hueco). */
+export interface PuntoExt { x: number; valor: number; sim: boolean; texto: string | null }
 /** Una fila de "una variable, todos los presidentes". */
 export interface FilaBarra {
   id: string; nombre: string; valor: number | null; variacion: string | null; cls: Cls; ini: string | null; fin: string | null; nota: string | null;
@@ -92,6 +94,7 @@ export interface DatosImagen {
   lineasRef?: LineaRef[];            // líneas horizontales con nombre y valor
   marcasExt?: MarcaExt[];            // máximo y mínimo marcados sobre la serie
   marcaUltimo?: boolean;             // marcar el último dato de cada serie (por defecto sí)
+  puntosExt?: PuntoExt[];            // puntos sueltos de otra fuente (eje izquierdo)
   temporalidad?: string | null;      // línea bajo el título: "Datos mensuales", …
   comentario: string;
   unidad: string; fuente: string; nota: string; fecha: string;
@@ -244,6 +247,7 @@ function grafico(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number) {
   const rango = (axis: number) => {
     let mn = Infinity, mx = -Infinity;
     vis.filter(({ s }) => s.axis === axis).forEach(({ s }) => s.v.forEach((x) => { if (x != null && (!log || x > 0)) { mn = Math.min(mn, x); mx = Math.max(mx, x); } }));
+    if (axis === 0 && isFinite(mn)) (d.puntosExt ?? []).forEach((p) => { if (!log || p.valor > 0) { mn = Math.min(mn, p.valor); mx = Math.max(mx, p.valor); } });
     if (!isFinite(mn)) return null;
     if (log) return { mn: mn / 1.2, mx: mx * 1.25 };
     const sp = (mx - mn) || Math.abs(mx) * 0.1 || 1;
@@ -383,9 +387,20 @@ function grafico(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number) {
       ocupados.push({ x: ex - rr - 2, y: ey - rr - 2, w: 2 * rr + 4, h: 2 * rr + 4 });
     });
   }
+  // puntos sueltos de otra fuente: rojo lleno (simulación) o círculo hueco del color de la serie (medición)
+  const sueltos = R0 ? (d.puntosExt ?? []).filter((p) => !log || p.valor > 0) : [];
+  if (R0) {
+    const Y = Yde(R0), rr = px(9 * esc), colSerie = pal.series[vis[0].s.color] ?? pal.acento;
+    sueltos.forEach((p) => {
+      const ex = X(p.x), ey = Y(p.valor);
+      ctx.fillStyle = p.sim ? pal.malo : pal.superficie; ctx.strokeStyle = p.sim ? pal.superficie : colSerie; ctx.lineWidth = px((p.sim ? 3 : 4) * esc);
+      ctx.beginPath(); ctx.arc(ex, ey, rr, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ocupados.push({ x: ex - rr - 2, y: ey - rr - 2, w: 2 * rr + 4, h: 2 * rr + 4 });
+    });
+  }
   ctx.restore();
   // etiquetas de las líneas de referencia y de los extremos
-  if (R0 && (refs.length || extremos.length)) {
+  if (R0 && (refs.length || extremos.length || sueltos.some((p) => p.texto))) {
     const Y = Yde(R0), ft = px(fs * 0.95), h = ft * 1.35, rr = px(9 * esc);
     ctx.font = fuenteDe(pal, 800, ft);
     const pasos = 10, items: (Etq & { texto: string; col: string })[] = [];
@@ -404,6 +419,12 @@ function grafico(ctx: Ctx, r: Rect, d: DatosImagen, pal: Paleta, esc: number) {
       [0, 1].forEach((i) => [0.5, 0, 1].forEach((f) => cands.push({ x: ex - w * f, y: vy[i], w, h })));
       cands.push({ x: ex + rr + 6, y: ey - h / 2, w, h }, { x: ex - rr - 6 - w, y: ey - h / 2, w, h });
       items.push({ w, h, cands, texto: e.texto, col: pal.tinta });
+    });
+    sueltos.filter((p) => p.texto).forEach((p) => {
+      const ex = X(p.x), ey = Y(p.valor), w = ctx.measureText(p.texto!).width + 14, cands: Rect[] = [];
+      [0.5, 0, 1].forEach((f) => cands.push({ x: ex - w * f, y: ey - rr - 4 - h, w, h }, { x: ex - w * f, y: ey + rr + 4, w, h }));
+      cands.push({ x: ex + rr + 6, y: ey - h / 2, w, h }, { x: ex - rr - 6 - w, y: ey - h / 2, w, h });
+      items.push({ w, h, cands, texto: p.texto!, col: pal.malo });
     });
     const lugares = ubicarEtiquetas(items, pl, trazos, ocupados, px(4.5 * esc) / 2 + 2);
     items.forEach((it, k) => {

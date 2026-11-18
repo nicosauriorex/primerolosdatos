@@ -1,0 +1,127 @@
+<title>Datos calientes 5</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@700&display=swap">
+<style>
+/* Lista de control: una columna, secciones en el orden del menú del sitio, cada cambio con su link directo */
+:root {
+  --bg: #f3f5fb; --sup: #ffffff; --tinta: #0b1230; --sec: #4a5478; --borde: #d9deee;
+  --acento: #1f6fd1; --sobre-acento: #ffffff; --accion: #f5b81c; --sobre-accion: #0b1230; --hecho: #1d8a55; --propio: #9a5400;
+  --f-txt: "Archivo", system-ui, sans-serif; --f-tit: "Archivo Narrow", "Archivo", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1230; --sup: #141d45; --tinta: #eef1fb; --sec: #9aa6d4; --borde: #26316a;
+  --acento: #6fc3ff; --sobre-acento: #0b1230; --accion: #ffbe2e; --sobre-accion: #0b1230; --hecho: #3fd68a; --propio: #ffbe2e; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--tinta); font-family: var(--f-txt); font-size: 15px; line-height: 1.5; margin: 0 }
+.envoltura { max-width: 760px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+h1 { font-family: var(--f-tit); font-size: 30px; text-transform: uppercase; letter-spacing: .01em; margin: 0 0 6px; text-wrap: balance }
+.bajada { color: var(--sec); margin: 0 0 18px; max-width: 62ch }
+.barra { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--borde); margin-bottom: 8px }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.riel { display: inline-flex; background: var(--sup); border-radius: 999px; padding: 4px; gap: 2px }
+.riel button { border: 0; background: transparent; color: var(--tinta); font: 600 14px var(--f-txt); padding: 8px 14px; border-radius: 999px; cursor: pointer }
+.riel button[aria-pressed="true"] { background: var(--acento); color: var(--sobre-acento) }
+.progreso { color: var(--sec); font-size: 14px; font-variant-numeric: tabular-nums; margin-left: auto }
+.aviso { font-size: 13px; color: var(--sec); margin: 6px 0 0; width: 100% }
+.aviso code { background: var(--sup); padding: 1px 6px; border-radius: 6px; font-size: 12px; user-select: all }
+section { padding-top: 22px }
+h2 { font-family: var(--f-tit); font-size: 19px; margin: 0 0 8px; display: flex; gap: 10px; align-items: baseline }
+h2 .n { color: var(--acento); font-variant-numeric: tabular-nums; min-width: 1.6em }
+ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px }
+li { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; background: var(--sup); border-radius: 12px; padding: 10px 12px }
+li.visto { opacity: .55 }
+li.visto .que { text-decoration: line-through; text-decoration-color: var(--sec) }
+input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--hecho); margin: 0 }
+.que { min-width: 0 }
+.num { font-weight: 800; color: var(--acento); font-variant-numeric: tabular-nums; margin-right: 4px }
+.origen { display: block; font-size: 13px; margin-top: 2px; color: var(--sec) }
+.origen.propio { color: var(--propio) }
+.que small { display: block; color: var(--sec); font-size: 12.5px; word-break: break-all }
+a.ir { background: var(--accion); color: var(--sobre-accion); text-decoration: none; font-weight: 800; font-size: 13px; padding: 8px 12px; border-radius: 999px; white-space: nowrap }
+a.ir:focus-visible, .riel button:focus-visible { outline: 3px solid var(--acento); outline-offset: 2px }
+.fuera { margin-top: 28px; padding: 14px; border: 1px dashed var(--borde); border-radius: 12px; color: var(--sec); font-size: 14px }
+@media (max-width: 480px) { li { grid-template-columns: 24px 1fr; } a.ir { grid-column: 2; justify-self: start } }
+</style>
+
+<div class="envoltura">
+  <h1>Datos calientes 5: dónde verlos</h1>
+  <p class="bajada">Cada renglón abre la página justo donde está el cambio. Para comentar uno, citá su número (por ejemplo 4.2). Debajo de cada cambio: lo que pediste, con tus palabras, o por qué lo agregué yo. Marcá la casilla cuando lo revisaste.</p>
+
+  <div class="barra">
+    <div class="riel" role="group" aria-label="Dónde abrir">
+      <button type="button" id="b-local" aria-pressed="true">En mi máquina</button>
+      <button type="button" id="b-sitio" aria-pressed="false">Sitio publicado</button>
+    </div>
+    <span class="progreso" id="progreso">0 de 0 vistos</span>
+    <p class="aviso" id="aviso"></p>
+  </div>
+
+  <div id="lista"></div>
+
+  <div class="fuera"><b>Huevo:</b> la Secretaría de Agricultura publica el dato en sus anuarios avícolas (con la producción que estima CAPIA), salvo de 2015 a 2019, que salen de comunicados de CAPIA citados por la prensa. Otras cifras que circulan (por ejemplo 391, 392 o 398 para 2025) quedaron anotadas con su fuente en datos/manual/huevo.json.</div>
+</div>
+
+<script>
+// Cada cambio: [qué cambió, ruta, origen]. Origen: P("palabras del pedido") = lo pediste vos; Y("por qué") = lo agregué yo (regla general o barrido).
+const P = (t) => ({ tipo: "pedido", t }), Y = (t) => ({ tipo: "propio", t });
+const SECCIONES = [
+  ["Portada (buscador)", [
+    ["La lupa encuentra «pobreza infantil», «chicos pobres», «niñez», «57», «UCA», «huevo» y «RIGI en evaluación»: escribilo en el buscador", "/", Y("regla general: cada dato nuevo tiene que aparecer en la lupa con las palabras del público")],
+  ]],
+  ["Histórico y gráficos listos", [
+    ["El 57,4 % de la UCA (ene-24) como punto rojo con su etiqueta sobre el gráfico de Di Tella; también el 49,5 % de dic-23 (otra simulación) y las mediciones de la UCA como círculos huecos. El globo explica cada punto; con variación, base 100 o en otra unidad no se dibujan", "/historico/?v=pobreza_utdt~asis~~compra~", P("me gustaria que aparezca ese puntito en el gráfico. hacer una sola serie para la uca si solo tiene ese dato no tiene sentido. capaz ponerlo en el de la di tella un puntito rojo o una serie que combine las 3")],
+    ["Gráfico listo «Pobreza: INDEC, Di Tella y UCA»: la oficial semestral y la de Di Tella en un gráfico, con los puntos de la UCA", "/historico/?v=pob_tasa_pobreza_personas~asis~~compra~,pobreza_utdt~asis~~compra~&pl=pobreza-indec-di-tella-y-uca", P("capaz ponerlo en el de la di tella un puntito rojo o una serie que combine las 3")],
+    ["Gráfico listo «Pobreza infantil: chicos de 0 a 14 años», contra la pobreza de todas las edades", "/historico/?v=pob_infantil~asis~~compra~,pob_tasa_pobreza_personas~asis~~compra~&pl=pobreza-infantil-chicos-de-0-a-14-anos", P("Pobreza infantil (0 a 14 años, EPH del INDEC por edad, semestral): no está; sumarla")],
+    ["La imagen para compartir del gráfico de Di Tella también lleva los puntos de la UCA, con la UCA en «Fuente:» (botón Compartir)", "/historico/?v=pobreza_utdt~asis~~compra~", Y("lo que se ve se puede compartir: si el punto está en el gráfico, va también en la imagen")],
+  ]],
+  ["Ficha del dato", [
+    ["Pobreza infantil (chicos de 0 a 14 años): 44,5 % en el 1.er semestre de 2026 (66,1 % en el 1.er semestre de 2024), INDEC, desde 2S-2016", "/dato/pobreza-infantil/", P("Pobreza infantil (0 a 14 años, EPH del INDEC por edad, semestral): no está; sumarla")],
+    ["Indigencia infantil (chicos de 0 a 14 años), misma fuente", "/dato/?v=indig_infantil", Y("sale del mismo cuadro del INDEC y completa la pobreza infantil")],
+    ["Consumo de huevo por habitante: 401 huevos en 2025 (125 en 2002), Anuarios Avícolas de la Secretaría de Agricultura; 2015-2019 de comunicados de CAPIA, con el cambio de fuente dicho en «Cómo se mide»", "/dato/huevo/", P("huevos sí cargalo")],
+    ["La ficha de Di Tella también muestra los puntos de la UCA en «¿Cómo viene?»", "/dato/?v=pobreza_utdt", P("me gustaria que aparezca ese puntito en el gráfico")],
+  ]],
+  ["RIGI (/rigi/)", [
+    ["Bloque «Presentados y en evaluación»: 21 en evaluación por US$ 140,2 mil millones (planilla oficial), 30 aprobados por US$ 79,6 mil millones y 48 presentados (Caputo, oct-26), cada número con su fecha y su fuente, y la foto oficial de junio debajo", "/rigi/#totales", P("RIGI: sumar los proyectos presentados y pendientes (o no aprobados), no solo los aprobados")],
+    ["Pestaña «En evaluación (16)»: la lista con nombres del Monitor RIGI (no oficial, con aviso visible), empresa, provincias, sector, monto, fecha de presentación y link a la fuente de cada uno", "/rigi/?e=evaluacion", P("RIGI: sumar los proyectos presentados y pendientes (o no aprobados), no solo los aprobados")],
+    ["Rechazados: Mariana (Ganfeng, Salta, US$ 273 millones), rechazo anunciado el 23-jul-2025, con link a la nota", "/rigi/?e=evaluacion", P("(o no aprobados)")],
+    ["Corrección: PSJ Cobre Mendocino tenía mal la norma (la 809/2026 es una designación del SENASA); ahora es la Resolución 801/2026, del 26-may-2026", "/rigi/", Y("bug encontrado al cruzar la lista con el monitor")],
+    ["Parque Eólico La Rinconada ya tiene su aprobación (Resolución 1983/2026, del 13-nov-2026): los 30 aprobados suman en la serie acumulada", "/dato/?v=rigi_aprobado", Y("bug encontrado al cruzar la lista con el monitor: era el único aprobado sin fecha")],
+  ]],
+];const BASES = { local: "http://localhost:3100", sitio: "https://primerolosdatos.com.ar" };
+const leer = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
+const guardar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} };
+let base = leer("dod-base", "local"), vistos = leer("dc5-vistos", {});
+
+function dibujar() {
+  const cont = document.getElementById("lista"); cont.innerHTML = "";
+  let total = 0, hechos = 0;
+  SECCIONES.forEach(([nombre, items], i) => {
+    const s = document.createElement("section");
+    s.innerHTML = `<h2><span class="n">${i + 1}</span>${nombre}</h2>`;
+    const ul = document.createElement("ul");
+    items.forEach(([que, ruta, origen], j) => {
+      const id = `${i}-${j}`, url = BASES[base] + ruta, ok = !!vistos[id];
+      total++; if (ok) hechos++;
+      const li = document.createElement("li"); if (ok) li.className = "visto";
+      li.innerHTML = `<input type="checkbox" id="c${id}" ${ok ? "checked" : ""} aria-label="Visto">
+        <label class="que" for="c${id}"><span class="num">${i + 1}.${j + 1}</span> ${que}<span class="origen ${origen.tipo}">${origen.tipo === "pedido" ? "Pediste: «" + origen.t + "»" : "Agregado por mí: " + origen.t}</span><small>${ruta}</small></label>
+        <a class="ir" href="${url}" target="_blank" rel="noopener">Ver →</a>`;
+      li.querySelector("input").addEventListener("change", (e) => { vistos[id] = e.target.checked; guardar("dc5-vistos", vistos); dibujar(); });
+      ul.appendChild(li);
+    });
+    s.appendChild(ul); cont.appendChild(s);
+  });
+  document.getElementById("progreso").textContent = `${hechos} de ${total} vistos`;
+  document.getElementById("b-local").setAttribute("aria-pressed", base === "local");
+  document.getElementById("b-sitio").setAttribute("aria-pressed", base === "sitio");
+  document.getElementById("aviso").innerHTML = base === "local"
+    ? 'Necesita la vista local andando. Si no abre, corré en la carpeta del proyecto: <code>python -m http.server 3100 --directory web/out</code>'
+    : "Solo muestra los cambios después del commit, el push y la corrida en verde (unos 10 minutos: este cambio toca el pipeline).";
+}
+document.getElementById("b-local").onclick = () => { base = "local"; guardar("dod-base", base); dibujar(); };
+document.getElementById("b-sitio").onclick = () => { base = "sitio"; guardar("dod-base", base); dibujar(); };
+dibujar();
+</script>

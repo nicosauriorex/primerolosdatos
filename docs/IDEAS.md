@@ -99,8 +99,4 @@ Investigado: fuentes, IDs, ranking y qué no se puede en `docs/investigaciones/d
 - El resto (homicidios, empleo público nacional, recaudación por impuesto, universidades por inciso, Malvinas…): sin elegir.
 
 ## Datos calientes, preguntas y pedidos (2026-11-17)
-- RIGI: sumar los proyectos **presentados y pendientes** (o no aprobados), no solo los aprobados. Hoy `/rigi/` y `rigi_aprobado` tienen solo los aprobados.
-- El 57,4 % de pobreza (UCA, ene-24): hoy aparece solo en la nota de la serie de pobreza mensual de Di Tella (`/historico/?v=pobreza_utdt~asis~~compra~`), explicado como simulación, no como punto del gráfico. Ver si conviene hacerlo más visible.
-- Consumo de huevo por habitante: ver si hay fuente (hoy solo está el rubro «leche, quesos y huevos» en precios en el mundo). Va con «Sumar datos de consumo» del ranking de presidentes.
-- Pobreza infantil (0 a 14 años, EPH del INDEC por edad, semestral): no está; sumarla.
 - Reservas netas y deuda neta desde 2019: hoy la parte del Banco Central arranca en abr-24 y la deuda neta en jun-24, porque los supuestos de reservas netas (swaps con China y el BIS, seguro de depósitos) solo tienen cita desde abr-24. Qué hacer: buscar en los informes del FMI de los programas 2018 y 2022 el swap con China (en yuanes, pasarlo a dólares en cada fecha) y el seguro de depósitos de 2019 a 2024; cargarlos en `datos/manual/reservas_netas_supuestos.json` con cita (documento y página) y bajar el inicio a 2019; revisar que la estimación de reservas netas de Herencia (D-021) siga pasando sus controles contra el FMI. Con eso la parte del Banco Central y la deuda neta salen solas desde 2019 (unos 20 trimestres más).

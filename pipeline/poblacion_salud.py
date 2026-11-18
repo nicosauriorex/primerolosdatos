@@ -66,6 +66,7 @@ FUENTE_TGF = (FUENTE_NAC + " (nacimientos por edad de la madre) e INDEC, proyecc
 FUENTE_DEF = ("Dirección de Estadísticas e Información en Salud (Ministerio de Salud), serie hdef_arg de datos.gob.ar y planilla "
               "«Serie histórica de defunciones ocurridas en Argentina por jurisdicción 1914-2024» de datos.salud.gob.ar")
 FUENTE_GHO = "OMS y UNICEF (WUENIC), Observatorio Mundial de la Salud de la OMS, indicador "
+FUENTE_POBREZA_EDAD = "INDEC, Encuesta Permanente de Hogares: cuadros del informe de pobreza e indigencia (cuadros_informe_pobreza_MM_AA.xls), cuadro 3.2 bis (incidencia por grupo de edad)"
 FUENTE_POBREZA = "INDEC, cuadros del informe de pobreza e indigencia (cuadros_informe_pobreza_MM_AA.xls), hoja de poblaciones por semestre"
 
 
@@ -298,6 +299,95 @@ def _controlar_pobreza(tabla, tasas):
     print(f"  Pobreza en personas: pobres / población cubierta = tasa publicada (±0,2 puntos) en los {n} semestres que están en las dos tablas (control cumplido)")
 
 
+def _leer_cuadro_edad(contenido):
+    """Cuadro «3.2 bis» (incidencia por grupo de edad): DataFrame semestre («AAAA-S») x [pob_total, pob_0_14, ind_0_14], en %.
+    Busca la hoja y el bloque por el texto (el nombre de la hoja cambia entre archivos). None si no es un xls."""
+    if contenido[:4] != b"\xd0\xcf\x11\xe0":
+        return None
+    xl = pd.ExcelFile(io.BytesIO(contenido))
+    for hoja in xl.sheet_names:
+        raw = xl.parse(hoja, header=None)
+        for i in range(len(raw)):
+            c0 = raw.iloc[i, 0]
+            if not (isinstance(c0, str) and "bis" in _ascii(c0) and "grupos de edad segun condicion" in _ascii(c0)):
+                continue
+            # fila de rótulos de semestre y filas Total y 0-14 debajo del título
+            fs = next((j for j in range(i + 1, min(i + 8, len(raw))) if any(isinstance(v, str) and re.search(r"semestre \d{4}", _ascii(v)) for v in raw.iloc[j])), None)
+            if fs is None:
+                continue
+            ft = next((j for j in range(fs + 1, min(fs + 10, len(raw))) if _ascii(raw.iloc[j, 0]) == "total"), None)
+            f014 = next((j for j in range(fs + 1, min(fs + 12, len(raw))) if _ascii(raw.iloc[j, 0]).replace(" ", "") == "0-14"), None)
+            if ft is None or f014 is None:
+                raise RuntimeError(f"hoja «{hoja}»: no encontré las filas Total y 0-14 del cuadro por edad")
+            filas = {}
+            for col in range(1, raw.shape[1]):
+                v = raw.iloc[fs, col]
+                m = isinstance(v, str) and re.match(r"(1er|2do)\.? semestre (\d{4})", _ascii(v))
+                if not m:
+                    continue
+                clave = f"{m.group(2)}-{1 if m.group(1) == '1er' else 2}"
+                def cel(f, k):
+                    x = raw.iloc[f, col + k]
+                    return float(str(x).replace(",", ".")) if x is not None and not (isinstance(x, float) and pd.isna(x)) else None
+                filas[clave] = [cel(ft, 3), cel(f014, 3), cel(f014, 1)]
+            if not filas:
+                raise RuntimeError(f"hoja «{hoja}»: no encontré semestres en el cuadro por edad")
+            return pd.DataFrame.from_dict(filas, orient="index", columns=["pob_total", "pob_0_14", "ind_0_14"]).sort_index()
+    raise RuntimeError("no encontré el cuadro «3.2 bis» (grupos de edad según condición de pobreza)")
+
+
+def _bajar_pobreza_edad():
+    """Tabla semestre -> [pob_total, pob_0_14, ind_0_14]. El último archivo publicado trae toda la serie desde 2S-2016."""
+    hoy = pd.Timestamp.today()
+    respondio = False
+    for aa in range(hoy.year, 2017, -1):
+        for mm in ("09", "03"):
+            try:
+                c = red.bajar(URL_POBREZA.format(mm=mm, aa=f"{aa % 100:02d}"), timeout=120)
+            except urllib.error.HTTPError:
+                respondio = True
+                continue
+            respondio = True
+            tabla = _leer_cuadro_edad(c)
+            if tabla is not None:
+                return tabla
+    if not respondio:
+        raise RuntimeError("sin respuesta del INDEC")
+    raise RuntimeError("ningún archivo de pobreza del INDEC trae el cuadro por edad")
+
+
+CONTROL_EDAD = {"pob_0_14": {"2024-1": 66.1, "2024-2": 51.9, "2025-1": 45.4, "2025-2": 41.3, "2026-1": 44.5},
+                "ind_0_14": {"2024-1": 27.0, "2024-2": 11.5, "2025-1": 10.0}}
+
+
+def _controlar_edad(tabla, tasas):
+    """Controles del cuadro por edad: puntuales avisan; estructurales cortan (ValueError)."""
+    for col, vals in CONTROL_EDAD.items():
+        for clave, esperado in vals.items():
+            real = tabla[col].get(clave)
+            if real is None or abs(real - esperado) > 0.05:
+                print(f"  AVISO: Pobreza infantil {col} {clave[-1]}S-{clave[:4]} = {real if real is None else round(real, 2)}, esperado {esperado} (±0,05)")
+            else:
+                print(f"  Pobreza infantil {col} {clave[-1]}S-{clave[:4]} = {real:.2f} (esperado {esperado} ±0,05: control cumplido)")
+    if tabla[["pob_total", "pob_0_14", "ind_0_14"]].isna().any().any():
+        raise ValueError("Pobreza infantil: hay semestres sin dato en el cuadro por edad")
+    if (tabla["pob_0_14"] < tabla["pob_total"]).any():
+        raise ValueError("Pobreza infantil: la pobreza de 0 a 14 años quedó por debajo del total en algún semestre")
+    if not ((tabla["ind_0_14"] > 0) & (tabla["ind_0_14"] < tabla["pob_0_14"]) & (tabla["pob_0_14"] < 100)).all():
+        raise ValueError("Pobreza infantil: no se cumple 0 < indigencia < pobreza < 100")
+    malos, n = [], 0
+    for clave, fila in tabla.iterrows():
+        t = tasas.get(_fecha_semestre(clave)) if tasas is not None else None
+        if t is None or pd.isna(t):
+            continue
+        n += 1
+        if abs(fila["pob_total"] - t) > 0.15:
+            malos.append(f"{clave[-1]}S-{clave[:4]}: cuadro {fila['pob_total']:.2f} vs tasa {t}")
+    if malos:
+        raise ValueError("Pobreza infantil: la fila Total del cuadro por edad difiere de pob_tasa_pobreza_personas (±0,15): " + "; ".join(malos))
+    print(f"  Pobreza infantil: fila Total del cuadro por edad = tasa de pobreza de personas (±0,15) en los {n} semestres que están en las dos tablas (control cumplido)")
+
+
 def _fecha_semestre(clave):
     a, s = (int(x) for x in clave.split("-"))
     return pd.Timestamp(a, 1 if s == 1 else 7, 1)
@@ -466,6 +556,21 @@ def series(idx, pob=None):
             out.append(S(k, n, CAT_POBREZA, "none", "personas", v.reindex(idx), dr, FUENTE_POBREZA,
                          f"Cantidad de personas {que} en los 31 aglomerados urbanos que mide la Encuesta Permanente de Hogares. " + comun
                          + "Falta el 2.º semestre de 2019: el INDEC no publicó ese archivo en su servidor."))
+
+    # Pobreza infantil (0 a 14 años), cuadro 3.2 bis del mismo informe
+    edad = red.cache_df("indec_pobreza_edad", _bajar_pobreza_edad)
+    if edad.empty:
+        print("  Población y salud: sin el cuadro de pobreza por edad (sin copia en el respaldo); se omiten pob_infantil e indig_infantil")
+    else:
+        _controlar_edad(edad, tasas.get("tasa_pobreza_personas"))  # los controles estructurales cortan (ValueError): mejor no publicar que publicar mal
+        fechas_e = [_fecha_semestre(c) for c in edad.index]
+        comun_e = ("Es la tasa del grupo (de cada 100 chicos, cuántos son pobres), no qué parte de los pobres son chicos. "
+                   "Dato semestral del INDEC (se ubica en enero y julio). Notas del INDEC: en el 2.º semestre de 2019 falta Gran Resistencia y en el 2.º de 2020, Ushuaia-Río Grande.")
+        for k, col, n, que in [("pob_infantil", "pob_0_14", "Pobreza infantil (0 a 14 años)", "viven en hogares con ingresos por debajo de la línea de pobreza (la canasta básica total)"),
+                               ("indig_infantil", "ind_0_14", "Indigencia infantil (0 a 14 años)", "viven en hogares con ingresos por debajo de la línea de indigencia (la canasta básica alimentaria)")]:
+            v = pd.Series(edad[col].astype(float).values, index=fechas_e)
+            out.append(S(k, n, CAT_POBREZA, "none", "% de chicos de 0 a 14 años", v.reindex(idx), -1, FUENTE_POBREZA_EDAD,
+                         f"Porcentaje de chicos de 0 a 14 años que {que}, en los 31 aglomerados urbanos que mide la Encuesta Permanente de Hogares. " + comun_e))
 
     # Estimación para todo el país (D-027)
     if tasas and hay_pob:

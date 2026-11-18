@@ -17,7 +17,7 @@ import { PALETA, vcolor } from "../util";
 import { fmtMes, MESES, nf0, nf1, ok, redondeadoComo, restaLimpia } from "@/lib/formato";
 import type { Calculo, Expr, Motor } from "@/lib/motor";
 import { fuentesCalc } from "@/lib/motor";
-import { PRES_DEF, aBase100, claseVariacion, estadisticasRows, etiqueta, filasGrafico, franjasPres, type EstRows } from "@/lib/estadisticas";
+import { PRES_DEF, aBase100, claseVariacion, estadisticasRows, etiqueta, filasGrafico, franjasPres, recortar, type EstRows } from "@/lib/estadisticas";
 import { admiteContexto, contextoDato } from "@/lib/contexto-dato";
 import { MAX_GRAFICOS, MAX_MISMA_UNIDAD, PG, TODOS_MESES, claseVariacionMostrada, comparacionesCabecera, deltaDeComparacion, exprsUsadas, fraseUltimoVs, frecuenciaOrigen, leerComun, leerGrafico, opcionesComoVerlo, sfx, textoPeriodo, textoTemporalidad, type Comun, type GEst } from "@/lib/historico";
 import { fmtEjeDe, notaInflacion, tituloGrafico, type VistaImg } from "@/lib/imagen-datos";
@@ -29,6 +29,7 @@ import { contarCompartir } from "@/lib/conteo";
 import { filasDeTabla, tablaATexto, type ColTabla } from "@/lib/tabla-texto";
 import { IconoCompartir } from "../Iconos";
 import { fuentePublica } from "@/lib/fuente-publica";
+import { marcasEnGrafico, mesesMarcas } from "@/lib/marcas";
 
 /** Los parámetros de la vista que "Volver a lo de fábrica" borra (todos menos `v`, `pl` y `pn`). */
 const PARAMS_FABRICA = ["d", "h", "ms", "f", "ag", ...PG.filter((k) => k !== "v")];
@@ -382,11 +383,14 @@ function CardGrafico({ titulo, temporal, nota, leyenda, visibles, config, rows, 
   const elegirVista = (v: string) => (onVista ? onVista(v as Vista) : setVistaL(v as Vista));
   const hay = hayDatos(rows, series, opts);
   const cab = leyenda ?? null;
+  const serieTabla = series.filter((se) => !se.marca);   // las marcas de otra fuente solo se dibujan: no van a la tabla ni a lo que se copia
+  // Con marcas, el gráfico puede empezar antes que la serie (el mes de la marca): la tabla no muestra esas filas vacías
+  const rowsTabla = serieTabla.length < series.length ? recortar(rows, serieTabla.map((se) => se.key)) : rows;
   const [avisoT, setAvisoT] = useState<string | null>(null);
   const copiarTabla = async () => {
-    const cols: ColTabla[] = series.map((se) => ({ key: se.key, name: se.name, unidad: unidades?.[se.key], fmt: se.fmt || opts.fmtTip }));
-    const r = await copiarTexto(tablaATexto(cols, filasDeTabla(rows, cols), window.location.href));
-    if (r === "copiado") contarCompartir({ accion: "tabla", dato: series.length === 1 ? series[0].key : undefined, href: window.location.href });
+    const cols: ColTabla[] = serieTabla.map((se) => ({ key: se.key, name: se.name, unidad: unidades?.[se.key], fmt: se.fmt || opts.fmtTip }));
+    const r = await copiarTexto(tablaATexto(cols, filasDeTabla(rowsTabla, cols), window.location.href));
+    if (r === "copiado") contarCompartir({ accion: "tabla", dato: serieTabla.length === 1 ? serieTabla[0].key : undefined, href: window.location.href });
     setAvisoT(avisoTabla(r)); setTimeout(() => setAvisoT(null), 4000);
   };
   const botonExpandir = (
@@ -400,9 +404,9 @@ function CardGrafico({ titulo, temporal, nota, leyenda, visibles, config, rows, 
         {avisoT && <span className="note" role="status" style={{ margin: 0 }}>{avisoT}</span>}
       </div>
       <div className="tablewrap tabla-graf"><table>
-        <thead><tr><th>Período</th>{series.map((se) => <th key={se.key}>{se.name}{unidades?.[se.key] && <small>{unidades[se.key]}</small>}</th>)}</tr></thead>
-        <tbody>{rows.slice().reverse().map((r) => (
-          <tr key={r.fecha + (r.per || "")}><td>{opts.tipTitle ? opts.tipTitle(r, 0) : etiqueta(r)}</td>{series.map((se) => <td key={se.key}>{ok(r[se.key]) ? (se.fmt || opts.fmtTip)(r[se.key]) : "–"}</td>)}</tr>
+        <thead><tr><th>Período</th>{serieTabla.map((se) => <th key={se.key}>{se.name}{unidades?.[se.key] && <small>{unidades[se.key]}</small>}</th>)}</tr></thead>
+        <tbody>{rowsTabla.slice().reverse().map((r) => (
+          <tr key={r.fecha + (r.per || "")}><td>{opts.tipTitle ? opts.tipTitle(r, 0) : etiqueta(r)}</td>{serieTabla.map((se) => <td key={se.key}>{ok(r[se.key]) ? (se.fmt || opts.fmtTip)(r[se.key]) : "–"}</td>)}</tr>
         ))}</tbody>
       </table></div></>
     ) : <p className="note">Sin datos para esta selección.</p>)
@@ -476,7 +480,8 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     const dos = !b100 && lista.length === 2;
     const hayBanda = !b100 && lista.some((o) => o.c.lo);
     const bd = hayBanda && E.banda === "si";
-    const rows: Fila[] = filasGrafico(F, lista, { desde: E.desde, hasta: E.hasta, meses: E.meses, freq: E.freq, cierre: E.ag === "cierre", banda: bd });
+    const rows: Fila[] = filasGrafico(F, lista, { desde: E.desde, hasta: E.hasta, meses: E.meses, freq: E.freq, cierre: E.ag === "cierre", banda: bd,
+      incluir: b100 ? [] : lista.flatMap((o) => mesesMarcas(o.c, E.freq)) });
     if (b100) { const bases = aBase100(rows, lista.map((o) => o.key)); lista.forEach((o) => { o.base = bases[o.key]; }); }
     const puedeLog = rows.every((r) => lista.every((o) => !ok(r[o.key]) || r[o.key] > 0));
     const cruzaCero = !b100 && rows.some((r) => lista.some((o) => ok(r[o.key]) && r[o.key] < 0));   // R20: con valores negativos se ofrece la "Línea del cero"
@@ -496,7 +501,9 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
     const tiposMk = new Set(["ult", "max", "min"].filter((k) => E.refs.has("mk_" + k)));
     const marcas: Marca[] = b100 || !tiposMk.size ? [] : lista.map((o) => ({ key: o.key, axis: misma ? 0 : o.axis, color: o.color, fmt: fmtDe(o), tipos: tiposMk }));
     const ejeFmt = fmtEjeDe;
-    const series: SerieG[] = lista.map((o) => ({ key: o.key, name: o.c.corto, short: o.c.corto.length > 18 ? o.c.corto.slice(0, 17) + "…" : o.c.corto, color: o.color, axis: o.axis, band: bd && !!o.c.lo, fmt: fmtDe(o) }));
+    // Puntos sueltos de otra fuente (UCA sobre Di Tella): solo con la serie en valores tal cual y por mes; se agregan a las filas después de todo cálculo
+    const marcasG: SerieG[] = b100 ? [] : lista.flatMap((o) => marcasEnGrafico(o.c, rows, o.key, o.color, fmtDe(o), E.freq).map((s) => ({ ...s, axis: o.axis })));
+    const series: SerieG[] = [...lista.map((o): SerieG => ({ key: o.key, name: o.c.corto, short: o.c.corto.length > 18 ? o.c.corto.slice(0, 17) + "…" : o.c.corto, color: o.color, axis: o.axis, band: bd && !!o.c.lo, fmt: fmtDe(o) })), ...marcasG];
     const opts = {
       log: E.escala === "log" && puedeLog, log2: E.escala === "log" && puedeLog, refs, marcas, mismaEscala: misma, refLine: b100 ? 100 : null, endLabels: b100 && lista.length > 1,
       fmtAxis: b100 ? (v: number) => nf0.format(v) : ejeFmt(lista[0].c), fmtAxis2: dos ? ejeFmt(lista[1].c) : null, fmtTip: fmtDe(lista[0]), tipTitle: (r: Fila) => etiqueta(r, frecuenciaOrigen(lista[0].c.v)),
@@ -558,7 +565,9 @@ function Principal({ m, E, set, version, compacto, simple }: { m: Motor; E: Esta
       {!b100 && hayBanda && <FilaAj rotulo="Rango"><Seg valor={E.banda} opciones={[["no", "Solo promedio"], ["si", "Con mín/máx"]]} onElegir={(v) => set({ bd: v === "no" ? null : v })} /></FilaAj>}
     </>
   );
-  const leyenda = <div className="legend">{lista.length > 1 && lista.map((o) => <span key={o.key} style={vcolor(o.color)}>{o.c.corto}{o.axis ? " (eje der.)" : ""}</span>)}</div>;
+  const marcasLey = series.filter((se) => se.marca);   // una entrada por tipo de punto suelto (rojo = simulación, hueco = medición)
+  const leyenda = <div className="legend">{lista.length > 1 && lista.map((o) => <span key={o.key} style={vcolor(o.color)}>{o.c.corto}{o.axis ? " (eje der.)" : ""}</span>)}
+    {marcasLey.map((se) => <span key={se.key} style={vcolor(se.color)}>{se.name}{se.hueco ? " · mediciones" : " · simulación"}</span>)}</div>;
   const unidades = Object.fromEntries(lista.map((o) => [o.key, b100 ? "base 100" : o.c.unidad]));
 
   // Resumen del período: seis celdas fijas; la frase de cada una compara el último dato con ella (siempre de la primera variable)

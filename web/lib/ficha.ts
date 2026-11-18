@@ -3,6 +3,7 @@
 // cada presidente y mes a mes desde que asumió. Funciones puras (sin React): la ficha y las imágenes usan las mismas.
 // Ver docs/specs/ajustes-tanda-5.md y docs/specs/remodelacion-fichas.md.
 import { baseIdx, calcularMandato, pasoDatos, claseVariacion, crearPres, estadisticasRows, filasGrafico, mesInicioTxt, statsMandato, varNum, type BaseCfg, type Fila, type ModoMandato, type Pres, type StatsM } from "./estadisticas";
+import { mesesMarcas } from "./marcas";
 import { fechaDeDato, fmtMes, lastIdx, mesNum, nf1, ok, redondeadoComo, r1 } from "./formato";
 import { TODOS_MESES, comparacionesCabecera, deltaDeComparacion, frecuenciaOrigen, leerComun, type Comun, type FrecOrigen } from "./historico";
 import type { ClaveFrase, DesdePref } from "./config";
@@ -36,10 +37,12 @@ export type PeriodoFicha = (typeof PERIODOS_FICHA)[number];
 export function historicoFicha(m: Motor, c: Calculo, desdeCfg: DesdePref, per: PeriodoFicha = ""): { E: Comun; rows: Fila[] } {
   const F = m.F, col = [{ key: "s0", c, flujo: !!c.flujo, ultimo: !!c.ultimo }];
   let E = leerComun(new URLSearchParams(), F, desdeCfg);
-  const u = lastIdx(c.v), i0 = c.v.findIndex((x) => ok(x));
+  const inc = mesesMarcas(c);   // puntos sueltos de otra fuente (UCA sobre Di Tella): el período los alcanza aunque la serie empiece después
+  const u = lastIdx(c.v), iSerie = c.v.findIndex((x) => ok(x));
+  const i0 = Math.min(iSerie, ...inc.map((f) => F.indexOf(f)).filter((i) => i >= 0));
   if (u >= 0 && per === "todo") E = { ...E, desde: F[i0] };
   else if (u >= 0 && (per === "1" || per === "5")) E = { ...E, desde: F[Math.max(i0, u - 12 * Number(per) + 1)], hasta: F[u] };
-  const filas = (d: string, h: string) => filasGrafico(F, col, { desde: d, hasta: h, meses: E.meses, freq: "M", cierre: false, banda: false });
+  const filas = (d: string, h: string) => filasGrafico(F, col, { desde: d, hasta: h, meses: E.meses, freq: "M", cierre: false, banda: false, incluir: inc });
   let rows = filas(E.desde, E.hasta);
   if (!rows.some((r) => ok(r.s0)) && E.desde > F[0]) { E = { ...E, desde: F[0] }; rows = filas(F[0], E.hasta); }
   return { E, rows };

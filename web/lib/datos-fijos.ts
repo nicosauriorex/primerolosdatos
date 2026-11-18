@@ -46,10 +46,12 @@ export const DATOS_FIJOS: DatoFijo[] = [
   { slug: "motos", e: ex("motos_0km", "asis") },
   { slug: "carne", e: ex("carne_vacuna", "asis") },
   { slug: "pollo", e: ex("carne_aviar", "asis") },
+  { slug: "huevo", e: ex("consumo_huevo", "asis") },
   // Empleo y pobreza
   { slug: "desocupacion", e: ex("dg_42_3_eph_puntuatal_0_m_30", "asis") },
   { slug: "pobreza", e: ex("pob_tasa_pobreza_personas", "asis") },
   { slug: "indigencia", e: ex("pob_tasa_indigencia_personas", "asis") },
+  { slug: "pobreza-infantil", e: ex("pob_infantil", "asis") },
   { slug: "empleo-privado-registrado", e: ex("dg_151_1_aariadotac_2012_m_26", "asis") },
   { slug: "auh-real", e: ex("auh", "real") },
   { slug: "pensiones-por-invalidez", e: ex("pnc_invalidez", "asis") },

@@ -8,6 +8,7 @@ import type { ComparacionImg, DatosImagen, TarjetaDato, TarjetaImg } from "./ima
 import { fmtMes, nf0, nf1, fmtCant, norm, ok } from "./formato";
 import type { Calculo, Expr, Motor } from "./motor";
 import { fuentesCalc } from "./motor";
+import { mesesMarcas, origenMarcas, valorTalCual } from "./marcas";
 import { filasDeTabla, tablaATexto } from "./tabla-texto";
 import { variacionMostrada } from "./tablas";
 import { fuentePublica, organismoDe, SITIO_FUENTES } from "./fuente-publica";
@@ -196,7 +197,8 @@ export function armarImagen(m: Motor, v: VistaImg, o: OpcionesImg): DatosImagen 
   const prep = preparar(m, v);
   if (!prep) return null;
   const { b100, calcs, lista } = prep, F = m.F, pers = o.personal ?? null;
-  const rows = filasGrafico(F, lista, { desde: v.desde, hasta: v.hasta, meses: v.meses, freq: v.freq, cierre: v.ag === "cierre", banda: false });
+  const rows = filasGrafico(F, lista, { desde: v.desde, hasta: v.hasta, meses: v.meses, freq: v.freq, cierre: v.ag === "cierre", banda: false,
+    incluir: lista.length === 1 && !b100 ? mesesMarcas(calcs[0], v.freq) : [] });
   if (!rows.length) return null;
   if (pers && !lista.some((x) => rows.filter((r) => ok(r[x.key])).length >= 2)) return null;
   if (b100) aBase100(rows, lista.map((x) => x.key));
@@ -225,6 +227,14 @@ export function armarImagen(m: Motor, v: VistaImg, o: OpcionesImg): DatosImagen 
     if (xMax != null) marcasExt.push({ tipo: "max", x: xMax, valor: est.max[0], texto: `Máximo ${fmt0(est.max[0])}` });
     if (xMin != null && xMin !== xMax) marcasExt.push({ tipo: "min", x: xMin, valor: est.min[0], texto: `Mínimo ${fmt0(est.min[0])}` });
   }
+  // Puntos sueltos de otra fuente (marcas de la serie): solo con una variable en valores tal cual y por mes; quedan fuera de todo cálculo
+  const puntosExt: NonNullable<DatosImagen["puntosExt"]> = [];
+  const marcasSerie = unico && !b100 && v.freq === "M" && valorTalCual(c0) ? c0.serie.marcas ?? [] : [];
+  marcasSerie.forEach((mk) => {
+    const r = rows.find((x) => x.fecha === mk.f);
+    if (r) puntosExt.push({ x: mesDeFila(r), valor: mk.v, sim: mk.tipo === "simulacion", texto: mk.tipo === "simulacion" ? `${fmt0(mk.v)} · ${origenMarcas(marcasSerie)}, simulación` : null });
+  });
+  const fuenteMarcas = puntosExt.length ? [...new Set(marcasSerie.map((mk) => mk.fuente).filter(Boolean).map(fuenteLegible))] : [];
   let franjas: DatosImagen["franjas"] = [], tarjetas: DatosImagen["tarjetas"];
   const conPres = !!(est && pers && (pers.resaltar || pers.tarjetas === "pres"));
   if (est && pers) {
@@ -255,14 +265,14 @@ export function armarImagen(m: Motor, v: VistaImg, o: OpcionesImg): DatosImagen 
     series: lista.map((x) => ({ nombre: x.c.corto, color: x.k, axis: x.axis, v: filasDib.map((r) => (ok(r[x.key]) ? (r[x.key] as number) : null)) })),
     fmtEje: b100 ? (x) => nf0.format(x) : fmtEjeDe(calcs[0]),
     fmtEje2: !b100 && lista.length === 2 && v.eje !== "misma" ? fmtEjeDe(calcs[1]) : null,
-    franjas, tarjetas, lineasRef, marcasExt, marcaUltimo: pers ? pers.marcaUltimo : true,
+    franjas, tarjetas, lineasRef, marcasExt, puntosExt, marcaUltimo: pers ? pers.marcaUltimo : true,
     // R30: las comparaciones de la vista van al lado de la cifra, salvo que quien comparte las apague
     comparaciones: ctx && v.comparaciones?.length && (!v.comparacionesMes || v.comparacionesMes === ctx.mes) && (pers ? pers.comparaciones : true) ? v.comparaciones : undefined,
     cero: v.cero, armado: lista.length > 1,   // R22: con más de una serie, la vista la armó quien comparte
     inicioTxt: conPres ? oracionInicio(o.base) : null,
     comentario: limpiarComentario(o.comentario),
     unidad: b100 ? "Base 100: primer dato del período = 100" : [...new Set(calcs.map((c) => c.unidad))].join(" · "),
-    fuente: "Fuente: " + [...new Set(calcs.flatMap(fuentesCalc).map(fuenteLegible))].join("; "), nota: notaInflacion(calcs, b100),
+    fuente: "Fuente: " + [...new Set([...calcs.flatMap(fuentesCalc).map(fuenteLegible), ...fuenteMarcas])].join("; "), nota: notaInflacion(calcs, b100),
     fecha: hoy.toLocaleDateString("es-AR"),
     archivo: `primerolosdatos-${slug(tituloBase)}-${mesUlt.slice(0, 7)}`,
   };

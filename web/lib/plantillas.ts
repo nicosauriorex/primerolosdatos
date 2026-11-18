@@ -122,6 +122,14 @@ export function crearPlantillas(metas: SerieMeta[]): Plantilla[] {
     "Personas pobres en los 31 aglomerados urbanos (cifra oficial del INDEC) y estimación propia para todo el país, que supone la misma tasa en el resto",
     ["pobres", "cantidad de pobres", "millones de pobres", "pobreza", "personas pobres"],
     ["pobres_31", "pobres_pais"].map((id) => E(id, { med: "asis" })));
+  manual("pobreza-indec-di-tella-y-uca", "Pobreza: INDEC, Di Tella y UCA", "Empleo y pobreza",
+    "El INDEC mide la pobreza por semestre; la Universidad Di Tella estima un semestre móvil cada mes. Los puntos de la UCA son de otra encuesta, y el 57,4 % de enero de 2024 fue una simulación, no una medición",
+    ["pobreza", "57", "57 %", "57,4", "uca", "di tella", "simulacion", "pobreza mensual", "indec", "odsa", "deuda social"],
+    ["pob_tasa_pobreza_personas", "pobreza_utdt"].map((id) => E(id, { med: "asis" })));
+  manual("pobreza-infantil-chicos-de-0-a-14-anos", "Pobreza infantil: chicos de 0 a 14 años", "Empleo y pobreza",
+    "De cada 100 chicos de 0 a 14 años, cuántos viven en hogares pobres, junto con la pobreza de toda la población (INDEC, 31 aglomerados urbanos, por semestre)",
+    ["pobreza infantil", "chicos pobres", "ninos pobres", "ninez", "infancia", "menores", "0 a 14", "indigencia infantil"],
+    ["pob_infantil", "pob_tasa_pobreza_personas"].map((id) => E(id, { med: "asis" })));
   manual("natalidad-y-mortalidad", "Natalidad y mortalidad", "Sociedad",
     "Nacimientos y muertes cada 1.000 habitantes por año. La mortalidad es una cuenta propia: defunciones sobre población",
     ["natalidad", "mortalidad", "nacimientos", "muertes", "defunciones", "bebes", "fecundidad"],

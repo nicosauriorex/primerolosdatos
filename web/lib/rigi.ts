@@ -4,9 +4,22 @@ import { MESES, fmtMes, nf0, nf1 } from "./formato";
 
 export interface ProyectoRigi { nombre: string; empresa: string; provincias: string[]; sector: string; monto: number; empleos: number | null; fecha: string | null; norma: string | null }
 export interface IngresadoRigi { bruto: number | null; egresos: number | null; neto: number | null; hasta: string | null; texto: string; url: string | null }
+/** Foto de los agregados oficiales (o declarados) en una fecha. Montos en millones de US$; lo que la fuente no trae va en null. */
+export interface TotalRigi {
+  fecha: string; aprobados: { n: number; monto: number | null } | null;
+  evaluacion: { n: number; monto: number | null; empleos: number | null } | null; presentados: { n: number; monto: number | null } | null;
+  fuente: string; url: string | null; cita: string | null;
+}
+/** Proyecto de la lista no oficial (Monitor RIGI). `fecha` es la de presentación (así `ordenar` sirve para las dos tablas). */
+export interface PendienteRigi {
+  nombre: string; empresa: string; provincias: string[]; sector: string; monto: number; fecha: string | null;
+  estado: "evaluacion" | "rechazado"; url: string | null; fechaRechazo: string | null;
+}
 export interface Rigi {
   actualizado: string | null; fuente: { texto: string; url: string | null } | null;
   proyectos: ProyectoRigi[]; ingresado: IngresadoRigi | null; nota: string | null;
+  totales: TotalRigi[]; pendientes: PendienteRigi[];
+  fuentePendientes: { texto: string; url: string | null; fecha: string | null } | null; notaPendientes: string | null;
 }
 
 const esTxt = (x: unknown): x is string => typeof x === "string" && x.trim() !== "";
@@ -32,8 +45,12 @@ export function decodificar(c: unknown): Rigi | null {
     });
   }
   if (!proyectos.length) return null;
+  const totales = decodificarTotales(o.totales), pendientes = decodificarPendientes(o.pendientes);
+  const fp = o.fuente_pendientes as Record<string, unknown> | null | undefined;
   const f = o.fuente as Record<string, unknown> | null | undefined, i = o.ingresado as Record<string, unknown> | null | undefined;
   return {
+    totales, pendientes, notaPendientes: esTxt(o.nota_pendientes) ? o.nota_pendientes.trim() : null,
+    fuentePendientes: fp && typeof fp === "object" && esTxt(fp.texto) ? { texto: fp.texto.trim(), url: enlace(fp.url), fecha: fechaIso(fp.fecha) } : null,
     actualizado: fechaIso(o.actualizado), nota: esTxt(o.nota) ? o.nota.trim() : null, proyectos,
     fuente: f && typeof f === "object" && esTxt(f.texto) ? { texto: f.texto.trim(), url: enlace(f.url) } : null,
     ingresado: i && typeof i === "object" && (num(i.neto) != null || num(i.bruto) != null)
@@ -41,6 +58,59 @@ export function decodificar(c: unknown): Rigi | null {
         texto: esTxt(i.texto) ? i.texto.trim() : "", url: enlace(i.url) }
       : null,
   };
+}
+
+const entero = (x: unknown): number | null => (typeof x === "number" && Number.isInteger(x) && x >= 0 ? x : null);
+const montoOk = (x: unknown): number | null => { const v = num(x); return v != null && v >= 0 ? v : null; };
+
+/** Fotos de totales, de la más vieja a la más nueva. Una foto sin fecha o sin ningún bloque válido se descarta. */
+function decodificarTotales(x: unknown): TotalRigi[] {
+  if (!Array.isArray(x)) return [];
+  const out: TotalRigi[] = [];
+  for (const t of x as Record<string, unknown>[]) {
+    if (!t || typeof t !== "object") continue;
+    const fecha = fechaIso(t.fecha);
+    const bloque = (b: unknown): Record<string, unknown> | null => (b && typeof b === "object" && entero((b as Record<string, unknown>).n) != null ? (b as Record<string, unknown>) : null);
+    const a = bloque(t.aprobados), e = bloque(t.evaluacion), pr = bloque(t.presentados);
+    if (!fecha || (!a && !e && !pr)) continue;
+    out.push({
+      fecha, fuente: esTxt(t.fuente) ? t.fuente.trim() : "Fuente sin informar", url: enlace(t.url), cita: esTxt(t.cita) ? t.cita.trim() : null,
+      aprobados: a ? { n: entero(a.n)!, monto: montoOk(a.monto) } : null,
+      evaluacion: e ? { n: entero(e.n)!, monto: montoOk(e.monto), empleos: montoOk(e.empleos) } : null,
+      presentados: pr ? { n: entero(pr.n)!, monto: montoOk(pr.monto) } : null,
+    });
+  }
+  return out.sort((p, q) => (p.fecha < q.fecha ? -1 : p.fecha > q.fecha ? 1 : 0));
+}
+
+/** Lista no oficial. Sin nombre o con monto inválido se descarta; un estado desconocido también. */
+function decodificarPendientes(x: unknown): PendienteRigi[] {
+  if (!Array.isArray(x)) return [];
+  const out: PendienteRigi[] = [];
+  for (const p of x as Record<string, unknown>[]) {
+    if (!p || typeof p !== "object") continue;
+    const monto = num(p.monto);
+    if (!esTxt(p.nombre) || monto == null || monto < 0 || (p.estado !== "evaluacion" && p.estado !== "rechazado")) continue;
+    out.push({
+      nombre: p.nombre.trim(), empresa: esTxt(p.empresa) ? p.empresa.trim() : "–",
+      provincias: Array.isArray(p.provincias) ? (p.provincias as unknown[]).filter(esTxt).map((s) => s.trim()) : [],
+      sector: esTxt(p.sector) ? p.sector.trim() : "Sin clasificar", monto, fecha: fechaIso(p.fecha_presentacion),
+      estado: p.estado, url: enlace(p.url), fechaRechazo: fechaIso(p.fecha_rechazo),
+    });
+  }
+  return out;
+}
+
+/** Foto oficial más reciente que trae el bloque pedido (la lista viene de la más vieja a la más nueva). */
+export function ultimaCon(r: Rigi, bloque: "aprobados" | "evaluacion" | "presentados"): TotalRigi | null {
+  for (let i = r.totales.length - 1; i >= 0; i--) if (r.totales[i][bloque]) return r.totales[i];
+  return null;
+}
+/** Fecha ISO de la última actualización del monitor, sacada de su texto («...actualizada al 2026-11-17»); si no está, la de la descarga. */
+export function fechaMonitor(r: Rigi): { iso: string | null; descarga: boolean } {
+  const fp = r.fuentePendientes;
+  const m = fp ? /(\d{4}-\d{2}-\d{2})/.exec(fp.texto) : null;
+  return m ? { iso: m[1], descarga: false } : { iso: fp?.fecha ?? null, descarga: true };
 }
 
 /** Montos en millones de US$: "US$ 762 millones", "US$ 1.205 millones"; desde 10.000 millones, "US$ 12,3 mil millones". */
@@ -83,7 +153,7 @@ export const escribirOrden = (o: OrdenRigi): string | null => (o.clave === ORDEN
 export const alternarOrden = (o: OrdenRigi, clave: ClaveOrden): OrdenRigi => (o.clave === clave ? { clave, asc: !o.asc } : { clave, asc: false });
 
 /** Proyectos ordenados; los que no tienen fecha van siempre al final y, a igual valor, por nombre. */
-export function ordenar(ps: ProyectoRigi[], o: OrdenRigi): ProyectoRigi[] {
+export function ordenar<T extends { nombre: string; monto: number; fecha: string | null }>(ps: T[], o: OrdenRigi): T[] {
   const d = o.asc ? 1 : -1;
   return [...ps].sort((a, b) => {
     if (o.clave === "fecha") {

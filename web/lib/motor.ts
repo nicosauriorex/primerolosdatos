@@ -12,6 +12,22 @@ export interface SerieMeta {
   nTecnico?: string;
   /** Series en US$ con una parte en pesos: cotizaciones (`blue`, `mep`, `ccl`) a las que se puede pasar esa parte (ver `alt`). */
   dol?: string[];
+  /** Puntos sueltos de otra fuente que se dibujan sobre el gráfico de la serie (no son parte de ella: no entran en cálculos, medidas ni tablas). */
+  marcas?: MarcaSerie[];
+}
+export interface MarcaSerie { f: string; v: number; t: string; tipo: "simulacion" | "medicion"; fuente: string; url: string }
+/** Marcas del catálogo ya validadas: fecha «AAAA-MM» que exista en `fechas`, `v` número y `t` texto; lo demás se descarta. */
+export function validarMarcas(x: unknown, F: string[]): MarcaSerie[] | undefined {
+  if (!Array.isArray(x)) return undefined;
+  const fs = new Set(F), out: MarcaSerie[] = [];
+  for (const o of x) {
+    if (!o || typeof o !== "object") continue;
+    const { f, v, t, tipo, fuente, url } = o as Record<string, unknown>;
+    if (typeof f !== "string" || !/^\d{4}-\d{2}$/.test(f) || !fs.has(f)) continue;
+    if (typeof v !== "number" || !Number.isFinite(v) || typeof t !== "string" || !t.trim()) continue;
+    out.push({ f, v, t, tipo: tipo === "simulacion" ? "simulacion" : "medicion", fuente: typeof fuente === "string" ? fuente : "", url: typeof url === "string" && /^https?:\/\//.test(url) ? url : "" });
+  }
+  return out.length ? out : undefined;
 }
 export interface SerieDatos { i0: number; v: (number | null)[]; min?: Banda; max?: Banda; alt?: Record<string, Banda> }
 export interface Serie extends SerieMeta {
@@ -114,6 +130,8 @@ export function crearMotor(F: string[]) {
       const d = datos[m.id];
       if (!d) continue;
       const s: Serie = { ...normalizarMeta(m), i0: d.i0, vals: expandir(d.i0, d.v, N) };
+      s.marcas = validarMarcas(m.marcas, F);
+      if (!s.marcas) delete s.marcas;
       if (d.min && d.max) { s.mn = expandir(d.min.i0, d.min.v, N); s.mx = expandir(d.max.i0, d.max.v, N); }
       if (d.alt) s.alt = Object.fromEntries(Object.entries(d.alt).map(([k, b]) => [k, expandir(b.i0, b.v, N)]));
       SER[s.id] = s;

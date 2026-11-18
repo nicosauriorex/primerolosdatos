@@ -15,7 +15,7 @@ dir: 1 = que suba es bueno, -1 = que suba es malo, 0 = neutro.
 
 Salida para la web nueva (web/public/datos/, la escribe obtener_datos.escribir_json_web):
   catalogo.json  {"version", "fechas": ["1990-01", ...], "series": [metadatos + "archivo"]}
-                 metadatos = id, n, cat, tipo, u, dir, fuente, desc (+ agg, flujo = 1 si corresponde);
+                 metadatos = id, n, cat, tipo, u, dir, fuente, desc (+ agg, flujo = 1 si corresponde; marcas = puntos sueltos de otra fuente);
                  "archivo" dice en qué JSON están los valores; "version" cambia con cada dato nuevo
                  y la web la agrega a cada pedido (?v=) para no mezclar cachés.
   <categoria>.json  uno por cat[0] (nombre pasado por slug): {id: {"i0", "v", "min"?, "max"?}}
@@ -58,13 +58,17 @@ def _controlar_canastas(can):
 FUENTE_IPC = "INDEC (IPC); de 2007 a 2016, IPC de San Luis y de la Ciudad de Buenos Aires"
 
 
-def S(id, n, cat, tipo, u, v, dir=0, fuente="", desc="", mn=None, mx=None, agg=False, flujo=False, alt=None):
-    """agg: monto agregado de toda la economía (admite por habitante y % del PIB). flujo: se suma en el tiempo (no es stock)."""
+def S(id, n, cat, tipo, u, v, dir=0, fuente="", desc="", mn=None, mx=None, agg=False, flujo=False, alt=None, marcas=None):
+    """agg: monto agregado de toda la economía (admite por habitante y % del PIB). flujo: se suma en el tiempo (no es stock).
+    marcas: puntos sueltos de otra fuente que se dibujan sobre el gráfico sin ser parte de la serie:
+    [{"f": "AAAA-MM", "v": 57.4, "t": texto, "tipo": "simulacion"|"medicion", "fuente": ..., "url": ...}]."""
     d = {"id": id, "n": n, "cat": cat, "tipo": tipo, "u": u, "dir": dir, "fuente": fuente, "desc": desc, "v": v, "agg": agg, "flujo": flujo}
     if mn is not None:
         d["min"], d["max"] = mn, mx
     if alt:
         d["alt"] = alt  # {"blue"|"mep"|"ccl": pd.Series}: la misma serie en otro dólar (deuda, ver docs/specs/deuda-otros-dolares.md)
+    if marcas:
+        d["marcas"] = marcas  # va a catalogo.json como metadato (ver docs/specs/datos-calientes-5.md, B)
     return d
 
 
@@ -556,7 +560,7 @@ def construir(m: pd.DataFrame, token: str | None):
                       ("Trabajo, obra pública, motos y robos", lambda: __import__("trabajo_obra").series(idx)),
                       ("Empresas por tamaño, aperturas y cierres", lambda: __import__("empresas").series(idx)),
                       ("Población, salud y pobres", lambda: __import__("poblacion_salud").series(idx, next((s["v"] for s in series if s["id"] == "poblacion"), None))),
-                      ("Datos a mano (pobreza UTDT, piquetes, carnes, universidades, RIGI)", lambda: __import__("manuales_calientes").series(idx)),
+                      ("Datos a mano (pobreza UTDT, piquetes, carnes, huevo, universidades, RIGI)", lambda: __import__("manuales_calientes").series(idx)),
                       ("Energía (CAMMESA: parte del costo que pagan las tarifas)", lambda: __import__("energia").series(idx)),
                       ("Tarifas del AMBA (IIEP)", lambda: __import__("tarifas").series(idx))]:
         try:
@@ -596,6 +600,8 @@ def a_json(series, idx):
         for k in ("agg", "flujo"):
             if s.get(k):
                 d[k] = 1
+        if s.get("marcas"):
+            d["marcas"] = s["marcas"]  # puntos sueltos de otra fuente (metadato; spec datos-calientes-5, B1)
         d["i0"], d["v"] = i0, vals
         if "min" in s:
             for k in ("min", "max"):

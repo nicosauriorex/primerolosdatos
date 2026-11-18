@@ -4,12 +4,14 @@ Datos cargados a mano con su cita (docs/specs/datos-calientes-3.md, fase 1D; dec
 - datos/manual/piquetes.json: cortes de calle y ruta por año según Diagnóstico Político (privada) y las afirmaciones del Gobierno con sus chequeos.
 - datos/manual/carne.json: consumo de carne vacuna, aviar, porcina y total por habitante (Secretaría de Agricultura).
 - datos/manual/universidades_alumnos.json: estudiantes, nuevos inscriptos y egresados universitarios por año (SPU).
+- datos/manual/huevo.json: consumo de huevo por habitante (CAPIA, privada; spec datos-calientes-5, E).
 - datos/manual/rigi.json: proyectos aprobados del RIGI (planilla del Ministerio de Economía + fecha de cada resolución) y lo ingresado según el BCRA.
 
 Regla: sin documento y cita no se carga. Los valores que el subagente marcó como no abiertos (solo extracto del buscador) no entran.
 No baja nada: con --solo-json funciona igual. escribir_rigi(destino) arma web/public/datos/rigi.json.
 """
 import json
+import re
 import os
 from pathlib import Path
 
@@ -60,6 +62,30 @@ def _pobreza_utdt():
     return s, uca
 
 
+def _marcas_uca(uca):
+    """Puntos de la UCA que se dibujan sobre el gráfico de Di Tella sin ser parte de la serie (spec datos-calientes-5, B1).
+    «AAAA-MM» va tal cual; «AAAA-T3» (encuesta del tercer trimestre) va a septiembre."""
+    out = []
+    for v in uca:
+        p = str(v["periodo"])
+        m = re.fullmatch(r"(\d{4})-T([1-4])", p)
+        f = f"{m.group(1)}-{int(m.group(2)) * 3:02d}" if m else p[:7]
+        if not re.fullmatch(r"\d{4}-\d{2}", f):
+            raise ValueError(f"UCA: periodo raro {p}")
+        sim = str(v.get("tipo", "")).lower().startswith("simulaci")
+        mes = pd.Timestamp(f + "-01")
+        cuando = (f"{m.group(2)}.er trimestre de {m.group(1)}" if m and m.group(2) in "13" else
+                  f"{m.group(2)}.º trimestre de {m.group(1)}" if m else f"{MESES_LARGOS[mes.month - 1]} de {mes.year}")
+        num = f"{float(v['pobreza']):.1f}".replace(".", ",")
+        t = (f"UCA: {num} % en {cuando}, simulación (no es una medición)" if sim else f"UCA: {num} % en {cuando} (Encuesta de la Deuda Social)")
+        out.append({"f": f, "v": float(v["pobreza"]), "t": t, "tipo": "simulacion" if sim else "medicion",
+                    "fuente": "ODSA-UCA, " + str(v.get("documento") or "Observatorio de la Deuda Social Argentina"), "url": v["url"]})
+    return out or None
+
+
+MESES_LARGOS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+
+
 # ---------------------------------------------------------------- piquetes
 def _piquetes():
     d = _leer("piquetes.json")
@@ -80,6 +106,39 @@ def _piquetes():
 def _estado_ok(v):
     e = str(v.get("estado", "")).lower()
     return e.startswith("confirmado") or e.startswith("verificado")
+
+
+def _huevo():
+    """Consumo de huevo por habitante (datos/manual/huevo.json, CAPIA): (Serie anual en diciembre, años proyectados, archivo). Solo valores con URL y cita."""
+    d = _leer("huevo.json")
+    if d is None:
+        return None
+    vals, proy, sin_cita = {}, [], []
+    for v in d.get("valores", []):
+        if v.get("huevos") is None:
+            continue
+        if not _con_cita(v):
+            sin_cita.append(v.get("anio"))
+            continue
+        num = float(v["huevos"])
+        txt = f"{num:g}"
+        if txt not in v["cita"] and txt.replace(".", ",") not in v["cita"]:
+            raise ValueError(f"Huevo {v['anio']}: el valor {txt} no figura en su cita")
+        f = pd.Timestamp(int(v["anio"]), 12, 1)
+        if f in vals:
+            raise ValueError(f"Huevo: el año {v['anio']} está dos veces")
+        vals[f] = num
+        if v.get("proyectado"):
+            proy.append(int(v["anio"]))
+    if sin_cita:
+        print(f"  Huevo: sin cita, no se cargan {sin_cita}")
+    if len(vals) < 3:
+        print(f"  Huevo: solo {len(vals)} años con cita; se omite")
+        return None
+    s = pd.Series(vals).sort_index()
+    if not ((s > 50) & (s < 600)).all():
+        raise ValueError(f"Huevo: valores fuera de 50-600 huevos por habitante: {s.to_dict()}")
+    return s, sorted(proy), d
 
 
 def _carne():
@@ -178,7 +237,9 @@ def series(idx):
                      "el INDEC publica la pobreza por semestre. La UTDT revisa sus estimaciones; se muestra la última versión publicada de cada ventana, así que conviven "
                      "ventanas publicadas en fechas distintas (algunas ya revisadas, otras como pronóstico de ese momento) y no son una serie hecha de una sola vez. "
                      "No hay archivo descargable: cada valor sale de una nota que cita el informe. "
-                     + (f"La UCA (Observatorio de la Deuda Social) publicó puntos sueltos: {txt_uca}. El 57,4 % de enero de 2024 fue una simulación, no una medición." if uca else "")))
+                     + (f"Los puntos sueltos del gráfico son de la UCA (Observatorio de la Deuda Social), otra encuesta: {txt_uca}. "
+                        "El 57,4 % de enero de 2024 (punto rojo) fue una simulación, no una medición." if uca else ""),
+                     marcas=_marcas_uca(uca)))
 
     p = _piquetes()
     if p is not None:
@@ -209,6 +270,26 @@ def series(idx):
                              f"Secretaría de Agricultura, Ganadería y Pesca, tableros de consumo per cápita de carnes ({ss[k].index.min().year}-{ss[k].index.max().year})",
                              f"Consumo aparente de {que} dividido por la población, en kilos por habitante por año, según el tablero de la Secretaría de Agricultura. "
                              "Datos recientes provisorios. Dato anual, se ubica en diciembre."))
+
+    h = _huevo()
+    if h is not None:
+        s, proy, dh = h
+        con_decimal = [f"{i.year}: {str(v).replace('.', ',')}" for i, v in s.items() if not float(v).is_integer()]
+        s = s.round(0)  # huevos enteros, como los anuarios; las cifras con decimal quedan en huevo.json y se dicen en la desc
+        faltan = [a for a in range(s.index.min().year, s.index.max().year + 1) if pd.Timestamp(a, 12, 1) not in s.index]
+        alt = [int(v["anio"]) for v in dh.get("valores", []) if v.get("fuente_alterna")]
+        out.append(S("consumo_huevo", "Consumo de huevo por habitante", CAT_CONS, "none", "huevos por habitante por año", s.reindex(idx), 1,
+                     "Secretaría de Agricultura, Ganadería y Pesca, Anuarios Avícolas (con la producción estimada por la cámara privada CAPIA)"
+                     + (f"; {alt[0]}-{alt[-1]}: comunicados de CAPIA citados por la prensa" if alt else ""),
+                     "Cantidad de huevos que consume en promedio cada habitante en un año, según la estimación que publica la Secretaría de Agricultura en su anuario avícola, "
+                     "hecha con la producción que estima la cámara privada de productores (CAPIA): no es una medición oficial. "
+                     "Cada año sale del anuario más reciente que lo trae. Los anuarios corrigen los años anteriores sin publicar la serie entera, así que algunos saltos "
+                     "entre años no coinciden con el porcentaje que dice cada anuario (por ejemplo, el de 2024 habla de +7,9 % y el de 2025 de +8,6 %). "
+                     + (f"Los anuarios de {alt[0]} a {alt[-1]} no traen el dato: esos años son de comunicados de CAPIA citados por la prensa, así que hay cambio de fuente en {alt[0]} y en {alt[-1] + 1}. " if alt else "")
+                     + (f"Se muestra en huevos enteros (la fuente dio {'; '.join(con_decimal)}). " if con_decimal else "")
+                     + "Dato anual, se ubica en diciembre"
+                     + (f". Años sin dato (no se interpola): {', '.join(map(str, faltan))}" if faltan else "")
+                     + (f". Estimado o proyectado por la fuente: {', '.join(map(str, proy))}" if proy else "") + "."))
 
     u = _universidades()
     if u is not None:
@@ -260,12 +341,46 @@ def construir_rigi():
                      "texto": "Banco Central, presentación del vicepresidente Vladimir Werning («Argentina: Programa Económico Fase 4», abril de 2026), citada por Chequeado: "
                               "flujos en el mercado de cambios de los proyectos aprobados, acumulados. En la presentación las cifras están en un gráfico.",
                      "url": "https://chequeado.com/el-explicador/el-gobierno-anuncio-en-paris-2-nuevos-rigi-cuantos-proyectos-se-aprobaron-y-cuantos-dolares-ingresaron-hasta-ahora/"}
-    return {"actualizado": d.get("actualizado"),
+    # presentados, en evaluación y rechazados (spec datos-calientes-5, C1/C2)
+    aprobados = {str(p.get("nombre") or "").strip().casefold() for p in d.get("proyectos", [])}
+    pendientes = []
+    for p in d.get("pendientes", []):
+        nom = str(p.get("nombre") or "").strip()
+        if nom.casefold() in aprobados:
+            raise ValueError(f"RIGI: el pendiente «{nom}» tiene el mismo nombre que un proyecto aprobado")
+        if p.get("monto") is not None and float(p["monto"]) < 0:
+            raise ValueError(f"RIGI: monto negativo en el pendiente «{nom}»")
+        if p.get("estado") not in ("evaluacion", "rechazado"):
+            raise ValueError(f"RIGI: estado inválido en el pendiente «{nom}»: {p.get('estado')}")
+        pendientes.append({"nombre": nom, "empresa": p.get("empresa"), "provincias": p.get("provincias") or [], "sector": p.get("sector"),
+                           "monto": p.get("monto"), "fecha_presentacion": p.get("fecha_presentacion"), "estado": p["estado"],
+                           "url": p.get("url"), "fecha_rechazo": p.get("fecha_rechazo")})
+    ev = [p for p in pendientes if p["estado"] == "evaluacion"]
+    suma_ev = sum(float(p["monto"] or 0) for p in ev)
+    ctl = d.get("control_pendientes") or {}
+    if ctl.get("evaluacion_monto") is not None and abs(suma_ev - float(ctl["evaluacion_monto"])) > 1:
+        print(f"  AVISO RIGI: la suma de los pendientes en evaluación (US$ {suma_ev:,.0f} M) no coincide con el total del Monitor (US$ {ctl['evaluacion_monto']:,.0f} M)")
+    totales = []
+    for t in sorted(d.get("totales", []), key=lambda t: t.get("fecha") or ""):
+        for k in ("aprobados", "evaluacion", "presentados"):
+            for kk, v in (t.get(k) or {}).items():
+                if v is not None and float(v) < 0:
+                    raise ValueError(f"RIGI: valor negativo en totales {t.get('fecha')} {k}.{kk}")
+        totales.append({"fecha": t.get("fecha"), "aprobados": t.get("aprobados"), "evaluacion": t.get("evaluacion"), "presentados": t.get("presentados"),
+                        "fuente": t.get("fuente"), "url": t.get("url"), "cita": t.get("cita")})
+    out = {"actualizado": d.get("actualizado"),
             "fuente": {"texto": "Ministerio de Economía, planilla oficial de proyectos RIGI aprobados; fecha de aprobación de cada resolución (argentina.gob.ar/normativa y Boletín Oficial)",
                        "url": "https://www.argentina.gob.ar/economia/rigi"},
             "proyectos": proys, "ingresado": ingresado,
             "nota": "Montos comprometidos por las empresas al pedir la adhesión, en millones de dólares. Un proyecto en varias provincias se cuenta una vez. "
                     "Lo ingresado según el Banco Central es la única cifra oficial de lo efectivamente invertido; no hay serie publicada."}
+    if totales:
+        out["totales"] = totales
+    if pendientes:
+        out["pendientes"] = pendientes
+        out["fuente_pendientes"] = {"texto": d.get("fuente_pendientes"), "url": d.get("url_pendientes"), "fecha": d.get("fecha_descarga_pendientes")}
+        out["nota_pendientes"] = d.get("nota_pendientes")
+    return out
 
 
 def escribir_rigi(destino):
@@ -273,7 +388,7 @@ def escribir_rigi(destino):
     if j is None:
         return
     (Path(destino) / "rigi.json").write_text(json.dumps(j, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"  RIGI: rigi.json con {len(j['proyectos'])} proyectos")
+    print(f"  RIGI: rigi.json con {len(j['proyectos'])} proyectos, {len(j.get('totales', []))} totales oficiales y {len(j.get('pendientes', []))} pendientes")
 
 
 if __name__ == "__main__":
@@ -285,3 +400,9 @@ if __name__ == "__main__":
         print(x["id"], v.index.min().date(), v.index.max().date(), len(v), "último", v.iloc[-1])
     j = construir_rigi()
     print("rigi.json:", len(j["proyectos"]), "proyectos; ingresado", j["ingresado"])
+    print("totales:", [(t["fecha"], t["aprobados"], t["evaluacion"], t["presentados"]) for t in j.get("totales", [])])
+    pend = j.get("pendientes", [])
+    for est in ("evaluacion", "rechazado"):
+        sub = [p for p in pend if p["estado"] == est]
+        print(f"pendientes {est}: {len(sub)}, suma US$ {sum(p['monto'] for p in sub):,.0f} M")
+    print("fuente_pendientes:", j.get("fuente_pendientes"))

@@ -65,7 +65,9 @@ export const recortar = (rows: Fila[], keys: string[]): Fila[] => {
 /** Una columna del gráfico: la serie calculada y cómo se agrupa al pasar a trimestres o años. */
 export interface ColGraf { key: string; c: { v: Vals; lo?: Vals; hi?: Vals }; flujo: boolean; ultimo: boolean }
 /** Las filas que dibuja un gráfico: el período visible, los meses elegidos y la frecuencia (una sola fuente de verdad para el gráfico y la imagen). */
-export function filasGrafico(F: string[], cols: ColGraf[], o: { desde: string; hasta: string; meses: Set<number>; freq: string; cierre: boolean; banda: boolean }): Fila[] {
+/** `incluir`: meses («AAAA-MM») que el recorte tiene que conservar aunque ninguna serie tenga dato (los puntos sueltos de otra fuente, `lib/marcas.ts`).
+ *  Solo vale por mes: con otra frecuencia se ignora. */
+export function filasGrafico(F: string[], cols: ColGraf[], o: { desde: string; hasta: string; meses: Set<number>; freq: string; cierre: boolean; banda: boolean; incluir?: string[] }): Fila[] {
   const enFiltro = (f: string) => f >= o.desde && f <= o.hasta && o.meses.has(+f.slice(5, 7));
   const rows = F.map((f, i) => {
     if (!enFiltro(f)) return null;
@@ -73,7 +75,14 @@ export function filasGrafico(F: string[], cols: ColGraf[], o: { desde: string; h
     cols.forEach((x) => { r[x.key] = x.c.v[i]; if (o.banda && x.c.lo && x.c.hi) { r[x.key + "_lo"] = x.c.lo[i]; r[x.key + "_hi"] = x.c.hi[i]; } });
     return r;
   }).filter(Boolean) as Fila[];
-  return recortar(agrupar(rows, o.freq, o.meses, new Set(cols.filter((x) => x.flujo).map((x) => x.key)), new Set(cols.filter((x) => x.ultimo).map((x) => x.key)), o.cierre), cols.map((x) => x.key));
+  const agr = agrupar(rows, o.freq, o.meses, new Set(cols.filter((x) => x.flujo).map((x) => x.key)), new Set(cols.filter((x) => x.ultimo).map((x) => x.key)), o.cierre);
+  const keys = cols.map((x) => x.key);
+  const inc = o.freq === "M" && o.incluir?.length ? new Set(o.incluir) : null;
+  if (!inc) return recortar(agr, keys);
+  agr.forEach((r) => { if (inc.has(r.fecha)) r._incluir = 1; });
+  const out = recortar(agr, [...keys, "_incluir"]);
+  agr.forEach((r) => { delete r._incluir; });
+  return out;
 }
 /** Pasa cada columna a base 100 (primer dato del período = 100). Modifica las filas y devuelve, por columna, el período que vale 100. */
 export function aBase100(rows: Fila[], keys: string[]): Record<string, string> {

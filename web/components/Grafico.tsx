@@ -14,6 +14,9 @@ export type Fila = Record<string, any>;
 export interface SerieG {
   key: string; name: string; short?: string; color: string; axis?: number; band?: boolean; fmt?: (v: number) => string; dash?: boolean;
   puntos?: number;   // solo círculos de este tamaño, sin línea (valores medidos aislados)
+  hueco?: boolean;   // con `puntos`: círculo con borde del color y relleno de la superficie (medición, frente a una estimación o simulación)
+  /** Marca de otra fuente (ver lib/marcas.ts): no es parte de la serie. Lleva su texto en la fila (`_t_<key>`, para el globo) y, si lo hay, su etiqueta junto al punto (`_e_<key>`). Las tablas la dejan afuera. */
+  marca?: boolean;
 }
 export interface Marca { key: string; axis?: number; color: string; fmt: (v: number) => string; tipos: Set<string> }
 export type TipoRef = "ult" | "prom" | "med" | "max" | "min";
@@ -313,7 +316,7 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
         width: se.puntos ? 0 : 2 + (resaltarRef.current === se.key ? 1 : 0), alpha: alfaDe(se.key, resaltarRef.current, keys),
         ...(curva && !se.puntos ? { paths: curva } : {}),
         points: {
-          show: se.puntos ? true : (uu: uPlot) => (pocos || ralo) && holgado(uu), size: se.puntos ?? 5, fill: col, stroke: col,
+          show: se.puntos ? true : (uu: uPlot) => (pocos || ralo) && holgado(uu), size: se.puntos ?? 5, fill: se.hueco ? surf : col, stroke: col, ...(se.hueco ? { width: 2 } : {}),
           // uPlot dibuja los puntos que devuelve `filter` aunque `show` sea falso: si no corresponde mostrarlos, se devuelve null
           filter: (_u: uPlot, _si: number, show: boolean) => (show ? vals.map((v, i) => (v != null ? i : -1)).filter((i) => i >= 0) : null),
         },
@@ -466,6 +469,7 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
           }
           // último dato de cada serie
           series.forEach((se) => {
+            if (se.marca) return;   // las marcas de otra fuente no son «el último dato»
             const ax = se.axis || 0;
             for (let i = visN - 1; i >= 0; i--) if (okv(rows[i][se.key], ax)) {
               const cx = xOf(i), cy = yOf(rows[i][se.key], ax);
@@ -477,6 +481,29 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
               break;
             }
           });
+          // Etiqueta junto a cada marca de otra fuente que la trae (`_e_<key>`): arriba del punto, centrada (o pegada al borde si no entra)
+          {
+            const xa = uu.scales.x.min ?? x0, xb = uu.scales.x.max ?? x1;
+            const et: { cx: number; ty: number; t: string; color: string; key: string }[] = [];
+            series.forEach((se) => {
+              if (!se.marca) return;
+              const ax = se.axis || 0;
+              for (let i = 0; i < visN; i++) {
+                const t = rows[i]["_e_" + se.key];
+                if (typeof t !== "string" || !okv(rows[i][se.key], ax) || xs[i] < xa || xs[i] > xb) continue;
+                const cy = yOf(rows[i][se.key], ax);
+                et.push({ cx: xOf(i), ty: cy - 9 * d < T + 9 * d ? cy + 17 * d : cy - 9 * d, t, color: se.color, key: se.key });
+              }
+            });
+            et.sort((a, b) => a.ty - b.ty);
+            for (let k = 1; k < et.length; k++) if (Math.abs(et[k].ty - et[k - 1].ty) < 12 * d && Math.abs(et[k].cx - et[k - 1].cx) < 170 * d) et[k].ty = et[k - 1].ty + 12 * d;
+            et.forEach((o) => {
+              const anc: CanvasTextAlign = o.cx > L + W - 90 * d ? "right" : o.cx < L + 90 * d ? "left" : "center";
+              ctx.globalAlpha = alfaDe(o.key, resaltarRef.current, keys);
+              halo(o.t, o.cx, Math.max(T + 9 * d, Math.min(T + H - 3 * d, o.ty)), colorDe(o.color), anc, 11, true);
+              ctx.globalAlpha = 1;
+            });
+          }
           // Marcadores con etiqueta: último, máximo y mínimo
           if (opts.marcas && opts.marcas.length) {
             const tit = opts.tipTitle || ((r: Fila) => fmtMes(r.fecha));
@@ -516,7 +543,7 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
           }
           // Etiquetas al final de cada línea
           if (opts.endLabels && !dual) {
-            const lab = series.map((se) => {
+            const lab = series.filter((se) => !se.marca).map((se) => {
               for (let i = visN - 1; i >= 0; i--) if (okv(rows[i][se.key], 0)) return { se, i, y: yOf(rows[i][se.key], 0) };
               return null;
             }).filter(Boolean).sort((a, b) => a!.y - b!.y) as { se: SerieG; i: number; y: number }[];
@@ -565,7 +592,8 @@ function GraficoBase({ rows, series, opts: optsIn, lleno }: { rows: Fila[]; seri
             const ax = se.axis || 0, v = r[se.key];
             if (!okv(v, ax)) return;
             const f = se.fmt || opts.fmtTip;
-            const sub = opts.tipSub ? opts.tipSub(r, se) : "";
+            const tm = se.marca ? r["_t_" + se.key] : null;   // texto de la marca de otra fuente
+            const sub = (opts.tipSub ? opts.tipSub(r, se) : "") + (typeof tm === "string" ? ` <small style="color:var(--text-muted)">${esc(tm)}</small>` : "");
             const rango = se.band && okv(r[se.key + "_lo"], ax) ? ` <small style="color:var(--text-muted)">(${esc(f(r[se.key + "_lo"]))} – ${esc(f(r[se.key + "_hi"]))})</small>` : "";
             html += `<div class="row"><span><i style="--c:var(${se.color})"></i>${esc(se.name)}${sub}</span><span>${esc(f(v))}${rango}</span></div>`;
           });

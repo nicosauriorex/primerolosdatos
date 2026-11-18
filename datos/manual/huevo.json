@@ -1,0 +1,370 @@
+{
+ "actualizado": "2026-11-18",
+ "fuente": "Secretaría de Agricultura, Ganadería y Pesca, Anuarios Avícolas (con estimaciones de producción de CAPIA). Los anuarios de 2003 a 2014 hablan de «estimaciones de CAPIA» o «fuentes privadas» (2010, 2011), los de 2020 a 2025 citan a CAPIA en la producción. Años 2015-2019: los anuarios no traen el dato; se usa CAPIA vía prensa (marcados fuente_alterna).",
+ "nota": "Huevos por habitante por año (unidades): consumo aparente de huevos (producción estimada, con CAPIA, más/menos comercio exterior) dividido por la población. Cada año es el valor de la edición más reciente de los anuarios abiertos que lo trae explícito. Cortes: (a) 2002 (125) viene del Anuario 2003 sin revisar; las ediciones siguientes revisaron 2003-2006 al alza (de 126 a 142, 159 a 173, 174 a 178, 183 a 186), por eso 2003 salta +14 %. (b) 2007 y 2008: el Anuario 2008 dice 206 con «5 % superior» al año anterior, que no cierra con el 190 del Anuario 2007; revisión sin explicar. (c) 2015-2019: ningún anuario abierto trae consumo de huevos per cápita (traen carne aviar); valores de CAPIA vía prensa, fuente_alterna; 2014 (256) a 2015 (265,1) cambia de fuente. (d) 2020-2025: los anuarios no traen tablas, solo una frase por año; 2023 (322, Anuario 2023) no figura explícito en otra edición: el Anuario 2024 solo dice +7,9 % (que implicaría ~336) y el 362 de 2024 es un valor corregido por fe de erratas; se carga el 322 escrito, no uno calculado, y la DGEC/CAPIA dan 336. Los valores de 2022 (310) y 2025 (401) son los más bajo y más alto, respectivamente, contra las cifras en base a CAPIA (314-322 y 391-398). Fechas: día 01 cuando solo se conoce el mes de portada; en 2020-2025 es la fecha de creación del PDF. El Anuario 2025 dice que 2025 (401) es +8,6 % sobre 2024, lo que implica unos 369 para 2024; el Anuario 2024 dice 362 (con fe de erratas). Se carga el número escrito, no el calculado.",
+ "valores": [
+  {
+   "anio": 2002,
+   "huevos": 125,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000036_Nro%2036%20Anuario%20Avicola%202003.pdf",
+   "fecha": "2004-02-01",
+   "documento": "SAGyP, Boletín Avícola Nro 36, Anuario Avícola 2003, p. 20 del PDF",
+   "cita": "El consumo estimado arroja un valor de 126 huevos/persona/año en comparación con los 125 huevos/persona/año consumidos en el 2002."
+  },
+  {
+   "anio": 2003,
+   "huevos": 142,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000040_Nro%2040%20Anuario%20Avicola%202004.pdf",
+   "fecha": "2005-03-01",
+   "documento": "SAGyP, Boletín Avícola Nro 40, Anuario Avícola 2004, p. 22 del PDF",
+   "cita": "El consumo estimado arroja un valor de 159 huevos/persona/año en comparación con los 142 huevos/persona/año consumidos en el 2003 (12 %)."
+  },
+  {
+   "anio": 2004,
+   "huevos": 173,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000044_Nro%2044%20Anuario%20Avicola%202005.pdf",
+   "fecha": "2006-04-01",
+   "documento": "SAGyP, Boletín Avícola Nro 44, Anuario Avícola 2005, p. 22 del PDF",
+   "cita": "El consumo estimado arroja un valor de 174 huevos/persona/año, 0.5 % más que el del año 2004 (173 huevos/persona/año)."
+  },
+  {
+   "anio": 2005,
+   "huevos": 178,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000047_Nro%2047%20Anuario%20Avicola%202006.pdf",
+   "fecha": "2007-03-01",
+   "documento": "SAGyP, Boletín Avícola Nro 47, Anuario Avícola 2006, p. 23 del PDF",
+   "cita": "El consumo estimado arroja un valor de 183 huevos/persona/año, 2.8 % más que el del año 2005 (178 huevos/persona/año)."
+  },
+  {
+   "anio": 2006,
+   "huevos": 186,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000051_Nro%2051%20Anuario%20Avicola%202007.pdf",
+   "fecha": "2008-03-01",
+   "documento": "SAGyP, Boletín Avícola Nro 51, Anuario Avícola 2007, p. 22 del PDF",
+   "cita": "El consumo estimado arroja un valor de 190 huevos/persona/año, 2.1 % superior al del año 2006 (186 huevos/persona/año)."
+  },
+  {
+   "anio": 2007,
+   "huevos": 190,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000051_Nro%2051%20Anuario%20Avicola%202007.pdf",
+   "fecha": "2008-03-01",
+   "documento": "SAGyP, Boletín Avícola Nro 51, Anuario Avícola 2007, p. 22 del PDF",
+   "cita": "El consumo estimado arroja un valor de 190 huevos/persona/año, 2.1 % superior al del año 2006 (186 huevos/persona/año)."
+  },
+  {
+   "anio": 2008,
+   "huevos": 206,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000055_Nro%2055%20Anuario%20Avicola%202008.pdf",
+   "fecha": "2009-03-01",
+   "documento": "SAGyP, Boletín Avícola Nro 55, Anuario Avícola 2008, p. 21 del PDF",
+   "cita": "El consumo estimado arroja un valor de 206 huevos/persona/año, 5 % superior al del año anterior."
+  },
+  {
+   "anio": 2009,
+   "huevos": 211,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000058_Nro%2058%20Anuario%20Avicola%202009.pdf",
+   "fecha": "2010-04-01",
+   "documento": "SAGyP, Boletín Avícola Nro 58, Anuario Avícola 2009, p. 18 del PDF",
+   "cita": "El consumo estimado arroja un valor de 211 huevos/persona/año, 3 % superior al de 2008."
+  },
+  {
+   "anio": 2010,
+   "huevos": 218,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000061_Nro%2061%20Anuario%20Avicola%202010.pdf",
+   "fecha": "2011-03-01",
+   "documento": "SAGyP, Boletín Avícola Nro 61, Anuario Avícola 2010, p. 34 del PDF",
+   "cita": "El consumo estimado arroja un valor de 218 huevos/persona/año, 3 % más que en 2009."
+  },
+  {
+   "anio": 2011,
+   "huevos": 224,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000064_Nro%2064%20Anuario%20Avicola%202011.pdf",
+   "fecha": "2012-03-01",
+   "documento": "SAGyP, Boletín Avícola Nro 64, Anuario Avícola 2011, p. 24 del PDF",
+   "cita": "El consumo calculado arroja un valor de 224 huevos/persona/año, 3 % más que en 2010."
+  },
+  {
+   "anio": 2012,
+   "huevos": 226,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000067_Nro%2067%20Anuario%20Avicola%202012.pdf",
+   "fecha": "2013-04-01",
+   "documento": "SAGyP, Boletín Avícola Nro 67, Anuario Avícola 2012, p. 21 del PDF",
+   "cita": "El consumo calculado arroja un valor de 226 huevos/persona/año, 3 % más que en 2011."
+  },
+  {
+   "anio": 2013,
+   "huevos": 232,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000071_Nro%2071%20Anuario%20Avicola%202013.pdf",
+   "fecha": "2014-04-01",
+   "documento": "SAGyP, Boletín Avícola Nro 71, Anuario Avícola 2013, p. 23 del PDF",
+   "cita": "El consumo calculado arroja un valor de 232 huevos/persona/año, 2.7 % más que en 2012."
+  },
+  {
+   "anio": 2014,
+   "huevos": 256,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000074_Nro%2074%20Anuario%20Avicola%202014.pdf",
+   "fecha": "2015-03-01",
+   "documento": "SAGyP, Boletín Avícola Nro 74, Anuario Avícola 2014, p. 23 del PDF",
+   "cita": "El consumo aparente total de huevos se estima en 11.770 millones de huevos (2014), 8% más que en el año 2013. El consumo per cápita calculado alcanzó los 256 huevos por persona."
+  },
+  {
+   "anio": 2015,
+   "huevos": 265.1,
+   "proyectado": false,
+   "fuente_alterna": true,
+   "url": "https://www.lavozdesanjusto.com.ar/el-consumo-de-huevos-crecio-3-en-2016-y-el-stock-avicola-supero-los-43-millones-de-pollos-19435",
+   "fecha": "2017-04-05",
+   "documento": "La Voz de San Justo, «El consumo de huevos creció 3% en 2016 y el stock avícola superó los 43 millones de pollos» (comunicado de CAPIA). Fuente alterna: los Anuarios 2015-2019 del MAGyP, abiertos, no traen consumo de huevos per cápita",
+   "cita": "el consumo en el mercado interno pasó de 265,1 huevos per cápita en 2015 a 272,8 huevos per cápita en 2016"
+  },
+  {
+   "anio": 2016,
+   "huevos": 272.8,
+   "proyectado": false,
+   "fuente_alterna": true,
+   "url": "https://www.lavozdesanjusto.com.ar/el-consumo-de-huevos-crecio-3-en-2016-y-el-stock-avicola-supero-los-43-millones-de-pollos-19435",
+   "fecha": "2017-04-05",
+   "documento": "La Voz de San Justo, «El consumo de huevos creció 3% en 2016 y el stock avícola superó los 43 millones de pollos» (comunicado de CAPIA). Fuente alterna: los Anuarios 2015-2019 del MAGyP, abiertos, no traen consumo de huevos per cápita",
+   "cita": "el consumo en el mercado interno pasó de 265,1 huevos per cápita en 2015 a 272,8 huevos per cápita en 2016"
+  },
+  {
+   "anio": 2017,
+   "huevos": 280,
+   "proyectado": false,
+   "fuente_alterna": true,
+   "url": "https://avinews.com/argentina-consumo-huevo-crece-capia/",
+   "fecha": "2020-01-24",
+   "documento": "Avinews, «Argentina: el consumo de huevo crece» (comunicado de CAPIA). Fuente alterna: los Anuarios 2015-2019 del MAGyP no traen consumo de huevos per cápita",
+   "cita": "Debido a que en el año 2018 el consumo disminuyó en comparación al 2017, cuando se consumían 280 unidades de huevos per cápita al año."
+  },
+  {
+   "anio": 2018,
+   "huevos": 271,
+   "proyectado": false,
+   "fuente_alterna": true,
+   "url": "https://avinews.com/argentina-consumo-huevo-crece-capia/",
+   "fecha": "2020-01-24",
+   "documento": "Avinews, «Argentina: el consumo de huevo crece» (comunicado de CAPIA). Fuente alterna: los Anuarios 2015-2019 del MAGyP no traen consumo de huevos per cápita",
+   "cita": "Conforme a la Cámara Argentina de Productores Avícolas, CAPIA, cada argentino consumió 284 unidades de huevos al año, es decir una cifra 5% superior al 2018, donde el consumo alcanzó 271 unidades per cápita al año."
+  },
+  {
+   "anio": 2019,
+   "huevos": 284,
+   "proyectado": false,
+   "fuente_alterna": true,
+   "url": "https://avinews.com/argentina-consumo-huevo-crece-capia/",
+   "fecha": "2020-01-24",
+   "documento": "Avinews, «Argentina: el consumo de huevo crece» (comunicado de CAPIA). Fuente alterna: los Anuarios 2015-2019 del MAGyP no traen consumo de huevos per cápita",
+   "cita": "Conforme a la Cámara Argentina de Productores Avícolas, CAPIA, cada argentino consumió 284 unidades de huevos al año, es decir una cifra 5% superior al 2018, donde el consumo alcanzó 271 unidades per cápita al año."
+  },
+  {
+   "anio": 2020,
+   "huevos": 306,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000083_Nro%2083%20Anuario%20Avicola%202020.pdf",
+   "fecha": "2021-07-01",
+   "documento": "SAGyP, Boletín Avícola Nro 83, Anuario Avícola 2020, p. 18 del PDF (fecha: creación del archivo PDF)",
+   "cita": "el consumo de huevos aumentó significativamente habiendo alcanzado en 2020 306 huevos/capita/año, como resultado de una mayor demanda doméstica durante la Pandemia por Covid 19."
+  },
+  {
+   "anio": 2021,
+   "huevos": 298,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000084_Nro%2084%20Anuario%20Avicola%202021.pdf",
+   "fecha": "2022-06-01",
+   "documento": "SAGyP, Boletín Avícola Nro 84, Anuario Avícola 2021, p. 18 del PDF (fecha: creación del archivo PDF)",
+   "cita": "el consumo de huevos disminuyó un 2,3 % respecto a 2020, calculándose en 298 huevos/cápita/año."
+  },
+  {
+   "anio": 2022,
+   "huevos": 310,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000085_Nro%2085%20Anuario%20Avicola%202022.pdf",
+   "fecha": "2025-07-01",
+   "documento": "SAGyP, Boletín Avícola Nro 85, Anuario Avícola 2022, p. 14 del PDF (fecha: creación del archivo PDF, posterior a la edición original)",
+   "cita": "aumentando 4 % respecto a 2021 (CAPIA7), en tanto, el consumo de huevos acompañó dicho crecimiento en igual medida, calculándose 310 huevos/cápita/año."
+  },
+  {
+   "anio": 2023,
+   "huevos": 322,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000086_Nro%2086%20Anuario%20Avicola%202023.pdf",
+   "fecha": "2025-06-30",
+   "documento": "SAGyP, Boletín Avícola Nro 86, Anuario Avícola 2023, p. 20 del PDF (fecha: creación del archivo PDF, posterior a la edición original)",
+   "cita": "el consumo de huevos aumentó un 4 % respecto al año anterior, calculándose en 322 huevos/cápita/año."
+  },
+  {
+   "anio": 2024,
+   "huevos": 362,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/240000_Nro%2087%20Anuario%20Av%C3%ADcola%202024.pdf",
+   "fecha": "2025-06-09",
+   "documento": "SAGyP, Boletín Avícola Nro 87, Anuario Avícola 2024, p. 23 del PDF (edición con fe de erratas: «valor actualizado en base a un ajuste en los datos de comercio exterior respecto del Anuario publicado en mayo 2025»; fecha: creación del PDF)",
+   "cita": "el consumo de huevos aumentó un 7,9 % respecto al año anterior, calculándose en 362 huevos/cápita/año."
+  },
+  {
+   "anio": 2025,
+   "huevos": 401,
+   "proyectado": false,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/250000_Anuario%20Avicola%202025.pdf",
+   "fecha": "2026-04-30",
+   "documento": "SAGyP, Anuario Avícola 2025, p. 24 del PDF (fecha: creación del archivo PDF)",
+   "cita": "el consumo de huevos se incrementó 8,6 % respecto al año anterior, calculándose en 401 huevos/cápita/año."
+  }
+ ],
+ "discrepancias": [
+  {
+   "anio": 2002,
+   "valor": 126,
+   "url": "https://www.diariodecuyo.com.ar/noticias/crecimiento-del-consumo-de-huevo-1011803.html",
+   "cita": "pasar de 126 unidades anuales por persona en 2002 a 210 en 2009, según la Cámara Argentina de Productores Avícolas (CAPIA)",
+   "por_que_no": "Prensa (2009-10-10) citando a CAPIA; se usa el Anuario del MAGyP (125)."
+  },
+  {
+   "anio": 2002,
+   "valor": 127,
+   "url": "https://www.forbesargentina.com/negocios/argentina-segundo-mayor-consumidor-huevos-mundo-oportunidad-n69013",
+   "cita": "El consumo per cápita en Argentina alcanzó los 127 unidades en 2002.",
+   "por_que_no": "Nota de prensa (2025-03-13) sin documento de origen."
+  },
+  {
+   "anio": 2003,
+   "valor": 126,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000036_Nro%2036%20Anuario%20Avicola%202003.pdf",
+   "cita": "El consumo estimado arroja un valor de 126 huevos/persona/año en comparación con los 125 huevos/persona/año consumidos en el 2002.",
+   "por_que_no": "Primera estimación (Anuario 2003, p. 20); el Anuario 2004 la revisó a 142."
+  },
+  {
+   "anio": 2004,
+   "valor": 159,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000040_Nro%2040%20Anuario%20Avicola%202004.pdf",
+   "cita": "El consumo estimado arroja un valor de 159 huevos/persona/año en comparación con los 142 huevos/persona/año consumidos en el 2003 (12 %).",
+   "por_que_no": "Primera estimación; el Anuario 2005 la revisó a 173."
+  },
+  {
+   "anio": 2005,
+   "valor": 174,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000044_Nro%2044%20Anuario%20Avicola%202005.pdf",
+   "cita": "El consumo estimado arroja un valor de 174 huevos/persona/año, 0.5 % más que el del año 2004 (173 huevos/persona/año).",
+   "por_que_no": "Primera estimación; el Anuario 2006 la revisó a 178."
+  },
+  {
+   "anio": 2006,
+   "valor": 183,
+   "url": "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/_archivos/000000_Datos%20Hist%C3%B3ricos/000047_Nro%2047%20Anuario%20Avicola%202006.pdf",
+   "cita": "El consumo estimado arroja un valor de 183 huevos/persona/año, 2.8 % más que el del año 2005 (178 huevos/persona/año).",
+   "por_que_no": "Primera estimación; el Anuario 2007 la revisó a 186."
+  },
+  {
+   "anio": 2009,
+   "valor": 210,
+   "url": "https://www.diariodecuyo.com.ar/noticias/crecimiento-del-consumo-de-huevo-1011803.html",
+   "cita": "pasar de 126 unidades anuales por persona en 2002 a 210 en 2009, según la Cámara Argentina de Productores Avícolas (CAPIA)",
+   "por_que_no": "Prensa de octubre de 2009 (año en curso, estimación) citando a CAPIA; se usa el Anuario 2009 (211)."
+  },
+  {
+   "anio": 2017,
+   "valor": 284,
+   "url": "https://bichosdecampo.com/javier-prida-somos-el-quinto-consumidor-mundial-con-284-huevos-anuales-per-capita",
+   "cita": "Javier Prida: «Somos el quinto consumidor mundial, con 284 huevos anuales per cápita» (9/10/2017); «Desde inicios de 2003 a la fecha pasamos de un consumo anual de 129 a 284 huevos per cápita»",
+   "por_que_no": "Declaración del presidente de CAPIA en octubre de 2017 (año en curso); el comunicado de CAPIA de enero de 2020 da 280 para 2017 y 284 para 2019."
+  },
+  {
+   "anio": 2018,
+   "valor": 271,
+   "url": "https://www.entrerios.gov.ar/dgec/wp-content/uploads/2026/08/Informe-Sector-Avicola-Ano-2025.pdf",
+   "cita": "Lectura del gráfico (no es texto de la fuente): Gráfico 14, etiquetas 2018-2025: 271, 284, 305, 298, 322, 336, 363, 391. Gráfico 14 «Consumo per cápita de huevos en Argentina», p. 15 del PDF; «Fuente",
+   "por_que_no": "Coincide con el valor alterno cargado (CAPIA/Avinews 2020)."
+  },
+  {
+   "anio": 2019,
+   "valor": 284,
+   "url": "https://www.entrerios.gov.ar/dgec/wp-content/uploads/2026/08/Informe-Sector-Avicola-Ano-2025.pdf",
+   "cita": "Lectura del gráfico (no es texto de la fuente): Gráfico 14, etiqueta 2019: 284. Gráfico 14 «Consumo per cápita de huevos en Argentina», p. 15 del PDF; «Fuente",
+   "por_que_no": "Coincide con el valor alterno cargado (CAPIA/Avinews 2020)."
+  },
+  {
+   "anio": 2020,
+   "valor": 305,
+   "url": "https://www.entrerios.gov.ar/dgec/wp-content/uploads/2026/08/Informe-Sector-Avicola-Ano-2025.pdf",
+   "cita": "Lectura del gráfico (no es texto de la fuente): Gráfico 14, etiqueta 2020: 305. Gráfico 14 «Consumo per cápita de huevos en Argentina», p. 15 del PDF; «Fuente",
+   "por_que_no": "DGEC en base a CAPIA; no es fuente oficial. Se usa el Anuario 2020 del MAGyP (306)."
+  },
+  {
+   "anio": 2021,
+   "valor": 298,
+   "url": "https://www.entrerios.gov.ar/dgec/wp-content/uploads/2026/08/Informe-Sector-Avicola-Ano-2025.pdf",
+   "cita": "Lectura del gráfico (no es texto de la fuente): Gráfico 14, etiqueta 2021: 298. Gráfico 14 «Consumo per cápita de huevos en Argentina», p. 15 del PDF; «Fuente",
+   "por_que_no": "Coincide con el Anuario 2021; se anota por completitud."
+  },
+  {
+   "anio": 2022,
+   "valor": 322,
+   "url": "https://www.entrerios.gov.ar/dgec/wp-content/uploads/2026/08/Informe-Sector-Avicola-Ano-2025.pdf",
+   "cita": "Lectura del gráfico (no es texto de la fuente): Gráfico 14, etiqueta 2022: 322. Gráfico 14 «Consumo per cápita de huevos en Argentina», p. 15 del PDF; «Fuente",
+   "por_que_no": "DGEC en base a CAPIA; se usa el Anuario 2022 del MAGyP (310)."
+  },
+  {
+   "anio": 2022,
+   "valor": 314,
+   "url": "https://avinews.com/argentina-es-el-cuarto-consumidor-de-huevos-a-nivel-mundial/",
+   "cita": "La Cámara Argentina de Productores Avícolas, CAPIA, informa que en 2022 se registró un crecimiento sostenido en el consumo por parte de los argentinos, que se ubica actualmente en los 314 huevos per cápita.",
+   "por_que_no": "Comunicado de CAPIA del 2023-01-10 (Avinews), preliminar; se usa el Anuario 2022 (310)."
+  },
+  {
+   "anio": 2023,
+   "valor": 336,
+   "url": "https://www.entrerios.gov.ar/dgec/wp-content/uploads/2026/08/Informe-Sector-Avicola-Ano-2025.pdf",
+   "cita": "Lectura del gráfico (no es texto de la fuente): Gráfico 14, etiqueta 2023: 336. Gráfico 14 «Consumo per cápita de huevos en Argentina», p. 15 del PDF; «Fuente",
+   "por_que_no": "DGEC en base a CAPIA. Coherente con el +7,9 % del Anuario 2024 (362/1,079≈336), pero se carga el 322 escrito en el Anuario 2023 porque ningún anuario trae 2023 explícito después de esa edición."
+  },
+  {
+   "anio": 2024,
+   "valor": 363,
+   "url": "https://www.canal26.com/general/2025/02/02/record-historico-argentina-se-posiciono-como-el-segundo-mayor-consumidor-de-huevos-del-mundo/",
+   "cita": "Según un informe de la Cámara Argentina de Productores e Industrializadores Avícolas (Capia), el consumo per cápita llegó a 363 unidades anuales por habitante, marcando un incremento del 7,98% en comparación con el año 2023.",
+   "por_que_no": "CAPIA vía prensa (2025-02-02) y DGEC (Gráfico 14, 363); se usa el Anuario 2024 (362)."
+  },
+  {
+   "anio": 2025,
+   "valor": 391,
+   "url": "https://www.entrerios.gov.ar/dgec/wp-content/uploads/2026/08/Informe-Sector-Avicola-Ano-2025.pdf",
+   "cita": "Lectura del gráfico (no es texto de la fuente): Gráfico 14, etiqueta 2025: 391. Gráfico 14 «Consumo per cápita de huevos en Argentina», p. 15 del PDF; «Fuente",
+   "por_que_no": "DGEC en base a CAPIA (año cerrado, informe de julio 2026); se usa el Anuario 2025 (401)."
+  },
+  {
+   "anio": 2025,
+   "valor": 392,
+   "url": "https://www.entrerios.gov.ar/dgec/wp-content/uploads/2026/08/Informe-Sector-Avicola-Ano-2025.pdf",
+   "cita": "alcanzando su valor más alto en 2025 con un consumo anual estimado de 392 unidades por habitante, lo que implicó un aumento de 7,7% en relación al año anterior donde se registró un consumo per cápita de 363 huevos.",
+   "por_que_no": "Texto de la DGEC (la etiqueta del gráfico dice 391); no es fuente oficial."
+  },
+  {
+   "anio": 2025,
+   "valor": 398,
+   "url": "https://bichosdecampo.com/un-informe-destaca-que-el-consumo-de-huevos-en-argentina-es-el-mas-alto-del-mundo-con-casi-400-unidades-anuales-por-habitante/",
+   "cita": "Javier Prida, presidente de la Cámara de Productores Avícolas (CAPIA), Argentina ha alcanzado un hito histórico al posicionarse como el primer consumidor mundial de huevos, con una proyección de 398 unidades por habitante para el año 2025.",
+   "por_que_no": "Proyección de CAPIA/ILH citada en prensa (2026-05-13), sin documento."
+  },
+  {
+   "anio": 2025,
+   "valor": 380,
+   "url": "https://www.engormix.com/avicultura/miscellaneous/argentina-consumo-huevos-per_n31312/",
+   "cita": "el consumo de huevo en el primer semestre de 2025, alcanzó la cifra histórica de 380 unidades per cápita",
+   "por_que_no": "Primer semestre de 2025 (CAPIA, 2025-08-12): no es un valor anual."
+  }
+ ]
+}
