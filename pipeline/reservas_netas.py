@@ -110,17 +110,27 @@ def construir_json(con_red=True):
         mensual.append({"mes": x["fecha"][:7], "fecha": x["fecha"], "netas": x["netas"], "netas_bcra": x["netas_bcra"]})
     ultimo = _cuenta(sup, df.index[-1], df["b"].iloc[-1], df["e"].iloc[-1])
 
+    # traspasos de mando (clave = mes del traspaso, como en Herencia): la cuenta del último día hábil anterior a la asunción
+    traspasos = {}
+    for mes, asuncion in sup.get("traspasos", {}).items():
+        d = df[df.index < pd.Timestamp(asuncion)]
+        if not d.empty:
+            traspasos[mes] = _cuenta(sup, d.index[-1], d["b"].iloc[-1], d["e"].iloc[-1])
+
     ahora = datetime.now(timezone(timedelta(hours=-3)))
     atraso = (pd.Timestamp(ahora.date()) - df.index[-1].normalize()).days
     if atraso > MAX_ATRASO_DIAS:
         print(f"  Reservas netas: último dato del {ultimo['fecha']} ({atraso} días de atraso)")
-    supuestos = [{"concepto": "swaps con China y el BIS", **t} for t in sup["swaps"]] + [{"concepto": "seguro de depósitos (SEDESA)", **t} for t in sup["sedesa"]]
+    # cada concepto con sus tramos juntos y en orden de fecha
+    supuestos = ([{"concepto": "swaps con China y el BIS", **t} for t in sorted(sup["swaps"], key=lambda t: t["desde"])]
+                 + [{"concepto": "seguro de depósitos (SEDESA)", **t} for t in sorted(sup["sedesa"], key=lambda t: t["desde"])])
     supuestos.append({"concepto": "crédito neto del FMI desde el acuerdo de 2025", "desde": "2025-04-01", "valor": None,
                       "cita": f"{sup['fmi']['base_cita']}; {sup['fmi']['usd_por_deg_cita']}; {sup['fmi']['deg_cita']}", "url": sup["fmi"]["url"]})
-    return {"actualizado": ahora.replace(microsecond=0).isoformat(), "ultimo": ultimo, "mensual": mensual, "controles": controles,
+    return {"actualizado": ahora.replace(microsecond=0).isoformat(), "ultimo": ultimo, "mensual": mensual, "traspasos": traspasos, "controles": controles,
             "controles_bcra": controles_bcra, "definicion_bcra": {"cita": sup.get("definicion_bcra_cita", ""), "url": sup.get("definicion_bcra_url", "")},
             "supuestos": supuestos, "no_incluye": sup["no_incluye"], "no_incluye_bcra": sup.get("no_incluye_bcra", sup["no_incluye"]),
-            "fuentes": "Banco Central, API de estadísticas (variables 1 y 1243); FMI, informes de país 24/167 y 26/105 y posición de Argentina en el Fondo"}
+            "fuentes": "Banco Central, API de estadísticas (variables 1 y 1243); FMI, informes de país 22/92, 22/322, 23/312, 24/37, 24/167 y 26/105"
+                       " y posición de Argentina en el Fondo"}
 
 
 if __name__ == "__main__":
@@ -128,6 +138,8 @@ if __name__ == "__main__":
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     j = construir_json(con_red="--bajar" in sys.argv)
     print("último:", j["ultimo"])
+    for mes, x in j["traspasos"].items():
+        print("traspaso", mes, x)
     for c in j["controles"]:
         print("control", c["fecha"], "propia", c["propia"], "FMI", c["fmi"], "dif", c["dif"])
     for c in j["controles_bcra"]:

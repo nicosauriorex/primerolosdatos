@@ -11,14 +11,14 @@ Hoy el sitio tiene la deuda bruta del Tesoro y la «deuda consolidada» propia (
 ## Definiciones
 **Tesoro con terceros** (trimestral, desde 2019) = deuda bruta − deuda en manos de agencias del sector público (BCRA, FGS, Banco Nación y otros organismos nacionales; Finanzas solo publica el total) = privados + organismos internacionales y bilaterales.
 
-**Banco Central, pasivos netos de reservas** (mensual, desde abr-24) = pasivos monetarios en dólares − (reservas brutas − swaps con China y el BIS − seguro de depósitos).
+**Banco Central, pasivos netos de reservas** (mensual, desde abr-24; desde el 2026-11-18, ene-19) = pasivos monetarios en dólares − (reservas brutas − swaps con China y el BIS − seguro de depósitos).
 - Pasivos monetarios: API del BCRA, variable 1247 (base monetaria + depósitos y otros pasivos monetarios en moneda extranjera), el último día hábil del mes, al A3500 de ese día.
 - No se restan los encajes en dólares: ya están dentro de los pasivos monetarios (variable 1254) y se contarían dos veces. Por eso esta resta no usa la estimación de reservas netas del sitio tal cual: usa sus mismas piezas (reservas brutas, variable 1; swaps y seguro de depósitos de `datos/manual/reservas_netas_supuestos.json`, D-021) sin los encajes. El crédito del FMI no se resta: es deuda del Tesoro y ya está en la parte del Tesoro.
 - Control con el texto del usuario: al 31/08/2026, 68.006.428 millones de $ / 1.509,47 = 45.053 − (48.259 − 20.000 − 2.000) ≈ 18.800 (el texto dice 18.869). La diferencia de ~70 se acepta (fecha o dólar distinto); si da más de 1.000, se revisa.
 
-**Deuda neta del Tesoro y el Banco Central** (trimestral, desde jun-24) = Tesoro con terceros + Banco Central, pasivos netos de reservas, al cierre de cada trimestre.
+**Deuda neta del Tesoro y el Banco Central** (trimestral, desde jun-24; desde el 2026-11-18, mar-19) = Tesoro con terceros + Banco Central, pasivos netos de reservas, al cierre de cada trimestre.
 
-Límites que la ficha dice: es una cuenta propia; no resta los depósitos del Tesoro (Facimex sí los resta) ni suma los BOPREAL y repos del Banco Central; la parte del Banco Central depende de supuestos fijos (swaps 20.000, seguro de depósitos 2.000); arranca en jun-24 porque los supuestos de reservas tienen cita desde abr-24.
+Límites que la ficha dice: es una cuenta propia; no resta los depósitos del Tesoro (Facimex sí los resta) ni suma los BOPREAL y repos del Banco Central; la parte del Banco Central depende de supuestos con cita (hoy swaps 20.000 y seguro de depósitos 2.000); desde el 2026-11-18 arranca en mar-19 ([reservas-netas-2019](reservas-netas-2019.md)).
 
 ## Qué se hace
 
@@ -34,8 +34,8 @@ Límites que la ficha dice: es una cuenta propia; no resta los depósitos del Te
 ### Fase 2: Banco Central y deuda neta
 4. `pipeline/deuda.py`: baja la variable 1247 con `red.cacheado` (respaldo en `datos/cache/`), toma el último día hábil de cada mes y la pasa a dólares con el A3500 de ese día (el mismo de `pasivos_fin_de_mes`). Reservas brutas (variable 1, ya cacheada) y swaps y seguro de depósitos de `reservas_netas_supuestos.json`, leídos con las funciones de `reservas_netas.py` (no se copia la lógica).
 5. Series nuevas (mismo lugar, tipo `usd`, `agg`):
-   - `bcra_pasivos_netos` «Pasivos del Banco Central menos reservas» (mensual, desde abr-24). La `desc` muestra la cuenta del último mes.
-   - `deuda_neta` «Deuda neta del Tesoro y el Banco Central» (trimestral, desde jun-24). La `desc` muestra la cuenta del último trimestre y los límites.
+   - `bcra_pasivos_netos` «Pasivos del Banco Central menos reservas» (mensual, desde abr-24; desde el 2026-11-18, ene-19). La `desc` muestra la cuenta del último mes.
+   - `deuda_neta` «Deuda neta del Tesoro y el Banco Central» (trimestral, desde jun-24; desde el 2026-11-18, mar-19). La `desc` muestra la cuenta del último trimestre y los límites.
 6. Control que corta: en ago-26, `bcra_pasivos_netos` entre 17.800 y 19.900 (la cifra del texto ±1.000).
 
 ### Fase 3: web
@@ -50,7 +50,7 @@ Límites que la ficha dice: es una cuenta propia; no resta los depósitos del Te
 
 ## Fuera de esta spec
 - Separar BCRA, FGS y Banco Nación (Finanzas no lo publica; el FGS bloquea la descarga automática).
-- Llevar la parte del Banco Central antes de abr-24: hace falta citar swaps y seguro de depósitos de 2019 a 2024 en `reservas_netas_supuestos.json`. Si se hace, la deuda neta arranca en 2019.
+- ~~Llevar la parte del Banco Central antes de abr-24~~ ✅ 2026-11-18: hecho en [reservas-netas-2019](reservas-netas-2019.md); la deuda neta arranca en mar-19.
 - Restar los depósitos del Tesoro.
 - Deuda neta al blue, MEP o CCL.
 

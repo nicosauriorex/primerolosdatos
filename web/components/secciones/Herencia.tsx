@@ -67,24 +67,28 @@ const fechaTxt = (f: string) => f.split("-").reverse().join("/");
 
 /** Una estimación propia de reservas netas: la cuenta con sus componentes, los supuestos con su cita y cuánto se apartó de la cifra publicada
  *  con esa definición (FMI o Banco Central). */
-function VentanaEstimacion({ rn, cual, onCerrar }: { rn: ReservasNetas; cual: DefinicionRN; onCerrar: () => void }) {
-  const u = rn.ultimo, D = defRNPropia(cual), bcra = cual === "bcra", netas = bcra ? u.netas_bcra ?? u.netas + u.fmi : u.netas;
+function VentanaEstimacion({ rn, cual, traspaso, onCerrar }: { rn: ReservasNetas; cual: DefinicionRN; traspaso: string; onCerrar: () => void }) {
+  // la cuenta del traspaso tocado (el último día hábil antes de la asunción) o la última
+  const enTraspaso = traspaso !== "hoy" ? rn.traspasos?.[traspaso] : undefined, u = enTraspaso ?? rn.ultimo;
+  const D = defRNPropia(cual), bcra = cual === "bcra", netas = bcra ? u.netas_bcra ?? u.netas + u.fmi : u.netas, conFMI = u.fmi !== 0;
   const quien = bcra ? "el Banco Central" : "el FMI";
   const controles = bcra
     ? (rn.controles_bcra ?? []).map((c) => ({ fecha: c.fecha, propia: c.propia, oficial: c.bcra, dif: c.dif, url: c.url }))
     : rn.controles.map((c) => ({ fecha: c.fecha, propia: c.propia, oficial: c.fmi, dif: c.dif, url: c.url }));
   return (
     <Modal titulo={`Cómo se calcula: ${D.nombre}`} cabecera={D.nombre} onCerrar={onCerrar}>
-      <p className="note">Estimación de Primero los Datos, no un dato oficial: la cuenta {bcra ? "con la definición del Banco Central" : "del FMI"} hecha con lo que el Banco Central publica cada día. Al {fechaTxt(u.fecha)}, en millones de US$:</p>
+      <p className="note">Estimación de Primero los Datos, no un dato oficial: la cuenta {bcra ? "con la definición del Banco Central" : "del FMI"} hecha con lo que el Banco Central publica cada día. Al {fechaTxt(u.fecha)}{enTraspaso ? ", el último día hábil antes del traspaso" : ""}, en millones de US$:</p>
       <dl className="her-cita">
         <dt>Reservas brutas</dt><dd>{fmtUS(u.brutas)} (Banco Central, variable 1)</dd>
         <dt>− Encajes en dólares</dt><dd>{fmtUS(u.encajes)} (depósitos de los bancos en el Banco Central, variable 1243)</dd>
         <dt>− Swaps con China y el BIS</dt><dd>{fmtUS(u.swaps)} (supuesto, de los informes del FMI)</dd>
         <dt>− Seguro de depósitos</dt><dd>{fmtUS(u.sedesa)} (supuesto, de los informes del FMI)</dd>
-        {bcra ? null : <><dt>− Crédito del FMI desde 2025</dt><dd>{fmtUS(u.fmi)} (lo que el FMI giró desde el acuerdo de abril de 2025, neto de lo que se le pagó)</dd></>}
+        {bcra || !conFMI ? null : <><dt>− Crédito del FMI desde 2025</dt><dd>{fmtUS(u.fmi)} (lo que el FMI giró desde el acuerdo de abril de 2025, neto de lo que se le pagó)</dd></>}
         <dt>= Reservas netas</dt><dd><b>{fmtUS(netas)}</b></dd>
       </dl>
-      {bcra ? (
+      {!conFMI ? (
+        <p className="note">En esa fecha no había crédito del acuerdo de 2025 con el FMI: las dos definiciones dan lo mismo.</p>
+      ) : bcra ? (
         <p className="note">
           No se restan los {fmtUS(u.fmi)} millones que prestó el FMI desde abril de 2025: según el Banco Central, son deuda del Tesoro y no de su balance
           {rn.definicion_bcra?.url ? <> (<a href={rn.definicion_bcra.url} target="_blank" rel="noopener noreferrer">informe de política monetaria de diciembre de 2025, pág. 57</a>)</> : null}.
@@ -178,11 +182,11 @@ export function Herencia() {
   const { motor: m } = sec;
   const inf = useHerenciaInformes();
   const rn = useReservasNetas();
-  const [verRN, setVerRN] = useState<DefinicionRN | null>(null);
+  const [verRN, setVerRN] = useState<{ cual: DefinicionRN; traspaso: string } | null>(null);
   const [cita, setCita] = useState<{ d: DefInforme; x: DatoInforme } | null>(null);
   const [hoja, setHoja] = useState(false);
   const [img, setImg] = useState<VistaCompartir | null>(null);
-  const verCita: VerCita = (d, x) => { const c = cualRNPropia(d.clave); if (c) setVerRN(c); else setCita({ d, x }); };
+  const verCita: VerCita = (d, x) => { const c = cualRNPropia(d.clave); if (c) setVerRN({ cual: c, traspaso: x.traspaso }); else setCita({ d, x }); };
   const PRES: Pres[] = useMemo(() => (m ? crearPres(m.F) : []), [m]);
   const listo = !!m && montado && !sec.ocupado && !!inf.datos && rn !== undefined;
   // Un link con ancla (por ejemplo desde el buscador: `#traspasos`) va al bloque una vez que llegaron los datos: antes los bloques no existen.
@@ -343,7 +347,7 @@ export function Herencia() {
                 <thead><tr><th>Variable</th><th>Recibió</th><th>{colFin}</th><th>Cambio</th></tr></thead>
                 <tbody>{filasEst.map((f) => <FilaInf key={f.def.clave} f={f} verCita={verCita} fin={colFin} m={m} />)}</tbody>
               </table></div>
-              {rn && filasEst.some((f) => cualRNPropia(f.def.clave) && f.entrego)
+              {rn && filasEst.some((f) => cualRNPropia(f.def.clave) && (f.recibio || f.entrego))
                 ? <p className="note">Las estimaciones propias se apartaron {rangoControles(rn, "fmi")} de las cifras del FMI y {rangoControles(rn, "bcra")} de las del Banco Central, en las fechas en que cada uno publicó. Tocá su valor para ver la cuenta.</p>
                 : null}
               <details className="her-plegado">
@@ -422,7 +426,7 @@ export function Herencia() {
         {inf.error ? <p className="note">{inf.error}</p> : null}
       </Capitulo>
       {cita ? <VentanaCita d={cita.d} x={cita.x} onCerrar={() => setCita(null)} /> : null}
-      {verRN && rn ? <VentanaEstimacion rn={rn} cual={verRN} onCerrar={() => setVerRN(null)} /> : null}
+      {verRN && rn ? <VentanaEstimacion rn={rn} cual={verRN.cual} traspaso={verRN.traspaso} onCerrar={() => setVerRN(null)} /> : null}
       {img && createPortal(<PanelCompartir vista={img} href={new URL(hrefPag, window.location.origin).href} titulo={`Primero los Datos: herencia de ${pres.n}`} onCerrar={() => setImg(null)} />, document.body)}
     </section>
   );

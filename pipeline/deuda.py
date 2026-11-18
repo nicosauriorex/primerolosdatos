@@ -236,7 +236,7 @@ def leer_por_acreedor(total):
 
 def pasivos_netos_bcra():
     """Pasivos monetarios del Banco Central en dólares menos (reservas brutas − swaps − seguro de depósitos), el último día hábil de cada
-    mes al A3500 de ese día, desde el inicio de los supuestos de reservas (abr-24). No resta los encajes (ya están en la variable 1247)
+    mes al A3500 de ese día, desde el inicio de los supuestos de reservas (ene-19). No resta los encajes (ya están en la variable 1247)
     ni el crédito del FMI (es deuda del Tesoro). Devuelve un DataFrame mensual: fecha, pm (millones de $), fx, pm_usd, brutas, swaps, sedesa, netos."""
     import catalogo  # aquí y no arriba: catalogo importa este módulo
     import reservas_netas as rn
@@ -309,7 +309,8 @@ def series_neta(m, idx):
         print(f"  Pasivos del Banco Central menos reservas: no disponible ({e})")
         b = None
     limites = (" Es una cuenta propia, no un dato oficial. Las reservas que se restan son las brutas menos los swaps con China y el BIS y el seguro de depósitos"
-               " (supuestos fijos con cita, los mismos de la estimación de reservas netas de esta página); no se restan los encajes en dólares de los bancos"
+               " (supuestos con cita en los informes del FMI, los mismos de la estimación de reservas netas de esta página; en 2019 y 2020 el seguro"
+               " de depósitos se supone igual al de 2021 porque el FMI no lo separa); no se restan los encajes en dólares de los bancos"
                " porque ya están dentro de los pasivos monetarios, ni el crédito del FMI, que es deuda del Tesoro. No suma los BOPREAL ni los repos del Banco Central.")
     if b is not None:
         r = b.iloc[-1]
@@ -321,7 +322,7 @@ def series_neta(m, idx):
                      "Cálculo propio con BCRA (API de estadísticas: variable 1247, pasivos monetarios; variable 1, reservas brutas; dólar A3500) y supuestos de reservas netas (FMI)",
                      "Lo que debe el Banco Central en pesos y en dólares (la base monetaria más los depósitos en dólares de los bancos y otros pasivos monetarios)"
                      " pasado a dólares, menos las reservas que son realmente suyas. Si da positivo, los pasivos superan a las reservas. Último día hábil de cada mes con los tres datos"
-                     " (pasivos, reservas y dólar), al dólar oficial A3500 de ese día; desde abr-24, cuando empiezan los supuestos de reservas." + limites + cuenta_b, agg=True))
+                     f" (pasivos, reservas y dólar), al dólar oficial A3500 de ese día; desde {_mes_txt(b.index.min())}." + limites + cuenta_b, agg=True))
     if ac is not None and b is not None:
         neta = (ac["terceros"] + b["netos"].reindex(ac["terceros"].index)).dropna()
         if len(neta):
@@ -331,7 +332,7 @@ def series_neta(m, idx):
             out.append(S("deuda_neta", "Deuda neta del Tesoro y el Banco Central", CAT, "usd", "millones de US$", neta.reindex(idx), -1,
                          "Cálculo propio con Secretaría de Finanzas (deuda por acreedor, presentaciones trimestrales) y BCRA (variables 1247 y 1; dólar A3500)",
                          "Lo que el Estado nacional (Tesoro y Banco Central juntos) les debe a terceros: la deuda del Tesoro con privados y organismos internacionales"
-                         " más los pasivos del Banco Central menos sus reservas. No cuenta la deuda de una parte del Estado con otra. Dato trimestral, desde jun-24."
+                         " más los pasivos del Banco Central menos sus reservas. No cuenta la deuda de una parte del Estado con otra. Dato trimestral, desde " + _mes_txt(neta.index.min()) + "."
                          " Límites: no resta los depósitos del Tesoro (algunas consultoras sí los restan)." + limites + cuenta_n, agg=True))
     return out
 

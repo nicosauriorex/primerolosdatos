@@ -61,11 +61,11 @@ export const FILAS_INFORME: DefInforme[] = [
  *  y otra con la definición del Banco Central (la misma cuenta sin restar el crédito del FMI, que es deuda del Tesoro). */
 export type DefinicionRN = "fmi" | "bcra";
 export const DEF_RN_PROPIA: DefInforme = {
-  clave: "reservas_netas_propia", img: "Netas propias (método FMI)", grupo: "Estimaciones", nombre: "Reservas netas, estimación propia con el método del FMI", unidad: "millones de US$", tipo: "monto", quien: "Primero los Datos", sinDato: "la estimación empieza en abr-24",
+  clave: "reservas_netas_propia", img: "Netas propias (método FMI)", grupo: "Estimaciones", nombre: "Reservas netas, estimación propia con el método del FMI", unidad: "millones de US$", tipo: "monto", quien: "Primero los Datos", sinDato: "la estimación empieza en 2019",
   nota: "Cuenta propia al día con datos del Banco Central y supuestos tomados de los informes del FMI. Tocá el valor para ver la fórmula y cuánto se apartó del FMI cuando publicó.",
 };
 export const DEF_RN_PROPIA_BCRA: DefInforme = {
-  clave: "reservas_netas_propia_bcra", img: "Netas propias (Banco Central)", grupo: "Estimaciones", nombre: "Reservas netas, estimación propia con la definición del Banco Central", unidad: "millones de US$", tipo: "monto", quien: "Primero los Datos", sinDato: "la estimación empieza en abr-24",
+  clave: "reservas_netas_propia_bcra", img: "Netas propias (Banco Central)", grupo: "Estimaciones", nombre: "Reservas netas, estimación propia con la definición del Banco Central", unidad: "millones de US$", tipo: "monto", quien: "Primero los Datos", sinDato: "la estimación empieza en 2019",
   nota: "La misma cuenta propia sin restar el crédito del FMI, que el Banco Central no descuenta porque es deuda del Tesoro. Tocá el valor para ver la fórmula y cuánto se apartó del Banco Central cuando publicó.",
 };
 export const defRNPropia = (cual: DefinicionRN): DefInforme => (cual === "bcra" ? DEF_RN_PROPIA_BCRA : DEF_RN_PROPIA);
@@ -138,6 +138,8 @@ export function traspasosInforme(datos: DatoInforme[], clave: string, PRES: Pres
 export interface ComponentesRN { fecha: string; netas: number; netas_bcra?: number; brutas: number; encajes: number; swaps: number; sedesa: number; fmi: number }
 export interface ReservasNetas {
   actualizado: string; ultimo: ComponentesRN; mensual: { mes: string; fecha: string; netas: number }[];
+  /** La cuenta del último día hábil antes de cada traspaso de mando, por mes del traspaso ("2019-12"); desde 2019. */
+  traspasos?: Record<string, ComponentesRN>;
   controles: { fecha: string; propia: number; fmi: number; dif: number; credito_fmi?: number; cita: string; url: string }[];
   controles_bcra?: { fecha: string; propia: number; bcra: number; dif: number; cita: string; url: string }[];
   definicion_bcra?: { cita: string; url: string };
@@ -146,20 +148,28 @@ export interface ReservasNetas {
 /** Días de atraso a partir de los cuales la estimación no cuenta como "hoy". */
 export const MAX_ATRASO_RN_DIAS = 20;
 
-/** Una fila de estimación propia: solo para el presidente en funciones ("Hoy"); null si no hay archivo; "sin dato" y por qué si el dato es viejo. */
-export function filaRNPropia(rn: ReservasNetas | null, enCurso: boolean, cual: DefinicionRN = "fmi", hoy: Date = new Date()): FilaInforme | null {
-  if (!rn || !enCurso) return null;
-  const DEF = defRNPropia(cual), valor = cual === "bcra" ? rn.ultimo.netas_bcra : rn.ultimo.netas;
-  if (valor == null) return null;
-  const u = rn.ultimo, dias = (hoy.getTime() - new Date(u.fecha + "T12:00:00-03:00").getTime()) / 864e5;
-  if (!(dias <= MAX_ATRASO_RN_DIAS)) {
-    return { def: DEF, recibio: null, entrego: null, cambio: "–", cambioAbs: "", sinEntrego: `el último dato es del ${u.fecha.split("-").reverse().join("/")}, con más de ${MAX_ATRASO_RN_DIAS} días de atraso` };
-  }
-  const dato: DatoInforme = {
-    clave: DEF.clave, traspaso: "hoy", valor, unidad: DEF.unidad, fecha_dato: u.fecha,
-    organismo: "Primero los Datos (estimación propia)", documento: "Fórmula y supuestos", url: "", pagina: "",
+/** Una fila de estimación propia para el presidente `k`: recibió y entregó salen de la cuenta en cada traspaso (`traspasos`, desde 2019) y,
+ *  para el presidente en funciones, entregó es el último dato ("Hoy"; "sin dato" y por qué si es viejo). Null si no hay archivo o ningún dato. */
+export function filaRNPropia(rn: ReservasNetas | null, PRES: Pres[], k: number, cual: DefinicionRN = "fmi", hoy: Date = new Date()): FilaInforme | null {
+  if (!rn) return null;
+  const DEF = defRNPropia(cual), p = PRES[k], sig = PRES[k + 1];
+  const punto = (c: ComponentesRN | undefined, traspaso: string): PuntoInforme | null => {
+    const valor = c && (cual === "bcra" ? c.netas_bcra : c.netas);
+    if (c == null || valor == null) return null;
+    return puntoInforme(DEF, { clave: DEF.clave, traspaso, valor, unidad: DEF.unidad, fecha_dato: c.fecha,
+      organismo: "Primero los Datos (estimación propia)", documento: "Fórmula y supuestos", url: "", pagina: "" });
   };
-  return { def: DEF, recibio: null, entrego: puntoInforme(DEF, dato), cambio: "–", cambioAbs: "" };
+  const a = punto(rn.traspasos?.[p.ini], p.ini);
+  let b: PuntoInforme | null, sinEntrego: string | undefined;
+  if (sig) b = punto(rn.traspasos?.[sig.ini], sig.ini);
+  else {
+    const u = rn.ultimo, dias = (hoy.getTime() - new Date(u.fecha + "T12:00:00-03:00").getTime()) / 864e5;
+    b = dias <= MAX_ATRASO_RN_DIAS ? punto(u, "hoy") : null;
+    if (!b) sinEntrego = `el último dato es del ${u.fecha.split("-").reverse().join("/")}, con más de ${MAX_ATRASO_RN_DIAS} días de atraso`;
+  }
+  if (!a && !b && !sinEntrego) return null;
+  const cb = cambioInforme(DEF, a, b);
+  return { def: DEF, recibio: a, entrego: b, cambio: cb.txt, cambioAbs: cb.abs, ...(sinEntrego ? { sinEntrego } : {}) };
 }
 
 /** Cuánto se apartó la estimación del FMI en las fechas en que publicó: "entre −397 y +1.252 millones de US$". */
@@ -174,7 +184,7 @@ export function rangoControles(rn: ReservasNetas, cual: DefinicionRN = "fmi"): s
 /** Filas del bloque de estimaciones del presidente `k`: las cargadas a mano (FMI, IIEP) y la propia. */
 export function filasEstimaciones(datos: DatoInforme[], rn: ReservasNetas | null, PRES: Pres[], k: number): FilaInforme[] {
   const est = filasInforme(datos, PRES, k).filter((f) => f.def.grupo === "Estimaciones");
-  const propias = (["fmi", "bcra"] as const).map((c) => filaRNPropia(rn, k === PRES.length - 1, c)).filter((f): f is FilaInforme => !!f);
+  const propias = (["fmi", "bcra"] as const).map((c) => filaRNPropia(rn, PRES, k, c)).filter((f): f is FilaInforme => !!f);
   if (!propias.length) return est;
   // las propias van justo después de las otras reservas netas, antes de lo demás
   const i = est.map((f) => f.def.clave.startsWith("reservas_netas")).lastIndexOf(true);

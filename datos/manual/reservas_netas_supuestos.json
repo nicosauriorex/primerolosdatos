@@ -1,8 +1,50 @@
 {
- "actualizado": "2026-11-12",
- "leeme": "Supuestos de la estimación propia de reservas netas con el método del FMI (docs/specs/herencia.md, fase 3; pipeline/reservas_netas.py). Montos en millones de US$. Cada tramo vale desde 'desde' (inclusive) hasta el tramo siguiente. Verificado contra los documentos el 2026-11-12.",
- "inicio": "2024-04-01",
+ "actualizado": "2026-11-18",
+ "leeme": "Supuestos de la estimación propia de reservas netas con el método del FMI (docs/specs/herencia.md, fase 3; pipeline/reservas_netas.py). Montos en millones de US$. Cada tramo vale desde 'desde' (inclusive) hasta el tramo siguiente. Verificado contra los documentos el 2026-11-12 (desde abr-24) y el 2026-11-18 (2019 a mar-24, docs/specs/reservas-netas-2019.md).",
+ "inicio": "2019-01-01",
  "swaps": [
+  {
+   "desde": "2019-01-01",
+   "valor": 22100,
+   "cita": "FMI, CR 22/92 (solicitud del acuerdo de 2022), PDF pág. 15, cuadro Balance of Payments 2019-21: Swap lines 22.1 (fin de 2019; se usa también para el resto de 2019, sin dato anterior con este desglose)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2022/english/1argea2022001.pdf"
+  },
+  {
+   "desde": "2020-12-01",
+   "valor": 22900,
+   "cita": "FMI, CR 22/92, PDF pág. 15: Swap lines 22.9 (fin de 2020)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2022/english/1argea2022001.pdf"
+  },
+  {
+   "desde": "2021-12-01",
+   "valor": 23400,
+   "cita": "FMI, CR 22/322 (2ª revisión), PDF pág. 12, International Reserves: Swap lines 23.4 (fin de 2021)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2022/english/1argea2022003.pdf"
+  },
+  {
+   "desde": "2022-03-01",
+   "valor": 23600,
+   "cita": "FMI, CR 22/322, PDF pág. 12: Swap lines 23.6 (fin de marzo y 23-09-2022)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2022/english/1argea2022003.pdf"
+  },
+  {
+   "desde": "2022-12-01",
+   "valor": 21900,
+   "cita": "FMI, CR 23/312 (5ª y 6ª revisión), PDF pág. 12, Text Table 2: Swap lines 21.9 (PBOC 18.8, BIS 3.0; fin de 2022)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2023/english/1argea2023002.pdf"
+  },
+  {
+   "desde": "2023-06-01",
+   "valor": 21000,
+   "cita": "FMI, CR 23/312, PDF pág. 12: Swap lines 21.0 (PBOC 18.0, BIS 3.0; fin de junio de 2023)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2023/english/1argea2023002.pdf"
+  },
+  {
+   "desde": "2023-08-01",
+   "valor": 20900,
+   "cita": "FMI, CR 23/312, PDF pág. 12: Swap lines 20.9 (PBOC 17.9, BIS 3.0; 15-08-2023; se usa hasta mar-24, sin dato de fin de 2023 con este desglose)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2023/english/1argea2023002.pdf"
+  },
   {
    "desde": "2024-04-01",
    "valor": 18300,
@@ -17,6 +59,12 @@
   }
  ],
  "sedesa": [
+  {
+   "desde": "2019-01-01",
+   "valor": 1800,
+   "cita": "FMI, CR 22/322, PDF pág. 12: Other 1.8, «Includes deposit insurance fund» (fin de 2021); CR 23/312, PDF pág. 12: Sedesa 1.8 (fin de 2022, jun-23 y ago-23). Para 2019 y 2020 el FMI no lo separa (CR 22/92, pág. 15, lo suma a los encajes): se usa el mismo valor",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2022/english/1argea2022003.pdf"
+  },
   {
    "desde": "2024-04-01",
    "valor": 1900,
@@ -61,6 +109,48 @@
  },
  "controles": [
   {
+   "fecha": "2019-12-30",
+   "fmi": 12400,
+   "cita": "FMI, CR 22/92, PDF pág. 15: NIR 12.4 (fin de 2019, definición del acuerdo de 2022)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2022/english/1argea2022001.pdf"
+  },
+  {
+   "fecha": "2020-12-30",
+   "fmi": 3800,
+   "cita": "FMI, CR 22/92, PDF pág. 15: NIR 3.8 (fin de 2020)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2022/english/1argea2022001.pdf"
+  },
+  {
+   "fecha": "2021-12-30",
+   "fmi": 2300,
+   "cita": "FMI, CR 22/322, PDF pág. 12: Net reserves 2.3 (fin de 2021)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2022/english/1argea2022003.pdf"
+  },
+  {
+   "fecha": "2022-12-30",
+   "fmi": 8800,
+   "cita": "FMI, CR 23/312, PDF pág. 12: Net International Reserves 8.8 (fin de 2022)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2023/english/1argea2023002.pdf"
+  },
+  {
+   "fecha": "2023-06-30",
+   "fmi": -5200,
+   "cita": "FMI, CR 23/312, PDF pág. 12: Net International Reserves -5.2 (fin de junio de 2023)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2023/english/1argea2023002.pdf"
+  },
+  {
+   "fecha": "2023-08-15",
+   "fmi": -10300,
+   "cita": "FMI, CR 23/312, PDF pág. 12: Net International Reserves -10.3 (15-08-2023)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2023/english/1argea2023002.pdf"
+  },
+  {
+   "fecha": "2023-12-29",
+   "fmi": -9200,
+   "cita": "FMI, CR 24/37 (7ª revisión), PDF pág. 65: net international reserves […] reached negative $9.2 billion (fin de 2023)",
+   "url": "https://www.imf.org/-/media/files/publications/cr/2024/english/1argea2024001.pdf"
+  },
+  {
    "fecha": "2024-05-29",
    "fmi": 300,
    "cita": "FMI, CR 24/167, PDF pág. 12: Net International Reserves 0.3 (datos al 29-05-2024)",
@@ -96,5 +186,10 @@
  ],
  "definicion_bcra_cita": "BCRA, Informe de Política Monetaria de diciembre de 2025, pág. 57: al sólo contemplar los pasivos propios del balance del BCRA (y no los del Tesoro), no se descuentan los desembolsos del crédito del FMI al Tesoro.",
  "definicion_bcra_url": "https://www.bcra.gob.ar/archivos/Pdfs/PublicacionesEstadisticas/informes/informe-politica-monetaria-2025-T4.pdf",
- "no_incluye_bcra": "repos con bancos y BOPREAL que vencen en menos de un año, el swap con el Tesoro de EE.UU. y futuros y forwards"
+ "no_incluye_bcra": "repos con bancos y BOPREAL que vencen en menos de un año, el swap con el Tesoro de EE.UU. y futuros y forwards",
+ "traspasos": {
+  "2019-12": "2019-12-10",
+  "2023-12": "2023-12-10"
+ },
+ "traspasos_leeme": "Mes del traspaso (la clave de Herencia) y fecha de asunción: se usa la cuenta del último día hábil anterior."
 }
