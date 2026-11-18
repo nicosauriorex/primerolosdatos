@@ -1137,4 +1137,7 @@
 {"fecha":"2026-11-18","id":"indig_infantil","periodo":"2026-01","inicial":true},
 {"fecha":"2026-11-18","id":"consumo_huevo","periodo":"2025-12","inicial":true},
 {"fecha":"2026-11-18","id":"presos","periodo":"2025-12"},
-{"fecha":"2026-11-18","id":"presos_tasa","periodo":"2025-12"}]}
+{"fecha":"2026-11-18","id":"presos_tasa","periodo":"2025-12"},
+{"fecha":"2026-11-18","id":"univ_estudiantes","periodo":"2023-12"},
+{"fecha":"2026-11-18","id":"univ_nuevos_inscriptos","periodo":"2023-12"},
+{"fecha":"2026-11-18","id":"univ_egresados","periodo":"2023-12"}]}
