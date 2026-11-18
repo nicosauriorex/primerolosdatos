@@ -1132,4 +1132,9 @@
 {"fecha":"2026-11-17","id":"deuda_ac_privados","periodo":"2026-06","inicial":true},
 {"fecha":"2026-11-17","id":"deuda_ac_terceros","periodo":"2026-06","inicial":true},
 {"fecha":"2026-11-17","id":"bcra_pasivos_netos","periodo":"2026-10","inicial":true},
-{"fecha":"2026-11-17","id":"deuda_neta","periodo":"2026-06","inicial":true}]}
+{"fecha":"2026-11-17","id":"deuda_neta","periodo":"2026-06","inicial":true},
+{"fecha":"2026-11-18","id":"pob_infantil","periodo":"2026-01","inicial":true},
+{"fecha":"2026-11-18","id":"indig_infantil","periodo":"2026-01","inicial":true},
+{"fecha":"2026-11-18","id":"consumo_huevo","periodo":"2025-12","inicial":true},
+{"fecha":"2026-11-18","id":"presos","periodo":"2025-12"},
+{"fecha":"2026-11-18","id":"presos_tasa","periodo":"2025-12"}]}
