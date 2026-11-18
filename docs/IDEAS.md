@@ -101,7 +101,3 @@ Idea del usuario: sumar datos que mencionan seguido el gobierno, los ministros y
 Investigado: fuentes, IDs, ranking y qué no se puede en `docs/investigaciones/datos-nuevos-2026-11-16.md`.
 - ~~AUH, Tarjeta Alimentar, cobertura de la canasta y pensiones por invalidez~~ ✅ 2026-11-16 → spec: docs/specs/auh-pensiones.md
 - El resto (homicidios, empleo público nacional, recaudación por impuesto, universidades por inciso, Malvinas…): sin elegir.
-
-## Tarifas de servicios y subsidios (2026-11-17) → spec: docs/specs/tarifas-y-datos-calientes-4.md
-- «y con eso sacar tambien como un indicador de la tarifa que paga el estado vs el consumidor final».
-- «también estaría bueno la tarifa de luz, de agua y de gas. ponele podemos investigar para bs as, cordoba y santa fe. con y sin subsidio. cantidad de gente que recibe el subsidio y los tipos de subsidios». Junto con la fase 3 de deuda (parte del costo de la electricidad que pagan las tarifas, CAMMESA) y los datos calientes que faltan (carne 2019-2023, pollo y cerdo, robos de motos, fecundidad, universidades). Investigación: `docs/investigaciones/tarifas-y-carnes-2026-11-17.md`.

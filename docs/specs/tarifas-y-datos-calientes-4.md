@@ -1,6 +1,6 @@
 # Tarifas y subsidios, cobertura del costo de la energía y datos calientes 4 (carnes, robos de motos, fecundidad, universidades)
 
-Estado: implementada (2026-11-17), sin publicar
+Estado: implementada (2026-11-17), publicada en c8212c0 (corrida completa en verde, run 44210055202)
 
 Pedidos del usuario (2026-11-17):
 - «segui con 1 y 2 que creo se relacionan»: los datos calientes que faltaban (carne 2019-2023, pollo y cerdo, robos de motos, fecundidad, universidades en serie larga) y la fase 3 de `series-deuda.md` (parte del costo de la electricidad que pagan las tarifas).
@@ -155,7 +155,8 @@ Cantidad de subsidiados por provincia y del SEF 2026 (sin fuente pública: queda
 - Web: `tipos`, `lint`, `previas` (67 de 67) y `build` sin error. En el navegador (vista `web-out`): `/tarifas/` con luz, gas y agua (texto en vez de tabla vacía), 375 px sin desborde de página (las tablas se deslizan), capturas de la cabecera y de la tabla de gas; fichas `/dato/tarifas/`, `quien-paga-la-luz`, `robos-de-motos`, `fecundidad`, `universitarios`, `pollo`, `carne`; plantilla «Quién paga la energía» con las tres series; sin errores de consola.
 - Revisor: primera pasada sin bloqueantes, 6 importantes (agua vacía, faltantes con claves internas y repetidos, quiebre de nov-25 sin aviso, cobertura de gas abr-24 de otra definición, PDF sueltos en la raíz, texto de «con subsidio»); todos corregidos. Segunda pasada: dos menores (redacción de los lugares, corte de la vacuna en la plantilla), corregidos.
 - Segunda vuelta de luz (pedido del usuario: «lo de epe santa fe si es imagen no lo podes leer igual?»): citas comprobadas de EPEC (RG 64/2019 y RG 125/2023, en el texto de los PDF) y de la EPE (cuadro de nov-2021, fila 1001); escalones de la EPE ene-25 calculados a mano = 42.579,47 (igual que el pipeline).
-- **Sin verificar:** el sitio publicado (falta commit, push y corrida); la lupa con cada término de la spec (se probó por plantillas, no tecleando en la lupa); luz de Córdoba y Santa Fe de 2024 en adelante y el agua (sin fuente legible: quedan como faltantes con motivo).
+- Publicado (2026-11-17): /tarifas/, /dato/quien-paga-la-luz/, /dato/robos-de-motos/ y datos/tarifas.json responden 200 en el sitio; tarifas.json con 47 cuadros y las dos coberturas.
+- **Sin verificar:** la lupa con cada término de la spec (se probó por plantillas, no tecleando en la lupa); luz de Córdoba y Santa Fe de 2024 en adelante y el agua (sin fuente legible: quedan como faltantes con motivo).
 
 ## Dónde ver los cambios
 Página con links y casillas: `docs/cambios/tarifas-y-datos-calientes-4.html`. Local `http://localhost:3100<ruta>` (vista `web-out`); publicado recién después del commit, el push y la corrida completa en verde (toca `pipeline/`: unos 10 minutos).
