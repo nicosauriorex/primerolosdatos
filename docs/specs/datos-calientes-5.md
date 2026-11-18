@@ -1,6 +1,6 @@
 # Datos calientes 5: pobreza infantil, el 57,4 % de la UCA en el gráfico y RIGI pendientes
 
-Estado: implementada (2026-11-18), sin publicar
+Estado: implementada (2026-11-18), publicada en c7cddf4 (corrida completa en verde, run 44339393259)
 
 Pedidos del usuario (`docs/IDEAS.md`, «Datos calientes, preguntas y pedidos (2026-11-17)»; elegido el 2026-11-18 con «Datos calientes 5»):
 - «RIGI: sumar los proyectos **presentados y pendientes** (o no aprobados), no solo los aprobados».
