@@ -1,6 +1,6 @@
 # Deuda neta del Tesoro y el Banco Central
 
-Estado: spec lista (2026-11-17), sin implementar
+Estado: implementada (2026-11-17), sin commit todavía
 
 Pedido del usuario (2026-11-17): trajo un texto con otra forma de medir la deuda consolidada («ah ya se, es porque algunos usan otra metodologia»): Tesoro USD 260.638 millones (deuda bruta menos la que tiene el propio sector público) y Banco Central USD 18.869 millones (pasivos monetarios menos reservas netas). Después: «Subí y buscá fuente» y «Sí, armá la spec».
 Fuentes: `docs/investigaciones/deuda-neta-2026-11-17.md`.
@@ -60,5 +60,17 @@ Límites que la ficha dice: es una cuenta propia; no resta los depósitos del Te
 - Cuenta a mano de la deuda neta en jun-26 = 99.247 + 177.738 + parte del Banco Central de jun-26.
 - `cd web && npm run tipos`, `npm run lint`, `npm run build`; en el navegador: fichas de las series nuevas (`/dato/?v=deuda_neta`, `deuda_ac_terceros`, `bcra_pasivos_netos`), las dos plantillas, la lupa con «deuda neta», 375 px sin desborde, sin errores de consola.
 
+## Cómo se verificó (2026-11-17)
+- Carga a mano: 30 fechas (mar-19 a jun-26), cada una leída mirando el cuadro «Deuda bruta de la Administración Central por acreedor» de la presentación de su trimestre (página renderizada como imagen). Las partes suman el total ±1 y los 30 totales coinciden con el boletín mensual (diferencia < 0,001 %). Control de la spec: jun-26 y dic-25 coinciden.
+  - 1T23: en la investigación estaban invertidos agencias y multilaterales (no privados): el PDF dice agencias 184.608 y multilaterales 81.302.
+  - dic-21: el cuadro dice 72.755 en multilaterales, pero sus propias variaciones (4T21, 1T22, 2T22 y 3T22) dan 72.775 y con eso suma el total: se cargó 72.775 con nota.
+  - 31-12-2018 no se carga: el boletín mensual arranca en ene-19 y no hay con qué controlar el total.
+- `python pipeline/obtener_datos.py` completo sin error (703 series, ningún respaldo). Banco Central ago-26 = 18.794 (texto del usuario: 18.869). Deuda neta jun-26 = 99.247 + 177.738 + 20.305 = 297.290 (cuenta a mano igual a la serie).
+- `npm run tipos`, `npm run lint`, `npm run build` sin error. En el navegador (leyendo el contenido, sin mirar capturas): fichas de las seis series, las dos plantillas, la lupa con «deuda neta» (serie, pasivos del Banco Central y plantilla), 375 px sin desborde, sin errores de consola.
+- Revisor: sin problemas graves; corregidos los menores (textos que el cuadro no dice, nombre de una consultora, un sinónimo repetido, aviso si no se puede hacer el control de ago-26).
+
 ## Dónde ver los cambios
-(Se completa al terminar.)
+Local con la vista `web-out` (`http://localhost:3100<ruta>`); publicado en `https://primerolosdatos.com.ar<ruta>` recién después del commit, el push y la corrida completa en verde (toca el pipeline: unos 10 minutos). Página con links: `docs/cambios/deuda-neta.html`.
+1. Portada: 1.1 la lupa encuentra «deuda neta», «deuda con privados», «deuda intra sector público» y «deuda con el FMI y organismos» (`/`).
+2. Histórico y gráficos listos: 2.1 «Deuda bruta, consolidada y neta» (`/plantillas/?q=deuda+neta`); 2.2 «¿A quién le debe el Tesoro?» (`/plantillas/?q=a+quien+le+debe`); 2.3 las tres medidas explicadas en Cambiar dato → Fiscal → «Sobre Fiscal» (`/historico/?v=deuda_neta`).
+3. Ficha: 3.1 `/dato/?v=deuda_neta`; 3.2 `/dato/?v=deuda_ac_terceros`; 3.3 `/dato/?v=bcra_pasivos_netos`; 3.4 `/dato/?v=deuda_ac_sector_publico`; 3.5 `/dato/?v=deuda_ac_organismos`; 3.6 `/dato/?v=deuda_ac_privados`.

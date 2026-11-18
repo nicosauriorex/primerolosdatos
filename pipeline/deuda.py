@@ -17,8 +17,10 @@ Consolidada (cuenta propia): deuda bruta − letras y adelantos del Tesoro en el
 Central (variables 1258, 155, 152 y 196, el último día hábil del mes) pasados a dólares al A3500 del mismo día.
 """
 import io
+import json
 import re
 import unicodedata
+from pathlib import Path
 
 import pandas as pd
 
@@ -200,6 +202,140 @@ def pasivos_fin_de_mes():
     return fin, fxm
 
 
+# ---------------------------------------------------------------- deuda neta (docs/specs/deuda-neta.md, D-031)
+POR_ACREEDOR = Path(__file__).resolve().parent.parent / "datos" / "manual" / "deuda_por_acreedor.json"
+VAR_PASIVOS_MONETARIOS = 1247   # base monetaria + depósitos y otros pasivos monetarios en moneda extranjera (millones de $)
+CONTROL_BCRA = (pd.Timestamp(2026, 8, 1), 17800, 19900)  # el texto del usuario: 18.869 al 31/08/2026 (±1.000)
+
+
+def leer_por_acreedor(total):
+    """Deuda bruta por acreedor (carga a mano de las presentaciones trimestrales de Finanzas), en el mes de cada cierre de trimestre.
+    `total`: deuda bruta del boletín mensual, para controlar. Devuelve {sector_publico, organismos, privados, terceros} (pd.Series)."""
+    j = json.loads(POR_ACREEDOR.read_text(encoding="utf-8"))
+    filas = {}
+    for d in j["datos"]:
+        f = pd.Timestamp(d["fecha"])
+        c = d.get("cita") or {}
+        if not (c.get("documento") and str(c.get("url", "")).startswith("http") and c.get("pagina")):
+            raise RuntimeError(f"deuda por acreedor {d['fecha']}: cita incompleta (documento, url y página)")
+        if f != f + pd.offsets.QuarterEnd(0):
+            raise RuntimeError(f"deuda por acreedor {d['fecha']}: no es un cierre de trimestre")
+        a, o, p, t = d["agencias"], d["organismos"], d["privados"], d["total"]
+        if min(a, o, p) < 0:
+            raise RuntimeError(f"deuda por acreedor {d['fecha']}: una parte negativa")
+        if abs(a + o + p - t) > 1:
+            raise RuntimeError(f"deuda por acreedor {d['fecha']}: las partes suman {a + o + p} y el total es {t}")
+        m = f.replace(day=1)
+        b = total.get(m)
+        if b is None or pd.isna(b) or abs(t / b - 1) > 0.005:
+            raise RuntimeError(f"deuda por acreedor {d['fecha']}: total {t} y el boletín mensual dice {b} (más de 0,5 % o sin dato)")
+        filas[m] = {"sector_publico": a, "organismos": o, "privados": p, "terceros": o + p}
+    df = pd.DataFrame.from_dict(filas, orient="index").sort_index().astype("float64")
+    return {k: df[k] for k in df.columns}
+
+
+def pasivos_netos_bcra():
+    """Pasivos monetarios del Banco Central en dólares menos (reservas brutas − swaps − seguro de depósitos), el último día hábil de cada
+    mes al A3500 de ese día, desde el inicio de los supuestos de reservas (abr-24). No resta los encajes (ya están en la variable 1247)
+    ni el crédito del FMI (es deuda del Tesoro). Devuelve un DataFrame mensual: fecha, pm (millones de $), fx, pm_usd, brutas, swaps, sedesa, netos."""
+    import catalogo  # aquí y no arriba: catalogo importa este módulo
+    import reservas_netas as rn
+    sup = json.loads(rn.SUPUESTOS.read_text(encoding="utf-8"))
+    fx = red.cacheado("d_a3500_bcra", lambda: catalogo._bcra(5)).dropna()
+    pm = red.cacheado(f"bcra_{VAR_PASIVOS_MONETARIOS}", lambda: catalogo._bcra(VAR_PASIVOS_MONETARIOS)).dropna()
+    brutas = red.cacheado("bcra_1", lambda: catalogo._bcra(1)).dropna()
+    df = pd.concat({"pm": pm, "fx": fx, "brutas": brutas}, axis=1).dropna()  # días con los tres datos
+    df = df[df.index >= pd.Timestamp(sup["inicio"])]
+    if df.empty:
+        raise RuntimeError("sin días con pasivos monetarios, A3500 y reservas desde el inicio de los supuestos")
+    ult = df.groupby(df.index.to_period("M")).tail(1)
+    # el mes en curso (o uno sin su último día hábil) no entra: no es un fin de mes
+    ult = ult[ult.index >= ult.index.to_period("M").to_timestamp(how="end").normalize() - pd.offsets.BDay(3)]
+    out = []
+    for dia, r in ult.iterrows():
+        pm_usd = r["pm"] / r["fx"]
+        sw, se = rn._tramo(sup["swaps"], dia), rn._tramo(sup["sedesa"], dia)
+        out.append({"mes": dia.replace(day=1), "fecha": dia, "pm": r["pm"], "fx": r["fx"], "pm_usd": pm_usd, "brutas": r["brutas"],
+                    "swaps": sw, "sedesa": se, "netos": pm_usd - (r["brutas"] - sw - se)})
+    t = pd.DataFrame(out).set_index("mes")
+    mes, lo, hi = CONTROL_BCRA
+    if mes not in t.index:
+        print(f"  Pasivos del Banco Central menos reservas: sin dato de {_mes_txt(mes)}, no se pudo hacer el control")
+    elif not lo <= t.at[mes, "netos"] <= hi:
+        raise RuntimeError(f"pasivos del Banco Central menos reservas en {_mes_txt(mes)}: {t.at[mes, 'netos']:,.0f}, fuera de {lo}-{hi}: revisar")
+    return t
+
+
+def _dolar_txt(v):
+    return f"{v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def series_neta(m, idx):
+    """Las series de deuda por acreedor, los pasivos netos del Banco Central y la deuda neta (lista de S)."""
+    from catalogo import S
+    out = []
+    try:
+        ac = leer_por_acreedor(m["total"])
+    except Exception as e:  # noqa: BLE001
+        print(f"  Deuda por acreedor: no disponible ({e})")
+        ac = None
+    trim = (" Dato trimestral (saldo al cierre de cada trimestre, en el último mes), cargado a mano desde las presentaciones gráficas trimestrales"
+            " de Finanzas; millones de US$ al tipo de cambio de fin de período.")
+    f_ac = "Secretaría de Finanzas, presentaciones gráficas trimestrales de la deuda pública («Deuda bruta de la Administración Central por acreedor»)"
+    if ac is not None:
+        u = ac["terceros"].index.max()
+        cuenta = (f" A {_mes_txt(u)}: deuda bruta {_fmt(m['total'][u])} = en manos del propio Estado {_fmt(ac['sector_publico'][u])}"
+                  f" + organismos {_fmt(ac['organismos'][u])} + privados {_fmt(ac['privados'][u])} millones de US$.")
+        out += [
+            S("deuda_ac_sector_publico", "Deuda del Tesoro en manos del propio Estado", CAT, "usd", "millones de US$", ac["sector_publico"].reindex(idx), 0, f_ac,
+              "Parte de la deuda bruta del Tesoro que tienen organismos del propio Estado nacional: Banco Central (letras intransferibles y adelantos),"
+              " FGS de la ANSES, Banco Nación y otros. Finanzas publica solo el total, no cuánto tiene cada uno. Es deuda de una parte del Estado con otra."
+              + trim + cuenta, agg=True),
+            S("deuda_ac_organismos", "Deuda del Tesoro con organismos internacionales", CAT, "usd", "millones de US$", ac["organismos"].reindex(idx), -1, f_ac,
+              "Lo que el Tesoro les debe a organismos multilaterales (FMI, Banco Mundial, BID y otros) y a otros países (préstamos bilaterales)."
+              + trim + cuenta, agg=True),
+            S("deuda_ac_privados", "Deuda del Tesoro con privados", CAT, "usd", "millones de US$", ac["privados"].reindex(idx), -1, f_ac,
+              "Lo que el Tesoro les debe a acreedores privados (bonos, letras y préstamos en manos de bancos, fondos, empresas y personas, del país y del exterior)."
+              " Incluye la deuda que no entró a los canjes y sigue pendiente de reestructurar (Finanzas la muestra dentro del sector privado)." + trim + cuenta, agg=True),
+            S("deuda_ac_terceros", "Deuda del Tesoro con privados y organismos", CAT, "usd", "millones de US$", ac["terceros"].reindex(idx), -1,
+              f_ac + "; suma propia",
+              "Deuda bruta del Tesoro menos la que tiene el propio Estado (Banco Central, FGS, Banco Nación y otros): lo que el Tesoro les debe a terceros,"
+              f" privados y organismos internacionales. A {_mes_txt(u)}: {_fmt(m['total'][u])} − {_fmt(ac['sector_publico'][u])}"
+              f" = {_fmt(ac['terceros'][u])} millones de US$." + trim, agg=True),
+        ]
+    try:
+        b = pasivos_netos_bcra()
+    except Exception as e:  # noqa: BLE001
+        print(f"  Pasivos del Banco Central menos reservas: no disponible ({e})")
+        b = None
+    limites = (" Es una cuenta propia, no un dato oficial. Las reservas que se restan son las brutas menos los swaps con China y el BIS y el seguro de depósitos"
+               " (supuestos fijos con cita, los mismos de la estimación de reservas netas de esta página); no se restan los encajes en dólares de los bancos"
+               " porque ya están dentro de los pasivos monetarios, ni el crédito del FMI, que es deuda del Tesoro. No suma los BOPREAL ni los repos del Banco Central.")
+    if b is not None:
+        r = b.iloc[-1]
+        u = b.index.max()
+        cuenta_b = (f" La cuenta a {_mes_txt(u)} ({r['fecha']:%d/%m/%Y}): pasivos monetarios {_fmt(r['pm'])} millones de $ a {_dolar_txt(r['fx'])} $ por dólar"
+                    f" = {_fmt(r['pm_usd'])} − (reservas brutas {_fmt(r['brutas'])} − swaps {_fmt(r['swaps'])} − seguro de depósitos {_fmt(r['sedesa'])})"
+                    f" = {_fmt(r['netos'])} millones de US$.")
+        out.append(S("bcra_pasivos_netos", "Pasivos del Banco Central menos reservas", CAT, "usd", "millones de US$", b["netos"].reindex(idx), -1,
+                     "Cálculo propio con BCRA (API de estadísticas: variable 1247, pasivos monetarios; variable 1, reservas brutas; dólar A3500) y supuestos de reservas netas (FMI)",
+                     "Lo que debe el Banco Central en pesos y en dólares (la base monetaria más los depósitos en dólares de los bancos y otros pasivos monetarios)"
+                     " pasado a dólares, menos las reservas que son realmente suyas. Si da positivo, los pasivos superan a las reservas. Último día hábil de cada mes con los tres datos"
+                     " (pasivos, reservas y dólar), al dólar oficial A3500 de ese día; desde abr-24, cuando empiezan los supuestos de reservas." + limites + cuenta_b, agg=True))
+    if ac is not None and b is not None:
+        neta = (ac["terceros"] + b["netos"].reindex(ac["terceros"].index)).dropna()
+        if len(neta):
+            u = neta.index.max()
+            cuenta_n = (f" La cuenta a {_mes_txt(u)}: deuda del Tesoro con privados y organismos {_fmt(ac['terceros'][u])}"
+                        f" + pasivos del Banco Central menos reservas {_fmt(b.at[u, 'netos'])} = {_fmt(neta[u])} millones de US$.")
+            out.append(S("deuda_neta", "Deuda neta del Tesoro y el Banco Central", CAT, "usd", "millones de US$", neta.reindex(idx), -1,
+                         "Cálculo propio con Secretaría de Finanzas (deuda por acreedor, presentaciones trimestrales) y BCRA (variables 1247 y 1; dólar A3500)",
+                         "Lo que el Estado nacional (Tesoro y Banco Central juntos) les debe a terceros: la deuda del Tesoro con privados y organismos internacionales"
+                         " más los pasivos del Banco Central menos sus reservas. No cuenta la deuda de una parte del Estado con otra. Dato trimestral, desde jun-24."
+                         " Límites: no resta los depósitos del Tesoro (algunas consultoras sí los restan)." + limites + cuenta_n, agg=True))
+    return out
+
+
 # ---------------------------------------------------------------- otros dólares
 OTROS = ("blue", "mep", "ccl")
 FRASE_ALT = (' En "Dólares al blue / MEP / CCL", la parte en pesos se pasa a esa cotización del último día del mes; '
@@ -318,6 +454,7 @@ def series(idx):
                      + cuenta + _frase("deuda_consolidada", alt) + nota, agg=True, alt=_alt("deuda_consolidada", alt, idx)))
     except Exception as e:  # noqa: BLE001
         print(f"  Deuda consolidada: no disponible ({e})")
+    out += series_neta(m, idx)
     print(f"  Deuda: hasta {_mes_txt(ult)}; preliminares: {', '.join(_mes_txt(f) for f in prel) or 'ninguno'}")
     return out
 

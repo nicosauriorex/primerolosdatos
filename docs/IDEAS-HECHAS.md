@@ -425,3 +425,8 @@ Idea del usuario: «fijate si tenemos empleados por empresa. porque a veces cier
 
 ## ~~Deuda en dólares a otra cotización (2026-11-15)~~ ✅ 2026-11-17 → spec: docs/specs/deuda-otros-dolares.md
 - «o si la quiero ver en otra moneda al dolar CCL» y «no sería en dolares blue?»: la deuda ya está en dólares (Finanzas pasa los pesos al oficial de fin de mes), así que «al CCL» solo cambia la parte en pesos. Versión con sentido: deuda en moneda extranjera + deuda en pesos y pasivos del Banco Central pasados a dólares al CCL/MEP/blue (para la consolidada: `deuda_ac_me + deuda_ac_mn × oficial / CCL − letras + pasivos / CCL`).
+
+## ~~Deuda neta del sector público consolidado (2026-11-17)~~ ✅ 2026-11-17 → spec: docs/specs/deuda-neta.md
+- El usuario trajo otra forma de medir la deuda consolidada (texto pegado, citado a Infobae y al BCRA): Tesoro USD 260.638 millones = deuda bruta (484.917) menos la deuda en manos del propio sector público (BCRA, FGS y otros); BCRA USD 18.869 millones = pasivos monetarios ($68.006.428 millones al 31/08/2026) menos reservas netas. Mide lo que el Estado le debe a terceros.
+- Diferencia con la nuestra (D-024): nosotros restamos solo lo que el Tesoro le debe al Banco Central según el boletín (letras y adelantos) y sumamos solo los pasivos remunerados; por eso la nuestra es un techo. Esta resta además lo que tienen el FGS, el Banco Nación y las Lecap del Banco Central, y del lado del Banco Central suma la base monetaria y resta las reservas netas.
+- Fuentes: investigadas en `docs/investigaciones/deuda-neta-2026-11-17.md` (presentación trimestral de Finanzas por acreedor, a mano; pasivos monetarios del BCRA, variable 1247; metodología de Facimex).

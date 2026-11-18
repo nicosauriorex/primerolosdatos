@@ -11,7 +11,7 @@ Hecha por `investigador-datos` para la idea «Deuda neta del sector público con
 - Control (las sumas cierran exacto; la asignación de filas conviene confirmarla mirando el PDF):
   - 30/06/2026: total 474.198; agencias 197.213 (41,6 %); privados 177.738 (incluye elegible pendiente 2.403); multilaterales y bilaterales 99.247.
   - 31/12/2025: total 455.077; agencias 200.249; privados 155.468; multilaterales 99.360.
-  - 31/03/2023: total 398.246; agencias 81.302; privados 132.336; multilaterales 184.608 (revisar: la proporción privados/multilaterales parece invertida).
+  - 31/03/2023: total 398.246; agencias 184.608; privados 132.336; multilaterales 81.302 (corregido el 2026-11-17 mirando el PDF: el agente había invertido agencias y multilaterales).
 
 **Planilla trimestral (`deuda_publica_<fecha>.xlsx`), solo la parte del BCRA:** hoja A.1.1 (adelantos transitorios: 2.758,6 M US$ al 30/06/2026) y A.1.9 (letras en dólares del BCRA: 30.309,9 M US$). No sirve para FGS ni Banco Nación.
 

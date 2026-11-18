@@ -183,6 +183,14 @@ export function crearPlantillas(metas: SerieMeta[]): Plantilla[] {
     "Subsidios económicos al transporte (mensual) y a la energía (trimestral, repartido en los 3 meses), ajustados por inflación",
     ["subsidios", "colectivos", "trenes", "transporte", "energia", "luz", "gas", "tarifas"],
     ["sub_transporte", "dg_452_2_energiagia_0_t_7_79"].map((id) => E(id, { med: "real" })));
+  manual("deuda-bruta-consolidada-y-neta", "Deuda bruta, consolidada y neta", "Fiscal",
+    "Tres medidas de la deuda pública en millones de dólares y en un solo eje: la bruta (todo lo que debe el Tesoro), la consolidada con el Banco Central y la neta (lo que ambos deben a terceros, menos las reservas)",
+    ["deuda", "deuda neta", "deuda publica", "deuda consolidada", "deuda bruta", "bcra", "reservas"],
+    ["deuda_ac_total", "deuda_consolidada", "deuda_neta"].map((id) => E(id)));
+  manual("a-quien-le-debe-el-tesoro", "¿A quién le debe el Tesoro?", "Fiscal",
+    "Deuda de la Administración Central según quién la tiene: el propio Estado (Banco Central, Fondo de Garantía de Sustentabilidad, Banco Nación y otros), los organismos internacionales y los privados, trimestral",
+    ["deuda", "acreedores", "fmi", "organismos", "privados", "bonistas", "deuda intra sector publico"],
+    ["deuda_ac_sector_publico", "deuda_ac_organismos", "deuda_ac_privados"].map((id) => E(id)));
   manual("viajes-al-exterior", "Viajes al exterior en avión", "Sector externo", "Argentinos que salen por Ezeiza y Aeroparque, en miles de pasajeros",
     ["turismo", "viajes", "exterior", "chile", "compras afuera"], [E("turismo_emisivo", { med: "asis" })]);
 

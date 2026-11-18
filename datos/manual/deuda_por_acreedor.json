@@ -1,0 +1,367 @@
+{
+ "actualizado": "2026-11-17",
+ "leeme": "Deuda bruta de la Administración Central por acreedor (docs/specs/deuda-neta.md; pipeline/deuda.py). Millones de US$ al tipo de cambio de fin de período. Una entrada por cierre de trimestre, leída mirando el cuadro de cada presentación gráfica trimestral de Finanzas (índice: https://www.argentina.gob.ar/economia/finanzas/datos-trimestrales-de-la-deuda). agencias = Agencias del Sector Público (títulos, préstamos y adelantos en cartera de organismos del Sector Público Nacional: BCRA, FGS, Banco Nación y otros; solo el total). privados = Sector Privado (incluye la deuda elegible pendiente de reestructuración). organismos = Multilaterales y Bilaterales. Cada fecha sale de la presentación de su propio trimestre (columna b); Las partes suman el total con ±1 por redondeo. Cargado y verificado mirando cada PDF el 2026-11-17. Cuando sale una presentación nueva, agregar su fecha con la cita.",
+ "datos": [
+  {
+   "fecha": "2019-03-31",
+   "total": 324898,
+   "agencias": 120429,
+   "organismos": 57742,
+   "privados": 146727,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 1er trimestre 2019: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_de_la_deuda_31-03-2019_1.pdf",
+    "pagina": 4
+   }
+  },
+  {
+   "fecha": "2019-06-30",
+   "total": 337267,
+   "agencias": 124724,
+   "organismos": 68073,
+   "privados": 144470,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 2º trimestre 2019: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_de_la_deuda_30-06-2019_0.pdf",
+    "pagina": 4
+   }
+  },
+  {
+   "fecha": "2019-09-30",
+   "total": 311251,
+   "agencias": 116592,
+   "organismos": 72679,
+   "privados": 121979,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 3er trimestre 2019: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_de_la_deuda_30-09-2019.pdf",
+    "pagina": 4
+   }
+  },
+  {
+   "fecha": "2019-12-31",
+   "total": 323065,
+   "agencias": 129078,
+   "organismos": 73399,
+   "privados": 120588,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 4º trimestre 2019: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_de_la_deuda_31-12-2019_0.pdf",
+    "pagina": 4
+   }
+  },
+  {
+   "fecha": "2020-03-31",
+   "total": 323381,
+   "agencias": 132883,
+   "organismos": 72485,
+   "privados": 118014,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 1er trimestre 2020: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_de_la_deuda_31-03-2020.pdf",
+    "pagina": 4
+   }
+  },
+  {
+   "fecha": "2020-06-30",
+   "total": 324552,
+   "agencias": 133540,
+   "organismos": 73729,
+   "privados": 117284,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 2º trimestre 2020: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion-grafica-de-la-deuda_30-06-2020.pdf",
+    "pagina": 4
+   }
+  },
+  {
+   "fecha": "2020-09-30",
+   "total": 332248,
+   "agencias": 135288,
+   "organismos": 74619,
+   "privados": 122341,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 3er trimestre 2020: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion-grafica-de-la-deuda_30-09-2020iii.pdf",
+    "pagina": 4
+   }
+  },
+  {
+   "fecha": "2020-12-31",
+   "total": 335582,
+   "agencias": 134340,
+   "organismos": 76756,
+   "privados": 124486,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 4º trimestre 2020: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_de_la_deuda_31-12-2020.pdf",
+    "pagina": 4
+   }
+  },
+  {
+   "fecha": "2021-03-31",
+   "total": 335556,
+   "agencias": 135425,
+   "organismos": 75500,
+   "privados": 124630,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 1er trimestre 2021: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_de_la_deuda_31-03-2021.pdf",
+    "pagina": 7
+   }
+  },
+  {
+   "fecha": "2021-06-30",
+   "total": 343524,
+   "agencias": 139360,
+   "organismos": 75617,
+   "privados": 128547,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 2º trimestre 2021: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_trimestral_iit211910.pdf",
+    "pagina": 7
+   }
+  },
+  {
+   "fecha": "2021-09-30",
+   "total": 342620,
+   "agencias": 140132,
+   "organismos": 72711,
+   "privados": 129777,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 3er trimestre 2021: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_trimestral_iiit21_3.pdf",
+    "pagina": 7
+   }
+  },
+  {
+   "fecha": "2021-12-31",
+   "total": 363233,
+   "agencias": 157857,
+   "organismos": 72775,
+   "privados": 132600,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 4º trimestre 2021: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_trimestralivt21.pdf",
+    "pagina": 8
+   },
+   "nota": "El cuadro de 4T21 (y los de 2022 en la columna 31-12-21) dice 72.755 en multilaterales y bilaterales, pero sus propias variaciones (4T21: −3.981 contra 76.756; 1T22: +5.136 hasta 77.911; 2T22: +4.062 hasta 76.837; 3T22: −1.812 hasta 70.963) dan 72.775, y con 72.775 las tres partes suman el total 363.233 (con 72.755 faltan 20). Se carga 72.775."
+  },
+  {
+   "fecha": "2022-03-31",
+   "total": 376300,
+   "agencias": 158971,
+   "organismos": 77911,
+   "privados": 139418,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 1er trimestre 2022: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_1t22.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2022-06-30",
+   "total": 378506,
+   "agencias": 167585,
+   "organismos": 76837,
+   "privados": 134083,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 2º trimestre 2022: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacio768n_gra769fica_2t22_-_final.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2022-09-30",
+   "total": 382281,
+   "agencias": 175637,
+   "organismos": 70963,
+   "privados": 135681,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 3er trimestre 2022: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_gra769fica_3t222_-ppt.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2022-12-31",
+   "total": 396555,
+   "agencias": 181945,
+   "organismos": 80561,
+   "privados": 134050,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 4º trimestre 2022: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_ivt22.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2023-03-31",
+   "total": 398246,
+   "agencias": 184608,
+   "organismos": 81302,
+   "privados": 132336,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 1er trimestre 2023: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_gra_fica_1t23.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2023-06-30",
+   "total": 403836,
+   "agencias": 192579,
+   "organismos": 76205,
+   "privados": 135051,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 2º trimestre 2023: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_gra_fica_2t23.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2023-09-30",
+   "total": 406948,
+   "agencias": 194523,
+   "organismos": 79834,
+   "privados": 132591,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 3er trimestre 2023: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_3t23.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2023-12-31",
+   "total": 370673,
+   "agencias": 165934,
+   "organismos": 78887,
+   "privados": 125853,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 4º trimestre 2023: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_4t23.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2024-03-31",
+   "total": 403052,
+   "agencias": 186806,
+   "organismos": 79096,
+   "privados": 137150,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 1er trimestre 2024: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_it_2024_2.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2024-06-30",
+   "total": 442515,
+   "agencias": 207239,
+   "organismos": 77581,
+   "privados": 157694,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 2º trimestre 2024: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_iit2024_2.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2024-09-30",
+   "total": 460069,
+   "agencias": 212066,
+   "organismos": 78787,
+   "privados": 169216,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 3er trimestre 2024: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_iiit_2024_2.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2024-12-31",
+   "total": 466921,
+   "agencias": 217298,
+   "organismos": 79280,
+   "privados": 170343,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 4º trimestre 2024: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_ivt_2024.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2025-03-31",
+   "total": 473561,
+   "agencias": 224265,
+   "organismos": 79402,
+   "privados": 169893,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 1er trimestre 2025: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_it_2025.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2025-06-30",
+   "total": 465353,
+   "agencias": 207934,
+   "organismos": 95542,
+   "privados": 161876,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 2º trimestre 2025: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_ii_t_25.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2025-09-30",
+   "total": 454037,
+   "agencias": 199810,
+   "organismos": 98404,
+   "privados": 155822,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 3er trimestre 2025: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_iii_t_25_2.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2025-12-31",
+   "total": 455077,
+   "agencias": 200249,
+   "organismos": 99360,
+   "privados": 155468,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 4º trimestre 2025: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_ivt_25.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2026-03-31",
+   "total": 483854,
+   "agencias": 219641,
+   "organismos": 98481,
+   "privados": 165733,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 1er trimestre 2026: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_it_26_c.pdf",
+    "pagina": 10
+   }
+  },
+  {
+   "fecha": "2026-06-30",
+   "total": 474198,
+   "agencias": 197213,
+   "organismos": 99247,
+   "privados": 177738,
+   "cita": {
+    "documento": "Secretaría de Finanzas, presentación gráfica de la deuda pública, 2º trimestre 2026: «Deuda bruta de la Administración Central por acreedor»",
+    "url": "https://www.argentina.gob.ar/sites/default/files/presentacion_grafica_2do_trim_26.pdf",
+    "pagina": 10
+   }
+  }
+ ]
+}

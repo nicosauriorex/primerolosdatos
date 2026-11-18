@@ -56,7 +56,11 @@ export const INFO_CAT: Record<string, string> = {
   "Fiscal": `<p>Sector público nacional, base caja.</p><dl>
     <dt>Resultado primario</dt><dd>Ingresos menos gastos sin contar intereses de la deuda.</dd>
     <dt>Resultado financiero</dt><dd>Después de pagar intereses.</dd>
-    <dt>Deuda pública</dt><dd>Secretaría de Finanzas, mensual desde 2019 y en dólares. La deuda consolidada del Tesoro y el Banco Central es una cuenta propia que suma lo que ambos deben a terceros.</dd>
+    <dt>Deuda pública</dt><dd>Secretaría de Finanzas, mensual desde 2019 y en dólares. Se muestra de tres maneras:
+      <br><b>Bruta</b>: todo lo que debe el Tesoro (Administración Central), incluso lo que le debe al Banco Central y a otros organismos del propio Estado.
+      <br><b>Consolidada</b> (un techo): resta lo que el Tesoro le debe al Banco Central y suma lo que el Banco Central debe en pesos con interés.
+      <br><b>Neta</b>: lo que el Tesoro y el Banco Central le deben a terceros: la deuda del Tesoro con privados y organismos internacionales más los pasivos del Banco Central menos sus reservas (trimestral, desde jun-24).
+      <br>La consolidada y la neta son cuentas propias, no datos oficiales.</dd>
     <dt>Tarifas y subsidios de la energía</dt><dd>Qué parte del costo de la electricidad pagan las tarifas (cuenta propia con datos de CAMMESA, para toda la demanda) y las facturas de luz, gas y agua de un hogar del AMBA (Observatorio de Tarifas y Subsidios del IIEP, UBA-CONICET, un centro universitario). Están explicadas en la página <a href="/tarifas/">Tarifas y subsidios</a>, junto con la comparación con Córdoba y Santa Fe.</dd>
     <dt>Subsidios al transporte</dt><dd>Plata del Estado nacional para que colectivos y trenes cobren menos de lo que cuestan; base caja, mensual. Los subsidios a la energía están aparte y son trimestrales.</dd>
     <dt>Transferencias a provincias</dt><dd>Las que decide el gobierno nacional (no automáticas): no incluye la coparticipación. Las corrientes son para gastos del día a día; las de capital, para obras.</dd>

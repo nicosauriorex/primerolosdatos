@@ -1126,4 +1126,10 @@
 {"fecha":"2026-11-17","id":"tarifa_amba_canasta","periodo":"2026-10","inicial":true},
 {"fecha":"2026-11-17","id":"cobertura_hogar_canasta","periodo":"2026-10","inicial":true},
 {"fecha":"2026-11-17","id":"cobertura_hogar_luz","periodo":"2026-10","inicial":true},
-{"fecha":"2026-11-17","id":"cobertura_hogar_gas","periodo":"2026-10","inicial":true}]}
+{"fecha":"2026-11-17","id":"cobertura_hogar_gas","periodo":"2026-10","inicial":true},
+{"fecha":"2026-11-17","id":"deuda_ac_sector_publico","periodo":"2026-06","inicial":true},
+{"fecha":"2026-11-17","id":"deuda_ac_organismos","periodo":"2026-06","inicial":true},
+{"fecha":"2026-11-17","id":"deuda_ac_privados","periodo":"2026-06","inicial":true},
+{"fecha":"2026-11-17","id":"deuda_ac_terceros","periodo":"2026-06","inicial":true},
+{"fecha":"2026-11-17","id":"bcra_pasivos_netos","periodo":"2026-10","inicial":true},
+{"fecha":"2026-11-17","id":"deuda_neta","periodo":"2026-06","inicial":true}]}
