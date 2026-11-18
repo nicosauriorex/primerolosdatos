@@ -7,7 +7,8 @@ Para retomar en una sesión nueva. Última actualización: 2026-11-17.
 ## Dónde estamos
 Publicado en https://primerolosdatos.com.ar: herramienta para responder en redes con una imagen, con datos oficiales. Plan y bloques en `docs/ROADMAP.md`; detalle de todo lo anterior al 2026-11-15 en `docs/HISTORIAL.md`.
 
-Últimos bloques (todos publicados, corrida en verde):
+Últimos bloques (todos publicados, corrida en verde, salvo el primero):
+- Deuda en dólares blue, MEP y CCL: en Ajustes → Dólares de la deuda bruta, en pesos y consolidada, con la parte en pesos a la cotización de fin de mes (D-030); además, la nota de dólares reales ya no dice «IPC de INDEC» — 2026-11-17, **sin publicar** — [spec](specs/deuda-otros-dolares.md)
 - Tarifas y subsidios (`/tarifas/`: quién paga la energía según IIEP y CAMMESA, facturas de gas en AMBA, Córdoba y Santa Fe, luz en los tres (Córdoba y Santa Fe solo algunos años), tipos de subsidio y cuántos los reciben) y datos calientes 4 (carnes completas, robos de motos, fecundidad, universidades): 19 series, D-029 — 2026-11-17, c8212c0 (corrida completa en verde, run 44210055202; /tarifas/ y fichas nuevas responden en el sitio) — [spec](specs/tarifas-y-datos-calientes-4.md)
 - Foco del teclado en las ventanas: `useFocoVentana` (entra, Tab no se escapa, vuelve al botón al cerrar) en `Modal`, gráfico ampliado y vista a pantalla completa de Compartir — 2026-11-17, 47a1752 (corrida en verde, run 44176179074; CSS nuevo comprobado en el sitio) — [spec](specs/foco-ventanas.md)
 - Lint: Ruff en el pipeline, ESLint con hooks y reglas propias (números con formato.ts, sin `<select>`, sin hex en JSX), hook al editar y paso «Revisar código» que corta la corrida antes de bajar datos (D-028) — 2026-11-17, 049e245 (corrida completa en verde, run 44162901957; «Revisar código» tarda 44 s) — [spec](specs/lint.md)

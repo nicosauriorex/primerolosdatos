@@ -5,6 +5,7 @@
 //   ars  (montos en pesos)      real → real · corr → corr · dólares → esa medida · variación → esa variación      aplica siempre
 //   fx   (pesos por dólar)      real → real · corr → corr · variación → esa variación · dólares → real / corrientes   en dólares NO aplica
 //   usd  (montos en dólares)    real → pesos de hoy (al oficial) · corr → pesos corrientes (al oficial) · dólares → esos       aplica siempre
+//                               (con `dol`, dólares blue / MEP / CCL pasan la parte en pesos a esa cotización; el resto, al oficial)
 //   idx  de precios por rubro   real → índice contra la inflación general · corr → índice tal cual · dólares / variación → tal cual   en dólares NO aplica
 //   idx  de precios general     siempre tal cual (contra sí misma sería una línea plana)                             NO aplica
 //   idx  con dir = 1 (salarios) real → real · corr → tal cual · dólares / variación → tal cual                       en dólares NO aplica
@@ -26,14 +27,18 @@ const esVariacion = (moneda: string) => moneda === "vm" || moneda === "via";
 export const esIndiceDeRubro = (s: Pick<SerieMeta, "id" | "tipo" | "dir" | "cat">): boolean =>
   s.tipo === "idx" && s.dir !== 1 && s.cat[0] === "Precios" && !ES_IPC_GENERAL(s.id);
 
-export function monedaEnSerie(s: Pick<SerieMeta, "id" | "tipo" | "dir" | "cat">, moneda: string): MonedaEnSerie {
+export function monedaEnSerie(s: Pick<SerieMeta, "id" | "tipo" | "dir" | "cat" | "dol">, moneda: string): MonedaEnSerie {
   switch (s.tipo) {
     case "ars": return { med: moneda, aplica: true };
     case "fx":
       if (esVariacion(moneda)) return { med: moneda, aplica: true };
       return esDolares(moneda) ? { med: moneda.startsWith("usdr") ? "real" : "corr", aplica: false } : { med: moneda, aplica: true };
-    case "usd":
+    case "usd": {
+      // Una serie en US$ con parte en pesos (`dol`): en dólares blue / MEP / CCL se pasa esa parte a la cotización elegida.
+      const [tipo, cot] = moneda.split("_");
+      if (cot && (tipo === "usd" || tipo === "usdr") && s.dol?.includes(cot)) return { med: moneda, aplica: true };
       return { med: moneda === "real" ? "real" : moneda === "corr" ? "arscorr" : moneda.startsWith("usdr") ? "usdr" : "corr", aplica: !esVariacion(moneda) };
+    }
     case "idx":
       if (esIndiceDeRubro(s)) return moneda === "real" ? { med: "real", aplica: true } : { med: "corr", aplica: moneda === "corr" };
       if (s.dir === 1) return moneda === "real" ? { med: "real", aplica: true } : { med: "corr", aplica: moneda === "corr" };

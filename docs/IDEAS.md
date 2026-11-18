@@ -92,12 +92,13 @@ Idea del usuario. Agregado el mismo día: ~~ver el presupuesto de cada entidad p
   - Un bot que publica solo necesita un proceso programado (el workflow de GitHub Actions de actualización diaria podría disparar el post). Verlo con la spec `actualizacion-diaria`.
 - Las plantillas pueden ser la base de todo: la búsqueda guiada, la página de inicio y "otros gráficos interesantes" muestran plantillas.
 
-## Deuda en dólares a otra cotización (2026-11-15)
-- «o si la quiero ver en otra moneda al dolar CCL» y «no sería en dolares blue?»: la deuda ya está en dólares (Finanzas pasa los pesos al oficial de fin de mes), así que «al CCL» solo cambia la parte en pesos. Versión con sentido: deuda en moneda extranjera + deuda en pesos y pasivos del Banco Central pasados a dólares al CCL/MEP/blue (para la consolidada: `deuda_ac_me + deuda_ac_mn × oficial / CCL − letras + pasivos / CCL`). Sin decidir: lo pide el usuario si lo quiere.
-
-
 ## Datos calientes que faltan (2026-11-16)
 Idea del usuario: sumar datos que mencionan seguido el gobierno, los ministros y la oposición, que le importan a la gente y que el sitio no tiene. Ejemplos suyos: AUH y asignaciones en términos reales y cuánto cubren de la canasta (la cuenta de Capital Humano); pensiones por invalidez por gobierno; qué hizo cada gobierno por Malvinas (y la ley de sanciones a las petroleras); en qué gastan las universidades (licitaciones, si no presentan presupuesto); empleados públicos por provincia y municipio.
 Investigado: fuentes, IDs, ranking y qué no se puede en `docs/investigaciones/datos-nuevos-2026-11-16.md`.
 - ~~AUH, Tarjeta Alimentar, cobertura de la canasta y pensiones por invalidez~~ ✅ 2026-11-16 → spec: docs/specs/auh-pensiones.md
 - El resto (homicidios, empleo público nacional, recaudación por impuesto, universidades por inciso, Malvinas…): sin elegir.
+
+## Deuda neta del sector público consolidado (2026-11-17)
+- El usuario trajo otra forma de medir la deuda consolidada (texto pegado, citado a Infobae y al BCRA): Tesoro USD 260.638 millones = deuda bruta (484.917) menos la deuda en manos del propio sector público (BCRA, FGS y otros); BCRA USD 18.869 millones = pasivos monetarios ($68.006.428 millones al 31/08/2026) menos reservas netas. Mide lo que el Estado le debe a terceros.
+- Diferencia con la nuestra (D-024): nosotros restamos solo lo que el Tesoro le debe al Banco Central según el boletín (letras y adelantos) y sumamos solo los pasivos remunerados; por eso la nuestra es un techo. Esta resta además lo que tienen el FGS, el Banco Nación y las Lecap del Banco Central, y del lado del Banco Central suma la base monetaria y resta las reservas netas.
+- Fuentes por ver: los Excel de Finanzas (boletín mensual y planilla trimestral) no separan la deuda por tenedor público o privado (solo por residencia, hoja A.4.5); habría que buscarlo en el informe trimestral de Finanzas o en otra fuente. Reservas netas: ya está la estimación propia (D-021).

@@ -422,3 +422,6 @@ Idea del usuario: «fijate si tenemos empleados por empresa. porque a veces cier
 ## ~~Tarifas de servicios y subsidios (2026-11-17)~~ ✅ 2026-11-17 → spec: docs/specs/tarifas-y-datos-calientes-4.md
 - «y con eso sacar tambien como un indicador de la tarifa que paga el estado vs el consumidor final».
 - «también estaría bueno la tarifa de luz, de agua y de gas. ponele podemos investigar para bs as, cordoba y santa fe. con y sin subsidio. cantidad de gente que recibe el subsidio y los tipos de subsidios». Junto con la fase 3 de deuda (parte del costo de la electricidad que pagan las tarifas, CAMMESA) y los datos calientes que faltan (carne 2019-2023, pollo y cerdo, robos de motos, fecundidad, universidades). Investigación: `docs/investigaciones/tarifas-y-carnes-2026-11-17.md`.
+
+## ~~Deuda en dólares a otra cotización (2026-11-15)~~ ✅ 2026-11-17 → spec: docs/specs/deuda-otros-dolares.md
+- «o si la quiero ver en otra moneda al dolar CCL» y «no sería en dolares blue?»: la deuda ya está en dólares (Finanzas pasa los pesos al oficial de fin de mes), así que «al CCL» solo cambia la parte en pesos. Versión con sentido: deuda en moneda extranjera + deuda en pesos y pasivos del Banco Central pasados a dólares al CCL/MEP/blue (para la consolidada: `deuda_ac_me + deuda_ac_mn × oficial / CCL − letras + pasivos / CCL`).

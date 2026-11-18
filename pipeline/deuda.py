@@ -127,6 +127,7 @@ def leer_mensual(b):
         "total": _fila(a1, r0, cols, lambda t: t.startswith("A- DEUDA BRUTA")),
         "fmi": _fila(a1, r0, cols, lambda t: t == "FMI"),
         "letras_bcra": _fila(a1, r0, cols, lambda t: t.startswith("LETRA BCRA") or t.startswith("ADELANTOS TRANSITORIOS"), todas=True),
+        "adelantos": _fila(a1, r0, cols, lambda t: t.startswith("ADELANTOS TRANSITORIOS")).fillna(0),  # deuda en pesos, en millones de US$ como el resto; celda vacía = 0
     }
     a3 = pd.read_excel(io.BytesIO(b), sheet_name="A.3", header=None)
     r3, cols3, prelim3 = _columnas_meses(a3)
@@ -146,6 +147,8 @@ def _controles(s):
         raise RuntimeError(f"moneda local + extranjera no da la deuda en pago normal (dif. {dif:.1f})")
     if ((s["pago_normal"] / s["total"]).dropna() < 0.95).any():
         raise RuntimeError("la deuda en pago normal es menos del 95 % de la bruta: revisar los rótulos")
+    if ((s["adelantos"] < 0) | (s["adelantos"] > s["letras_bcra"] + 1e-6)).any():
+        raise RuntimeError("adelantos transitorios negativos o mayores que letras + adelantos: revisar los rótulos")
     for k in ("fmi", "letras_bcra"):
         if ((s[k] / s["total"]).dropna() > 0.3).any() or (s[k] < 0).any():
             raise RuntimeError(f"{k}: más del 30 % de la deuda bruta o negativo: revisar los rótulos")
@@ -197,6 +200,59 @@ def pasivos_fin_de_mes():
     return fin, fxm
 
 
+# ---------------------------------------------------------------- otros dólares
+OTROS = ("blue", "mep", "ccl")
+FRASE_ALT = (' En "Dólares al blue / MEP / CCL", la parte en pesos se pasa a esa cotización del último día del mes; '
+             "lo que está en moneda extranjera queda igual.")
+
+
+def _alternativas(m, o, fx, pas):
+    """Las tres cuentas de la deuda al dólar k (blue, MEP, CCL). `m`: series de leer_mensual; `o`: A3500 de fin de mes (para la bruta y
+    la moneda nacional); `fx`: tabla de fin_de_mes(); `pas`: (pasivos del BCRA en $, A3500 de su fin de mes) de pasivos_fin_de_mes(), o None si no se pudo (sin consolidada).
+    Devuelve ({serie: {k: pd.Series}}, diferencia máxima del control con F = O, en millones de US$)."""
+    ix = m["total"].index
+    o_ = o.reindex(ix)
+    p = m["mn"] * o_                                  # parte en pesos, millones de $
+    con_pas = pas is not None                         # sin pasivos del Banco Central: solo la bruta y la moneda nacional
+    if con_pas:
+        pas_pesos, o_pas = pas[0].reindex(ix), pas[1].reindex(ix)
+        p_pas = m["mn"] * o_pas                       # lo mismo con el A3500 de la consolidada
+        intrans = m["letras_bcra"] - m["adelantos"]   # letras intransferibles, en dólares
+
+    def cuentas(f, f_pas):
+        mn = p / f
+        c = {"deuda_ac_mn": mn, "deuda_ac_total": m["total"] - m["mn"] + mn}
+        if con_pas:
+            c["deuda_consolidada"] = m["total"] - m["mn"] - intrans + (p_pas - m["adelantos"] * o_pas + pas_pesos) / f_pas
+        return c
+
+    # Control: con F = O las cuentas dan la serie de siempre
+    orig = {"deuda_ac_mn": m["mn"], "deuda_ac_total": m["total"]}
+    if con_pas:
+        orig["deuda_consolidada"] = m["total"] - m["letras_bcra"] + pas_pesos / o_pas
+    dif = max(float((c - orig[k]).abs().max()) for k, c in cuentas(o_, o_pas if con_pas else None).items())
+    if dif >= 0.5:
+        raise RuntimeError(f"dólar blue/MEP/CCL: con F = oficial la cuenta no da la serie original (dif. {dif:.2f} millones)")
+    out = {k: {} for k in orig}
+    for d in OTROS:
+        f = fx[d].reindex(ix)
+        for k, c in cuentas(f, f).items():
+            c = c.dropna()
+            if len(c):
+                out[k][d] = c
+    return out, dif
+
+
+def _alt(id, alt, idx):
+    """Las series en otros dólares de `id` reindexadas a `idx` (o None si no hay)."""
+    return {k: s.reindex(idx) for k, s in alt.get(id, {}).items()} or None
+
+
+def _frase(id, alt):
+    """La oración de la desc sobre los otros dólares, solo si la serie los tiene."""
+    return FRASE_ALT if alt.get(id) else ""
+
+
 # ---------------------------------------------------------------- catálogo
 def series(idx):
     from catalogo import S  # ídem
@@ -207,17 +263,30 @@ def series(idx):
     nota = (f" Los últimos meses ({_mes_txt(prel[0])} a {_mes_txt(prel[-1])}) son preliminares: Finanzas los puede corregir." if len(prel) > 1
             else f" El dato de {_mes_txt(prel[0])} es preliminar: Finanzas lo puede corregir." if prel else "")
     fin_mes = " Saldo a fin de cada mes; lo que está en otras monedas, al tipo de cambio de ese día."
+    alt = {}
+    try:
+        import macro  # aquí por el mismo motivo que catalogo
+        fx_mes = macro.fin_de_mes()
+        try:
+            pas_mes = pasivos_fin_de_mes()
+        except Exception as e:  # noqa: BLE001
+            pas_mes = None
+            print(f"  Deuda consolidada en blue/MEP/CCL: sin pasivos del Banco Central ({e})")
+        alt, dif = _alternativas(m, fx_mes["oficial"], fx_mes, pas_mes)
+        print(f"  Deuda en otros dólares: control con F = oficial, diferencia máxima {dif:.3f} millones de US$")
+    except Exception as e:  # noqa: BLE001
+        print(f"  Deuda en blue/MEP/CCL: no disponible ({e})")
     out = [
         S("deuda_ac_total", "Deuda bruta de la Administración Central", CAT, "usd", "millones de US$", m["total"].reindex(idx), -1, FUENTE + " (hoja A.1)",
           "Todo lo que debe el Tesoro nacional: bonos, letras, organismos internacionales (FMI incluido) y otros préstamos, en pesos y en moneda extranjera."
           + fin_mes + " En «% del PIB» esta página la divide por el PIB de 12 meses con el dólar oficial promedio (cálculo propio): puede diferir unas décimas de la cifra de Finanzas, que está en «Deuda pública bruta / PIB»."
-          + nota, agg=True),
+          + _frase("deuda_ac_total", alt) + nota, agg=True, alt=_alt("deuda_ac_total", alt, idx)),
         S("deuda_ac_me", "Deuda pública en moneda extranjera", CAT, "usd", "millones de US$", m["me"].reindex(idx), -1, FUENTE + " (hoja A.3)",
           "Parte de la deuda del Tesoro en dólares, euros, yenes, DEG y otras monedas extranjeras. Es la que no se puede pagar con pesos. Solo la deuda en situación de pago normal."
           + fin_mes + nota, agg=True),
         S("deuda_ac_mn", "Deuda pública en moneda nacional", CAT, "usd", "millones de US$", m["mn"].reindex(idx), 0, FUENTE + " (hoja A.3)",
           "Parte de la deuda del Tesoro en pesos (con o sin ajuste por inflación), pasada a dólares al tipo de cambio de fin de mes. Solo la deuda en situación de pago normal."
-          + nota, agg=True),
+          + _frase("deuda_ac_mn", alt) + nota, agg=True, alt=_alt("deuda_ac_mn", alt, idx)),
         S("deuda_fmi", "Deuda con el FMI", CAT, "usd", "millones de US$", m["fmi"].reindex(idx), -1, FUENTE + " (hoja A.1, fila FMI)",
           "Lo que el Tesoro le debe al Fondo Monetario Internacional, pasado a dólares (el FMI presta en DEG, su moneda de cuenta)." + fin_mes + nota, agg=True),
         S("deuda_letras_bcra", "Deuda del Tesoro con el Banco Central (letras y adelantos)", CAT, "usd", "millones de US$", m["letras_bcra"].reindex(idx), 0,
@@ -246,7 +315,7 @@ def series(idx):
                      "Cuenta propia, no es un dato oficial. Deuda del Tesoro menos lo que el Tesoro le debe al Banco Central (letras y adelantos: al consolidar es deuda de una parte del Estado con otra) más la deuda en pesos del Banco Central que paga interés (pases, Leliq, Lefi, Lebac), pasada a dólares al oficial del último día hábil de cada mes."
                      " Es un techo: las Lecap y otros títulos en pesos que tiene el Banco Central no se publican aparte y no se restan."
                      " En jul-25 las Lefi pasaron al Tesoro: desde ahí están en la deuda del Tesoro y no en los pasivos del Banco Central (no se cuentan dos veces, pero cambia la composición)."
-                     + cuenta + nota, agg=True))
+                     + cuenta + _frase("deuda_consolidada", alt) + nota, agg=True, alt=_alt("deuda_consolidada", alt, idx)))
     except Exception as e:  # noqa: BLE001
         print(f"  Deuda consolidada: no disponible ({e})")
     print(f"  Deuda: hasta {_mes_txt(ult)}; preliminares: {', '.join(_mes_txt(f) for f in prel) or 'ninguno'}")
@@ -255,7 +324,13 @@ def series(idx):
 
 if __name__ == "__main__":
     idx = pd.date_range("1990-01-01", pd.Timestamp.today().normalize().replace(day=1), freq="MS")
-    for s in series(idx):
+    todas = series(idx)
+    for s in todas:
         v = s["v"].dropna()
         print(f"{s['id']}: {len(v)} datos, {_mes_txt(v.index[0])} a {_mes_txt(v.index[-1])}, último {v.iloc[-1]:,.1f}")
-    print(next(s for s in series(idx) if s["id"] == "deuda_consolidada")["desc"])
+        for k, a in (s.get("alt") or {}).items():
+            a = a.dropna()
+            print(f"    al {k}: {_mes_txt(a.index[-1])} {a.iloc[-1]:,.1f} (oficial {v[a.index[-1]]:,.1f}); {len(a)} datos")
+    print(next(s for s in todas if s["id"] == "deuda_consolidada")["desc"])
+    import macro
+    print(macro.fin_de_mes().tail(3))

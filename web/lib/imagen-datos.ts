@@ -51,9 +51,14 @@ export const tituloGrafico = (lista: { c: Calculo }[], b100: boolean): string =>
     : lista.length === 2 ? `${lista[0].c.corto} y ${lista[1].c.corto}` : lista[0].c.nombre;
 
 /** Cuando el valor es real, con qué índice se descontó la inflación (vacío si no corresponde). */
-export const notaInflacion = (calcs: Calculo[], b100: boolean): string =>
-  !b100 && calcs.some((c) => c.serie.id !== "ipc_empalme" && /\$ de [a-z]{3}-\d\d|descontada la inflación|relativo al IPC|% real/.test(c.unidad))
-    ? "Inflación descontada con el IPC de INDEC (de 2007 a 2016, con los de San Luis y la Ciudad de Buenos Aires)." : "";
+export const notaInflacion = (calcs: Calculo[], b100: boolean): string => {
+  if (b100) return "";
+  // «$ de oct-26» son pesos de hoy (IPC de INDEC); «US$ de oct-26», dólares de hoy (inflación de EE.UU.)
+  const ar = calcs.some((c) => c.serie.id !== "ipc_empalme" && /(^|[^S])\$ de [a-z]{3}-\d\d|descontada la inflación|relativo al IPC|% real|neto infl/.test(c.unidad));
+  const us = calcs.some((c) => /US\$ de [a-z]{3}-\d\d|neto infl/.test(c.unidad));
+  return [ar ? "Inflación descontada con el IPC de INDEC (de 2007 a 2016, con los de San Luis y la Ciudad de Buenos Aires)." : "",
+    us ? "Dólares de hoy: inflación de EE.UU. descontada con el CPI-U del BLS." : ""].filter(Boolean).join(" ");
+};
 
 /** Título de una imagen de una sola variable: el nombre y, entre paréntesis, cómo se mide. */
 export function tituloVariable(m: Motor, e: Expr, c: Calculo): string {

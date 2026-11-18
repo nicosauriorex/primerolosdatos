@@ -125,6 +125,37 @@ def _sin_datos_sueltos(s: pd.Series, tolerancia: float = 0.3) -> pd.Series:
     return s[~confiable | ((s / med - 1).abs() <= tolerancia)]
 
 
+def _cotizaciones_diarias(d: dict) -> tuple:
+    """(oficial, blue, mep, ccl) diarios, ya combinados y sin datos sueltos, desde las series diarias `d` (sin ceros)."""
+    # Oficial diario (para mín/máx): A3500 diario (tiene años vacíos) completado con el mayorista desde 2011
+    oficial = d["a3500"].combine_first(d["mayorista"])
+    # Ámbito es la fuente principal (Bluelytics tiene 2011-2012 sin variación diaria); Bluelytics completa días faltantes
+    blue = d["blue_ambito"].combine_first(d["blue_bluelytics"][d["blue_bluelytics"].index >= "2013-01-01"])
+    return (_sin_datos_sueltos(oficial), _sin_datos_sueltos(blue),
+            _sin_datos_sueltos(d["mep"]), _sin_datos_sueltos(d["ccl"]))
+
+
+def fin_de_mes() -> pd.DataFrame:
+    """Cotización del último día con dato de cada mes (índice = primer día del mes): columnas oficial, blue, mep y ccl.
+    Usa las mismas descargas (y claves de caché) que `construir`."""
+    d = {
+        "a3500": red.cacheado("d_a3500_bcra", lambda: __import__("catalogo")._bcra(5)),
+        "mayorista": red.cacheado("d_mayorista", lambda: _argdatos("cotizaciones/dolares/mayorista")),
+        "blue_ambito": red.cacheado("d_blue_ambito", lambda: _ambito("dolar/informal", 2002, date.today().year)),
+        "blue_bluelytics": red.cacheado("d_blue_bluelytics", _bluelytics),
+        "mep": red.cacheado("d_mep", lambda: _argdatos("cotizaciones/dolares/bolsa")),
+        "ccl": red.cacheado("d_ccl", lambda: _argdatos("cotizaciones/dolares/contadoconliqui")),
+    }
+    d = {k: s[s > 0] for k, s in d.items()}
+    cols = dict(zip(("oficial", "blue", "mep", "ccl"), _cotizaciones_diarias(d)))
+    out = {}
+    for k, s in cols.items():
+        m = s.sort_index().groupby(s.index.to_period("M")).last()
+        m.index = m.index.to_timestamp()
+        out[k] = m
+    return pd.DataFrame(out).sort_index()
+
+
 def construir(indice: pd.DatetimeIndex) -> pd.DataFrame:
     """DataFrame mensual (en el índice dado) con promedio, mínimo y máximo de cada serie de mercado."""
     print("Mercados: bajando series diarias...")
@@ -146,12 +177,7 @@ def construir(indice: pd.DatetimeIndex) -> pd.DataFrame:
     for k, s in d.items():
         print(f"  {k}:{s.index.min():%Y-%m-%d} a {s.index.max():%Y-%m-%d} ({len(s)} días)")
 
-    # Oficial diario (para mín/máx): A3500 diario (tiene años vacíos) completado con el mayorista desde 2011
-    oficial = d["a3500"].combine_first(d["mayorista"])
-    # Ámbito es la fuente principal (Bluelytics tiene 2011-2012 sin variación diaria); Bluelytics completa días faltantes
-    blue = d["blue_ambito"].combine_first(d["blue_bluelytics"][d["blue_bluelytics"].index >= "2013-01-01"])
-    oficial, blue = _sin_datos_sueltos(oficial), _sin_datos_sueltos(blue)
-    d["mep"], d["ccl"] = _sin_datos_sueltos(d["mep"]), _sin_datos_sueltos(d["ccl"])
+    oficial, blue, d["mep"], d["ccl"] = _cotizaciones_diarias(d)
     fuentes = {"fx_oficial": oficial, "fx_blue": blue, "fx_mep": d["mep"], "fx_ccl": d["ccl"],
                "riesgo": d["riesgo"], "tcrm": d["tcrm"], "soja_ros": d["soja_ros"], "soja_chi": d["soja_chi"]}
     out = pd.DataFrame(index=indice)

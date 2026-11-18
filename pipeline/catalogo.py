@@ -58,11 +58,13 @@ def _controlar_canastas(can):
 FUENTE_IPC = "INDEC (IPC); de 2007 a 2016, IPC de San Luis y de la Ciudad de Buenos Aires"
 
 
-def S(id, n, cat, tipo, u, v, dir=0, fuente="", desc="", mn=None, mx=None, agg=False, flujo=False):
+def S(id, n, cat, tipo, u, v, dir=0, fuente="", desc="", mn=None, mx=None, agg=False, flujo=False, alt=None):
     """agg: monto agregado de toda la economía (admite por habitante y % del PIB). flujo: se suma en el tiempo (no es stock)."""
     d = {"id": id, "n": n, "cat": cat, "tipo": tipo, "u": u, "dir": dir, "fuente": fuente, "desc": desc, "v": v, "agg": agg, "flujo": flujo}
     if mn is not None:
         d["min"], d["max"] = mn, mx
+    if alt:
+        d["alt"] = alt  # {"blue"|"mep"|"ccl": pd.Series}: la misma serie en otro dólar (deuda, ver docs/specs/deuda-otros-dolares.md)
     return d
 
 
@@ -600,5 +602,14 @@ def a_json(series, idx):
                 j0, vv = comp(s[k])
                 if j0 is not None:
                     d[k] = {"i0": j0, "v": vv}
+        if s.get("alt"):
+            alt = {}
+            for k, sv in s["alt"].items():
+                j0, vv = comp(sv)
+                if j0 is not None:
+                    alt[k] = {"i0": j0, "v": vv}
+            if alt:
+                d["alt"] = alt
+                d["dol"] = list(alt)
         out.append(d)
     return {"fechas": fechas, "series": out}

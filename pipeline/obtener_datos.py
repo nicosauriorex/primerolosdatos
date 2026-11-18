@@ -242,7 +242,7 @@ def escribir_json_web(datos, ctx=None, pm=None, cap=None, con_red=True):
     meta = []
     for s in datos["series"]:
         archivo = "base" if s["id"] in IDS_BASE else catalogo.slug(s["cat"][0])
-        valores = {k: s[k] for k in ("i0", "v", "min", "max") if k in s}
+        valores = {k: s[k] for k in ("i0", "v", "min", "max", "alt") if k in s}
         grupos.setdefault(archivo, {})[s["id"]] = valores
         meta.append({**{k: v for k, v in s.items() if k not in valores}, "archivo": archivo})
     h = hashlib.sha1()

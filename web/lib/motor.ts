@@ -10,10 +10,14 @@ export interface SerieMeta {
   agg?: number; flujo?: number; archivo: string;
   /** Nombre original del catálogo cuando `n` es el nombre público (ver nombres.ts). */
   nTecnico?: string;
+  /** Series en US$ con una parte en pesos: cotizaciones (`blue`, `mep`, `ccl`) a las que se puede pasar esa parte (ver `alt`). */
+  dol?: string[];
 }
-export interface SerieDatos { i0: number; v: (number | null)[]; min?: Banda; max?: Banda }
+export interface SerieDatos { i0: number; v: (number | null)[]; min?: Banda; max?: Banda; alt?: Record<string, Banda> }
 export interface Serie extends SerieMeta {
   vals: Vals; mn?: Vals; mx?: Vals; busca?: string; i0: number;
+  /** La misma serie en US$ con la parte en pesos pasada a cada cotización de `dol`. */
+  alt?: Record<string, Vals>;
 }
 export interface Expr {
   id: string; med?: string; rel?: string | null; modo?: string; esc?: string; forzar?: boolean;
@@ -111,6 +115,7 @@ export function crearMotor(F: string[]) {
       if (!d) continue;
       const s: Serie = { ...normalizarMeta(m), i0: d.i0, vals: expandir(d.i0, d.v, N) };
       if (d.min && d.max) { s.mn = expandir(d.min.i0, d.min.v, N); s.mx = expandir(d.max.i0, d.max.v, N); }
+      if (d.alt) s.alt = Object.fromEntries(Object.entries(d.alt).map(([k, b]) => [k, expandir(b.i0, b.v, N)]));
       SER[s.id] = s;
     }
     cache = new Map();
@@ -180,6 +185,24 @@ export function crearMotor(F: string[]) {
     etq: (v) => `Dólares ${v[0] === "usdr" ? "reales" : "corrientes"} al ${FX_NOM[v[1]]}`,
   });
 
+  /** Dólares de una serie en US$ con parte en pesos (`dol`): corrientes / reales y la cotización a la que se pasa esa parte.
+   *  El oficial conserva los códigos de siempre (`corr`, `usdr`); el resto es `usd_<cotización>` / `usdr_<cotización>`. */
+  const grupoDolaresUsd = (cots: string[]): GrupoMed => {
+    const fxs = ["oficial", ...FX_KEYS.filter((k) => k !== "oficial" && cots.includes(k))];
+    return {
+      k: "dolares", nombre: "Dólares",
+      dims: [{ opciones: [["usd", "Corrientes"], ["usdr", "Reales"]] }, { opciones: fxs.map((k): Opcion => [k, FX_NOM[k]]) }],
+      unir: (v) => (v[1] === "oficial" ? (v[0] === "usdr" ? "usdr" : "corr") : `${v[0]}_${v[1]}`),
+      partir: (c) => {
+        if (c === "corr") return ["usd", "oficial"];
+        if (c === "usdr") return ["usdr", "oficial"];
+        const [t, f] = c.split("_");
+        return (t === "usdr" || t === "usd") && f !== "oficial" && fxs.includes(f) ? [t, f] : null;
+      },
+      etq: (v) => `Dólares ${v[0] === "usdr" ? "reales" : "corrientes"}${v[1] === "oficial" ? "" : ` al ${FX_NOM[v[1]]}`}`,
+    };
+  };
+
   /** Medidas de una serie ordenadas en grupos (pasos). Vacío o con una sola opción: no hay botón de medida. */
   function gruposMedida(s: SerieMeta): GrupoMed[] {
     base();
@@ -189,7 +212,7 @@ export function crearMotor(F: string[]) {
       case "fx": return [
         simple("pesos", "Pesos", [["real", "Reales"], ["corr", "Corrientes"], ["realbi", "Reales netos de inflación de EE.UU."]]), grupoVar(true)];
       case "usd": return [
-        simple("dolares", "Dólares", [["corr", "Corrientes"], ["usdr", "Reales"]]),
+        s.dol?.some((k) => FX_NOM[k] && k !== "oficial") ? grupoDolaresUsd(s.dol) : simple("dolares", "Dólares", [["corr", "Corrientes"], ["usdr", "Reales"]]),
         simple("pesos", "Pesos", [["arscorr", "Corrientes (al oficial)"], ["real", "Reales (al oficial)"]])];
       case "tasa": return [simple("tasa", "", [["asis", "TNA"], ["tea", "TEA"], ["real_a", "Real anual"], ["real_m", "Real mensual"]])];
       case "idx": {
@@ -227,7 +250,7 @@ export function crearMotor(F: string[]) {
       return s.tipo === "usd" && v[0] === "real" ? "pesos de hoy (al oficial)" : t ?? g.etq(v);
     }
     if (g.k === "dolares") {
-      if (v[1]) return `en US$ ${FX_NOM[v[1]]}${v[0] === "usdr" ? " de hoy" : ""}`;
+      if (v[1] && !(s.tipo === "usd" && v[1] === "oficial")) return `en US$ ${FX_NOM[v[1]]}${v[0] === "usdr" ? " de hoy" : ""}`;   // una serie en US$ con el oficial: los textos de siempre
       return v[0] === "usdr" ? "dólares de hoy" : "dólares corrientes";
     }
     if (g.k === "valor") return "";                          // el valor tal cual: el nombre alcanza, sin "(tal cual)"
@@ -288,6 +311,13 @@ export function crearMotor(F: string[]) {
       return tipo === "usd" ? usd : mul(usd, realUS(i));
     });
     if (t === "fx") return arr.map((x, i) => !ok(x) ? null : med === "corr" ? x : med === "real" ? mul(x, realAR(i)) : mul(x, realAR(i), 1 / (realUS(i) as number)));
+    if (t === "usd") {
+      const [tipo, cot] = med.split("_");
+      if (cot && (tipo === "usd" || tipo === "usdr")) {   // la parte en pesos a otra cotización: la serie sale de `alt`, no de `arr`
+        const alt = s.alt?.[cot];
+        return alt ? alt.map((x, i) => !ok(x) ? null : tipo === "usd" ? x : mul(x, realUS(i))) : arr.map(() => null);
+      }
+    }
     if (t === "usd") return arr.map((x, i) => !ok(x) ? null : med === "corr" ? x : med === "usdr" ? mul(x, realUS(i))
       : med === "arscorr" ? mul(x, FX.oficial[i]) : mul(x, FX.oficial[i], realAR(i)));
     return arr.slice();
@@ -315,6 +345,10 @@ export function crearMotor(F: string[]) {
       return u.replace("$", tipo === "usdr" ? `US$ de ${refUS}` : "US$") + ` (${FX_NOM[fx]})`;
     }
     if (s.tipo === "fx") return med === "corr" ? u : med === "real" ? `$ de ${refAR} por US$` : `$ de ${refAR} por US$, neto infl. EEUU`;
+    if (s.tipo === "usd") {
+      const [tipo, fx] = med.split("_");
+      if (fx && FX_NOM[fx] && (tipo === "usd" || tipo === "usdr")) return (tipo === "usdr" ? u.replace("US$", `US$ de ${refUS}`) : u) + ` (${FX_NOM[fx]})`;
+    }
     if (s.tipo === "usd") return ({ corr: u, usdr: u.replace("US$", `US$ de ${refUS}`), arscorr: u.replace("US$", "$"), real: u.replace("US$", `$ de ${refAR}`) } as Record<string, string>)[med] || u;
     return u;
   }
@@ -372,7 +406,7 @@ export function crearMotor(F: string[]) {
       const mm = mm0 && permiteMM(A, med) ? mm0 : 0;   // el suavizado solo vale sobre un valor
       const suave = (x: Vals) => (mm ? mediaMovil(x, mm) : x);
       r = { v: suave(transformar(A, A.vals, med)), nombre: mm ? `${A.n} (promedio móvil ${mm} meses)` : A.n, corto: A.n, unidad: unidadDe(A, med) + (mm ? `, promedio móvil ${mm} meses` : ""), dir: dirEfectiva(A, med, null), flujo: !!A.flujo };
-      if (A.mn && A.mx) { r.lo = suave(transformar(A, A.mn, med)); r.hi = suave(transformar(A, A.mx, med)); }
+      if (A.mn && A.mx && !(A.tipo === "usd" && med.includes("_"))) { r.lo = suave(transformar(A, A.mn, med)); r.hi = suave(transformar(A, A.mx, med)); }   // la banda es del oficial: con otra cotización no hay
       if (esc === "pc") {
         const [fa, uu] = FACTOR_U(r.unidad);
         const POB = b.POB as Vals;
