@@ -15,7 +15,7 @@ en_que,1,Gastos en personal,Asistencia social al personal,,7,0.0,17888.0513,3433
 en_que,1,Gastos en personal,Asistencia social al personal,,8,0.0,10989.4073,47990.2591
 en_que,1,Gastos en personal,Asistencia social al personal,,9,0.0,-655511.1696,62735.363
 en_que,1,Gastos en personal,Asistencia social al personal,,10,0.0,703.1111,66772.0335
-en_que,1,Gastos en personal,Asistencia social al personal,,11,0.0,0.652,28771.6741
+en_que,1,Gastos en personal,Asistencia social al personal,,11,0.0,0.652,28774.6427
 en_que,1,Gastos en personal,Beneficios y compensaciones,,1,116344.3053,116562.5868,9239.5344
 en_que,1,Gastos en personal,Beneficios y compensaciones,,2,0.0,2162.3069,7236.6203
 en_que,1,Gastos en personal,Beneficios y compensaciones,,3,0.0,2221.66,8555.8409
@@ -59,7 +59,7 @@ en_que,1,Gastos en personal,Personal permanente,,7,0.0,448635.4083,1103962.3883
 en_que,1,Gastos en personal,Personal permanente,,8,0.0,-20565.97,1125179.3503
 en_que,1,Gastos en personal,Personal permanente,,9,0.0,551803.4314,1194047.8196
 en_que,1,Gastos en personal,Personal permanente,,10,0.0,2713.6385,1135127.5818
-en_que,1,Gastos en personal,Personal permanente,,11,0.0,-740.4439,62784.3054
+en_que,1,Gastos en personal,Personal permanente,,11,0.0,-740.4439,62898.2627
 en_que,1,Gastos en personal,Personal temporario,,1,354818.3276,354915.3276,27097.1843
 en_que,1,Gastos en personal,Personal temporario,,2,0.0,-68.2454,29056.2419
 en_que,1,Gastos en personal,Personal temporario,,3,0.0,-93.0,29411.8507
@@ -81,7 +81,7 @@ en_que,1,Gastos en personal,Servicios extraordinarios,,7,0.0,-506.6632,27751.683
 en_que,1,Gastos en personal,Servicios extraordinarios,,8,0.0,5369.9062,28981.9078
 en_que,1,Gastos en personal,Servicios extraordinarios,,9,0.0,33723.1135,31975.3118
 en_que,1,Gastos en personal,Servicios extraordinarios,,10,0.0,6767.6044,30442.7178
-en_que,1,Gastos en personal,Servicios extraordinarios,,11,0.0,0.0,2831.0283
+en_que,1,Gastos en personal,Servicios extraordinarios,,11,0.0,0.0,2920.8147
 en_que,2,Bienes de consumo,Minerales,,1,1245.904,1245.904,5.7641
 en_que,2,Bienes de consumo,Minerales,,2,0.0,-50.0,74.9383
 en_que,2,Bienes de consumo,Minerales,,3,0.0,1.0,48.4946
@@ -103,7 +103,7 @@ en_que,2,Bienes de consumo,Otros bienes de consumo,,7,0.0,-6996.2127,7275.3016
 en_que,2,Bienes de consumo,Otros bienes de consumo,,8,0.0,97.5196,11116.2682
 en_que,2,Bienes de consumo,Otros bienes de consumo,,9,0.0,20223.5694,20128.9646
 en_que,2,Bienes de consumo,Otros bienes de consumo,,10,0.0,-1911.8931,11615.171
-en_que,2,Bienes de consumo,Otros bienes de consumo,,11,0.0,-6800.2381,7844.9111
+en_que,2,Bienes de consumo,Otros bienes de consumo,,11,0.0,-6800.2381,7899.8057
 en_que,2,Bienes de consumo,"Productos alimenticios, agropecuarios y forestales",,1,194109.3158,193402.914,1374.343
 en_que,2,Bienes de consumo,"Productos alimenticios, agropecuarios y forestales",,2,0.0,-474.1807,8713.7582
 en_que,2,Bienes de consumo,"Productos alimenticios, agropecuarios y forestales",,3,0.0,783.9766,12863.3653
@@ -114,7 +114,7 @@ en_que,2,Bienes de consumo,"Productos alimenticios, agropecuarios y forestales",
 en_que,2,Bienes de consumo,"Productos alimenticios, agropecuarios y forestales",,8,0.0,-1949.6042,10082.5865
 en_que,2,Bienes de consumo,"Productos alimenticios, agropecuarios y forestales",,9,0.0,-5430.275,20789.4088
 en_que,2,Bienes de consumo,"Productos alimenticios, agropecuarios y forestales",,10,0.0,-3588.7052,10554.3022
-en_que,2,Bienes de consumo,"Productos alimenticios, agropecuarios y forestales",,11,0.0,135.7999,5860.9314
+en_que,2,Bienes de consumo,"Productos alimenticios, agropecuarios y forestales",,11,0.0,135.7999,6059.8084
 en_que,2,Bienes de consumo,Productos de cuero y caucho,,1,8948.8965,8948.8965,204.1762
 en_que,2,Bienes de consumo,Productos de cuero y caucho,,2,0.0,0.0,142.1812
 en_que,2,Bienes de consumo,Productos de cuero y caucho,,3,0.0,-34.2127,247.495
@@ -125,7 +125,7 @@ en_que,2,Bienes de consumo,Productos de cuero y caucho,,7,0.0,-230.9957,437.4139
 en_que,2,Bienes de consumo,Productos de cuero y caucho,,8,0.0,-85.5138,319.4906
 en_que,2,Bienes de consumo,Productos de cuero y caucho,,9,0.0,3288.6058,553.6104
 en_que,2,Bienes de consumo,Productos de cuero y caucho,,10,0.0,-2283.7985,248.9363
-en_que,2,Bienes de consumo,Productos de cuero y caucho,,11,0.0,13.3144,542.0838
+en_que,2,Bienes de consumo,Productos de cuero y caucho,,11,0.0,13.3144,544.4183
 en_que,2,Bienes de consumo,Productos de minerales no metálicos,,1,7141.5431,7142.5431,17.2459
 en_que,2,Bienes de consumo,Productos de minerales no metálicos,,2,0.0,0.0,50.19
 en_que,2,Bienes de consumo,Productos de minerales no metálicos,,3,0.0,6.0,442.1813
@@ -136,7 +136,7 @@ en_que,2,Bienes de consumo,Productos de minerales no metálicos,,7,0.0,162.6752,
 en_que,2,Bienes de consumo,Productos de minerales no metálicos,,8,0.0,-293.4743,564.1378
 en_que,2,Bienes de consumo,Productos de minerales no metálicos,,9,0.0,1138.6714,741.343
 en_que,2,Bienes de consumo,Productos de minerales no metálicos,,10,0.0,9.8114,684.4072
-en_que,2,Bienes de consumo,Productos de minerales no metálicos,,11,0.0,-18.365,274.7142
+en_que,2,Bienes de consumo,Productos de minerales no metálicos,,11,0.0,-18.365,275.3895
 en_que,2,Bienes de consumo,"Productos de papel, cartón e impresos",,1,102162.4901,101667.518,848.8983
 en_que,2,Bienes de consumo,"Productos de papel, cartón e impresos",,2,0.0,37630.5496,2664.4927
 en_que,2,Bienes de consumo,"Productos de papel, cartón e impresos",,3,0.0,-57.8981,39154.2934
@@ -147,7 +147,7 @@ en_que,2,Bienes de consumo,"Productos de papel, cartón e impresos",,7,0.0,-358.
 en_que,2,Bienes de consumo,"Productos de papel, cartón e impresos",,8,0.0,-469.2305,9369.7605
 en_que,2,Bienes de consumo,"Productos de papel, cartón e impresos",,9,0.0,5081.7393,2938.4413
 en_que,2,Bienes de consumo,"Productos de papel, cartón e impresos",,10,0.0,-57.4131,11638.2834
-en_que,2,Bienes de consumo,"Productos de papel, cartón e impresos",,11,0.0,-56.369,4944.859
+en_que,2,Bienes de consumo,"Productos de papel, cartón e impresos",,11,0.0,-56.369,4946.0382
 en_que,2,Bienes de consumo,Productos metálicos,,1,30353.4265,30354.9265,438.3246
 en_que,2,Bienes de consumo,Productos metálicos,,2,0.0,-7407.1719,334.8344
 en_que,2,Bienes de consumo,Productos metálicos,,3,0.0,-68.8926,586.1065
@@ -158,7 +158,7 @@ en_que,2,Bienes de consumo,Productos metálicos,,7,0.0,-556.4744,705.0942
 en_que,2,Bienes de consumo,Productos metálicos,,8,0.0,-357.6253,2676.8491
 en_que,2,Bienes de consumo,Productos metálicos,,9,0.0,1004.4573,1247.7671
 en_que,2,Bienes de consumo,Productos metálicos,,10,0.0,-3547.4263,1446.0299
-en_que,2,Bienes de consumo,Productos metálicos,,11,0.0,126.9952,664.9341
+en_que,2,Bienes de consumo,Productos metálicos,,11,0.0,126.9952,665.308
 en_que,2,Bienes de consumo,"Productos químicos, combustibles y lubricantes",,1,786860.7919,786505.3586,5717.9232
 en_que,2,Bienes de consumo,"Productos químicos, combustibles y lubricantes",,2,0.0,-12467.7561,22631.8533
 en_que,2,Bienes de consumo,"Productos químicos, combustibles y lubricantes",,3,0.0,-1909.7926,150215.4845
@@ -169,7 +169,7 @@ en_que,2,Bienes de consumo,"Productos químicos, combustibles y lubricantes",,7,
 en_que,2,Bienes de consumo,"Productos químicos, combustibles y lubricantes",,8,0.0,12000.7029,70585.3591
 en_que,2,Bienes de consumo,"Productos químicos, combustibles y lubricantes",,9,0.0,401109.8995,174781.4153
 en_que,2,Bienes de consumo,"Productos químicos, combustibles y lubricantes",,10,0.0,47321.0114,138963.1737
-en_que,2,Bienes de consumo,"Productos químicos, combustibles y lubricantes",,11,0.0,1705.2263,63546.3371
+en_que,2,Bienes de consumo,"Productos químicos, combustibles y lubricantes",,11,0.0,1705.2263,63548.4455
 en_que,2,Bienes de consumo,Textiles y vestuario,,1,42862.2947,42152.4033,555.9271
 en_que,2,Bienes de consumo,Textiles y vestuario,,2,0.0,818.1398,1129.6676
 en_que,2,Bienes de consumo,Textiles y vestuario,,3,0.0,-290.3221,4191.0789
@@ -180,7 +180,7 @@ en_que,2,Bienes de consumo,Textiles y vestuario,,7,0.0,79.5196,1601.7461
 en_que,2,Bienes de consumo,Textiles y vestuario,,8,0.0,-236.1664,3402.106
 en_que,2,Bienes de consumo,Textiles y vestuario,,9,0.0,1954.579,2406.668
 en_que,2,Bienes de consumo,Textiles y vestuario,,10,0.0,-5277.5114,2600.9131
-en_que,2,Bienes de consumo,Textiles y vestuario,,11,0.0,-238.3443,1257.394
+en_que,2,Bienes de consumo,Textiles y vestuario,,11,0.0,-238.3443,1261.1776
 en_que,3,Servicios no personales,Alquileres y derechos,,1,145397.8043,148552.8398,2251.0265
 en_que,3,Servicios no personales,Alquileres y derechos,,2,0.0,162.283,18512.2061
 en_que,3,Servicios no personales,Alquileres y derechos,,3,0.0,2924.31,20516.5187
@@ -191,7 +191,7 @@ en_que,3,Servicios no personales,Alquileres y derechos,,7,0.0,20071.9664,11963.6
 en_que,3,Servicios no personales,Alquileres y derechos,,8,0.0,23.4353,10322.0891
 en_que,3,Servicios no personales,Alquileres y derechos,,9,0.0,33682.9257,32181.6594
 en_que,3,Servicios no personales,Alquileres y derechos,,10,0.0,4912.1655,20100.8372
-en_que,3,Servicios no personales,Alquileres y derechos,,11,0.0,2661.964,10944.623
+en_que,3,Servicios no personales,Alquileres y derechos,,11,0.0,2661.964,10963.5376
 en_que,3,Servicios no personales,"Impuestos, derechos, tasas y juicios",,1,62999.7864,63529.2294,6359.1654
 en_que,3,Servicios no personales,"Impuestos, derechos, tasas y juicios",,2,0.0,280.3141,3421.3298
 en_que,3,Servicios no personales,"Impuestos, derechos, tasas y juicios",,3,0.0,-1250.5671,7199.5126
@@ -213,7 +213,7 @@ en_que,3,Servicios no personales,"Mantenimiento, reparación y limpieza",,7,0.0,
 en_que,3,Servicios no personales,"Mantenimiento, reparación y limpieza",,8,0.0,7786.0115,49792.588
 en_que,3,Servicios no personales,"Mantenimiento, reparación y limpieza",,9,0.0,65561.8425,81498.949
 en_que,3,Servicios no personales,"Mantenimiento, reparación y limpieza",,10,0.0,1907.2976,41225.5457
-en_que,3,Servicios no personales,"Mantenimiento, reparación y limpieza",,11,0.0,-2350.9216,25763.1238
+en_que,3,Servicios no personales,"Mantenimiento, reparación y limpieza",,11,0.0,-2350.9216,25936.723
 en_que,3,Servicios no personales,Otros servicios,,1,609028.5643,608323.5643,19368.7387
 en_que,3,Servicios no personales,Otros servicios,,2,0.0,4593.5841,28152.7281
 en_que,3,Servicios no personales,Otros servicios,,3,0.0,-897.5626,52190.7638
@@ -224,7 +224,7 @@ en_que,3,Servicios no personales,Otros servicios,,7,0.0,37358.14,35052.711
 en_que,3,Servicios no personales,Otros servicios,,8,0.0,-5226.3343,50658.6786
 en_que,3,Servicios no personales,Otros servicios,,9,0.0,-99752.1075,64901.5902
 en_que,3,Servicios no personales,Otros servicios,,10,0.0,-2716.4708,42340.8518
-en_que,3,Servicios no personales,Otros servicios,,11,0.0,1877.7543,13103.4515
+en_que,3,Servicios no personales,Otros servicios,,11,0.0,1877.7543,13107.1385
 en_que,3,Servicios no personales,Pasajes y viáticos,,1,135805.1851,126856.0551,2617.7656
 en_que,3,Servicios no personales,Pasajes y viáticos,,2,0.0,-1120.173,5996.3339
 en_que,3,Servicios no personales,Pasajes y viáticos,,3,0.0,2641.9777,11151.6447
@@ -235,7 +235,7 @@ en_que,3,Servicios no personales,Pasajes y viáticos,,7,0.0,-632.0983,8186.2976
 en_que,3,Servicios no personales,Pasajes y viáticos,,8,0.0,1575.728,9595.8673
 en_que,3,Servicios no personales,Pasajes y viáticos,,9,0.0,4295.206,12328.7186
 en_que,3,Servicios no personales,Pasajes y viáticos,,10,0.0,3303.1482,10175.0207
-en_que,3,Servicios no personales,Pasajes y viáticos,,11,0.0,-9.6994,6253.4212
+en_que,3,Servicios no personales,Pasajes y viáticos,,11,0.0,-9.6994,6259.9317
 en_que,3,Servicios no personales,Publicidad y propaganda,,1,8069.1216,8069.1216,0.0
 en_que,3,Servicios no personales,Publicidad y propaganda,,2,0.0,-10.0,0.8037
 en_que,3,Servicios no personales,Publicidad y propaganda,,3,0.0,6.0,2.6737
@@ -257,7 +257,7 @@ en_que,3,Servicios no personales,Servicios básicos,,7,0.0,3718.8949,21139.1529
 en_que,3,Servicios no personales,Servicios básicos,,8,0.0,700.2077,28711.7435
 en_que,3,Servicios no personales,Servicios básicos,,9,0.0,124701.5671,102517.0114
 en_que,3,Servicios no personales,Servicios básicos,,10,0.0,-11702.8523,33870.8405
-en_que,3,Servicios no personales,Servicios básicos,,11,0.0,-2216.7302,13445.5001
+en_que,3,Servicios no personales,Servicios básicos,,11,0.0,-2216.7302,13605.0834
 en_que,3,Servicios no personales,Servicios comerciales y financieros,,1,304278.1995,301857.3295,5278.017
 en_que,3,Servicios no personales,Servicios comerciales y financieros,,2,0.0,-11202.9243,15529.446
 en_que,3,Servicios no personales,Servicios comerciales y financieros,,3,0.0,7976.6074,18388.0565
@@ -268,7 +268,7 @@ en_que,3,Servicios no personales,Servicios comerciales y financieros,,7,0.0,832.
 en_que,3,Servicios no personales,Servicios comerciales y financieros,,8,0.0,-775.7513,14110.2229
 en_que,3,Servicios no personales,Servicios comerciales y financieros,,9,0.0,115154.0309,47571.6888
 en_que,3,Servicios no personales,Servicios comerciales y financieros,,10,0.0,7583.8393,22935.9877
-en_que,3,Servicios no personales,Servicios comerciales y financieros,,11,0.0,3510.1178,6785.8486
+en_que,3,Servicios no personales,Servicios comerciales y financieros,,11,0.0,3510.1178,6801.4154
 en_que,3,Servicios no personales,Servicios técnicos y profesionales,,1,393457.8307,402625.4028,10280.027
 en_que,3,Servicios no personales,Servicios técnicos y profesionales,,2,0.0,6949.9618,16427.012
 en_que,3,Servicios no personales,Servicios técnicos y profesionales,,3,0.0,11987.9336,37162.2687
@@ -279,7 +279,7 @@ en_que,3,Servicios no personales,Servicios técnicos y profesionales,,7,0.0,7914
 en_que,3,Servicios no personales,Servicios técnicos y profesionales,,8,0.0,5420.6134,30937.2851
 en_que,3,Servicios no personales,Servicios técnicos y profesionales,,9,0.0,69484.7561,71632.5868
 en_que,3,Servicios no personales,Servicios técnicos y profesionales,,10,0.0,-7056.2148,36703.8053
-en_que,3,Servicios no personales,Servicios técnicos y profesionales,,11,0.0,-1124.9817,17269.8255
+en_que,3,Servicios no personales,Servicios técnicos y profesionales,,11,0.0,-1124.9817,17275.0338
 en_que,4,Bienes de uso,Activos intangibles,,1,68669.324,68964.324,1.9265
 en_que,4,Bienes de uso,Activos intangibles,,2,0.0,5581.1864,3219.4052
 en_que,4,Bienes de uso,Activos intangibles,,3,0.0,4359.147,1499.4661
@@ -424,7 +424,7 @@ en_que,5,Transferencias,Transferencias al sector privado para financiar gastos c
 en_que,5,Transferencias,Transferencias al sector privado para financiar gastos corrientes,,8,0.0,-42174.4816,8162372.7692
 en_que,5,Transferencias,Transferencias al sector privado para financiar gastos corrientes,,9,0.0,1340973.6438,9296416.8469
 en_que,5,Transferencias,Transferencias al sector privado para financiar gastos corrientes,,10,0.0,126275.2931,8805810.5681
-en_que,5,Transferencias,Transferencias al sector privado para financiar gastos corrientes,,11,0.0,296.0189,306549.0571
+en_que,5,Transferencias,Transferencias al sector privado para financiar gastos corrientes,,11,0.0,296.0189,306549.1517
 en_que,6,Incremento de activos financieros,Aportes de capital y compra de acciones,,1,297033.9702,297033.9702,0.0
 en_que,6,Incremento de activos financieros,Aportes de capital y compra de acciones,,2,0.0,0.0,4430.4311
 en_que,6,Incremento de activos financieros,Aportes de capital y compra de acciones,,3,0.0,0.0,50721.16
@@ -576,7 +576,7 @@ para_que,1.8,Administración gubernamental,Información y Estadística Básicas,
 para_que,1.8,Administración gubernamental,Información y Estadística Básicas,,8,0.0,900.0,3299.3291
 para_que,1.8,Administración gubernamental,Información y Estadística Básicas,,9,0.0,-87.0,6040.0275
 para_que,1.8,Administración gubernamental,Información y Estadística Básicas,,10,0.0,0.0,3369.8626
-para_que,1.8,Administración gubernamental,Información y Estadística Básicas,,11,0.0,0.0,523.6057
+para_que,1.8,Administración gubernamental,Información y Estadística Básicas,,11,0.0,0.0,527.0845
 para_que,2.1,Servicios de defensa y seguridad,Defensa,,1,2770262.0283,2770262.0283,176234.6177
 para_que,2.1,Servicios de defensa y seguridad,Defensa,,2,0.0,0.0,150588.1953
 para_que,2.1,Servicios de defensa y seguridad,Defensa,,3,0.0,0.0,218110.929
@@ -587,7 +587,7 @@ para_que,2.1,Servicios de defensa y seguridad,Defensa,,7,0.0,-3946.4879,231278.8
 para_que,2.1,Servicios de defensa y seguridad,Defensa,,8,0.0,0.0,256828.2757
 para_que,2.1,Servicios de defensa y seguridad,Defensa,,9,0.0,-69491.4946,315383.8731
 para_que,2.1,Servicios de defensa y seguridad,Defensa,,10,0.0,0.0,264164.5829
-para_que,2.1,Servicios de defensa y seguridad,Defensa,,11,0.0,-0.0,44008.6097
+para_que,2.1,Servicios de defensa y seguridad,Defensa,,11,0.0,-0.0,44435.3888
 para_que,2.2,Servicios de defensa y seguridad,Seguridad Interior,,1,3386272.4884,3386272.4884,228531.9834
 para_que,2.2,Servicios de defensa y seguridad,Seguridad Interior,,2,0.0,-5505.0,245825.3573
 para_que,2.2,Servicios de defensa y seguridad,Seguridad Interior,,3,0.0,0.0,249077.1275
@@ -609,7 +609,7 @@ para_que,2.3,Servicios de defensa y seguridad,Sistema Penal,,7,0.0,3971.46,49809
 para_que,2.3,Servicios de defensa y seguridad,Sistema Penal,,8,0.0,0.0,61955.0553
 para_que,2.3,Servicios de defensa y seguridad,Sistema Penal,,9,0.0,-48615.4695,55558.4975
 para_que,2.3,Servicios de defensa y seguridad,Sistema Penal,,10,0.0,-9630.0,63937.9514
-para_que,2.3,Servicios de defensa y seguridad,Sistema Penal,,11,0.0,0.0,4672.0428
+para_que,2.3,Servicios de defensa y seguridad,Sistema Penal,,11,0.0,0.0,4843.2302
 para_que,2.4,Servicios de defensa y seguridad,Inteligencia,,1,288930.5374,288930.5374,21604.0663
 para_que,2.4,Servicios de defensa y seguridad,Inteligencia,,2,0.0,0.0,22490.3553
 para_que,2.4,Servicios de defensa y seguridad,Inteligencia,,3,0.0,-0.0,38304.0977
@@ -620,7 +620,7 @@ para_que,2.4,Servicios de defensa y seguridad,Inteligencia,,7,0.0,49586.8296,318
 para_que,2.4,Servicios de defensa y seguridad,Inteligencia,,8,0.0,0.0,36093.1012
 para_que,2.4,Servicios de defensa y seguridad,Inteligencia,,9,0.0,34034.8837,45063.5478
 para_que,2.4,Servicios de defensa y seguridad,Inteligencia,,10,0.0,0.0,34897.9141
-para_que,2.4,Servicios de defensa y seguridad,Inteligencia,,11,0.0,0.0,16236.3793
+para_que,2.4,Servicios de defensa y seguridad,Inteligencia,,11,0.0,0.0,16236.7061
 para_que,3.1,Servicios sociales,Salud,,1,8822143.5936,8823076.5602,271223.4558
 para_que,3.1,Servicios sociales,Salud,,2,0.0,0.0,470142.7109
 para_que,3.1,Servicios sociales,Salud,,3,0.0,-1107.3,694767.3961
@@ -631,7 +631,7 @@ para_que,3.1,Servicios sociales,Salud,,7,0.0,238907.6585,609174.9773
 para_que,3.1,Servicios sociales,Salud,,8,0.0,257.8139,701626.0839
 para_que,3.1,Servicios sociales,Salud,,9,0.0,568485.4832,949909.412
 para_que,3.1,Servicios sociales,Salud,,10,0.0,15787.3441,784842.915
-para_que,3.1,Servicios sociales,Salud,,11,0.0,375.6519,491944.9792
+para_que,3.1,Servicios sociales,Salud,,11,0.0,375.6519,492005.3059
 para_que,3.2,Servicios sociales,Promoción y Asistencia Social,,1,3621219.3012,3621219.3012,211064.3083
 para_que,3.2,Servicios sociales,Promoción y Asistencia Social,,2,0.0,0.0,223761.4846
 para_que,3.2,Servicios sociales,Promoción y Asistencia Social,,3,0.0,-0.0,234655.7886
@@ -642,7 +642,7 @@ para_que,3.2,Servicios sociales,Promoción y Asistencia Social,,7,0.0,633790.885
 para_que,3.2,Servicios sociales,Promoción y Asistencia Social,,8,0.0,5507.4525,303220.4956
 para_que,3.2,Servicios sociales,Promoción y Asistencia Social,,9,0.0,-345488.9412,319580.1575
 para_que,3.2,Servicios sociales,Promoción y Asistencia Social,,10,0.0,-2492.5701,304901.8787
-para_que,3.2,Servicios sociales,Promoción y Asistencia Social,,11,0.0,0.0,11603.1375
+para_que,3.2,Servicios sociales,Promoción y Asistencia Social,,11,0.0,0.0,11605.0034
 para_que,3.3,Servicios sociales,Seguridad Social,,1,83443724.7043,83443724.7043,6023445.9244
 para_que,3.3,Servicios sociales,Seguridad Social,,2,0.0,0.0,6156860.1067
 para_que,3.3,Servicios sociales,Seguridad Social,,3,0.0,0.0,7845894.4762
@@ -664,7 +664,7 @@ para_que,3.4,Servicios sociales,Educación y Cultura,,7,0.0,1377437.1393,174596.
 para_que,3.4,Servicios sociales,Educación y Cultura,,8,0.0,-3332.6401,622799.311
 para_que,3.4,Servicios sociales,Educación y Cultura,,9,0.0,57669.4161,1226815.5354
 para_que,3.4,Servicios sociales,Educación y Cultura,,10,0.0,528.8425,725147.4236
-para_que,3.4,Servicios sociales,Educación y Cultura,,11,0.0,-351.1519,62375.1391
+para_que,3.4,Servicios sociales,Educación y Cultura,,11,0.0,-351.1519,62565.2775
 para_que,3.5,Servicios sociales,"Ciencia, Tecnología e Innovación",,1,1575382.498,1575382.498,96530.547
 para_que,3.5,Servicios sociales,"Ciencia, Tecnología e Innovación",,2,0.0,-0.0,115327.6699
 para_que,3.5,Servicios sociales,"Ciencia, Tecnología e Innovación",,3,0.0,2364.4001,171104.7717
@@ -1483,7 +1483,7 @@ quien,,Ministerio de Capital Humano,Instituto Nacional de Asociativismo y Econom
 quien,,Ministerio de Capital Humano,Instituto Nacional de Asociativismo y Economía Social,Asistencia a la Actividad Cooperativa y Mutual,8,0.0,0.0,1265.6646
 quien,,Ministerio de Capital Humano,Instituto Nacional de Asociativismo y Economía Social,Asistencia a la Actividad Cooperativa y Mutual,9,0.0,0.0,2488.0636
 quien,,Ministerio de Capital Humano,Instituto Nacional de Asociativismo y Economía Social,Asistencia a la Actividad Cooperativa y Mutual,10,0.0,0.0,1158.4326
-quien,,Ministerio de Capital Humano,Instituto Nacional de Asociativismo y Economía Social,Asistencia a la Actividad Cooperativa y Mutual,11,0.0,0.0,123.6109
+quien,,Ministerio de Capital Humano,Instituto Nacional de Asociativismo y Economía Social,Asistencia a la Actividad Cooperativa y Mutual,11,0.0,0.0,125.4769
 quien,,Ministerio de Capital Humano,Ministerio de Capital Humano,Actividades Centrales,1,10255.28,10255.28,826.1903
 quien,,Ministerio de Capital Humano,Ministerio de Capital Humano,Actividades Centrales,2,0.0,0.0,705.1756
 quien,,Ministerio de Capital Humano,Ministerio de Capital Humano,Actividades Centrales,3,0.0,0.0,1188.6014
@@ -2034,7 +2034,7 @@ quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Activi
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Actividades Centrales,8,0.0,296.3998,33984.0363
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Actividades Centrales,9,0.0,26618.0002,16809.2843
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Actividades Centrales,10,0.0,252.0081,42493.1734
-quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Actividades Centrales,11,0.0,-126.1432,11757.7908
+quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Actividades Centrales,11,0.0,-126.1432,12029.4093
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Alistamiento Operacional del Ejercito,1,1117839.3669,1117454.1882,92429.55
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Alistamiento Operacional del Ejercito,2,0.0,39.15,55199.3906
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Alistamiento Operacional del Ejercito,3,0.0,-10.4417,84997.2499
@@ -2045,7 +2045,7 @@ quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Alista
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Alistamiento Operacional del Ejercito,8,0.0,260.3885,107922.6768
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Alistamiento Operacional del Ejercito,9,0.0,3537.1652,129624.2018
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Alistamiento Operacional del Ejercito,10,0.0,51.0458,88992.664
-quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Alistamiento Operacional del Ejercito,11,0.0,938.3957,16543.6283
+quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Alistamiento Operacional del Ejercito,11,0.0,938.3957,16694.849
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Asistencia Sanitaria,1,152851.1753,153784.1419,4027.9777
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Asistencia Sanitaria,2,0.0,0.0,16417.3567
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Asistencia Sanitaria,3,0.0,0.0,32403.4598
@@ -2056,7 +2056,7 @@ quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Asiste
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Asistencia Sanitaria,8,0.0,0.0,5153.0142
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Asistencia Sanitaria,9,0.0,1502.459,6368.9343
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Asistencia Sanitaria,10,0.0,0.0,6393.7168
-quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Asistencia Sanitaria,11,0.0,374.7708,4615.8749
+quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Asistencia Sanitaria,11,0.0,374.7708,4676.2016
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Formacion y Capacitacion,1,241166.999,240234.0324,11729.1442
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Formacion y Capacitacion,2,0.0,0.0,31787.1282
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Formacion y Capacitacion,3,0.0,0.0,38572.9122
@@ -2067,7 +2067,7 @@ quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Formac
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Formacion y Capacitacion,8,0.0,0.0,8611.0642
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Formacion y Capacitacion,9,0.0,724.8806,24516.1141
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Formacion y Capacitacion,10,0.0,0.0,17949.7643
-quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Formacion y Capacitacion,11,0.0,-345.3208,6011.1426
+quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Formacion y Capacitacion,11,0.0,-345.3208,6167.5562
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Remonta y Veterinaria,1,27552.7884,27549.4042,936.8995
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Remonta y Veterinaria,2,0.0,0.0,3710.1024
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Remonta y Veterinaria,3,0.0,0.0,4326.5089
@@ -2078,7 +2078,7 @@ quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Remont
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Remonta y Veterinaria,8,0.0,0.0,1006.4043
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Remonta y Veterinaria,9,0.0,44.9997,2158.3825
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Remonta y Veterinaria,10,0.0,0.0,729.7863
-quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Remonta y Veterinaria,11,0.0,380.0,618.5933
+quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Remonta y Veterinaria,11,0.0,380.0,622.8599
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Sastreria Militar,1,5655.2892,5643.6039,173.9536
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Sastreria Militar,2,0.0,0.0,260.8142
 quien,,Ministerio de Defensa,Estado Mayor General del Ejército Argentino,Sastreria Militar,3,0.0,6.0005,3222.8282
@@ -2471,7 +2471,7 @@ quien,,Ministerio de Economía,Economía y Energía,Actividades Comunes del INDE
 quien,,Ministerio de Economía,Economía y Energía,Actividades Comunes del INDEC,8,0.0,-0.0,1668.3788
 quien,,Ministerio de Economía,Economía y Energía,Actividades Comunes del INDEC,9,0.0,0.0,2804.3894
 quien,,Ministerio de Economía,Economía y Energía,Actividades Comunes del INDEC,10,0.0,0.0,1309.6592
-quien,,Ministerio de Economía,Economía y Energía,Actividades Comunes del INDEC,11,0.0,0.0,457.3513
+quien,,Ministerio de Economía,Economía y Energía,Actividades Comunes del INDEC,11,0.0,0.0,460.8301
 quien,,Ministerio de Economía,Economía y Energía,Administracion Financiera,1,994159.4991,994159.4991,1210.5411
 quien,,Ministerio de Economía,Economía y Energía,Administracion Financiera,2,0.0,-190000.0,7490.7336
 quien,,Ministerio de Economía,Economía y Energía,Administracion Financiera,3,0.0,20.8429,7102.8718
@@ -4207,7 +4207,7 @@ quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Actividad
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Actividades Centrales,8,0.0,12832.3663,9879.4601
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Actividades Centrales,9,0.0,16432.5144,9117.758
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Actividades Centrales,10,0.0,2700.0,9795.1958
-quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Actividades Centrales,11,0.0,0.0,1549.7863
+quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Actividades Centrales,11,0.0,0.0,1587.9309
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Cooperacion Tecnica y Financiera para la Laborterapia de Internos,1,29299.2587,29299.2587,1350.6846
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Cooperacion Tecnica y Financiera para la Laborterapia de Internos,2,0.0,0.0,1365.4409
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Cooperacion Tecnica y Financiera para la Laborterapia de Internos,3,0.0,0.0,1579.4431
@@ -4229,7 +4229,7 @@ quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Formacion
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Formacion y Capacitacion,8,0.0,-0.0,1687.8183
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Formacion y Capacitacion,9,0.0,0.0,1787.571
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Formacion y Capacitacion,10,0.0,1.0,1636.0886
-quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Formacion y Capacitacion,11,0.0,0.0,89.9653
+quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Formacion y Capacitacion,11,0.0,0.0,123.6901
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Seguridad y Rehabilitacion del Interno,1,428956.6756,428956.6756,30818.5298
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Seguridad y Rehabilitacion del Interno,2,0.0,0.0,29923.6384
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Seguridad y Rehabilitacion del Interno,3,0.0,0.0,38103.2071
@@ -4240,7 +4240,7 @@ quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Seguridad
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Seguridad y Rehabilitacion del Interno,8,0.0,-12832.3663,38611.1777
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Seguridad y Rehabilitacion del Interno,9,0.0,-6989.5,40261.7012
 quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Seguridad y Rehabilitacion del Interno,10,0.0,0.0,41453.5441
-quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Seguridad y Rehabilitacion del Interno,11,0.0,0.0,2722.7465
+quien,,Ministerio de Seguridad Nacional,Servicio Penitenciario Federal,Seguridad y Rehabilitacion del Interno,11,0.0,0.0,2855.7892
 quien,,Ministerio del Interior,Ministerio del Interior,Actividades Centrales,1,20230.1229,20230.1229,700.9956
 quien,,Ministerio del Interior,Ministerio del Interior,Actividades Centrales,2,0.0,-2.0,1398.5608
 quien,,Ministerio del Interior,Ministerio del Interior,Actividades Centrales,3,0.0,-11.0648,1227.5487
