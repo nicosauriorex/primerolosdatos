@@ -5,19 +5,24 @@ Fuentes:
 - Ministerio de Salud (DEIS) vía datos.gob.ar: tasa de natalidad (tn_arg) y defunciones (hdef_arg); el xlsx de datos.salud.gob.ar de la serie
   histórica de defunciones completa los años que la API todavía no trae.
 - DEIS, datos.salud.gob.ar, dataset de nacidos vivos registrados: un CSV por período, con un renglón por combinación de características
-  (suma de nacimientos_cantidad por año, por residencia de la madre). El de 2005-2022 pesa 68 MB: en el respaldo se guarda solo el total por año.
+  (suma de nacimientos_cantidad por año, por residencia de la madre). El de 2005-2022 pesa 68 MB: en el respaldo se guarda solo el conteo por año y
+  grupo de edad de la madre (columnas g1 a g9 de deis_nacimientos; el total por año sale de sumarlas).
+- Banco Mundial (indicador SP.DYN.TFRT.IN, estimación de la ONU): hijos por mujer, anual desde 1960.
+- INDEC, proyecciones de población (cargadas a mano en datos/manual/mujeres_por_edad.json): mujeres por grupo quinquenal de edad, para la
+  fecundidad de cuenta propia (docs/specs/tarifas-y-datos-calientes-4.md, 2C).
 - OMS y UNICEF (WUENIC), API del Observatorio Mundial de la Salud (GHO): cobertura de vacunas.
 - INDEC, cuadros de pobreza por semestre (cuadros_informe_pobreza_MM_AA.xls): personas pobres e indigentes de los 31 aglomerados urbanos.
   Una URL inexistente devuelve 200 con una página HTML: se valida la cabecera OLE antes de leer.
 - Estimación para todo el país: tasa de pobreza de personas del INDEC (31 aglomerados) × población total (D-027).
 
 Anuales en diciembre; semestrales como las tasas de pobreza de catalogo.indec_social (1.er semestre en enero, 2.º en julio).
-Respaldos: datos/cache/poblacion_salud.pkl (APIs), deis_nacimientos.pkl, deis_defunciones.pkl, oms_vacunas.json, indec_pobreza_personas.pkl.
+Respaldos: datos/cache/poblacion_salud.pkl (APIs), deis_nacimientos.pkl, deis_defunciones.pkl, oms_vacunas.json, indec_pobreza_personas.pkl, bm_fecundidad.json.
 """
 import io
 import json
 import re
 import urllib.error
+from pathlib import Path
 
 import pandas as pd
 
@@ -36,6 +41,9 @@ URL_PAQUETE_SALUD = "https://datos.salud.gob.ar/api/3/action/package_show?id="
 PAQUETE_NACIMIENTOS = "d1350588-d8bb-4892-b21c-48738311e218"
 PAQUETE_DEFUNCIONES = "76ce7d19-921d-4d17-bb20-73c1fe55f07e"
 NACIMIENTOS_DESDE = 2005
+RUTA_MUJERES = Path(__file__).resolve().parent.parent / "datos" / "manual" / "mujeres_por_edad.json"
+GRUPOS_TGF = ["15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"]
+URL_BM_FECUNDIDAD = "https://api.worldbank.org/v2/country/ARG/indicator/SP.DYN.TFRT.IN?format=json&per_page=100"
 
 URL_GHO = "https://ghoapi.azureedge.net/api/{}?$filter=SpatialDim eq 'ARG'"
 VACUNAS = {  # id de la serie -> (código GHO, nombre, qué mide, población objetivo)
@@ -53,6 +61,8 @@ HOJA_POBLACIONES = "Poblaciones (Ex cuadro 4.2)"
 
 FUENTE_DEIS = "Dirección de Estadísticas e Información en Salud (Ministerio de Salud) vía datos.gob.ar, serie "
 FUENTE_NAC = "Dirección de Estadísticas e Información en Salud (Ministerio de Salud), datos.salud.gob.ar, dataset «Nacidos vivos registrados en la República Argentina»"
+FUENTE_BM = "Banco Mundial, indicador SP.DYN.TFRT.IN (Perspectivas de la Población Mundial de la ONU, WPP)"
+FUENTE_TGF = (FUENTE_NAC + " (nacimientos por edad de la madre) e INDEC, proyecciones de población (mujeres por grupo de edad: base 2010 para 2010-2021 y base 2022 desde 2022)")
 FUENTE_DEF = ("Dirección de Estadísticas e Información en Salud (Ministerio de Salud), serie hdef_arg de datos.gob.ar y planilla "
               "«Serie histórica de defunciones ocurridas en Argentina por jurisdicción 1914-2024» de datos.salud.gob.ar")
 FUENTE_GHO = "OMS y UNICEF (WUENIC), Observatorio Mundial de la Salud de la OMS, indicador "
@@ -71,21 +81,34 @@ def _paquete(id_paquete):
 
 # ---------------------------------------------------------------- nacimientos (DEIS)
 def _leer_nacimientos(contenido):
-    """Total de nacimientos por año de un CSV de DEIS. Devuelve (Serie, renglones leídos, renglones salteados). El separador puede ser «,» o «;»."""
+    """Nacimientos por año y grupo de edad de la madre de un CSV de DEIS. Devuelve (DataFrame año × g1..g9, renglones leídos, renglones salteados).
+    El grupo es el número con que empieza «edad_madre_grupo» (1 menor de 15, 2 15-19, 3 20-24, 4 25-29, 5 30-34, 6 35-39, 7 40-44, 8 45 y más, 9 sin especificar).
+    El separador puede ser «,» o «;»."""
     primera = contenido[:2000].decode("utf-8-sig", errors="replace").splitlines()[0]
     sep = ";" if primera.count(";") > primera.count(",") else ","
-    df = pd.read_csv(io.BytesIO(contenido), sep=sep, encoding="utf-8-sig", on_bad_lines="skip", usecols=lambda c: c.strip().lower() in ("anio", "nacimientos_cantidad"))
+    df = pd.read_csv(io.BytesIO(contenido), sep=sep, encoding="utf-8-sig", on_bad_lines="skip",
+                     usecols=lambda c: c.strip().lower() in ("anio", "nacimientos_cantidad", "edad_madre_grupo"))
     df.columns = [c.strip().lower() for c in df.columns]
     lineas = contenido.count(b"\n") + (0 if contenido.endswith(b"\n") else 1) - 1  # sin el encabezado
     saltadas = max(lineas - len(df), 0)
     df["nacimientos_cantidad"] = pd.to_numeric(df["nacimientos_cantidad"], errors="coerce")
-    return df.groupby("anio")["nacimientos_cantidad"].sum(), len(df), saltadas
+    g = df["edad_madre_grupo"].astype(str).str.extract(r"^\s*(\d)")[0].fillna("9")
+    df["g"] = "g" + g.where(g != "0", "9")
+    tabla = df.groupby(["anio", "g"])["nacimientos_cantidad"].sum().unstack(fill_value=0.0)
+    for k in range(1, 10):
+        if f"g{k}" not in tabla:
+            tabla[f"g{k}"] = 0.0
+    return tabla[[f"g{k}" for k in range(1, 10)]], len(df), saltadas
 
 
 def _bajar_nacimientos():
-    """Total por año: solo baja los años que no están en el respaldo (el CSV de 2005-2022 pesa 68 MB)."""
+    """Nacimientos por año y grupo de edad de la madre (g1..g9) y total: solo baja los años que no están en el respaldo con sus grupos
+    (el CSV de 2005-2022 pesa 68 MB; un respaldo viejo que solo tenía el total obliga a bajarlo una vez)."""
     f = red.CACHE / "deis_nacimientos.pkl"
-    tot = pd.read_pickle(f)["nacimientos"].to_dict() if f.exists() else {}
+    previo = pd.read_pickle(f) if f.exists() else pd.DataFrame()
+    cols = [f"g{k}" for k in range(1, 10)]
+    tabla = previo[cols].copy() if all(c in previo for c in cols) else pd.DataFrame(columns=cols, dtype=float)
+    tabla.index = tabla.index.astype(int)
     recursos = []
     for r in _paquete(PAQUETE_NACIMIENTOS):
         if str(r.get("format", "")).upper() != "CSV":
@@ -94,7 +117,7 @@ def _bajar_nacimientos():
         if anios:
             recursos.append((min(anios), max(anios), r))
     recursos.sort(key=lambda x: x[0] - x[1])  # primero los que cubren más años (el de 2005-2022 antes que los sueltos de 2017 y 2018)
-    cubiertos = set(tot)
+    cubiertos = set(tabla.index)
     for a, b, r in recursos:
         faltan = set(range(a, b + 1)) - cubiertos
         if not faltan:
@@ -103,13 +126,62 @@ def _bajar_nacimientos():
         print(f"  Nacimientos: {a}-{b}: {n:,} renglones leídos, {saltadas:,} salteados ({saltadas / max(n + saltadas, 1) * 100:.2f} %)".replace(",", "."))
         if n and saltadas / (n + saltadas) > 0.005:
             print(f"  AVISO: Nacimientos {a}-{b}: se salteó más del 0,5 % de las líneas del CSV")
-        for anio, v in s.items():
-            if int(anio) not in tot:
-                tot[int(anio)] = float(v)
+        for anio, fila in s.iterrows():
+            if int(anio) not in tabla.index:
+                tabla.loc[int(anio)] = fila.values
         cubiertos |= set(int(x) for x in s.index)
-    if not tot:
+    if tabla.empty:
         raise RuntimeError("nacimientos: no se encontró ningún CSV")
-    return pd.DataFrame({"nacimientos": pd.Series(tot).sort_index()})
+    tabla = tabla.sort_index().astype(float)
+    tabla.insert(0, "nacimientos", tabla[cols].sum(axis=1))
+    return tabla
+
+
+def _tgf(nac, mujeres):
+    """Tasa global de fecundidad = 5 × Σ (nacimientos del grupo / mujeres del grupo), grupos de 15-19 a 45-49. Los menores de 15 se suman a 15-19 y los
+    «sin especificar» se reparten en proporción. `nac`: DataFrame año × g1..g9; `mujeres`: {año: {"15-19": n, ...}}. Devuelve Serie por año (solo años con las dos fuentes)."""
+    out = {}
+    for anio, fila in nac.iterrows():
+        m = mujeres.get(int(anio))
+        if not m:
+            continue
+        sin = fila["g9"]
+        con = fila[[f"g{k}" for k in range(1, 9)]].sum()
+        if con <= 0:
+            continue
+        k = (con + sin) / con
+        grupos = [fila["g1"] + fila["g2"]] + [fila[f"g{i}"] for i in range(3, 9)]
+        out[int(anio)] = 5 * sum(b * k / m[g] for b, g in zip(grupos, GRUPOS_TGF))
+    return pd.Series(out, dtype=float).sort_index()
+
+
+def _leer_mujeres(ruta=None):
+    """{año: {grupo: mujeres}} de datos/manual/mujeres_por_edad.json, o None si no existe o no es válido (avisa)."""
+    ruta = Path(ruta) if ruta else RUTA_MUJERES
+    if not ruta.exists():
+        print(f"  Fecundidad: falta {ruta.name} (mujeres por edad, a mano); se omite fecundidad")
+        return None
+    try:
+        out = {}
+        for r in json.loads(ruta.read_text(encoding="utf-8"))["anios"]:
+            g = {k: float(r["grupos"][k]) for k in GRUPOS_TGF}
+            if any(v <= 0 for v in g.values()):
+                raise ValueError(f"{r['anio']}: un grupo sin mujeres")
+            out[int(r["anio"])] = g
+    except (KeyError, ValueError, TypeError) as e:
+        print(f"  Fecundidad: {ruta.name} no tiene el formato esperado ({e!r}); se omite fecundidad")
+        return None
+    return out
+
+
+# ---------------------------------------------------------------- fecundidad ONU (Banco Mundial)
+def _bajar_fecundidad_bm():
+    d = json.loads(red.bajar(URL_BM_FECUNDIDAD, timeout=60))
+    filas = d[1] if isinstance(d, list) and len(d) > 1 and d[1] else []
+    out = {str(int(x["date"])): float(x["value"]) for x in filas if x.get("value") is not None}
+    if not out:
+        raise RuntimeError("Banco Mundial SP.DYN.TFRT.IN: sin datos para ARG")
+    return out
 
 
 # ---------------------------------------------------------------- defunciones (xlsx de DEIS)
@@ -231,6 +303,33 @@ def _fecha_semestre(clave):
     return pd.Timestamp(a, 1 if s == 1 else 7, 1)
 
 
+def _fecundidad(idx, out, nac):
+    from catalogo import S
+    if "g9" not in nac:
+        print("  Fecundidad: el respaldo de nacimientos no tiene grupos de edad; se omite fecundidad")
+        return
+    mujeres = _leer_mujeres()
+    if mujeres is None:
+        return
+    tgf = _tgf(nac, mujeres)
+    if tgf.empty:
+        print("  Fecundidad: no hay años con nacimientos y mujeres por edad a la vez; se omite fecundidad")
+        return
+    for a, v in ((2014, 2.37), (2019, 1.86), (2022, 1.44), (2023, 1.34), (2024, 1.19)):
+        real = tgf.get(a)
+        if real is None or abs(real - v) > 0.03:
+            print(f"  AVISO: Fecundidad {a} = {real if real is None else round(real, 3)}, esperado {v} (±0,03)")
+        else:
+            print(f"  Fecundidad {a} = {real:.3f} (esperado {v} ±0,03: control cumplido)")
+    s = pd.Series(tgf.values, index=[pd.Timestamp(int(a), 1, 1) for a in tgf.index])
+    out.append(S("fecundidad", "Fecundidad: hijos por mujer (nacimientos y población oficiales)", CAT_POB, "none", "hijos por mujer", _anual_a_diciembre(s).round(2).reindex(idx), 0, FUENTE_TGF,
+                 "Cuenta propia: por cada grupo de edad de 15 a 49 años (de a cinco), nacimientos del año divididos por las mujeres de ese grupo, todo sumado y multiplicado por 5. "
+                 "Los nacimientos son los registrados por el Ministerio de Salud según la edad de la madre (los de madres menores de 15 se suman al grupo de 15-19 y los de edad no especificada se reparten en proporción); "
+                 "las mujeres, las proyecciones de población del INDEC (base 2010 hasta 2021 y base 2022 desde 2022: el cambio de proyección mueve un poco la serie en 2022). "
+                 "Difiere de la estimación de la ONU (serie vecina): la ONU estima y desde 2020 sus valores quedan más altos que lo que surge de los registros. "
+                 "El último año es provisorio, porque se siguen inscribiendo nacimientos tarde. Dato anual, se ubica en diciembre."))
+
+
 # ---------------------------------------------------------------- catálogo
 def series(idx, pob=None):
     from catalogo import S, _cacheado_dict  # aquí y no arriba: catalogo importa este módulo
@@ -251,6 +350,20 @@ def series(idx, pob=None):
     else:
         print(f"  Población y salud: falta {ID_NATALIDAD} (sin copia en el respaldo); se omite natalidad")
 
+    # Fecundidad de la ONU (Banco Mundial)
+    bm = red.cache_json("bm_fecundidad", _bajar_fecundidad_bm)
+    if not bm:
+        print("  Población y salud: sin datos del Banco Mundial (sin copia en el respaldo); se omite fecundidad_onu")
+    else:
+        s = pd.Series({pd.Timestamp(int(a), 1, 1): v for a, v in bm.items()}).sort_index()
+        _control("Fecundidad ONU 2014", s.get(pd.Timestamp("2014-01-01")), 2.386, 0.0005)
+        _control("Fecundidad ONU 2024", s.get(pd.Timestamp("2024-01-01")), 1.504, 0.0005)
+        out.append(S("fecundidad_onu", "Fecundidad: hijos por mujer (estimación de la ONU)", CAT_POB, "none", "hijos por mujer", _anual_a_diciembre(s).round(3).reindex(idx), 0, FUENTE_BM,
+                     "Cantidad de hijos que tendría en promedio una mujer a lo largo de su vida si tuviera los hijos que hoy tienen las mujeres de cada edad. "
+                     "Es una estimación de las Naciones Unidas (Perspectivas de la Población Mundial) que difunde el Banco Mundial: no sale de los nacimientos registrados en el país, "
+                     "y desde 2020 queda bastante más alta que la cuenta con los datos oficiales argentinos (serie vecina). Con unos 2,1 hijos por mujer la población se mantiene sin migración. "
+                     "Dato anual, se ubica en diciembre."))
+
     # Nacimientos
     nac = red.cache_df("deis_nacimientos", _bajar_nacimientos)
     if nac.empty:
@@ -263,6 +376,8 @@ def series(idx, pob=None):
         out.append(S("nacimientos", "Nacimientos", CAT_POB, "none", "nacidos vivos", s.reindex(idx), 0, FUENTE_NAC,
                      "Nacidos vivos registrados en el país en el año, contados por la provincia donde vive la madre (Dirección de Estadísticas e Información en Salud, Ministerio de Salud). "
                      "No es el mismo criterio que las defunciones, que se cuentan donde ocurren. Dato anual, se ubica en diciembre; sale con unos dos años de atraso."))
+
+        _fecundidad(idx, out, nac)
 
     # Defunciones y mortalidad
     xl = red.cache_df("deis_defunciones", _bajar_defunciones)

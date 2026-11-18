@@ -2731,3 +2731,22 @@ nav.tabs .con-menu { align-self: stretch; align-items: center; }
 .rigi-nombre { font-weight: 700; }
 .rigi-tabla .rigi-num-col { text-align: right; white-space: nowrap; }
 .rigi-tabla th.rigi-num-col .cg-th { text-align: right; white-space: normal; }
+
+/* Tarifas y subsidios (/tarifas/, components/secciones/Tarifas.tsx): dos cifras arriba, tabla de facturas por lugar y lista de subsidios. */
+.tarifas { min-width: 0; }
+.tarifas-cifras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-4); margin: 0 0 var(--e-3); }
+.tarifas-cifras > div { min-width: 0; }
+.tarifas-cifras dt { font-size: var(--t-xs); color: var(--text-muted); }
+.tarifas-cifras dd { margin: 0; }
+.tarifas-num { font-size: var(--t-xl, 1.5rem); font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1.1; overflow-wrap: anywhere; }
+.tarifas-sub { font-size: var(--t-xs); color: var(--text-muted); margin-top: var(--e-1, 4px); overflow-wrap: anywhere; }
+@media (max-width: 640px) { .tarifas-cifras { grid-template-columns: minmax(0, 1fr); } }
+.tarifas-tabla table { font-size: var(--t-sm); font-variant-numeric: tabular-nums; }
+.tarifas-tabla th[scope="row"] { text-align: left; white-space: nowrap; }
+.tarifas-tabla td { vertical-align: top; }
+.tarifas-tabla td small { display: block; font-size: var(--t-xs); color: var(--text-muted); white-space: normal; }
+.tarifas-tabla .tarifas-num-col { text-align: right; white-space: nowrap; min-width: 6.5rem; }
+.tarifas-tabla .tarifas-grupo { text-align: center; }
+.tarifas-h3 { font-size: var(--t-md, 1rem); margin: var(--e-4) 0 var(--e-2); }
+.tarifas-cantidades small { display: block; color: var(--text-muted); }
+.tarifas-tabla .tarifas-parte { display: block; white-space: nowrap; }

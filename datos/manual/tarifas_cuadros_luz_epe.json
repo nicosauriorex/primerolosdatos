@@ -1,0 +1,146 @@
+{
+ "actualizado": "2026-11-17",
+ "registros": [
+  {
+   "servicio": "luz",
+   "lugar": "santa_fe",
+   "empresa": "EPE",
+   "corte": "2020-12",
+   "vigencia": "2020-06-01",
+   "categoria": "sin_subsidio",
+   "categoria_residencial": "1001 Residencial hasta 20 kW, urbano (tarifa 1)",
+   "cargo_fijo": 77.8681,
+   "escalones": [
+    [
+     75,
+     3.79154
+    ],
+    [
+     75,
+     4.24404
+    ],
+    [
+     150,
+     6.1442
+    ],
+    [
+     null,
+     7.60499
+    ]
+   ],
+   "consumo": 250,
+   "factura": 1294.96,
+   "norma": "https://frrq.cvg.utn.edu.ar/mod/resource/view.php?id=9051",
+   "cita": "EPE, Cuadro tarifario completo mensual, facturación bimestral, «Consumos registrados desde el 01 de JUNIO de 2020», Anexo 1, p. 1, tabla «Tarifa 1 - Uso Residencial (menor de 20 kW)», fila 1001 «Residencial hasta 20 kW»: cuota de servicio 77,86810 $/sum.mes; primeros 75 kWh 3,79154; siguientes 75 kWh 4,24404; siguientes 150 kWh 6,14420; excedente de 300 kWh 7,60499 $/kWh (copia del PDF de la EPE alojada en el sitio de la UTN FRRq; el PDF fue creado el 28-5-2020).",
+   "nota": "Cuadro vigente al 1-dic-2020 por continuidad, no por un cuadro con esa fecha: El Litoral (enero de 2021, https://www.ellitoral.com/economia/aumentan-tarifas-epe-1-febrero_0_6U5sZhpU3Q.html) dice que el cuadro de la EPE «no se modificaba desde marzo de 2019» y que la actualización de febrero de 2021 (Res. EPE 16/21) fue de 0,6 % para residencial; la EPE tuvo las tarifas congeladas todo 2020 (Informe de Audiencia Pública 2022, p. 18). El PDF citado es el cuadro con consumos desde jun-2020. Antes de 2022 no hay Nivel 1/Nivel 2: es la tarifa residencial general. Facturación bimestral: los escalones son por kWh/mes (ya mensuales). Sin impuestos ni alumbrado público."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "santa_fe",
+   "empresa": "EPE",
+   "corte": "2021-12",
+   "vigencia": "2021-11-01",
+   "categoria": "sin_subsidio",
+   "categoria_residencial": "1001 Residencial hasta 20 kW, urbano (tarifa 1)",
+   "cargo_fijo": 102.00721,
+   "escalones": [
+    [
+     75,
+     5.10731
+    ],
+    [
+     75,
+     5.70009
+    ],
+    [
+     150,
+     8.18929
+    ],
+    [
+     null,
+     10.10293
+    ]
+   ],
+   "consumo": 250,
+   "factura": 1731.49,
+   "norma": "https://www.santafe.gov.ar/normativa/getFile.php?id=1424148&item=240146&cod=aea515588428b6df913ba1792db5efa0",
+   "cita": "EPE, Cuadro tarifario completo mensual, facturación bimestral, «Consumos registrados desde el 01 de NOVIEMBRE de 2021», Anexo 1, p. 1, fila 1001 «Residencial hasta 20 kW»: cuota de servicio 102,00721; primeros 75 kWh 5,10731; siguientes 75 kWh 5,70009; siguientes 150 kWh 8,18929; excedente de 300 kWh 10,10293.",
+   "nota": "Cuadro vigente al 1-dic-2021: el Informe de Audiencia Pública 2022 (https://www.santafe.gov.ar/index.php/web/content/download/266011/1391391/file/Informe%20Audiencia%20P%C3%BAblica%202022_.pdf, cap. XI, p. 100) toma como base «el cuadro tarifario vigente al 31 de diciembre de 2021» y compara contra «Vigente Nov-21». Sin Nivel 1/Nivel 2 (la segmentación nacional es de 2022). Escalones por kWh/mes (el cuadro es mensual con facturación bimestral). Sin impuestos ni alumbrado público."
+  }
+ ],
+ "faltantes": [
+  {
+   "corte": "2015-12 a 2018-12",
+   "categoria": "ambas",
+   "motivo": "No se encontró ningún cuadro tarifario residencial de la EPE de esos años en un documento oficial que se pueda abrir (el sitio viejo de la EPE devuelve «Server unavailable» y el nuevo solo publica los dos últimos meses).",
+   "servicio": "luz",
+   "lugar": "santa_fe",
+   "empresa": "EPE"
+  },
+  {
+   "corte": "2022-12",
+   "categoria": "ambas",
+   "motivo": "Solo hay los cuadros de nov-2021, abr-2022 (https://www.santafe.gov.ar/normativa/getFile.php?id=1437008&item=246152&cod=6025b08cc3e7b879ba42524965298579) y los propuestos de la audiencia pública de feb-2023; no se encontró el cuadro vigente al 1-dic-2022 (hubo ajustes intermedios).",
+   "servicio": "luz",
+   "lugar": "santa_fe",
+   "empresa": "EPE"
+  },
+  {
+   "corte": "2023-12",
+   "categoria": "ambas",
+   "motivo": "El cuadro «desde el 1 de diciembre de 2023» solo está en una copia de terceros (Scribd) sin texto legible; no hay documento oficial abierto. No se carga.",
+   "servicio": "luz",
+   "lugar": "santa_fe",
+   "empresa": "EPE"
+  },
+  {
+   "corte": "2024-12",
+   "categoria": "ambas",
+   "motivo": "El cuadro vigente es el de consumos desde el 1-nov-2024 (Res. EPE 808/2024, BO 8-11-2024, Anexos 1 a 5), pero el BO remite al sitio de la EPE y los anexos no se encontraron. Los valores de nov-2024 solo aparecen como facturas con impuestos en el Informe de Audiencia Pública dic-2024, p. 92.",
+   "servicio": "luz",
+   "lugar": "santa_fe",
+   "empresa": "EPE"
+  },
+  {
+   "corte": "2025-12",
+   "categoria": "ambas",
+   "motivo": "Desde 2025 la EPE actualiza con un índice mensual (Res. 1702 del Ministerio de Desarrollo Productivo) y cambios de costos de abastecimiento (Res. EPE 509/2025 y 684/2025); no se encontró el cuadro de diciembre de 2025. Hay el cuadro de enero de 2025 (Nivel 1, 1AA: cuota 1.888,57602; 136,64710 / 147,62169 / 193,70735 / 229,13652; https://www.santafe.gob.ar/normativa/getFile.php?id=1513868&item=283699&cod=db62abf92964a9c9b0e98af408728fee, p. 1), pero no es el de diciembre y no se calculó ninguno desde el índice.",
+   "servicio": "luz",
+   "lugar": "santa_fe",
+   "empresa": "EPE"
+  },
+  {
+   "corte": "vigente",
+   "categoria": "ambas",
+   "motivo": "El cuadro vigente (CUT_Residencial_Octubre_2026.pdf, en https://epe.santafe.gov.ar/institucional/usuarios) se baja desde un endpoint que exige una clave de API incrustada en el sitio; no se usó. Queda por abrirse a mano desde esa página.",
+   "servicio": "luz",
+   "lugar": "santa_fe",
+   "empresa": "EPE"
+  },
+  {
+   "corte": "2019-12, 2020-12, 2021-12",
+   "categoria": "con_subsidio",
+   "motivo": "Antes de 2022 no hay Nivel 2; la tarifa social provincial (Decreto 449/2011) no está en las páginas residenciales generales abiertas (solo se cargó la fila 1001).",
+   "servicio": "luz",
+   "lugar": "santa_fe",
+   "empresa": "EPE"
+  },
+  {
+   "corte": "2022-12 en adelante",
+   "categoria": "con_subsidio",
+   "motivo": "Sin cuadro de Nivel 2 de una fecha cargable (el Nivel 2 de enero de 2025 está en el Informe de Audiencia dic-2024, pp. 106-109, pero ese corte no es diciembre).",
+   "servicio": "luz",
+   "lugar": "santa_fe",
+   "empresa": "EPE"
+  },
+  {
+   "servicio": "luz",
+   "lugar": "santa_fe",
+   "empresa": "EPE",
+   "corte": "2019-12",
+   "categoria": "sin_subsidio",
+   "motivo": "No se encontró el cuadro vigente al 1-12-2019 (el de marzo de 2019 no se pudo abrir). El de junio de 2020 tiene los mismos valores según la prensa, pero eso no es una cita del cuadro: no se carga (revisión de la sesión principal)."
+  }
+ ],
+ "nota": "EPE (Santa Fe), tarifa residencial urbana. Factura sin impuestos de 250 kWh/mes = cuota de servicio + suma por escalones (75 + 75 + 100 kWh). La EPE factura cada dos meses pero publica los cuadros en valores por mes (cuota $/sum.mes y escalones en kWh/mes), así que no hubo conversión. Solo se cargaron los cortes que se pudieron citar de un documento abierto; 2019 y 2020 se apoyan en la continuidad del cuadro (ver nota de cada registro)."
+}

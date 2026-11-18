@@ -27,6 +27,8 @@ const TEMAS_CON_PARTE = new Set(["dolar", "finanzas"]);
 const TEMAS_CON_SEMAFORO = new Set(["actividad"]);
 /** Temas que enlazan al panel del RIGI (/rigi/). */
 const TEMAS_CON_RIGI = new Set(["externo"]);
+/** Temas que enlazan a la página de tarifas y subsidios (/tarifas/). */
+const TEMAS_CON_TARIFAS = new Set(["fiscal"]);
 
 function Texto({ t }: { t: Tema }) {
   const [largo, setLargo] = useState(false);
@@ -159,6 +161,7 @@ export function TemaPagina({ t }: { t: Tema }) {
         <Texto t={t} />
         {TEMAS_CON_PARTE.has(t.slug) && <Link prefetch={false} href="/bcra/" className="enlace-parte">Parte del Banco Central: los datos de cada día</Link>}
         {TEMAS_CON_SEMAFORO.has(t.slug) && <Link prefetch={false} href="/semaforo/" className="enlace-parte">Semáforo de actividad: qué indicadores subieron cada mes</Link>}
+        {TEMAS_CON_TARIFAS.has(t.slug) && <Link prefetch={false} href="/tarifas/" className="enlace-parte">Tarifas y subsidios: quién paga la energía</Link>}
         {TEMAS_CON_RIGI.has(t.slug) && <Link prefetch={false} href="/rigi/" className="enlace-parte">RIGI: los proyectos de grandes inversiones aprobados</Link>}
       </div>
 

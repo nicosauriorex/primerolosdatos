@@ -554,7 +554,9 @@ def construir(m: pd.DataFrame, token: str | None):
                       ("Trabajo, obra pública, motos y robos", lambda: __import__("trabajo_obra").series(idx)),
                       ("Empresas por tamaño, aperturas y cierres", lambda: __import__("empresas").series(idx)),
                       ("Población, salud y pobres", lambda: __import__("poblacion_salud").series(idx, next((s["v"] for s in series if s["id"] == "poblacion"), None))),
-                      ("Datos a mano (pobreza UTDT, piquetes, carne, RIGI)", lambda: __import__("manuales_calientes").series(idx))]:
+                      ("Datos a mano (pobreza UTDT, piquetes, carnes, universidades, RIGI)", lambda: __import__("manuales_calientes").series(idx)),
+                      ("Energía (CAMMESA: parte del costo que pagan las tarifas)", lambda: __import__("energia").series(idx)),
+                      ("Tarifas del AMBA (IIEP)", lambda: __import__("tarifas").series(idx))]:
         try:
             nuevas = f()
             print(f"  {nombre}: {len(nuevas)} series")

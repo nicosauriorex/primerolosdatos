@@ -11,8 +11,10 @@ Fuentes:
   Si la URL cambia, se busca en la página de la serie histórica el link que termina en .xlsx y contiene «UP».
 - DNRPA (Ministerio de Justicia, datos.jus.gob.ar): inscripciones y transferencias de motos (un CSV con todo el período) y robos y
   recuperos de autos (un ZIP por año con un CSV por mes; se guarda solo el conteo mensual).
+- SNIC (Ministerio de Seguridad), Sistema de Alerta Temprana de delitos contra la propiedad (docs/specs/tarifas-y-datos-calientes-4.md, 2C): un CSV
+  de unos 51 MB con un renglón por departamento, mes y delito; se cuentan los «Robo de motocicletas» por mes y en el respaldo queda solo ese conteo.
 
-Respaldos: datos/cache/trabajo_obra.pkl, srt_empresas.pkl, dnrpa_motos.pkl y dnrpa_robos.pkl.
+Respaldos: datos/cache/trabajo_obra.pkl, srt_empresas.pkl, dnrpa_motos.pkl, dnrpa_robos.pkl y snic_robos_motos.pkl.
 """
 import io
 import json
@@ -50,12 +52,19 @@ CKAN = "https://datos.jus.gob.ar/api/3/action/package_show?id="
 PAQUETE_MOTOS = "72d85f23-b751-4d12-935b-25e32ed9445e"
 PAQUETE_ROBOS = "a9bdfec2-0af4-433a-b810-38c91275a251"
 
+URL_PAQUETE_SNIC = "https://datos.gob.ar/api/3/action/package_show?id=delitos-contra-la-propiedad-sistema-de-alerta-temprana-estadisticas-criminales"
+URL_SNIC_CONOCIDA = "https://cloud-snic.minseg.gob.ar/Bases/SAT/PROP/SAT-Propiedad-BU_2017-2024.csv"
+MESES = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5, "junio": 6, "julio": 7, "agosto": 8, "septiembre": 9, "setiembre": 9,
+         "octubre": 10, "noviembre": 11, "diciembre": 12}
+
 FUENTE_INDEC = "INDEC, Cuenta de generación del ingreso, vía datos.gob.ar, serie "
 FUENTE_HAC = "Secretaría de Hacienda (Ministerio de Economía), Esquema Ahorro-Inversión-Financiamiento base caja, vía datos.gob.ar, series "
 FUENTE_SRT = ("Superintendencia de Riesgos del Trabajo (SRT), estadística de unidades productivas según ART (serie histórica), cuadro 1.2, "
               "fila «Parte empleadora afiliada de unidades productivas con personas trabajadoras declaradas (1)»")
 FUENTE_DNRPA_MOTOS = ("Dirección Nacional de los Registros Nacionales de la Propiedad del Automotor (Ministerio de Justicia), datos.jus.gob.ar, "
                       "dataset «Estadística de trámites de motovehículos», recurso ")
+FUENTE_SNIC = ("Ministerio de Seguridad Nacional, Sistema Nacional de Información Criminal (SNIC), Sistema de Alerta Temprana: base de delitos contra la propiedad "
+               "por departamentos (datos.gob.ar), delito «Robo de motocicletas»")
 FUENTE_DNRPA_ROBOS = ("Dirección Nacional de los Registros Nacionales de la Propiedad del Automotor (Ministerio de Justicia), datos.jus.gob.ar, "
                       "dataset «DNRPA. Robos y recuperos de autos» (un ZIP por año; se cuentan los trámites de cada mes)")
 
@@ -331,6 +340,70 @@ def _robos(idx, out):
                  "no en el del robo. " + comun, agg=True))
 
 
+# ---------------------------------------------------------------- robos de motos (SNIC)
+def _url_snic():
+    """El CSV más nuevo de la base SAT de propiedad: se busca en el dataset de datos.gob.ar el de período más largo (SAT-Propiedad-BU_AAAA-AAAA.csv)."""
+    try:
+        rec = json.loads(red.bajar(URL_PAQUETE_SNIC, timeout=60))["result"]["resources"]
+        cand = [(int(m.group(1)), r["url"]) for r in rec if str(r.get("format", "")).upper() == "CSV"
+                for m in [re.search(r"SAT-Propiedad-BU_\d{4}-(\d{4})\.csv", r.get("url", ""))] if m]
+        if cand:
+            return max(cand)[1]
+    except Exception as e:  # noqa: BLE001
+        print(f"  SNIC: no pude consultar el dataset ({e}); uso la URL conocida")
+    return URL_SNIC_CONOCIDA
+
+
+def _contar_snic(contenido):
+    """Conteo mensual de «Robo de motocicletas» de la base SAT: DataFrame (mes -> robos_motos, jurisdicciones del año). Prueba utf-8 y, si falla, latin-1."""
+    cols = ["provincia_id", "anio", "mes", "nombre_delito_sat_prop", "cantidad_hechos"]
+    try:
+        df = pd.read_csv(io.BytesIO(contenido), encoding="utf-8", usecols=cols, dtype={"provincia_id": str})
+    except UnicodeDecodeError:
+        df = pd.read_csv(io.BytesIO(contenido), encoding="latin-1", usecols=cols, dtype={"provincia_id": str})
+    df = df[df["nombre_delito_sat_prop"].map(_sin_tildes) == "ROBO DE MOTOCICLETAS"].copy()
+    if df.empty:
+        raise ValueError("SNIC: la base no tiene «Robo de motocicletas»")
+    df["m"] = df["mes"].map(lambda x: MESES.get(_sin_tildes(x).lower()))
+    if df["m"].isna().any():
+        raise ValueError("SNIC: meses que no reconozco: " + ", ".join(sorted(set(df.loc[df["m"].isna(), "mes"].astype(str)))))
+    df["mes"] = pd.to_datetime(dict(year=df["anio"].astype(int), month=df["m"].astype(int), day=1))
+    out = pd.DataFrame({"robos_motos": df.groupby("mes")["cantidad_hechos"].sum().astype(float)})
+    juris = df.groupby(df["mes"].dt.year)["provincia_id"].nunique()
+    out["jurisdicciones"] = [float(juris[a]) for a in out.index.year]
+    return out
+
+
+def _bajar_snic():
+    url = _url_snic()
+    print(f"  SNIC: bajando {url.rsplit('/', 1)[-1]} (unos 51 MB; se guarda solo el conteo mensual)")
+    return _contar_snic(red.bajar(url, timeout=600))
+
+
+def _robos_motos(idx, out):
+    from catalogo import S
+    df = red.cache_df("snic_robos_motos", _bajar_snic)
+    if df.empty:
+        print("  Robos de motos: sin la base del SNIC (sin copia en el respaldo); se omite la serie")
+        return
+    s = df["robos_motos"]
+    meses = pd.date_range(s.index.min(), s.index.max(), freq="MS")
+    if len(meses) != len(s):
+        raise ValueError("SNIC robos de motos: faltan meses en el conteo: " + ", ".join(f"{m:%Y-%m}" for m in meses.difference(s.index)[:6]))
+    mal = df["jurisdicciones"][df["jurisdicciones"] != 24]
+    if len(mal):
+        raise ValueError("SNIC robos de motos: años con distinta cantidad de jurisdicciones que 24: " + ", ".join(f"{a}: {int(n)}" for a, n in mal.groupby(mal.index.year).first().items()))
+    print(f"  SNIC robos de motos: 24 jurisdicciones en cada año {s.index.min().year}-{s.index.max().year} (control cumplido)")
+    anual = s.groupby(s.index.year).sum()
+    for a, v in ((2017, 33312), (2020, 26637), (2024, 44236)):
+        _control(f"Robos de motos {a}", anual.get(a), v, 0)
+    out.append(S("robos_motos", "Robos de motos (denuncias, SNIC)", CAT_SEG, "none", "hechos", s.astype(float).reindex(idx), -1, FUENTE_SNIC,
+                 "Hechos de robo de motocicletas denunciados ante las fuerzas de seguridad de las 24 jurisdicciones y cargados en el Sistema de Alerta Temprana del Ministerio de Seguridad, "
+                 "mes por mes. Son denuncias ante la policía y la justicia, no trámites del Registro de la Propiedad del Automotor: por eso no se comparan con los robos de autos, "
+                 "que salen de los trámites de la DNRPA. Desde 2023 el hurto de motos (sin violencia ni amenaza) se cuenta aparte y no está acá. "
+                 "El Ministerio la publica una vez por año, con unos meses de atraso: el último año puede tardar en aparecer.", agg=True))
+
+
 # ---------------------------------------------------------------- catálogo
 def series(idx):
     from catalogo import _cacheado_dict  # aquí y no arriba: catalogo importa este módulo
@@ -344,6 +417,7 @@ def series(idx):
     _empresas(idx, out)
     _motos(idx, out)
     _robos(idx, out)
+    _robos_motos(idx, out)
     return out
 
 

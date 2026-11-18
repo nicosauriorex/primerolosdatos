@@ -139,6 +139,30 @@ export function crearPlantillas(metas: SerieMeta[]): Plantilla[] {
     "Denuncias de robo o hurto de autos inscriptas en el Registro del Automotor (no es el total de denuncias policiales)",
     ["robo de autos", "autos robados", "inseguridad", "recuperos"],
     [E("robos_autos", { med: "asis" })]);
+  manual("robos-de-autos-y-de-motos", "Robos de autos y de motos", "Sociedad",
+    "Robos de autos (trámites en el Registro del Automotor) y de motos (denuncias ante las fuerzas de seguridad): son fuentes distintas, no se pueden sumar",
+    ["robo de autos", "robo de motos", "motochorros", "inseguridad", "autos robados", "motos robadas"],
+    ["robos_autos", "robos_motos"].map((id) => E(id, { med: "asis" })));
+  manual("fecundidad-onu-contra-datos-oficiales", "Fecundidad: ONU contra datos oficiales", "Sociedad",
+    "Hijos por mujer: la estimación de la ONU y la cuenta propia con nacimientos (Ministerio de Salud) y población (INDEC). Difieren porque la ONU estima y los datos oficiales de los últimos años son provisorios",
+    ["fecundidad", "hijos por mujer", "natalidad", "nacimientos", "tasa de fecundidad"],
+    ["fecundidad_onu", "fecundidad"].map((id) => E(id, { med: "asis" })));
+  manual("universidades-estudiantes-inscriptos-y-egresados", "Universidades: estudiantes, inscriptos y egresados", "Sociedad",
+    "Estudiantes, nuevos inscriptos y egresados de universidades e institutos universitarios (estatales y privados), por año. Los años sin dato quedan vacíos",
+    ["universitarios", "estudiantes universitarios", "egresados", "graduados", "inscriptos", "universidades"],
+    ["univ_estudiantes", "univ_nuevos_inscriptos", "univ_egresados"].map((id) => E(id, { med: "asis" })));
+  manual("consumo-de-carnes-por-habitante", "Consumo de carnes por habitante", "Actividad",
+    "Kilos por habitante por año de carne vacuna, de pollo y de cerdo (Secretaría de Agricultura). En 2019 cambia el cálculo de la vacuna: 2018 y 2019 no se comparan directo",
+    ["carne", "asado", "pollo", "cerdo", "carnes", "consumo de carne"],
+    ["carne_vacuna", "carne_aviar", "carne_porcina"].map((id) => E(id, { med: "asis" })));
+  manual("tarifas-del-amba-luz-gas-y-agua-iiep", "Tarifas del AMBA: luz, gas y agua (IIEP)", "Fiscal",
+    "Factura mensual de un hogar del AMBA, con impuestos, en pesos de hoy (Observatorio de Tarifas y Subsidios del IIEP, UBA-CONICET). El consumo de referencia cambió con los años y el gas es muy estacional",
+    ["tarifas", "luz", "gas", "agua", "factura", "boleta", "subsidios", "tarifa social"],
+    ["tarifa_amba_luz", "tarifa_amba_gas", "tarifa_amba_agua"].map((id) => E(id, { med: "real" })));
+  manual("quien-paga-la-energia-tarifa-contra-costo", "Quién paga la energía: tarifa contra costo", "Fiscal",
+    "Qué parte del costo pagan los usuarios: la electricidad según CAMMESA (cuenta propia, toda la demanda) y la luz y el gas de los hogares del AMBA según el IIEP. Miden cosas distintas",
+    ["quien paga", "tarifas", "subsidios", "costo de la energia", "cobertura", "luz", "gas", "cammesa"],
+    ["luz_cobertura", "cobertura_hogar_luz", "cobertura_hogar_gas"].map((id) => E(id, { med: "asis" })));
   manual("empresas-por-tamano", "Empresas por tamaño", "Empleo y pobreza",
     "Empleadores con al menos un trabajador declarado en una ART, según cuántos trabajadores tienen. Son variaciones netas por tramo: una empresa que achica pasa a un tramo menor",
     ["empresas", "pymes", "microempresas", "cuits", "empresas chicas", "tamano de empresas", "monotributistas con empleados"],

@@ -2,22 +2,25 @@
 Datos cargados a mano con su cita (docs/specs/datos-calientes-3.md, fase 1D; decisión D-027):
 - datos/manual/pobreza_alta_frecuencia.json: Nowcast de Pobreza de la UTDT (privado, semestres móviles) y puntos de la UCA/ODSA.
 - datos/manual/piquetes.json: cortes de calle y ruta por año según Diagnóstico Político (privada) y las afirmaciones del Gobierno con sus chequeos.
-- datos/manual/carne.json: consumo de carne vacuna por habitante (Secretaría de Agricultura).
+- datos/manual/carne.json: consumo de carne vacuna, aviar, porcina y total por habitante (Secretaría de Agricultura).
+- datos/manual/universidades_alumnos.json: estudiantes, nuevos inscriptos y egresados universitarios por año (SPU).
 - datos/manual/rigi.json: proyectos aprobados del RIGI (planilla del Ministerio de Economía + fecha de cada resolución) y lo ingresado según el BCRA.
 
 Regla: sin documento y cita no se carga. Los valores que el subagente marcó como no abiertos (solo extracto del buscador) no entran.
 No baja nada: con --solo-json funciona igual. escribir_rigi(destino) arma web/public/datos/rigi.json.
 """
 import json
+import os
 from pathlib import Path
 
 import pandas as pd
 
-MANUAL = Path(__file__).resolve().parent.parent / "datos" / "manual"
+MANUAL = Path(os.environ.get("DATOS_MANUAL_DIR") or Path(__file__).resolve().parent.parent / "datos" / "manual")  # la variable es solo para pruebas
 CAT_POB = ["Empleo, pobreza e ingresos", "Pobreza (EPH, semestral)"]  # la misma de las tasas de pobreza del INDEC (catalogo.py, indec_social)
 CAT_SEG = ["Sociedad", "Seguridad"]
 CAT_CONS = ["Actividad", "Consumo e indicadores de demanda"]
 CAT_EXT = ["Sector externo"]
+CAT_EDU = ["Sociedad", "Educación"]
 
 
 def _leer(nombre):
@@ -74,26 +77,79 @@ def _piquetes():
 
 
 # ---------------------------------------------------------------- carne
+def _estado_ok(v):
+    e = str(v.get("estado", "")).lower()
+    return e.startswith("confirmado") or e.startswith("verificado")
+
+
 def _carne():
+    """Devuelve ({clave: Serie anual en diciembre}, hist). Claves: vacuna, aviar, porcina, total (las nuevas solo si el archivo las trae)."""
     d = _leer("carne.json")
     if d is None:
         return None
-    vals = {}
+    vals = {"vacuna": {}, "aviar": {}, "porcina": {}, "total": {}}
     hist = d.get("serie_historica_oficial") or {}
     for v in hist.get("valores", []):
         fecha, valor = (v if isinstance(v, (list, tuple)) else (v.get("fecha") or v.get("anio"), v.get("valor") or v.get("vacuna")))
         if valor is not None:
-            vals[pd.Timestamp(int(str(fecha)[:4]), 12, 1)] = float(valor)
-    nuevos = [v for v in d.get("serie_tablero_oficial", []) if str(v.get("estado", "")).startswith("confirmado") and v.get("vacuna") is not None]
-    for v in nuevos:
-        vals[pd.Timestamp(int(v["anio"]), 12, 1)] = float(v["vacuna"])
-    if len(vals) < 10:
-        print(f"  Carne: solo {len(vals)} años; se omite")
+            vals["vacuna"][pd.Timestamp(int(str(fecha)[:4]), 12, 1)] = float(valor)
+    for v in d.get("serie_tablero_oficial", []):
+        if not _estado_ok(v):
+            continue
+        for k in vals:
+            if v.get(k) is not None:
+                vals[k][pd.Timestamp(int(v["anio"]), 12, 1)] = float(v[k])
+    # 2015-2018 del tablero 2024: solo pollo, cerdo y total (la vacuna de esos años sigue siendo AGRO_0244, por el corte 2018/2019)
+    for v in (d.get("tablero_2024_2015_2018") or {}).get("valores", []):
+        if not _estado_ok(v):
+            continue
+        for k in ("aviar", "porcina", "total"):
+            if v.get(k) is not None:
+                vals[k].setdefault(pd.Timestamp(int(v["anio"]), 12, 1), float(v[k]))
+    if len(vals["vacuna"]) < 10:
+        print(f"  Carne: solo {len(vals['vacuna'])} años; se omite")
         return None
-    s = pd.Series(vals).sort_index()
-    if not ((s > 20) & (s < 120)).all():
-        raise ValueError("Carne: valores fuera de 20-120 kg por habitante")
-    return s, hist, nuevos
+    out = {}
+    for k, m in vals.items():
+        if not m:
+            continue
+        s = pd.Series(m).sort_index()
+        if not ((s > 5) & (s < 130)).all():
+            raise ValueError(f"Carne ({k}): valores fuera de 5-130 kg por habitante")
+        out[k] = s
+    return out, hist
+
+
+# ---------------------------------------------------------------- universidades
+def _universidades():
+    d = _leer("universidades_alumnos.json")
+    if d is None:
+        return None
+    filas = [v for v in _lista(d, "registros", "anios", "valores", "serie") if v.get("anio") is not None]
+    campos = {"univ_estudiantes": ("estudiantes",), "univ_nuevos_inscriptos": ("nuevos_inscriptos", "inscriptos"), "univ_egresados": ("egresados",)}
+    out = {}
+    for id_, claves in campos.items():
+        m = {}
+        for v in filas:
+            for c in claves:
+                if v.get(c) is not None:
+                    m[pd.Timestamp(int(v["anio"]), 12, 1)] = float(v[c])
+                    break
+        if m:
+            s = pd.Series(m).sort_index()
+            if (s <= 0).any():
+                raise ValueError(f"Universidades ({id_}): valores no positivos")
+            out[id_] = s
+    return out or None
+
+
+def _lista(d, *claves):
+    if isinstance(d, list):
+        return d
+    for k in claves:
+        if isinstance(d.get(k), list):
+            return d[k]
+    return []
 
 
 # ---------------------------------------------------------------- RIGI
@@ -135,13 +191,38 @@ def series(idx):
 
     c = _carne()
     if c is not None:
-        s, hist, nuevos = c
-        out.append(S("carne_vacuna", "Consumo de carne vacuna por habitante", CAT_CONS, "none", "kg por habitante por año", s.reindex(idx), 1,
-                     "Secretaría de Agricultura, Ganadería y Pesca: serie " + str(hist.get("id_serie", "AGRO_0244")) + " vía datos.gob.ar (1990-2018) y tablero de consumo per cápita de carnes (2024-2025, citado por Los Andes, 5/2/2026)",
+        ss, hist = c
+        corte = ("Hasta 2018 es la serie de indicadores bovinos de la Secretaría de Agricultura; desde 2019 la Secretaría usa otro cálculo (tablero de consumo per cápita): "
+                 "2018 da 57,9 kg con el cálculo viejo y 2019 da 51,1 con el nuevo, así que una parte de esa diferencia puede venir del cambio de cálculo y no de que se coma menos. ")
+        n_ult = max(ss["vacuna"].index).year
+        fuente = ("Secretaría de Agricultura, Ganadería y Pesca: serie " + str(hist.get("id_serie", "AGRO_0244")) + " vía datos.gob.ar (1990-2018) y "
+                  f"tableros de consumo per cápita de carnes (2019-{n_ult})")
+        out.append(S("carne_vacuna", "Consumo de carne vacuna por habitante", CAT_CONS, "none", "kg por habitante por año", ss["vacuna"].reindex(idx), 1, fuente,
                      "Consumo aparente de carne vacuna (producción menos exportaciones más importaciones) dividido por la población, en kilos por habitante por año. "
-                     "Hasta 2018 es la serie de indicadores bovinos de la Secretaría de Agricultura; desde 2019 la Secretaría usa otro cálculo (tablero de consumo per cápita), "
-                     "así que 2024 y 2025 no son comparables con 2018 y los años anteriores: una parte de la diferencia puede venir del cambio de cálculo y no de que se coma menos. "
-                     "2019 a 2023 faltan: el documento oficial no se pudo abrir para comprobarlos. Dato anual, se ubica en diciembre."))
+                     + corte + "Los datos recientes son provisorios y la Secretaría los revisa. Dato anual, se ubica en diciembre."))
+        nuevas = [("carne_aviar", "aviar", "Consumo de pollo por habitante", "carne de pollo (aviar)"),
+                  ("carne_porcina", "porcina", "Consumo de cerdo por habitante", "carne de cerdo (porcina)"),
+                  ("carne_total", "total", "Consumo de carnes por habitante (vacuna, pollo y cerdo)", "carnes (vacuna, pollo y cerdo juntas)")]
+        for id_, k, nombre, que in nuevas:
+            if k in ss:
+                out.append(S(id_, nombre, CAT_CONS, "none", "kg por habitante por año", ss[k].reindex(idx), 1,
+                             f"Secretaría de Agricultura, Ganadería y Pesca, tableros de consumo per cápita de carnes ({ss[k].index.min().year}-{ss[k].index.max().year})",
+                             f"Consumo aparente de {que} dividido por la población, en kilos por habitante por año, según el tablero de la Secretaría de Agricultura. "
+                             "Datos recientes provisorios. Dato anual, se ubica en diciembre."))
+
+    u = _universidades()
+    if u is not None:
+        textos = {"univ_estudiantes": ("Estudiantes universitarios", "estudiantes", "estudian en"),
+                  "univ_nuevos_inscriptos": ("Nuevos inscriptos en universidades", "nuevos inscriptos", "se inscriben por primera vez en"),
+                  "univ_egresados": ("Egresados universitarios", "egresados", "se reciben en")}
+        for id_, s in u.items():
+            nombre, plural, verbo = textos[id_]
+            faltan = [a for a in range(s.index.min().year, s.index.max().year + 1) if pd.Timestamp(a, 12, 1) not in s.index]
+            out.append(S(id_, nombre, CAT_EDU, "none", "personas", s.reindex(idx), 1,
+                         "Secretaría de Políticas Universitarias (Ministerio de Capital Humano), anuarios y síntesis de estadísticas universitarias",
+                         f"Cantidad de {plural}: personas que {verbo} universidades e institutos universitarios estatales y privados, pregrado y grado, total del país. "
+                         "Dato anual, se ubica en diciembre. Los años sin dato quedan vacíos (no se interpola)"
+                         + (f": faltan {', '.join(map(str, faltan))}." if faltan else ".")))
 
     r = _rigi()
     if r is not None:

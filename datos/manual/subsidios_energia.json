@@ -1,0 +1,1071 @@
+{
+ "actualizado": "2026-11-17",
+ "fuente": "Normas: Boletín Oficial, argentina.gob.ar/normativa y biblioteca electrónica de ARCA. Cantidades: informes del Jefe de Gabinete de Ministros a las Cámaras (HCDN), informe de la Secretaría de Energía sobre Zona Fría (feb-2024) y comunicado del Gobierno de Santa Fe.",
+ "nota": "Cada cantidad lleva el documento, la página del PDF y la frase o cuadro de donde sale. Solo entran fotos con documento oficial abierto; las cifras de prensa sin documento de origen están en «faltantes». Los números del informe 140 (jul-2024) son exactos; los del informe 145 (SEF) y los del 139 vienen redondeados en el original. Los niveles N1, N2 y N3 existieron entre jun-2022 y ene-2026: el SEF los reemplaza por una sola categoría. Cuidado al comparar: «usuarios» (suministros) y «hogares» no son lo mismo, y el RASE de 2023 cuenta inscriptos de ambos servicios.",
+ "tipos": [
+  {
+   "id": "tarifa_social_federal",
+   "nombre": "Tarifa Social Federal (luz y gas por redes)",
+   "desde": "2016-01",
+   "hasta": "2026-01",
+   "servicios": [
+    "luz",
+    "gas"
+   ],
+   "quienes": "Hogares inscriptos en el registro de beneficiarios por criterios de ingreso o condición (en 2016: jubilados y pensionados con haber hasta 2 jubilaciones mínimas y trabajadores con remuneración hasta 2 salarios mínimos; la Res. 219/2016 amplió y reordenó los criterios y fijó un solo suministro por titular y servicio).",
+   "descuento": "Luz: los primeros 150 kWh por mes a precio de energía cero (Res. MEyM 6/2016, art. 7); desde dic-2017, descuento del 100 % del precio de la energía hasta 150 kWh y 50 % en los 150 kWh siguientes (Res. SEE 1091/2017, según el informe del ENRE). Gas: bonificación sobre el precio del gas por redes (Res. 28/2016); el porcentaje no se verificó en un documento abierto (ver faltantes).",
+   "norma_nombre": "Res. MEyM 6/2016 (art. 7), 7/2016 y 28/2016; Res. MEyM 219/2016 (art. 1 a 3, criterios de acceso)",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/resoluci%C3%B3n-6-2016-258201/texto",
+   "normas_relacionadas": [
+    {
+     "nombre": "Res. MEyM 219/2016, art. 1 a 3 (sustituye el Anexo I de la Res. 7/2016 y el Anexo III de la Res. 28/2016; un solo suministro por titular y servicio; permanencia mínima de 6 meses)",
+     "url": "https://www.argentina.gob.ar/normativa/nacional/resoluci%C3%B3n-219-2016-266416/texto"
+    },
+    {
+     "nombre": "Decreto 943/2025, art. 10 (deja sin efecto la Tarifa Social Federal de Gas: Res. 28/2016, 474/2017 y 113/2023)",
+     "url": "https://www.argentina.gob.ar/normativa/nacional/decreto-943-2025-422016/texto"
+    },
+    {
+     "nombre": "Informe del ENRE sobre programas de subsidios para usuarios residenciales de electricidad (nota NO-2024-16257570-APN-ENRE#MEC, 15-2-2024), apartados 1.1 a 1.3",
+     "url": "https://www.argentina.gob.ar/sites/default/files/programas_de_subsidios_vigentes_a_usuarios_residenciales_de_electricidad1.pdf"
+    }
+   ],
+   "cita": "Res. MEyM 6/2016, art. 7: establece los precios de referencia para los usuarios residenciales «a cuyo consumo se le haya otorgado la Tarifa Social», con los primeros 150 kWh/mes a precio cero; el informe del ENRE (p. 1) lo resume así: «los primeros 150 kwh/mes ... son valorizados a precio CERO». Fin del gas: Decreto 943/2025, art. 10: «Déjase sin efecto el programa conocido como Tarifa Social Federal de Gas...». Luz: desde el 1-1-2019 cada provincia define su tarifa social (Res. SGE 366/2018 derogó la Res. 1091/2017; informe del ENRE, apartado 1.3). En Córdoba, EPEC publicó la tarifa social nacional como «ANEXO 2 – TARIFA SOCIAL NACIONAL (según Res. MEyM Nº 6/16 art. Nº 7)».",
+   "nota": "La parte de luz pasó a las provincias el 1-1-2019 (Consenso Fiscal, Ley 27.469); la parte de gas terminó con el Decreto 943/2025 (BO 2-1-2026), cuyos beneficiarios pasaron al ReSEF."
+  },
+  {
+   "id": "segmentacion_rase",
+   "nombre": "Segmentación de subsidios por niveles de ingreso (RASE: N1, N2, N3)",
+   "desde": "2022-06",
+   "hasta": "2026-01",
+   "servicios": [
+    "luz",
+    "gas"
+   ],
+   "quienes": "Todos los hogares residenciales, en tres niveles según ingresos y bienes. N1 (mayores ingresos): ingresos netos del hogar por encima de 3,5 canastas básicas totales (CBT, hogar 2), o 3 o más autos de menos de 5 años, 3 o más inmuebles, aeronaves o embarcaciones de lujo, o activos societarios. N2 (menores ingresos): ingresos menores a 1 CBT, certificado de vivienda (ReNaBaP), comedor comunitario, pensión de veteranos de Malvinas, o discapacidad con ingresos menores a 1,5 CBT. N3 (ingresos medios): el resto. Quien no se inscribió en el RASE quedó en N1.",
+   "descuento": "N1: paga el costo pleno de la energía. N2 y N3 (esquema vigente a mediados de 2024 según el informe 140 del Jefe de Gabinete): N2 con bonificación de 71,92 % del precio de la energía eléctrica (Res. SE 90/2024) y de 64 % del precio del gas (Res. SE 91/2024); N3 de 55,94 % y 55 %; en ambos con tope de consumo subsidiado. El Decreto 332/2022 original limitaba el aumento (40 % del CVS para N2, 80 % para N3), límite que el Decreto 465/2024 (art. 3) dejó sin efecto.",
+   "norma_nombre": "Decreto 332/2022, art. 1 y 2 (BO 16-6-2022); Decreto 465/2024, art. 2 y 3 (BO 28-5-2024)",
+   "norma": "https://biblioteca.afip.gob.ar/dcp/DEC_C_000332_2022_06_16",
+   "normas_relacionadas": [
+    {
+     "nombre": "Decreto 465/2024, art. 2 (período de transición hacia subsidios focalizados, 1-6-2024 al 30-11-2024, prorrogable) y art. 3 (deja sin efecto el límite de traslado a factura)",
+     "url": "https://www.argentina.gob.ar/normativa/nacional/decreto-465-2024-399851/texto"
+    },
+    {
+     "nombre": "Decreto 943/2025, art. 2, 20 y 21 (elimina los tres niveles, deroga el Decreto 332/2022 y concluye el período de transición)",
+     "url": "https://www.argentina.gob.ar/normativa/nacional/decreto-943-2025-422016/texto"
+    }
+   ],
+   "cita": "Decreto 332/2022, art. 1: «Establécese, a partir del mes de junio de 2022, un régimen de segmentación de subsidios a usuarios y usuarias residenciales de los servicios públicos de energía eléctrica y gas natural por red...»; art. 2: Nivel 1 – Mayores Ingresos, Nivel 2 – Menores Ingresos y Nivel 3 – Ingresos Medios. Decreto 943/2025, art. 20: «Derógase el Decreto N° 332 del 16 de junio de 2022». Porcentajes de bonificación: Informe 140 del Jefe de Gabinete (HCDN, 09/2024), pregunta 1240, PDF p. 1066.",
+   "nota": "El período de transición del Decreto 465/2024 se prorrogó por la Res. SE 384/2024 y por el Decreto 370/2025, y se dio por concluido con el Decreto 943/2025 (art. 21)."
+  },
+  {
+   "id": "sef",
+   "nombre": "Subsidios Energéticos Focalizados (SEF)",
+   "desde": "2026-01",
+   "hasta": null,
+   "servicios": [
+    "luz",
+    "gas",
+    "garrafa"
+   ],
+   "quienes": "Hogares residenciales inscriptos en el ReSEF (formado a partir del RASE) que no queden excluidos por los criterios del Anexo I: según la Secretaría de Energía en el informe 145, ingresos del hogar mayores a 3 canastas básicas totales, 3 o más inmuebles, activos societarios, aeronaves o embarcaciones de lujo, o auto de menos de 3 años (salvo certificado de discapacidad). Una sola categoría: se eliminan los tres niveles.",
+   "descuento": "Electricidad: bonificación general del 50 % sobre el consumo base (300 kWh en enero, febrero, mayo a agosto y diciembre; 150 kWh en marzo, abril y septiembre a noviembre). Gas natural y propano por redes: bonificaciones sobre el Precio Anual Uniforme, con los bloques de consumo base de las Res. 686/22 y 91/24. Durante 2026, bonificación extraordinaria adicional de hasta 25 %, decreciente según el Anexo II. Lo que excede el consumo base no se bonifica. Incluye la garrafa de 10 kg y el GLP por redes.",
+   "norma_nombre": "Decreto 943/2025, art. 1 a 8 (BO 2-1-2026)",
+   "norma": "https://www.argentina.gob.ar/normativa/nacional/decreto-943-2025-422016/texto",
+   "normas_relacionadas": [],
+   "cita": "Decreto 943/2025, art. 1: «Unifícanse los subsidios energéticos de jurisdicción nacional. A tal fin, créase el régimen de SUBSIDIOS ENERGÉTICOS FOCALIZADOS (SEF)...»; art. 4: bloques de 300 y 150 kWh; art. 8: «durante el año 2026 se aplicará ... una bonificación adicional extraordinaria sobre el consumo base de hasta el VEINTICINCO POR CIENTO (25 %).» El 50 % general sobre el consumo base de electricidad figura en los considerandos («una bonificación general del CINCUENTA POR CIENTO (50 %) sobre el consumo base, durante todos los meses del año»); los porcentajes por componente están en el Anexo II (IF-2025-143839560-APN-SE#MEC), que no se abrió.",
+   "nota": "Reemplaza a la segmentación RASE, a la Tarifa Social Federal de Gas y al Programa Hogar (art. 10, 16 y 20)."
+  },
+  {
+   "id": "zona_fria",
+   "nombre": "Régimen de Zona Fría (gas por redes)",
+   "desde": "2002",
+   "hasta": null,
+   "servicios": [
+    "gas"
+   ],
+   "quienes": "Hogares de las zonas del régimen. Región Patagónica, Malargüe (Mendoza) y Puna: descuento original del 50 % para todos los usuarios residenciales. Zonas agregadas por la Ley 27.637 (2021): 50 % para los hogares de menores ingresos inscriptos en el Registro Único (planes sociales, jubilados, monotributo social, electrodependientes) y 30 % para el resto. Desde la Ley 27.828 (BO 13-10-2026): en las zonas ampliadas, la bonificación adicional exige estar inscripto en el régimen de subsidios focalizados y cumplir criterios (ingresos hasta 3 CBT, ReNaBaP, pensión de veteranos de Malvinas, CUD).",
+   "descuento": "30 % o 50 % sobre el cuadro tarifario pleno según el caso (Ley 27.637); desde la Ley 27.828 la bonificación adicional se aplica sobre el consumo base de los hogares inscriptos en el SEF. Se financia con un recargo de hasta 7,5 % sobre el precio del gas en PIST y rige hasta el 31-12-2031.",
+   "norma_nombre": "Ley 25.565, art. 75; Ley 27.637 (BO 7-7-2021); Ley 27.828 (BO 13-10-2026, art. 1 a 3)",
+   "norma": "https://biblioteca.afip.gob.ar/dcp/LEY_C_027637_2021_06_24",
+   "normas_relacionadas": [
+    {
+     "nombre": "Ley 27.828 (sancionada 24-9-2026, promulgada 9-10-2026, BO 13-10-2026): art. 1 sustituye el art. 75 de la Ley 25.565; art. 2 sustituye el art. 3 de la Ley 27.637; art. 3 deroga sus art. 2, 4, 5, 6, 7 y 8",
+     "url": "https://www.boletinoficial.gob.ar/detalleAviso/primera/348838/20261013"
+    },
+    {
+     "nombre": "Decreto 486/2021 (reglamenta la Ley 27.637 y crea el Registro Único de beneficiarios especiales)",
+     "url": "https://www.argentina.gob.ar/normativa/nacional/decreto-486-2021-352540/texto"
+    },
+    {
+     "nombre": "Informe de la Secretaría de Energía «Ley 25.565 y 27.637 – Régimen de Zona Fría» (feb-2024), diapositivas 3 a 6",
+     "url": "https://www.argentina.gob.ar/sites/default/files/informe_regimen_zona_fria.pdf"
+    }
+   ],
+   "cita": "Ley 27.828, art. 1: «El presente régimen se mantendrá en vigencia hasta el 31 de diciembre de 2031.» y «Una bonificación «adicional por Zona Fría», bajo el Régimen de Subsidios Focalizados...»; art. 3: «Derógase los artículos 2°, 4°, 5°, 6°, 7° y 8° de la ley 27.637.» (Boletín Oficial, aviso 348838, págs. 1 a 2). Descuentos 30 % y 50 %: informe de la Secretaría de Energía, diapositivas 4 y 5 (el 50 % para los hogares de menores ingresos y el 30 % para «el resto de los hogares con tarifa diferencial incorporados»).",
+   "nota": "La fecha «desde» es la de la Ley 25.565 (2002, solo el año); la ampliación de la Ley 27.637 rige desde el 7-7-2021. La Res. SE 219/2025 limitó el 50 % a quien tiene más de un medidor a su nombre (informe 143, pregunta 327)."
+  },
+  {
+   "id": "aysa_tarifa_social",
+   "nombre": "Tarifa social de agua y cloacas de AySA (ERAS)",
+   "desde": null,
+   "hasta": null,
+   "servicios": [
+    "agua"
+   ],
+   "quienes": "Hogares usuarios de AySA que, por problemas económicos permanentes o transitorios, no pueden pagar sus facturas, deudas o cargos de conexión; se evalúa con integrantes, ingresos y gastos del hogar contra topes de ingreso disponible (valor de referencia primario de diciembre de 2026: $ 907.594 para 1 persona y $ 1.361.391 para 2). Hay además Caso Social y Tarifa Comunitaria para entidades de bien público.",
+   "descuento": "Varía según el hogar; el porcentaje no figura en las páginas oficiales abiertas (ver faltantes).",
+   "norma_nombre": "Programa de Tarifa Social del ERAS (Ley 26.221, Marco Regulatorio); Res. SOP 91/2022, art. 3 y 4, que lo mantiene y neutraliza los aumentos para sus beneficiarios",
+   "norma": "https://www.argentina.gob.ar/eras/programa-tarifa-social",
+   "normas_relacionadas": [
+    {
+     "nombre": "Res. SOP 91/2022 (BO 23-6-2022), art. 3 y 4: descuento adicional que neutraliza el aumento para beneficiarios de Tarifa Social",
+     "url": "https://www.boletinoficial.gob.ar/pdf/aviso/primera/264908/20220623"
+    },
+    {
+     "nombre": "ERAS: valores de referencia periódica, hogares, diciembre 2026",
+     "url": "https://www.argentina.gob.ar/sites/default/files/valores_de_referencia_periodica_diciembre_2026.pdf"
+    }
+   ],
+   "cita": "ERAS, página «Programa Tarifa Social»: «El beneficio está dirigido a hogares (tarifa social - usuarios residenciales - y caso social) y entidades de bien público (tarifa comunitaria) que, a causa de problemas económicos, no se encuentran en condiciones de afrontar en su totalidad el pago de las facturas de los servicios de agua y cloacas...». Res. SOP 91/2022, art. 3: «Aplíquese a los usuarios beneficiarios del Programa de Tarifa Social con beneficio vigente ... un descuento adicional que neutralice el efecto de la aplicación de la modificación tarifaria...».",
+   "nota": "No se verificó la fecha de creación del programa ni el porcentaje de descuento."
+  },
+  {
+   "id": "epe_tarifa_social",
+   "nombre": "Tarifa social de energía eléctrica de la EPE (Santa Fe)",
+   "desde": "2011",
+   "hasta": null,
+   "servicios": [
+    "luz"
+   ],
+   "quienes": "Usuarios residenciales de la EPE con potencia hasta 2,2 kW en las tarifas Social 1 (1C8) y Social 2 (1I8), con cupo anual de beneficiarios y tope de consumo fijados por la provincia. Desde el Decreto 2746/2025 los ministros de Economía y de Desarrollo Productivo fijan el régimen, los parámetros de acceso, el tope de consumo y la duración o renovación del beneficio. En 2016 la provincia extendió a sus clientes los criterios de la tarifa social nacional (jubilados con haber hasta 2 jubilaciones mínimas, trabajadores hasta 2 salarios mínimos).",
+   "descuento": "Tarifa residencial diferencial (Social 1 y 2); la provincia compensa a la EPE la diferencia (Ley 10.014, art. 6 inc. q). El valor del descuento no figura en los documentos abiertos.",
+   "norma_nombre": "Decreto provincial 449/2011 (Tarifas Social 1 y 2) y Decreto 2746/2025 (delegación del régimen, 7-11-2025)",
+   "norma": "https://www.lt9.com.ar/wp-content/uploads/2025/11/DEC-2025-00002746-APPSF-PE-1.pdf",
+   "normas_relacionadas": [
+    {
+     "nombre": "Comunicado del Gobierno de Santa Fe (29-2-2016) sobre la ampliación de la tarifa social de la EPE",
+     "url": "https://www.santafe.gob.ar/noticias/noticia/226539/"
+    }
+   ],
+   "cita": "Decreto 2746/2025, art. 1: «Delégase en los Ministros de Desarrollo Productivo y de Economía la facultad de establecer y aprobar el régimen de beneficio de la tarifa social de los usuarios de energía eléctrica, determinar los parámetros para su otorgamiento, tope de consumo, duración y/o renovación de dicho beneficio, en el ámbito de la Provincia de Santa Fe.» Considerandos: «el Decreto N° 0449/11 aprobó la Tarifa RESIDENCIAL HASTA 2,2 kW de potencia-TARIFA SOCIAL 1 (1 C8) y la Tarifa ... TARIFA SOCIAL 2 (1 I8)».",
+   "nota": "El enlace es una copia del decreto publicada por un medio (LT9); el original está en el Boletín Oficial de la Provincia de Santa Fe. La fecha «desde» es la del Decreto 449/11 (solo el año, tomado de los considerandos del Decreto 2746/2025); antes rigió el Decreto 2683/02."
+  }
+ ],
+ "cantidades": [
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz_y_gas",
+   "nivel": "N1",
+   "fecha": "2023-02",
+   "usuarios": 412755,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 135 del Jefe de Gabinete de Ministros a la HCDN (03/2023), pregunta 991, PDF p. 1114 (repetida en la pregunta 1393, p. 1529)",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-135.pdf",
+   "cita": "«a febrero de 2023 la cantidad de usuarios inscriptos en el RASE es de 9.866.523 de los cuales 412.755 corresponden a N1, 5.842.827 a N2 y 3.610.941 a N3»",
+   "nota": "Inscriptos en el RASE (un formulario para electricidad y gas); no se informa por servicio."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz_y_gas",
+   "nivel": "N2",
+   "fecha": "2023-02",
+   "usuarios": 5842827,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 135 del Jefe de Gabinete de Ministros a la HCDN (03/2023), pregunta 991, PDF p. 1114 (repetida en la pregunta 1393, p. 1529)",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-135.pdf",
+   "cita": "«a febrero de 2023 la cantidad de usuarios inscriptos en el RASE es de 9.866.523 de los cuales 412.755 corresponden a N1, 5.842.827 a N2 y 3.610.941 a N3»",
+   "nota": "Inscriptos en el RASE (un formulario para electricidad y gas); no se informa por servicio."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz_y_gas",
+   "nivel": "N3",
+   "fecha": "2023-02",
+   "usuarios": 3610941,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 135 del Jefe de Gabinete de Ministros a la HCDN (03/2023), pregunta 991, PDF p. 1114 (repetida en la pregunta 1393, p. 1529)",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-135.pdf",
+   "cita": "«a febrero de 2023 la cantidad de usuarios inscriptos en el RASE es de 9.866.523 de los cuales 412.755 corresponden a N1, 5.842.827 a N2 y 3.610.941 a N3»",
+   "nota": "Inscriptos en el RASE (un formulario para electricidad y gas); no se informa por servicio."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz_y_gas",
+   "nivel": "N1",
+   "fecha": "2023-03",
+   "usuarios": 416630,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 136 del Jefe de Gabinete (Rossi, respuesta del Ministerio de Economía), pregunta 63, PDF p. 83",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-136.pdf",
+   "cita": "«a marzo de 2023 la cantidad de usuarios inscriptos en el RASE es de 9.910.736 de los cuales 416.630 corresponden a N1, 5.878.450 a N2 y 3.615.656 a N3»",
+   "nota": "El índice de la HCDN rotula este informe «05/2022 – H. Senado»; el dato es de marzo de 2023. Corte distinto al del informe 137 (mismo mes)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz_y_gas",
+   "nivel": "N2",
+   "fecha": "2023-03",
+   "usuarios": 5878450,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 136 del Jefe de Gabinete (Rossi, respuesta del Ministerio de Economía), pregunta 63, PDF p. 83",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-136.pdf",
+   "cita": "«a marzo de 2023 la cantidad de usuarios inscriptos en el RASE es de 9.910.736 de los cuales 416.630 corresponden a N1, 5.878.450 a N2 y 3.615.656 a N3»",
+   "nota": "El índice de la HCDN rotula este informe «05/2022 – H. Senado»; el dato es de marzo de 2023. Corte distinto al del informe 137 (mismo mes)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz_y_gas",
+   "nivel": "N3",
+   "fecha": "2023-03",
+   "usuarios": 3615656,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 136 del Jefe de Gabinete (Rossi, respuesta del Ministerio de Economía), pregunta 63, PDF p. 83",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-136.pdf",
+   "cita": "«a marzo de 2023 la cantidad de usuarios inscriptos en el RASE es de 9.910.736 de los cuales 416.630 corresponden a N1, 5.878.450 a N2 y 3.615.656 a N3»",
+   "nota": "El índice de la HCDN rotula este informe «05/2022 – H. Senado»; el dato es de marzo de 2023. Corte distinto al del informe 137 (mismo mes)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz_y_gas",
+   "nivel": "N1",
+   "fecha": "2023-03",
+   "usuarios": 419780,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 137 del Jefe de Gabinete a la HCDN (06/2023, Rossi), pregunta 1195, PDF p. 1272",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-137.pdf",
+   "cita": "«Los inscriptos en el RASE a marzo de 2023 son 9.984.641 de los cuales 419.780 corresponden a N1, 5.938.409 a N2 y 3.626.452 a N3»",
+   "nota": "El informe habla de «hogares inscriptos al RASE» (p. 1092) y de «inscriptos» (p. 1272); corte de marzo de 2023 distinto al del informe 136."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz_y_gas",
+   "nivel": "N2",
+   "fecha": "2023-03",
+   "usuarios": 5938409,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 137 del Jefe de Gabinete a la HCDN (06/2023, Rossi), pregunta 1195, PDF p. 1272",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-137.pdf",
+   "cita": "«Los inscriptos en el RASE a marzo de 2023 son 9.984.641 de los cuales 419.780 corresponden a N1, 5.938.409 a N2 y 3.626.452 a N3»",
+   "nota": "El informe habla de «hogares inscriptos al RASE» (p. 1092) y de «inscriptos» (p. 1272); corte de marzo de 2023 distinto al del informe 136."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz_y_gas",
+   "nivel": "N3",
+   "fecha": "2023-03",
+   "usuarios": 3626452,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 137 del Jefe de Gabinete a la HCDN (06/2023, Rossi), pregunta 1195, PDF p. 1272",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-137.pdf",
+   "cita": "«Los inscriptos en el RASE a marzo de 2023 son 9.984.641 de los cuales 419.780 corresponden a N1, 5.938.409 a N2 y 3.626.452 a N3»",
+   "nota": "El informe habla de «hogares inscriptos al RASE» (p. 1092) y de «inscriptos» (p. 1272); corte de marzo de 2023 distinto al del informe 136."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N1",
+   "fecha": "2024-05",
+   "usuarios": 5300000,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 139 del Jefe de Gabinete al Senado (05/2024, Posse), pregunta 159, PDF p. 188",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-139.pdf",
+   "cita": "«Actualmente, los hogares registrados en el RASE se dividen del siguiente modo: N1: 5.3 M de usuarios. N2: 8 M de usuarios. N3: 2.7 M de usuarios.»",
+   "redondeo": "redondeado a 0,1 millón en el original",
+   "nota": "El informe no da fecha de corte (se usa la del informe) ni aclara si es luz o ambos servicios; los valores son coherentes con el padrón eléctrico del informe 140."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N2",
+   "fecha": "2024-05",
+   "usuarios": 8000000,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 139 del Jefe de Gabinete al Senado (05/2024, Posse), pregunta 159, PDF p. 188",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-139.pdf",
+   "cita": "«Actualmente, los hogares registrados en el RASE se dividen del siguiente modo: N1: 5.3 M de usuarios. N2: 8 M de usuarios. N3: 2.7 M de usuarios.»",
+   "redondeo": "redondeado a 0,1 millón en el original",
+   "nota": "El informe no da fecha de corte (se usa la del informe) ni aclara si es luz o ambos servicios; los valores son coherentes con el padrón eléctrico del informe 140."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N3",
+   "fecha": "2024-05",
+   "usuarios": 2700000,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 139 del Jefe de Gabinete al Senado (05/2024, Posse), pregunta 159, PDF p. 188",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-139.pdf",
+   "cita": "«Actualmente, los hogares registrados en el RASE se dividen del siguiente modo: N1: 5.3 M de usuarios. N2: 8 M de usuarios. N3: 2.7 M de usuarios.»",
+   "redondeo": "redondeado a 0,1 millón en el original",
+   "nota": "El informe no da fecha de corte (se usa la del informe) ni aclara si es luz o ambos servicios; los valores son coherentes con el padrón eléctrico del informe 140."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N1",
+   "fecha": "2024-07",
+   "usuarios": 5035352,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Total» del cuadro: N1 5.035.352, N2 8.382.271, N3 2.817.480, total 16.235.103 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N2",
+   "fecha": "2024-07",
+   "usuarios": 8382271,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Total» del cuadro: N1 5.035.352, N2 8.382.271, N3 2.817.480, total 16.235.103 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N3",
+   "fecha": "2024-07",
+   "usuarios": 2817480,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Total» del cuadro: N1 5.035.352, N2 8.382.271, N3 2.817.480, total 16.235.103 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N1",
+   "fecha": "2024-07",
+   "usuarios": 1894393,
+   "unidad": "usuarios",
+   "alcance": "provincia Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Buenos Aires» del cuadro: N1 1.894.393, N2 3.189.134, N3 1.084.556, total 6.168.083 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N2",
+   "fecha": "2024-07",
+   "usuarios": 3189134,
+   "unidad": "usuarios",
+   "alcance": "provincia Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Buenos Aires» del cuadro: N1 1.894.393, N2 3.189.134, N3 1.084.556, total 6.168.083 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N3",
+   "fecha": "2024-07",
+   "usuarios": 1084556,
+   "unidad": "usuarios",
+   "alcance": "provincia Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Buenos Aires» del cuadro: N1 1.894.393, N2 3.189.134, N3 1.084.556, total 6.168.083 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N1",
+   "fecha": "2024-07",
+   "usuarios": 742700,
+   "unidad": "usuarios",
+   "alcance": "Ciudad de Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Ciudad de Buenos Aires» del cuadro: N1 742.700, N2 468.554, N3 383.406, total 1.594.660 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N2",
+   "fecha": "2024-07",
+   "usuarios": 468554,
+   "unidad": "usuarios",
+   "alcance": "Ciudad de Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Ciudad de Buenos Aires» del cuadro: N1 742.700, N2 468.554, N3 383.406, total 1.594.660 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N3",
+   "fecha": "2024-07",
+   "usuarios": 383406,
+   "unidad": "usuarios",
+   "alcance": "Ciudad de Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Ciudad de Buenos Aires» del cuadro: N1 742.700, N2 468.554, N3 383.406, total 1.594.660 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N1",
+   "fecha": "2024-07",
+   "usuarios": 522611,
+   "unidad": "usuarios",
+   "alcance": "provincia Córdoba",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Córdoba» del cuadro: N1 522.611, N2 687.246, N3 306.447, total 1.516.304 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N2",
+   "fecha": "2024-07",
+   "usuarios": 687246,
+   "unidad": "usuarios",
+   "alcance": "provincia Córdoba",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Córdoba» del cuadro: N1 522.611, N2 687.246, N3 306.447, total 1.516.304 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N3",
+   "fecha": "2024-07",
+   "usuarios": 306447,
+   "unidad": "usuarios",
+   "alcance": "provincia Córdoba",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Córdoba» del cuadro: N1 522.611, N2 687.246, N3 306.447, total 1.516.304 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N1",
+   "fecha": "2024-07",
+   "usuarios": 488886,
+   "unidad": "usuarios",
+   "alcance": "provincia Santa Fe",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Santa Fe» del cuadro: N1 488.886, N2 715.395, N3 218.531, total 1.422.812 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N2",
+   "fecha": "2024-07",
+   "usuarios": 715395,
+   "unidad": "usuarios",
+   "alcance": "provincia Santa Fe",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Santa Fe» del cuadro: N1 488.886, N2 715.395, N3 218.531, total 1.422.812 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "luz",
+   "nivel": "N3",
+   "fecha": "2024-07",
+   "usuarios": 218531,
+   "unidad": "usuarios",
+   "alcance": "provincia Santa Fe",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Energía Eléctrica – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Santa Fe» del cuadro: N1 488.886, N2 715.395, N3 218.531, total 1.422.812 (padrón eléctrico)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N1",
+   "fecha": "2024-07",
+   "usuarios": 3689640,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Total» del cuadro: N1 3.689.640, N2 3.538.866, N3 2.247.662, total 9.476.168 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N2",
+   "fecha": "2024-07",
+   "usuarios": 3538866,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Total» del cuadro: N1 3.689.640, N2 3.538.866, N3 2.247.662, total 9.476.168 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N3",
+   "fecha": "2024-07",
+   "usuarios": 2247662,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Total» del cuadro: N1 3.689.640, N2 3.538.866, N3 2.247.662, total 9.476.168 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N1",
+   "fecha": "2024-07",
+   "usuarios": 1485592,
+   "unidad": "usuarios",
+   "alcance": "provincia Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Buenos Aires» del cuadro: N1 1.485.592, N2 1.661.050, N3 977.037, total 4.123.679 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N2",
+   "fecha": "2024-07",
+   "usuarios": 1661050,
+   "unidad": "usuarios",
+   "alcance": "provincia Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Buenos Aires» del cuadro: N1 1.485.592, N2 1.661.050, N3 977.037, total 4.123.679 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N3",
+   "fecha": "2024-07",
+   "usuarios": 977037,
+   "unidad": "usuarios",
+   "alcance": "provincia Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Buenos Aires» del cuadro: N1 1.485.592, N2 1.661.050, N3 977.037, total 4.123.679 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N1",
+   "fecha": "2024-07",
+   "usuarios": 701699,
+   "unidad": "usuarios",
+   "alcance": "Ciudad de Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Ciudad de Buenos Aires» del cuadro: N1 701.699, N2 369.320, N3 350.512, total 1.421.531 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N2",
+   "fecha": "2024-07",
+   "usuarios": 369320,
+   "unidad": "usuarios",
+   "alcance": "Ciudad de Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Ciudad de Buenos Aires» del cuadro: N1 701.699, N2 369.320, N3 350.512, total 1.421.531 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N3",
+   "fecha": "2024-07",
+   "usuarios": 350512,
+   "unidad": "usuarios",
+   "alcance": "Ciudad de Buenos Aires",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Ciudad de Buenos Aires» del cuadro: N1 701.699, N2 369.320, N3 350.512, total 1.421.531 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N1",
+   "fecha": "2024-07",
+   "usuarios": 320159,
+   "unidad": "usuarios",
+   "alcance": "provincia Córdoba",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Córdoba» del cuadro: N1 320.159, N2 304.579, N3 199.339, total 824.077 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N2",
+   "fecha": "2024-07",
+   "usuarios": 304579,
+   "unidad": "usuarios",
+   "alcance": "provincia Córdoba",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Córdoba» del cuadro: N1 320.159, N2 304.579, N3 199.339, total 824.077 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N3",
+   "fecha": "2024-07",
+   "usuarios": 199339,
+   "unidad": "usuarios",
+   "alcance": "provincia Córdoba",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Córdoba» del cuadro: N1 320.159, N2 304.579, N3 199.339, total 824.077 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N1",
+   "fecha": "2024-07",
+   "usuarios": 355889,
+   "unidad": "usuarios",
+   "alcance": "provincia Santa Fe",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Santa Fe» del cuadro: N1 355.889, N2 215.124, N3 170.238, total 741.251 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N2",
+   "fecha": "2024-07",
+   "usuarios": 215124,
+   "unidad": "usuarios",
+   "alcance": "provincia Santa Fe",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Santa Fe» del cuadro: N1 355.889, N2 215.124, N3 170.238, total 741.251 (padrón de gas)."
+  },
+  {
+   "tipo": "segmentacion_rase",
+   "servicio": "gas",
+   "nivel": "N3",
+   "fecha": "2024-07",
+   "usuarios": 170238,
+   "unidad": "usuarios",
+   "alcance": "provincia Santa Fe",
+   "fuente": "Informe N.º 140 del Jefe de Gabinete a la HCDN (09/2024, Francos), pregunta 569, cuadro «RASE Gas por redes – Julio 2024», PDF p. 526",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe-140.pdf",
+   "cita": "Fila «Santa Fe» del cuadro: N1 355.889, N2 215.124, N3 170.238, total 741.251 (padrón de gas)."
+  },
+  {
+   "tipo": "sef",
+   "servicio": "luz",
+   "nivel": "con subsidio",
+   "fecha": "2026-03",
+   "usuarios": 8730000,
+   "unidad": "hogares",
+   "alcance": "país",
+   "fuente": "Informe N.º 145 del Jefe de Gabinete a la HCDN (28-4-2026, Adorni), pregunta 1169, respuesta de la Secretaría de Energía con corte de datos al 18-3-26, PDF p. 1091-1092",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME145JGM.pdf",
+   "cita": "Cuadro de la respuesta (último corrimiento de data al 18-3-26): «GAS ELECTRICIDAD / Usuarios con subsidios 4.78MM 8.73MM / Usuarios sin subsidios 4.82MM 7.74MM».",
+   "redondeo": "redondeado a 0,01 millón en el original",
+   "nota": "Corte de datos al 18-3-26 (columna «Febrero» de los cuadros de evolución). Redondeado a 10.000. Totales: luz 16,5 MM y gas 9,6 MM."
+  },
+  {
+   "tipo": "sef",
+   "servicio": "luz",
+   "nivel": "sin subsidio",
+   "fecha": "2026-03",
+   "usuarios": 7740000,
+   "unidad": "hogares",
+   "alcance": "país",
+   "fuente": "Informe N.º 145 del Jefe de Gabinete a la HCDN (28-4-2026, Adorni), pregunta 1169, respuesta de la Secretaría de Energía con corte de datos al 18-3-26, PDF p. 1091-1092",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME145JGM.pdf",
+   "cita": "Cuadro de la respuesta (último corrimiento de data al 18-3-26): «GAS ELECTRICIDAD / Usuarios con subsidios 4.78MM 8.73MM / Usuarios sin subsidios 4.82MM 7.74MM».",
+   "redondeo": "redondeado a 0,01 millón en el original",
+   "nota": "Corte de datos al 18-3-26 (columna «Febrero» de los cuadros de evolución). Redondeado a 10.000. Totales: luz 16,5 MM y gas 9,6 MM."
+  },
+  {
+   "tipo": "sef",
+   "servicio": "gas",
+   "nivel": "con subsidio",
+   "fecha": "2026-03",
+   "usuarios": 4780000,
+   "unidad": "hogares",
+   "alcance": "país",
+   "fuente": "Informe N.º 145 del Jefe de Gabinete a la HCDN (28-4-2026, Adorni), pregunta 1169, respuesta de la Secretaría de Energía con corte de datos al 18-3-26, PDF p. 1091-1092",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME145JGM.pdf",
+   "cita": "Cuadro de la respuesta (último corrimiento de data al 18-3-26): «GAS ELECTRICIDAD / Usuarios con subsidios 4.78MM 8.73MM / Usuarios sin subsidios 4.82MM 7.74MM».",
+   "redondeo": "redondeado a 0,01 millón en el original",
+   "nota": "Corte de datos al 18-3-26 (columna «Febrero» de los cuadros de evolución). Redondeado a 10.000. Totales: luz 16,5 MM y gas 9,6 MM."
+  },
+  {
+   "tipo": "sef",
+   "servicio": "gas",
+   "nivel": "sin subsidio",
+   "fecha": "2026-03",
+   "usuarios": 4820000,
+   "unidad": "hogares",
+   "alcance": "país",
+   "fuente": "Informe N.º 145 del Jefe de Gabinete a la HCDN (28-4-2026, Adorni), pregunta 1169, respuesta de la Secretaría de Energía con corte de datos al 18-3-26, PDF p. 1091-1092",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME145JGM.pdf",
+   "cita": "Cuadro de la respuesta (último corrimiento de data al 18-3-26): «GAS ELECTRICIDAD / Usuarios con subsidios 4.78MM 8.73MM / Usuarios sin subsidios 4.82MM 7.74MM».",
+   "redondeo": "redondeado a 0,01 millón en el original",
+   "nota": "Corte de datos al 18-3-26 (columna «Febrero» de los cuadros de evolución). Redondeado a 10.000. Totales: luz 16,5 MM y gas 9,6 MM."
+  },
+  {
+   "tipo": "sef",
+   "servicio": "luz",
+   "nivel": "con subsidio",
+   "fecha": "2026-01",
+   "usuarios": 8770000,
+   "unidad": "hogares",
+   "alcance": "país",
+   "fuente": "Informe N.º 145 del Jefe de Gabinete a la HCDN (28-4-2026, Adorni), pregunta 1169, respuesta de la Secretaría de Energía con corte de datos al 18-3-26, PDF p. 1091-1092",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME145JGM.pdf",
+   "cita": "Cuadros «Inicio del SEF»: electricidad con subsidio 8.77MM, sin subsidio 7.75MM (total 16.5MM); gas con subsidio 4.81MM, sin subsidio 4.79MM (total 9.59MM).",
+   "redondeo": "redondeado a 0,01 millón en el original",
+   "nota": "«Inicio del SEF» = el RASE migrado a los parámetros del Decreto 943/25 (enero de 2026). Redondeado a 10.000."
+  },
+  {
+   "tipo": "sef",
+   "servicio": "luz",
+   "nivel": "sin subsidio",
+   "fecha": "2026-01",
+   "usuarios": 7750000,
+   "unidad": "hogares",
+   "alcance": "país",
+   "fuente": "Informe N.º 145 del Jefe de Gabinete a la HCDN (28-4-2026, Adorni), pregunta 1169, respuesta de la Secretaría de Energía con corte de datos al 18-3-26, PDF p. 1091-1092",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME145JGM.pdf",
+   "cita": "Cuadros «Inicio del SEF»: electricidad con subsidio 8.77MM, sin subsidio 7.75MM (total 16.5MM); gas con subsidio 4.81MM, sin subsidio 4.79MM (total 9.59MM).",
+   "redondeo": "redondeado a 0,01 millón en el original",
+   "nota": "«Inicio del SEF» = el RASE migrado a los parámetros del Decreto 943/25 (enero de 2026). Redondeado a 10.000."
+  },
+  {
+   "tipo": "sef",
+   "servicio": "gas",
+   "nivel": "con subsidio",
+   "fecha": "2026-01",
+   "usuarios": 4810000,
+   "unidad": "hogares",
+   "alcance": "país",
+   "fuente": "Informe N.º 145 del Jefe de Gabinete a la HCDN (28-4-2026, Adorni), pregunta 1169, respuesta de la Secretaría de Energía con corte de datos al 18-3-26, PDF p. 1091-1092",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME145JGM.pdf",
+   "cita": "Cuadros «Inicio del SEF»: electricidad con subsidio 8.77MM, sin subsidio 7.75MM (total 16.5MM); gas con subsidio 4.81MM, sin subsidio 4.79MM (total 9.59MM).",
+   "redondeo": "redondeado a 0,01 millón en el original",
+   "nota": "«Inicio del SEF» = el RASE migrado a los parámetros del Decreto 943/25 (enero de 2026). Redondeado a 10.000."
+  },
+  {
+   "tipo": "sef",
+   "servicio": "gas",
+   "nivel": "sin subsidio",
+   "fecha": "2026-01",
+   "usuarios": 4790000,
+   "unidad": "hogares",
+   "alcance": "país",
+   "fuente": "Informe N.º 145 del Jefe de Gabinete a la HCDN (28-4-2026, Adorni), pregunta 1169, respuesta de la Secretaría de Energía con corte de datos al 18-3-26, PDF p. 1091-1092",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME145JGM.pdf",
+   "cita": "Cuadros «Inicio del SEF»: electricidad con subsidio 8.77MM, sin subsidio 7.75MM (total 16.5MM); gas con subsidio 4.81MM, sin subsidio 4.79MM (total 9.59MM).",
+   "redondeo": "redondeado a 0,01 millón en el original",
+   "nota": "«Inicio del SEF» = el RASE migrado a los parámetros del Decreto 943/25 (enero de 2026). Redondeado a 10.000."
+  },
+  {
+   "tipo": "sef",
+   "servicio": "garrafa",
+   "nivel": "inscriptos y admitidos",
+   "fecha": "2026-03",
+   "usuarios": 58000,
+   "unidad": "hogares",
+   "alcance": "país",
+   "fuente": "Informe N.º 145 del Jefe de Gabinete a la HCDN (28-4-2026, Adorni), pregunta 1169, respuesta de la Secretaría de Energía con corte de datos al 18-3-26, PDF p. 1091-1092",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME145JGM.pdf",
+   "cita": "«A la fecha se cuenta con un total de 58.000 inscriptos y admitidos al beneficio de la Garrafa - SEF.»",
+   "redondeo": "cifra redonda en el original"
+  },
+  {
+   "tipo": "sef",
+   "servicio": "gas_propano_redes",
+   "nivel": "beneficiarios",
+   "fecha": "2026-03",
+   "usuarios": 21705,
+   "unidad": "hogares",
+   "alcance": "país",
+   "fuente": "Informe N.º 145 del Jefe de Gabinete a la HCDN (28-4-2026, Adorni), pregunta 1169, respuesta de la Secretaría de Energía con corte de datos al 18-3-26, PDF p. 1091-1092",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME145JGM.pdf",
+   "cita": "«un total de beneficiarios de GLP por redes, según fuente ENARGAS, de 21.705.»"
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "Ley 27.637, descuento 30 %",
+   "fecha": "2024-02",
+   "usuarios": 1718034,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Secretaría de Energía, «Ley 25.565 y 27.637 – Régimen de Zona Fría», versión 1 (PDF generado el 16-2-2024), diapositiva 6 «Universo de beneficiarios»",
+   "url": "https://www.argentina.gob.ar/sites/default/files/informe_regimen_zona_fria.pdf",
+   "cita": "Fila «TOTAL» de la columna «Beneficiarios Ley 27.637, descuento 30 %»: 1.718.034. La diapositiva dice: «El universo de usuarios alcanzados por el RZF asciende a 4,3 millones sobre un padrón de 9,4 millones.»",
+   "nota": "El informe no trae fecha de corte (usa datos de 2023 en lo financiero); se fecha con la de creación del PDF (2024-02-16). Los tres totales suman 4.304.776, coherente con los 4,3 millones."
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "Ley 27.637, descuento 50 %",
+   "fecha": "2024-02",
+   "usuarios": 1647196,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Secretaría de Energía, «Ley 25.565 y 27.637 – Régimen de Zona Fría», versión 1 (PDF generado el 16-2-2024), diapositiva 6 «Universo de beneficiarios»",
+   "url": "https://www.argentina.gob.ar/sites/default/files/informe_regimen_zona_fria.pdf",
+   "cita": "Fila «TOTAL» de la columna «Beneficiarios Ley 27.637, descuento 50 %»: 1.647.196. La diapositiva dice: «El universo de usuarios alcanzados por el RZF asciende a 4,3 millones sobre un padrón de 9,4 millones.»",
+   "nota": "El informe no trae fecha de corte (usa datos de 2023 en lo financiero); se fecha con la de creación del PDF (2024-02-16). Los tres totales suman 4.304.776, coherente con los 4,3 millones."
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "Ley 25.565, descuento 50 %",
+   "fecha": "2024-02",
+   "usuarios": 939546,
+   "unidad": "usuarios",
+   "alcance": "país",
+   "fuente": "Secretaría de Energía, «Ley 25.565 y 27.637 – Régimen de Zona Fría», versión 1 (PDF generado el 16-2-2024), diapositiva 6 «Universo de beneficiarios»",
+   "url": "https://www.argentina.gob.ar/sites/default/files/informe_regimen_zona_fria.pdf",
+   "cita": "Fila «TOTAL» de la columna «Beneficiarios Ley 25.565, descuento 50 %»: 939.546. La diapositiva dice: «El universo de usuarios alcanzados por el RZF asciende a 4,3 millones sobre un padrón de 9,4 millones.»",
+   "nota": "El informe no trae fecha de corte (usa datos de 2023 en lo financiero); se fecha con la de creación del PDF (2024-02-16). Los tres totales suman 4.304.776, coherente con los 4,3 millones."
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "Ley 27.637, descuento 30 %",
+   "fecha": "2024-02",
+   "usuarios": 692046,
+   "unidad": "usuarios",
+   "alcance": "provincia Buenos Aires",
+   "fuente": "Secretaría de Energía, «Ley 25.565 y 27.637 – Régimen de Zona Fría», versión 1 (PDF generado el 16-2-2024), diapositiva 6 «Universo de beneficiarios»",
+   "url": "https://www.argentina.gob.ar/sites/default/files/informe_regimen_zona_fria.pdf",
+   "cita": "Fila «Buenos Aires» de la columna «Beneficiarios Ley 27.637, descuento 30 %»: 692.046. La diapositiva dice: «El universo de usuarios alcanzados por el RZF asciende a 4,3 millones sobre un padrón de 9,4 millones.»",
+   "nota": "El informe no trae fecha de corte (usa datos de 2023 en lo financiero); se fecha con la de creación del PDF (2024-02-16). Los tres totales suman 4.304.776, coherente con los 4,3 millones."
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "Ley 27.637, descuento 50 %",
+   "fecha": "2024-02",
+   "usuarios": 625294,
+   "unidad": "usuarios",
+   "alcance": "provincia Buenos Aires",
+   "fuente": "Secretaría de Energía, «Ley 25.565 y 27.637 – Régimen de Zona Fría», versión 1 (PDF generado el 16-2-2024), diapositiva 6 «Universo de beneficiarios»",
+   "url": "https://www.argentina.gob.ar/sites/default/files/informe_regimen_zona_fria.pdf",
+   "cita": "Fila «Buenos Aires» de la columna «Beneficiarios Ley 27.637, descuento 50 %»: 625.294. La diapositiva dice: «El universo de usuarios alcanzados por el RZF asciende a 4,3 millones sobre un padrón de 9,4 millones.»",
+   "nota": "El informe no trae fecha de corte (usa datos de 2023 en lo financiero); se fecha con la de creación del PDF (2024-02-16). Los tres totales suman 4.304.776, coherente con los 4,3 millones."
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "Ley 25.565, descuento 50 %",
+   "fecha": "2024-02",
+   "usuarios": 11980,
+   "unidad": "usuarios",
+   "alcance": "provincia Buenos Aires",
+   "fuente": "Secretaría de Energía, «Ley 25.565 y 27.637 – Régimen de Zona Fría», versión 1 (PDF generado el 16-2-2024), diapositiva 6 «Universo de beneficiarios»",
+   "url": "https://www.argentina.gob.ar/sites/default/files/informe_regimen_zona_fria.pdf",
+   "cita": "Fila «Buenos Aires» de la columna «Beneficiarios Ley 25.565, descuento 50 %»: 11.980. La diapositiva dice: «El universo de usuarios alcanzados por el RZF asciende a 4,3 millones sobre un padrón de 9,4 millones.»",
+   "nota": "El informe no trae fecha de corte (usa datos de 2023 en lo financiero); se fecha con la de creación del PDF (2024-02-16). Los tres totales suman 4.304.776, coherente con los 4,3 millones."
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "Ley 27.637, descuento 30 %",
+   "fecha": "2024-02",
+   "usuarios": 338136,
+   "unidad": "usuarios",
+   "alcance": "provincia Córdoba",
+   "fuente": "Secretaría de Energía, «Ley 25.565 y 27.637 – Régimen de Zona Fría», versión 1 (PDF generado el 16-2-2024), diapositiva 6 «Universo de beneficiarios»",
+   "url": "https://www.argentina.gob.ar/sites/default/files/informe_regimen_zona_fria.pdf",
+   "cita": "Fila «Córdoba» de la columna «Beneficiarios Ley 27.637, descuento 30 %»: 338.136. La diapositiva dice: «El universo de usuarios alcanzados por el RZF asciende a 4,3 millones sobre un padrón de 9,4 millones.»",
+   "nota": "El informe no trae fecha de corte (usa datos de 2023 en lo financiero); se fecha con la de creación del PDF (2024-02-16). Los tres totales suman 4.304.776, coherente con los 4,3 millones."
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "Ley 27.637, descuento 50 %",
+   "fecha": "2024-02",
+   "usuarios": 374466,
+   "unidad": "usuarios",
+   "alcance": "provincia Córdoba",
+   "fuente": "Secretaría de Energía, «Ley 25.565 y 27.637 – Régimen de Zona Fría», versión 1 (PDF generado el 16-2-2024), diapositiva 6 «Universo de beneficiarios»",
+   "url": "https://www.argentina.gob.ar/sites/default/files/informe_regimen_zona_fria.pdf",
+   "cita": "Fila «Córdoba» de la columna «Beneficiarios Ley 27.637, descuento 50 %»: 374.466. La diapositiva dice: «El universo de usuarios alcanzados por el RZF asciende a 4,3 millones sobre un padrón de 9,4 millones.»",
+   "nota": "El informe no trae fecha de corte (usa datos de 2023 en lo financiero); se fecha con la de creación del PDF (2024-02-16). Los tres totales suman 4.304.776, coherente con los 4,3 millones."
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "Ley 27.637, descuento 30 %",
+   "fecha": "2024-02",
+   "usuarios": 294625,
+   "unidad": "usuarios",
+   "alcance": "provincia Santa Fe",
+   "fuente": "Secretaría de Energía, «Ley 25.565 y 27.637 – Régimen de Zona Fría», versión 1 (PDF generado el 16-2-2024), diapositiva 6 «Universo de beneficiarios»",
+   "url": "https://www.argentina.gob.ar/sites/default/files/informe_regimen_zona_fria.pdf",
+   "cita": "Fila «Santa Fe» de la columna «Beneficiarios Ley 27.637, descuento 30 %»: 294.625. La diapositiva dice: «El universo de usuarios alcanzados por el RZF asciende a 4,3 millones sobre un padrón de 9,4 millones.»",
+   "nota": "El informe no trae fecha de corte (usa datos de 2023 en lo financiero); se fecha con la de creación del PDF (2024-02-16). Los tres totales suman 4.304.776, coherente con los 4,3 millones."
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "Ley 27.637, descuento 50 %",
+   "fecha": "2024-02",
+   "usuarios": 268906,
+   "unidad": "usuarios",
+   "alcance": "provincia Santa Fe",
+   "fuente": "Secretaría de Energía, «Ley 25.565 y 27.637 – Régimen de Zona Fría», versión 1 (PDF generado el 16-2-2024), diapositiva 6 «Universo de beneficiarios»",
+   "url": "https://www.argentina.gob.ar/sites/default/files/informe_regimen_zona_fria.pdf",
+   "cita": "Fila «Santa Fe» de la columna «Beneficiarios Ley 27.637, descuento 50 %»: 268.906. La diapositiva dice: «El universo de usuarios alcanzados por el RZF asciende a 4,3 millones sobre un padrón de 9,4 millones.»",
+   "nota": "El informe no trae fecha de corte (usa datos de 2023 en lo financiero); se fecha con la de creación del PDF (2024-02-16). Los tres totales suman 4.304.776, coherente con los 4,3 millones."
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "cuentas con más de un medidor por CUIT/CUIL",
+   "fecha": "2025-06",
+   "usuarios": 357288,
+   "unidad": "cuentas",
+   "alcance": "país",
+   "fuente": "Informe N.º 143 del Jefe de Gabinete al Senado (06/2025, Francos), pregunta 327, PDF p. 405-406",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe_143.pdf",
+   "cita": "«se identificaron 357.288 cuentas de gas por redes que referían a 137.975 personas es decir que, con una misma identificación (a través de la CUIT o CUIL) se registraron beneficios para 2 o más medidores.» También: «El 23.7% de los usuarios incorporados al Registro Único ... tiene más de un suministro a su nombre.»",
+   "nota": "Fecha aproximada (informe de junio de 2025). Son 137.975 personas titulares de esas cuentas; no es el total de beneficiarios."
+  },
+  {
+   "tipo": "zona_fria",
+   "servicio": "gas",
+   "nivel": "servicios alcanzados por la ampliación",
+   "fecha": "2026-04",
+   "usuarios": 117244,
+   "unidad": "servicios",
+   "alcance": "provincia Santa Cruz",
+   "fuente": "Informe N.º 145 del Jefe de Gabinete a la HCDN (28-4-2026), pregunta 1454, respuesta 2, PDF p. 1355",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME145JGM.pdf",
+   "cita": "«A la fecha, los servicios alcanzados por la ampliación de Zona Fría de Gas Natural en Santa Cruz son 117.244.»",
+   "nota": "Fecha aproximada (informe de abril de 2026)."
+  },
+  {
+   "tipo": "aysa_tarifa_social",
+   "servicio": "agua",
+   "nivel": "Tarifa Social hogares",
+   "fecha": "2025-02",
+   "usuarios": 214601,
+   "unidad": "hogares",
+   "alcance": "área de concesión de AySA (AMBA)",
+   "fuente": "Informe N.º 142 del Jefe de Gabinete a la HCDN (04/2025, Francos), pregunta 1793, PDF p. 1294",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe_142.pdf",
+   "cita": "«se informan los beneficiarios registrados del Programa de Tarifa Social al 28/2/2025: Tarifa Social Hogares: 214.601 hogares; Tarifa Comunitaria: 855 Entidades; Caso Social: 1.013 Casos»"
+  },
+  {
+   "tipo": "aysa_tarifa_social",
+   "servicio": "agua",
+   "nivel": "Tarifa Comunitaria",
+   "fecha": "2025-02",
+   "usuarios": 855,
+   "unidad": "entidades",
+   "alcance": "área de concesión de AySA (AMBA)",
+   "fuente": "Informe N.º 142 del Jefe de Gabinete a la HCDN (04/2025, Francos), pregunta 1793, PDF p. 1294",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe_142.pdf",
+   "cita": "«se informan los beneficiarios registrados del Programa de Tarifa Social al 28/2/2025: Tarifa Social Hogares: 214.601 hogares; Tarifa Comunitaria: 855 Entidades; Caso Social: 1.013 Casos»"
+  },
+  {
+   "tipo": "aysa_tarifa_social",
+   "servicio": "agua",
+   "nivel": "Caso Social",
+   "fecha": "2025-02",
+   "usuarios": 1013,
+   "unidad": "casos",
+   "alcance": "área de concesión de AySA (AMBA)",
+   "fuente": "Informe N.º 142 del Jefe de Gabinete a la HCDN (04/2025, Francos), pregunta 1793, PDF p. 1294",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe_142.pdf",
+   "cita": "«se informan los beneficiarios registrados del Programa de Tarifa Social al 28/2/2025: Tarifa Social Hogares: 214.601 hogares; Tarifa Comunitaria: 855 Entidades; Caso Social: 1.013 Casos»"
+  },
+  {
+   "tipo": "epe_tarifa_social",
+   "servicio": "luz",
+   "nivel": "tarifa social provincial",
+   "fecha": "2016-02",
+   "usuarios": 80000,
+   "unidad": "usuarios",
+   "alcance": "provincia Santa Fe (clientes de la EPE)",
+   "fuente": "Gobierno de Santa Fe, comunicado «Santa Fe ampliará la cantidad de clientes con tarifa social para la energía eléctrica» (29-2-2016)",
+   "url": "https://www.santafe.gob.ar/noticias/noticia/226539/",
+   "cita": "«En la actualidad, en Santa Fe hay 80 mil clientes de la EPE que son beneficiarios de la tarifa social provincial, mientras que 126 mil jubilados y pensionados también pagan una tarifa diferencial.»",
+   "redondeo": "«80 mil» en el original",
+   "nota": "Comunicado oficial del Gobierno provincial, no un informe estadístico. Dato de 2016."
+  }
+ ],
+ "faltantes": [
+  {
+   "tema": "RASE luz abr-2025 (N1 6.918.821, N2 6.244.657, N3 3.211.792)",
+   "motivo": "Cifra que el IIEP cita desde el informe 142 del Jefe de Gabinete (HCDN, 04/2025, pregunta 716, anexo «Energía eléctrica»). El PDF principal del informe 142 se bajó y se leyó entero: la pregunta 716 solo remite a archivos adjuntos que no vienen incluidos ni están en el índice de la HCDN. Sin el anexo abierto no se carga. Es la única foto de 2025 por nivel.",
+   "url": "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/informe_142.pdf"
+  },
+  {
+   "tema": "RASE por nivel de los informes 133 (09/2022) y 134 (11/2022)",
+   "motivo": "El informe 133 da «casi diez millones» de inscriptos y un cuadro por provincia (N1/N2/N3, PDF p. 364) cuyas columnas salen desalineadas al extraer el texto (Santa Fe aparece con dos juegos de valores); el informe 134 remite a un anexo (pregunta 52) no publicado. No se cargaron."
+  },
+  {
+   "tema": "RASE por nivel en los informes 141, 143, 144 y 145 (2024 a 2026)",
+   "motivo": "No traen conteos por nivel en el texto (141, 143, 144); el 145 ya trae el SEF con y sin subsidio."
+  },
+  {
+   "tema": "SEF por provincia y por mes después de marzo de 2026",
+   "motivo": "Sin documento oficial abierto: el informe 145 da el total país con corte al 18-3-26. Falta la apertura provincial; vía sugerida: pedido de acceso a la información a la Secretaría de Energía."
+  },
+  {
+   "tema": "Zona Fría: total actual de beneficiarios (después de la Res. SE 219/2025 y la Ley 27.828)",
+   "motivo": "Solo hay el informe de la Secretaría de Energía de feb-2024 (4,3 millones de usuarios) y el informe 143. La prensa habla de más de 3,3 millones de hogares que perderían el beneficio (https://www.lanacion.com.ar/politica/en-un-tramite-inesperado-y-veloz-el-senado-sanciono-el-recorte-de-subsidios-al-gas-nid24092026/) y de 130.000 usuarios recortados (https://www.lacapitalmdp.com/zona-fria-ampliada-el-gobierno-recorta-subsidios-a-mas-de-130-000-usuarios/): sin documento de origen, no entran."
+  },
+  {
+   "tema": "Cifras solo de prensa sin documento de origen",
+   "motivo": "RASE dic-2023 15.690.128; tarifa social 2016: 2.849.918 y 2018: 4,1 millones; Córdoba (La Voz/Los Andes, 8-5-2022: EPEC 145.540 beneficiarios, Ecogas unos 70.000, agua unos 29.500): https://www.losandes.com.ar/la-voz/entre-luz-agua-y-gas-hay-casi-250-mil-beneficios-de-tarifa-social-en-cordoba ; Santa Fe (El Litoral, sin fecha: 164.134 con tarifa social provincial y 252.690 con tarifa subsidiada; las cifras no figuran en el texto abierto): https://www.ellitoral.com/economia/pobres-energeticos-acceso-tarifa-social_0_3cSK0Eh9z2.html ; EPE dio de baja a más de 15.000 usuarios (comunicado provincial del 2-8-2025, sin total): https://www.santafe.gob.ar/noticias/noticia/283690/"
+  },
+  {
+   "tema": "Córdoba: tarifa social provincial de EPEC (ERSeP) y Programa Tarifa Solidaria",
+   "motivo": "Las normas (Decreto 1357/06; categoría «Tarifa Social Provincial» de los cuadros tarifarios de EPEC) solo se vieron en resúmenes de búsqueda: ersep.cba.gov.ar devuelve 403 y portaldetramites.cba.gov.ar 404 a las descargas automáticas. No se cargó el tipo. Sí se abrió el Anexo 2 de EPEC «Tarifa Social Nacional según Res. MEyM 6/16 art. 7», que se cita en la Tarifa Social Federal: https://web.epec.com.ar/docs/cuadro-tarifario/tarifa_n1_SocialNacionalRG53_16.pdf"
+  },
+  {
+   "tema": "Córdoba: tarifa social de Aguas Cordobesas (ERSeP)",
+   "motivo": "No apareció ninguna resolución del ERSeP que la regule en documentos abiertos."
+  },
+  {
+   "tema": "Santa Fe: tarifa social de Aguas Santafesinas (ENRESS)",
+   "motivo": "Los resultados solo mencionan un sistema de subsidios de la Res. ENRESS 345/10 y una revisión en 2026; la Res. 1296/2026 de ASSA no se pudo bajar como PDF y las demás normas no se pudieron abrir. No se cargó el tipo."
+  },
+  {
+   "tema": "Tarifa social de AySA: porcentaje de descuento y fecha de creación",
+   "motivo": "Las páginas oficiales del ERAS abiertas (programa y valores de referencia de dic-2026) dan los topes de ingreso pero no el porcentaje; otras fuentes hablan de 15 %, 30 % o hasta 100 % (solo prensa)."
+  },
+  {
+   "tema": "Tarifa Social Federal: texto de las Res. MEyM 7/2016, 28/2016 y 474/2017",
+   "motivo": "Solo se abrieron la Res. 6/2016 (art. 7) y la 219/2016; la 7/2016 y la 28/2016 aparecen citadas en sus considerandos y en el comunicado de Santa Fe. La bonificación de 10 % del gas (Res. 474/2017) aparece en búsquedas pero no se abrió su texto."
+  },
+  {
+   "tema": "Decreto 943/2025: Anexos I y II",
+   "motivo": "El cuadro de bonificaciones por componente (PEST, PAU) no se abrió: figura como «Visualizar Anexo». Solo se usó el articulado."
+  }
+ ]
+}

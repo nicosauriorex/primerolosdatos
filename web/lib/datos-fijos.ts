@@ -45,6 +45,7 @@ export const DATOS_FIJOS: DatoFijo[] = [
   { slug: "demanda-electrica", e: ex("demanda_electrica", "asis") },
   { slug: "motos", e: ex("motos_0km", "asis") },
   { slug: "carne", e: ex("carne_vacuna", "asis") },
+  { slug: "pollo", e: ex("carne_aviar", "asis") },
   // Empleo y pobreza
   { slug: "desocupacion", e: ex("dg_42_3_eph_puntuatal_0_m_30", "asis") },
   { slug: "pobreza", e: ex("pob_tasa_pobreza_personas", "asis") },
@@ -77,6 +78,8 @@ export const DATOS_FIJOS: DatoFijo[] = [
   { slug: "gasto-ciencia", e: ex("gasto_ciencia", "asis") },
   { slug: "obra-publica", e: ex("obra_publica", "real") },
   { slug: "rigi", e: ex("rigi_aprobado", "asis") },
+  { slug: "tarifas", e: ex("tarifa_amba_canasta", "asis") },
+  { slug: "quien-paga-la-luz", e: ex("luz_cobertura", "asis") },
   // Seguridad y salud
   { slug: "homicidios", e: ex("homicidios_tasa", "asis") },
   { slug: "mortalidad-infantil", e: ex("mortalidad_infantil", "asis") },
@@ -86,6 +89,9 @@ export const DATOS_FIJOS: DatoFijo[] = [
   { slug: "natalidad", e: ex("natalidad", "asis") },
   { slug: "vacunacion", e: ex("vacuna_sarampion1", "asis") },
   { slug: "robos-de-autos", e: ex("robos_autos", "asis") },
+  { slug: "robos-de-motos", e: ex("robos_motos", "asis") },
+  { slug: "fecundidad", e: ex("fecundidad", "asis") },
+  { slug: "universitarios", e: ex("univ_estudiantes", "asis") },
   { slug: "piquetes", e: ex("piquetes", "asis") },
   // Dinero, tasas y mercados
   { slug: "reservas", e: ex("bcra_1", "usdr") },

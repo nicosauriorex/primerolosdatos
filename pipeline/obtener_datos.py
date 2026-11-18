@@ -352,6 +352,18 @@ def escribir_json_web(datos, ctx=None, pm=None, cap=None, con_red=True):
         __import__("manuales_calientes").escribir_rigi(destino)
     except Exception as e:
         print(f"RIGI: no se pudo armar, se sigue sin rigi.json ({e}).")
+    # Tarifas y subsidios (/tarifas/): datos/manual/tarifas_*.json y subsidios_energia.json, más el último dato de luz_cobertura. Sin red, fuera del hash.
+    try:
+        cob = next((s for s in datos["series"] if s["id"] == "luz_cobertura"), None)
+        cob_ult = None
+        if cob is not None:
+            vals = [(i, v) for i, v in enumerate(cob["v"]) if v is not None]
+            if vals:
+                i, v = vals[-1]
+                cob_ult = {"mes": datos["fechas"][cob["i0"] + i], "luz": round(float(v), 1), "url": "https://cammesaweb.cammesa.com/variables-relevantes-mem/"}
+        __import__("tarifas").escribir_tarifas(destino, cob_ult)
+    except Exception as e:
+        print(f"Tarifas: no se pudo armar, se sigue sin tarifas.json ({e}).")
     # "version" cambia con cada dato nuevo: la web la agrega a cada pedido para no mezclar cachés viejos y nuevos.
     (destino / "catalogo.json").write_text(
         json.dumps({"version": h.hexdigest()[:10], "fechas": datos["fechas"], "series": meta}, ensure_ascii=False, separators=(",", ":")),

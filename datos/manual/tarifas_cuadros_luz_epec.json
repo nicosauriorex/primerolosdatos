@@ -1,0 +1,268 @@
+{
+ "actualizado": "2026-11-17",
+ "registros": [
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2019-12",
+   "vigencia": "2019-11-01",
+   "categoria": "sin_subsidio",
+   "categoria_residencial": "Tarifa N°1 Residencial, 120 a 500 kWh/mes (acápites a, b, c, e, f, h)",
+   "cargo_fijo": 100.3767,
+   "escalones": [
+    [
+     120,
+     6.09152
+    ],
+    [
+     null,
+     7.81711
+    ]
+   ],
+   "consumo": 250,
+   "factura": 1847.58,
+   "norma": "https://www.epec.com.ar/docs/cuadro-tarifario/tarifa_n1c20191101.pdf",
+   "cita": "EPEC, Tarifa N°1 Residencial, 'a aplicar por la EPEC desde el 01/11/2019 - Resolución ERSEP N° 64', PDF p. 2 (consumos > 120 y <= 500 kWh/mes): CFM $100,3767; primeros 120 kWh $6,09152/kWh; excedente de 120 kWh $7,81711/kWh. Es el cuadro vigente al 1-12-2019: el siguiente es el del 1-1-2020 (RG ERSeP 88).",
+   "nota": "Cargo fijo mensual. El cuadro suma el C.O.I.D.E. (3,18% sobre cargo fijo y variable), que no se incluyó para comparar sin recargos (con C.O.I.D.E. la factura sería 1.906,34). Hasta 2022 el cuadro no tiene niveles; la tarifa social provincial (acápite g) es una condición de acceso sin precios propios, por eso no se carga con_subsidio."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2020-12",
+   "vigencia": "2020-01-01",
+   "categoria": "sin_subsidio",
+   "categoria_residencial": "Tarifa N°1 Residencial, 120 a 500 kWh/mes (acápites a, b, c, e, f, h)",
+   "cargo_fijo": 112.6802,
+   "escalones": [
+    [
+     120,
+     6.51891
+    ],
+    [
+     null,
+     8.456
+    ]
+   ],
+   "consumo": 250,
+   "factura": 1994.23,
+   "norma": "https://www.epec.com.ar/docs/cuadro-tarifario/tarifa_n1c20200101.pdf",
+   "cita": "EPEC, Tarifa N°1 Residencial, 'a aplicar por la EPEC desde el 01/01/2020 - Resolución ERSEP N° 88', PDF p. 2 (consumos > 120 y <= 500 kWh/mes): CFM $112,6802; primeros 120 kWh $6,51891/kWh; excedente $8,45600/kWh. Sin nuevo cuadro hasta enero de 2021: la tarifa estuvo congelada todo 2020 (Tribuna, 'La Cooperativa aplicará el aumento de EPEC recién desde la factura de febrero': el aumento de enero de 2021 fue el primero en 12 meses, tras el de enero de 2020).",
+   "nota": "Cargo fijo mensual. Este cuadro ya no trae C.O.I.D.E. El congelamiento de 2020 se tomó de la prensa (Tribuna, Viapais), no de una resolución de ERSeP, porque ersep.cba.gov.ar y boletinoficial.cba.gov.ar devuelven 403 a pedidos automáticos. Sin niveles ni subsidio en el cuadro: no se carga con_subsidio."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2023-12",
+   "vigencia": "2023-11-01",
+   "categoria": "sin_subsidio",
+   "categoria_residencial": "Tarifa N°1 Residencial, Nivel 1 (mayores ingresos), 120 a 500 kWh/mes",
+   "cargo_fijo": 420.3744,
+   "escalones": [
+    [
+     120,
+     40.06195
+    ],
+    [
+     null,
+     47.28863
+    ]
+   ],
+   "consumo": 250,
+   "factura": 11375.33,
+   "norma": "https://www.epec.com.ar/docs/cuadro-tarifario/tarifa_n1c20231129.pdf",
+   "cita": "EPEC, Tarifa N°1 Residencial, 'a aplicar por la EPEC desde el 01/11/2023 - Resolución ERSEP N° 125/2023', PDF p. 12, Nivel 1 (consumos > 120 y <= 500 kWh/mes): CFM $420,3744; primeros 120 kWh $40,06195/kWh; excedente $47,28863/kWh. Cuadro vigente al 1-12-2023: el de RG 138/2023 rige desde el 7-12-2023.",
+   "nota": "Cargo fijo mensual. El PDF es el que EPEC publica junto con las tasas de conexión del 29-11-2023 y en el texto trae páginas de varios cuadros (RG 111/2023 y 125/2023) superpuestas; se tomaron las páginas con encabezado 01/11/2023."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2023-12",
+   "vigencia": "2023-11-01",
+   "categoria": "con_subsidio",
+   "categoria_residencial": "Tarifa N°1 Residencial, Nivel 2 (menores ingresos), 120 a 500 kWh/mes",
+   "cargo_fijo": 276.586,
+   "escalones": [
+    [
+     120,
+     14.93616
+    ],
+    [
+     null,
+     19.69096
+    ]
+   ],
+   "consumo": 250,
+   "factura": 4628.75,
+   "norma": "https://www.epec.com.ar/docs/cuadro-tarifario/tarifa_n1c20231129.pdf",
+   "cita": "EPEC, Tarifa N°1 Residencial, 'a aplicar por la EPEC desde el 01/11/2023 - Resolución ERSEP N° 125/2023', PDF p. 7, Nivel 2 (consumos > 120 y <= 500 kWh/mes): CFM $276,5860; primeros 120 kWh $14,93616/kWh; excedente $19,69096/kWh.",
+   "nota": "Cargo fijo mensual. Precio del cuadro del Nivel 2; la bonificación nacional sobre el bloque subsidiado no está en el cuadro y no se descontó."
+  }
+ ],
+ "faltantes": [
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2015-12",
+   "categoria": "sin_subsidio",
+   "motivo": "No se encontró el cuadro de EPEC de 2015: epec.com.ar no lo publica en la web (los PDF más viejos hallados son de 2016-2018) y ersep.cba.gov.ar y boletinoficial.cba.gov.ar devuelven 403 a pedidos automáticos (no se evadió)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2015-12",
+   "categoria": "con_subsidio",
+   "motivo": "No se encontró el cuadro de EPEC de 2015: epec.com.ar no lo publica en la web (los PDF más viejos hallados son de 2016-2018) y ersep.cba.gov.ar y boletinoficial.cba.gov.ar devuelven 403 a pedidos automáticos (no se evadió)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2016-12",
+   "categoria": "sin_subsidio",
+   "motivo": "No se pudo verificar el cuadro N°1 residencial vigente al 1-12-2016 (en epec.com.ar solo aparecen anexos sueltos RG53_16, no el N°1 de ese corte). ersep.cba.gov.ar y boletinoficial.cba.gov.ar devuelven 403 a pedidos automáticos (no se evadió)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2016-12",
+   "categoria": "con_subsidio",
+   "motivo": "No se pudo verificar el cuadro N°1 residencial vigente al 1-12-2016 (en epec.com.ar solo aparecen anexos sueltos RG53_16, no el N°1 de ese corte). ersep.cba.gov.ar y boletinoficial.cba.gov.ar devuelven 403 a pedidos automáticos (no se evadió)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2017-12",
+   "categoria": "sin_subsidio",
+   "motivo": "No se encontró el PDF del cuadro N°1 vigente al 1-12-2017 (EPEC ofrece el de abril de 2018, tarifa_n1RG132018.pdf, y el de septiembre de 2018). ersep.cba.gov.ar y boletinoficial.cba.gov.ar devuelven 403 a pedidos automáticos (no se evadió)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2017-12",
+   "categoria": "con_subsidio",
+   "motivo": "No se encontró el PDF del cuadro N°1 vigente al 1-12-2017 (EPEC ofrece el de abril de 2018, tarifa_n1RG132018.pdf, y el de septiembre de 2018). ersep.cba.gov.ar y boletinoficial.cba.gov.ar devuelven 403 a pedidos automáticos (no se evadió)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2018-12",
+   "categoria": "sin_subsidio",
+   "motivo": "Los cuadros hallados son del 1-4-2018 (RG 13/2018), 1-9-2018 (RG 61/2018) y 1-5-2019 (RG 34/2019, tarifa_n1201905.pdf); no se pudo confirmar si hubo un cuadro intermedio ni cuál rigió el 1-12-2018. ersep.cba.gov.ar y boletinoficial.cba.gov.ar devuelven 403 a pedidos automáticos (no se evadió)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2018-12",
+   "categoria": "con_subsidio",
+   "motivo": "Los cuadros hallados son del 1-4-2018 (RG 13/2018), 1-9-2018 (RG 61/2018) y 1-5-2019 (RG 34/2019, tarifa_n1201905.pdf); no se pudo confirmar si hubo un cuadro intermedio ni cuál rigió el 1-12-2018. ersep.cba.gov.ar y boletinoficial.cba.gov.ar devuelven 403 a pedidos automáticos (no se evadió)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2019-12",
+   "categoria": "con_subsidio",
+   "motivo": "El cuadro de 2019 no tiene niveles ni precios de tarifa social (el acápite g es solo una condición de acceso)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2020-12",
+   "categoria": "con_subsidio",
+   "motivo": "El cuadro de 2020 no tiene niveles ni precios de tarifa social."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2021-12",
+   "categoria": "sin_subsidio",
+   "motivo": "El 2021 tuvo varios cuadros (enero RG 4, abril RG 18, mayo RG 29, agosto...) y no se pudo identificar ni abrir el vigente al 1-12-2021: los anexos están en boletinoficial.cba.gov.ar y ersep.cba.gov.ar (403) y epec.com.ar no tiene índice."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2021-12",
+   "categoria": "con_subsidio",
+   "motivo": "El 2021 tuvo varios cuadros (enero RG 4, abril RG 18, mayo RG 29, agosto...) y no se pudo identificar ni abrir el vigente al 1-12-2021: los anexos están en boletinoficial.cba.gov.ar y ersep.cba.gov.ar (403) y epec.com.ar no tiene índice."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2022-12",
+   "categoria": "sin_subsidio",
+   "motivo": "Cuadros hallados solo como títulos (RG 5/2022 del 1-3, RG 46/2022 del 8-7, RG 55/2022 del 1-8, RG 58/2022 de septiembre); no se pudo abrir ni verificar el vigente al 1-12-2022 (anexos en ersep.cba.gov.ar y boletinoficial.cba.gov.ar, que dan 403)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2022-12",
+   "categoria": "con_subsidio",
+   "motivo": "Cuadros hallados solo como títulos (RG 5/2022 del 1-3, RG 46/2022 del 8-7, RG 55/2022 del 1-8, RG 58/2022 de septiembre); no se pudo abrir ni verificar el vigente al 1-12-2022 (anexos en ersep.cba.gov.ar y boletinoficial.cba.gov.ar, que dan 403)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2024-12",
+   "categoria": "sin_subsidio",
+   "motivo": "El cuadro vigente al 1-12-2024 (pass-through mensual de EPEC por RG 77/2024) no se encontró en epec.com.ar ni en consejoregionalcentro.coop.ar, que solo aloja los cuadros de EPEC de enero y febrero de 2024 y los de cooperativas. ERSeP da 403."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2024-12",
+   "categoria": "con_subsidio",
+   "motivo": "El cuadro vigente al 1-12-2024 (pass-through mensual de EPEC por RG 77/2024) no se encontró en epec.com.ar ni en consejoregionalcentro.coop.ar, que solo aloja los cuadros de EPEC de enero y febrero de 2024 y los de cooperativas. ERSeP da 403."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2025-12",
+   "categoria": "sin_subsidio",
+   "motivo": "No se encontró el cuadro de diciembre de 2025 (publicación web de EPEC por RG 14/2025 con pass-through): el buscador solo devuelve el de 1-9-2025, que no es el vigente al 1-12. ERSeP da 403 y los links de energia.gob.ar del listado de cuadros EPEC devuelven 404."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "2025-12",
+   "categoria": "con_subsidio",
+   "motivo": "No se encontró el cuadro de diciembre de 2025 (publicación web de EPEC por RG 14/2025 con pass-through): el buscador solo devuelve el de 1-9-2025, que no es el vigente al 1-12. ERSeP da 403 y los links de energia.gob.ar del listado de cuadros EPEC devuelven 404."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "vigente",
+   "categoria": "sin_subsidio",
+   "motivo": "No se encontró el cuadro de EPEC de noviembre de 2026: el listado de la Secretaría de Energía (argentina.gob.ar, 'Cuadros Tarifarios EPEC') apunta a PDF en energia.gob.ar (2026_06_EPEC.pdf) que devuelven 404, epec.com.ar no tiene índice y ERSeP da 403."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "cordoba",
+   "empresa": "EPEC",
+   "corte": "vigente",
+   "categoria": "con_subsidio",
+   "motivo": "No se encontró el cuadro de EPEC de noviembre de 2026: el listado de la Secretaría de Energía (argentina.gob.ar, 'Cuadros Tarifarios EPEC') apunta a PDF en energia.gob.ar (2026_06_EPEC.pdf) que devuelven 404, epec.com.ar no tiene índice y ERSeP da 403."
+  }
+ ],
+ "nota": "EPEC (Córdoba), Tarifa N°1 Residencial, consumo de referencia 250 kWh/mes, sin impuestos ni tasas municipales; el cargo fijo del cuadro es mensual. Para 250 kWh rige el tramo '>120 y <=500 kWh/mes', con precio por kWh escalonado (primeros 120 kWh y excedente). 'sin_subsidio' = residencial general (2019-2020) y Nivel 1 (2023); 'con_subsidio' = Nivel 2 desde 2022. Cargados solo dic-2019, dic-2020 y dic-2023 (N1 y N2). Control con_subsidio <= sin_subsidio en 2023-12: cumplido. Fuentes: PDF de epec.com.ar; ERSeP y Boletín Oficial de Córdoba dan 403 a pedidos automáticos y no se evadió."
+}

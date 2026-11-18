@@ -1,6 +1,6 @@
 # Series de deuda pública y deuda consolidada Tesoro + Banco Central
 
-Estado: implementada (2026-11-15), fases 1 y 2, publicada en 931167d (corrida completa en verde, run 43786667160); la fase 3 (tarifa eléctrica, opcional) queda para después
+Estado: implementada (2026-11-15), fases 1 y 2, publicada en 931167d (corrida completa en verde, run 43786667160); la fase 3 (tarifa eléctrica) se hizo en docs/specs/tarifas-y-datos-calientes-4.md (serie luz_cobertura)
 
 Pedido del usuario (2026-11-15): «no tenemos series para ver la evolución de las variables esas que están en herencia? y deuda neta porque tampoco tenemos… arma una propia que sea la suma de los pasivos del bcra + los pasivos del tesoro» y después «en realidad era deuda consolidada no neta».
 

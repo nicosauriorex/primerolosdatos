@@ -1,0 +1,341 @@
+{
+ "actualizado": "2026-11-17",
+ "fuente": "INDEC, estimaciones y proyecciones de población: base Censo 2010 (2010-2021) y base Censo 2022, Análisis Demográfico n.° 40 (2022-2025). Total del país, mujeres al 1 de julio de cada año por grupo quinquenal de edad.",
+ "nota": "Mujeres por grupo de edad para calcular la tasa global de fecundidad (nacimientos por edad de la madre sobre mujeres de cada grupo). CORTE DE BASE: 2010-2021 salen de las proyecciones basadas en el censo 2010 y 2022-2025 de las basadas en el censo 2022; el censo 2022 reubicó a las mujeres entre grupos (2022, total 15-49: 11.747.529 con base 2022 contra 11.561.088 con base 2010; 40-44: 1.630.034 contra 1.581.282; 15-19: 1.774.747 contra 1.711.871; ver continuidad_base_2010), así que las tasas entre 2021 y 2022 no son del todo comparables. total_15_49 es suma propia de los siete grupos. Controles: ambos sexos menos varones = mujeres en los 16 años y 8 filas; con nacimientos por edad de la madre (DEIS, con menores de 15 y edad sin especificar repartidos) la TGF da 2,37 en 2014, 1,86 en 2019, 1,44 en 2022, 1,34 en 2023 y 1,19 en 2024. Los valores 2014 y 2019 coinciden con los de la serie anterior usada en la investigación.",
+ "anios": [
+  {
+   "anio": 2010,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1762649,
+    "20-24": 1671613,
+    "25-29": 1590985,
+    "30-34": 1571862,
+    "35-39": 1376489,
+    "40-44": 1198199,
+    "45-49": 1135147
+   },
+   "total_15_49": 10306944,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2010, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2011,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1766990,
+    "20-24": 1694250,
+    "25-29": 1598787,
+    "30-34": 1586319,
+    "35-39": 1420822,
+    "40-44": 1222566,
+    "45-49": 1142539
+   },
+   "total_15_49": 10432273,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2011, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2012,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1764945,
+    "20-24": 1716459,
+    "25-29": 1612356,
+    "30-34": 1591036,
+    "35-39": 1465595,
+    "40-44": 1253022,
+    "45-49": 1149467
+   },
+   "total_15_49": 10552880,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2012, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2013,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1758347,
+    "20-24": 1736590,
+    "25-29": 1630453,
+    "30-34": 1590032,
+    "35-39": 1507564,
+    "40-44": 1288614,
+    "45-49": 1157884
+   },
+   "total_15_49": 10669484,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2013, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2014,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1749599,
+    "20-24": 1752831,
+    "25-29": 1651186,
+    "30-34": 1588553,
+    "35-39": 1542857,
+    "40-44": 1328055,
+    "45-49": 1170187
+   },
+   "total_15_49": 10783268,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2014, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2015,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1740503,
+    "20-24": 1763709,
+    "25-29": 1673206,
+    "30-34": 1590602,
+    "35-39": 1568522,
+    "40-44": 1370228,
+    "45-49": 1188129
+   },
+   "total_15_49": 10894899,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2015, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2016,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1732539,
+    "20-24": 1767969,
+    "25-29": 1695751,
+    "30-34": 1598421,
+    "35-39": 1583000,
+    "40-44": 1414469,
+    "45-49": 1212478
+   },
+   "total_15_49": 11004627,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2016, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2017,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1726202,
+    "20-24": 1765877,
+    "25-29": 1717836,
+    "30-34": 1611962,
+    "35-39": 1587812,
+    "40-44": 1459104,
+    "45-49": 1242869
+   },
+   "total_15_49": 11111662,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2017, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2018,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1721209,
+    "20-24": 1759248,
+    "25-29": 1737845,
+    "30-34": 1630031,
+    "35-39": 1586891,
+    "40-44": 1500972,
+    "45-49": 1278344
+   },
+   "total_15_49": 11214540,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2018, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2019,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1717132,
+    "20-24": 1750444,
+    "25-29": 1753984,
+    "30-34": 1650720,
+    "35-39": 1585502,
+    "40-44": 1536188,
+    "45-49": 1317642
+   },
+   "total_15_49": 11311612,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2019, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2020,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1713908,
+    "20-24": 1741317,
+    "25-29": 1764757,
+    "30-34": 1672670,
+    "35-39": 1587623,
+    "40-44": 1561851,
+    "45-49": 1359623
+   },
+   "total_15_49": 11401749,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2020, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2021,
+   "base": "2010",
+   "grupos": {
+    "15-19": 1711879,
+    "20-24": 1733273,
+    "25-29": 1768941,
+    "30-34": 1695145,
+    "35-39": 1595472,
+    "40-44": 1576380,
+    "45-49": 1403688
+   },
+   "total_15_49": 11484778,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "url_copia": "https://www.argentina.gob.ar/sites/default/files/2020/09/proyeccionesyestimaciones_nac_2010_2040.pdf",
+   "cita": "INDEC, Estimaciones y proyecciones de población 2010-2040. Total del país (base Censo 2010), Cuadro 2 «Población por sexo y grupo quinquenal de edad», bloque Mujeres, p. 33 del PDF (2010-2017 y 2018-2025 en dos bloques de la misma página), columna 2021, población estimada al 1 de julio. Cada valor comprobado como Ambos sexos (p. 29) menos Varones (p. 31); total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2022,
+   "base": "2022",
+   "grupos": {
+    "15-19": 1774747,
+    "20-24": 1769875,
+    "25-29": 1762851,
+    "30-34": 1728828,
+    "35-39": 1615658,
+    "40-44": 1630034,
+    "45-49": 1465536
+   },
+   "total_15_49": 11747529,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyecciones_jurisdicciones_2022_2040.pdf",
+   "url_copia": "https://www.estadisticasantafe.gob.ar/wp-content/uploads/sites/24/2026/01/proyecciones_jurisdicciones_2022_2040.pdf",
+   "cita": "INDEC, Análisis Demográfico n.° 40, Estimaciones y proyecciones de población, por sexo y grupos de edad. Jurisdicciones. Años 2022-2040 (base Censo 2022), Cuadro 2.1 «Total del país», p. 28 del PDF, columna Mujeres de 2022, población al 1 de julio. Cada valor comprobado como Ambos sexos menos Varones; total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2023,
+   "base": "2022",
+   "grupos": {
+    "15-19": 1777743,
+    "20-24": 1769587,
+    "25-29": 1758209,
+    "30-34": 1739620,
+    "35-39": 1632913,
+    "40-44": 1617110,
+    "45-49": 1517212
+   },
+   "total_15_49": 11812394,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyecciones_jurisdicciones_2022_2040.pdf",
+   "url_copia": "https://www.estadisticasantafe.gob.ar/wp-content/uploads/sites/24/2026/01/proyecciones_jurisdicciones_2022_2040.pdf",
+   "cita": "INDEC, Análisis Demográfico n.° 40, Estimaciones y proyecciones de población, por sexo y grupos de edad. Jurisdicciones. Años 2022-2040 (base Censo 2022), Cuadro 2.1 «Total del país», p. 28 del PDF, columna Mujeres de 2023, población al 1 de julio. Cada valor comprobado como Ambos sexos menos Varones; total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2024,
+   "base": "2022",
+   "grupos": {
+    "15-19": 1785678,
+    "20-24": 1773794,
+    "25-29": 1755503,
+    "30-34": 1744946,
+    "35-39": 1654829,
+    "40-44": 1601176,
+    "45-49": 1563053
+   },
+   "total_15_49": 11878979,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyecciones_jurisdicciones_2022_2040.pdf",
+   "url_copia": "https://www.estadisticasantafe.gob.ar/wp-content/uploads/sites/24/2026/01/proyecciones_jurisdicciones_2022_2040.pdf",
+   "cita": "INDEC, Análisis Demográfico n.° 40, Estimaciones y proyecciones de población, por sexo y grupos de edad. Jurisdicciones. Años 2022-2040 (base Censo 2022), Cuadro 2.1 «Total del país», p. 28 del PDF, columna Mujeres de 2024, población al 1 de julio. Cada valor comprobado como Ambos sexos menos Varones; total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  },
+  {
+   "anio": 2025,
+   "base": "2022",
+   "grupos": {
+    "15-19": 1792869,
+    "20-24": 1780760,
+    "25-29": 1754154,
+    "30-34": 1746670,
+    "35-39": 1676845,
+    "40-44": 1592215,
+    "45-49": 1595684
+   },
+   "total_15_49": 11939197,
+   "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyecciones_jurisdicciones_2022_2040.pdf",
+   "url_copia": "https://www.estadisticasantafe.gob.ar/wp-content/uploads/sites/24/2026/01/proyecciones_jurisdicciones_2022_2040.pdf",
+   "cita": "INDEC, Análisis Demográfico n.° 40, Estimaciones y proyecciones de población, por sexo y grupos de edad. Jurisdicciones. Años 2022-2040 (base Censo 2022), Cuadro 2.1 «Total del país», p. 28 del PDF, columna Mujeres de 2025, población al 1 de julio. Cada valor comprobado como Ambos sexos menos Varones; total_15_49 es la suma de los siete grupos (el cuadro no trae ese total)."
+  }
+ ],
+ "continuidad_base_2010": {
+  "nota": "Mismas mujeres 2022-2025 según la proyección vieja (base Censo 2010, p. 33 del PDF de 2010-2040), solo para medir el corte de base; no usar para la TGF de esos años.",
+  "url": "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyeccionesyestimaciones_nac_2010_2040.pdf",
+  "anios": [
+   {
+    "anio": 2022,
+    "base": "2010",
+    "grupos": {
+     "15-19": 1711871,
+     "20-24": 1726877,
+     "25-29": 1766751,
+     "30-34": 1717162,
+     "35-39": 1609026,
+     "40-44": 1581282,
+     "45-49": 1448119
+    },
+    "total_15_49": 11561088
+   },
+   {
+    "anio": 2023,
+    "base": "2010",
+    "grupos": {
+     "15-19": 1714977,
+     "20-24": 1721807,
+     "25-29": 1760050,
+     "30-34": 1737087,
+     "35-39": 1627091,
+     "40-44": 1580461,
+     "45-49": 1489841
+    },
+    "total_15_49": 11631314
+   },
+   {
+    "anio": 2024,
+    "base": "2010",
+    "grupos": {
+     "15-19": 1721712,
+     "20-24": 1717660,
+     "25-29": 1751160,
+     "30-34": 1753158,
+     "35-39": 1647740,
+     "40-44": 1579214,
+     "45-49": 1524932
+    },
+    "total_15_49": 11695576
+   },
+   {
+    "anio": 2025,
+    "base": "2010",
+    "grupos": {
+     "15-19": 1733547,
+     "20-24": 1714352,
+     "25-29": 1741935,
+     "30-34": 1763866,
+     "35-39": 1669679,
+     "40-44": 1581415,
+     "45-49": 1550541
+    },
+    "total_15_49": 11755335
+   }
+  ]
+ }
+}

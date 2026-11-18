@@ -1,0 +1,248 @@
+{
+ "actualizado": "2026-11-17",
+ "registros": [
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2019-12",
+   "vigencia": "2019-05-01",
+   "categoria": "sin_subsidio",
+   "categoria_residencial": "R2 (151-325 kWh/mes)",
+   "cargo_fijo": 74.62,
+   "cargo_variable": 2.843,
+   "consumo": 250,
+   "factura": 785.37,
+   "norma": "https://www.argentina.gob.ar/normativa/322695_res104-01enre_pdf/archivo",
+   "cita": "ENRE Res. 104/2019 (BO 2-5-2019), Anexo I, IF-2019-39920263-APN-ARYEE#ENRE, 'Cuadro Tarifario vigencia a partir de 1 de mayo de 2019', Tarifa 1-R, fila R2 (151-325 kWh): cargo fijo 74,62 $/mes, cargo variable 2,843 $/kWh. La resolución dice que la categoría residencial queda sin cambios respecto de la anterior (Res. 25/2019, feb-2019). No hay cuadro residencial nuevo hasta la Res. ENRE 262/2021 (vigencia 1-8-2021, https://www.argentina.gob.ar/normativa/nacional/norma-352778/texto), así que es también el cuadro del 1-dic-2020. Sin subsidio = único cuadro general residencial de esos años. "
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2020-12",
+   "vigencia": "2019-05-01",
+   "categoria": "sin_subsidio",
+   "categoria_residencial": "R2 (151-325 kWh/mes)",
+   "cargo_fijo": 74.62,
+   "cargo_variable": 2.843,
+   "consumo": 250,
+   "factura": 785.37,
+   "norma": "https://www.argentina.gob.ar/normativa/322695_res104-01enre_pdf/archivo",
+   "cita": "ENRE Res. 104/2019 (BO 2-5-2019), Anexo I, IF-2019-39920263-APN-ARYEE#ENRE, 'Cuadro Tarifario vigencia a partir de 1 de mayo de 2019', Tarifa 1-R, fila R2 (151-325 kWh): cargo fijo 74,62 $/mes, cargo variable 2,843 $/kWh. La resolución dice que la categoría residencial queda sin cambios respecto de la anterior (Res. 25/2019, feb-2019). No hay cuadro residencial nuevo hasta la Res. ENRE 262/2021 (vigencia 1-8-2021, https://www.argentina.gob.ar/normativa/nacional/norma-352778/texto), así que es también el cuadro del 1-dic-2020. Sin subsidio = único cuadro general residencial de esos años. "
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2023-12",
+   "vigencia": "2023-11-01",
+   "categoria": "sin_subsidio",
+   "categoria_residencial": "R2 (151-325 kWh/mes)",
+   "cargo_fijo": 443.24,
+   "cargo_variable": 26.497,
+   "consumo": 250,
+   "factura": 7067.49,
+   "norma": "https://www.argentina.gob.ar/normativa/392687_res784-1_pdf/archivo",
+   "cita": "ENRE Res. 784/2023 (BO 6-11-2023, n.º 35292, p. 45), Anexo I, 'Cuadro Tarifario vigencia a partir de 1 de noviembre de 2023', Tarifa 1-R Nivel 1 altos ingresos, fila R2 (151-325 kWh): cargo fijo 443,240 $/mes, cargo variable 26,497 $/kWh. Cuadro N1 vigente al 1-dic-2023 (rige hasta el 31-1-2024)."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2023-12",
+   "vigencia": "2023-08-01",
+   "categoria": "con_subsidio",
+   "categoria_residencial": "R2 (151-325 kWh/mes)",
+   "cargo_fijo": 443.24,
+   "cargo_variable": 6.792,
+   "consumo": 250,
+   "factura": 2141.24,
+   "norma": "https://www.argentina.gob.ar/normativa/387531_res574-2_pdf/archivo",
+   "cita": "ENRE Res. 574/2023 (BO 1-8-2023, n.º 35223, p. 14), art. 2 y Anexo II, 'Cuadro Tarifario vigencia a partir de 1 de agosto de 2023', Tarifa 1-R Nivel 2 bajos ingresos y Entidades de Bien Público, fila R2 (151-325 kWh): cargo fijo 443,240 $/mes, cargo variable 6,792 $/kWh. La Res. ENRE 784/2023 (art. 2, https://www.argentina.gob.ar/normativa/nacional/norma-392687/texto) mantiene este cuadro N2 desde el 1-11-2023, por lo que es el vigente al 1-dic-2023. El cuadro N2 no trae tope de bloque."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2024-12",
+   "vigencia": "2024-12-01",
+   "categoria": "sin_subsidio",
+   "categoria_residencial": "R2 (151-400 kWh/mes)",
+   "cargo_fijo": 2046.55,
+   "cargo_variable": 96.214,
+   "consumo": 250,
+   "factura": 26100.05,
+   "norma": "https://www.argentina.gob.ar/normativa/406695_res1007-2_pdf/archivo",
+   "cita": "ENRE Res. 1007/2024 (BO 2-12-2024, n.º 35558, p. 18), art. 2 y Anexo II, IF-2024-130941622-APN-ARYEE#ENRE, 'Cuadro Tarifario vigencia a partir del 1 de diciembre de 2024', Tarifa 1-R Nivel 1 altos ingresos, fila R2 (151-400 kWh): cargo fijo 2.046,550 $/mes, cargo variable 96,214 $/kWh."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2024-12",
+   "vigencia": "2024-12-01",
+   "categoria": "con_subsidio",
+   "categoria_residencial": "R2 (151-400 kWh/mes)",
+   "cargo_fijo": 2046.55,
+   "cargo_variable": 37.51,
+   "consumo": 250,
+   "factura": 11424.05,
+   "norma": "https://www.argentina.gob.ar/normativa/406695_res1007-3_pdf/archivo",
+   "cita": "ENRE Res. 1007/2024, art. 3 y Anexo III, IF-2024-130941447-APN-ARYEE#ENRE, Tarifa 1-R Nivel 2 bajos ingresos, fila R2 (151-400 kWh): cargo fijo 2.046,550 $/mes, cargo variable 37,510 $/kWh por los primeros 350 kWh/mes (el excedente, 96,214 $/kWh). 250 kWh no supera el bloque de 350: todo el consumo va al precio subsidiado."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2025-12",
+   "vigencia": "2025-12-01",
+   "categoria": "sin_subsidio",
+   "categoria_residencial": "R2 (151-400 kWh/mes)",
+   "cargo_fijo": 2949.73,
+   "cargo_variable": 112.806,
+   "consumo": 250,
+   "factura": 31151.23,
+   "norma": "https://servicios.infoleg.gob.ar/infolegInternet/anexos/420000-424999/420795/res798-anexo2.pdf",
+   "cita": "ENRE Res. 798/2025, Anexo 2, IF-2025-131350216-APN-ARYEE#ENRE (firmado 27-11-2025), 'Cuadro Tarifario vigencia a partir del 1 de diciembre de 2025', Tarifa 1-R Nivel 1 altos ingresos, p. 1 de 3, fila R2 (151-400 kWh): cargo fijo 2.949,730 $/mes, cargo variable 112,806 $/kWh. Norma: https://www.argentina.gob.ar/normativa/nacional/norma-420795/texto"
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2025-12",
+   "vigencia": "2025-12-01",
+   "categoria": "con_subsidio",
+   "categoria_residencial": "R2 (151-400 kWh/mes)",
+   "cargo_fijo": 2949.73,
+   "cargo_variable": 52.959,
+   "consumo": 250,
+   "factura": 16189.48,
+   "norma": "https://servicios.infoleg.gob.ar/infolegInternet/anexos/420000-424999/420795/res798-anexo3.pdf",
+   "cita": "ENRE Res. 798/2025, Anexo 3, IF-2025-131350436-APN-ARYEE#ENRE, p. 1 de 1, Tarifa 1-R Nivel 2 bajos ingresos, fila R2 (151-400 kWh): cargo fijo 2.949,730 $/mes, cargo variable 52,959 $/kWh por los primeros 350 kWh/mes (excedente 112,806 $/kWh). 250 kWh no supera el bloque de 350: todo subsidiado (régimen N2, Decreto 332/2022)."
+  }
+ ],
+ "faltantes": [
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2019-12",
+   "categoria": "con_subsidio",
+   "motivo": "Tarifa social federal (2016-2021): no es una fila del cuadro del ENRE sino una bonificación del precio de la energía por bloque de 150 kWh fijada en resoluciones del Ministerio de Energía; armarla sería una cuenta propia sin cuadro citable."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2020-12",
+   "categoria": "con_subsidio",
+   "motivo": "Tarifa social federal (2016-2021): no es una fila del cuadro del ENRE sino una bonificación del precio de la energía por bloque de 150 kWh fijada en resoluciones del Ministerio de Energía; armarla sería una cuenta propia sin cuadro citable."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2015-12",
+   "categoria": "sin_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2015-12",
+   "categoria": "con_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución. La tarifa social federal tampoco es fila del cuadro."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2016-12",
+   "categoria": "sin_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2016-12",
+   "categoria": "con_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución. La tarifa social federal tampoco es fila del cuadro."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2017-12",
+   "categoria": "sin_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2017-12",
+   "categoria": "con_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución. La tarifa social federal tampoco es fila del cuadro."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2018-12",
+   "categoria": "sin_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2018-12",
+   "categoria": "con_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución. La tarifa social federal tampoco es fila del cuadro."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2021-12",
+   "categoria": "sin_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2021-12",
+   "categoria": "con_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución. La tarifa social federal tampoco es fila del cuadro."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2022-12",
+   "categoria": "sin_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución."
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "2022-12",
+   "categoria": "con_subsidio",
+   "motivo": "No se abrió el cuadro de Edenor vigente al 1 de diciembre de ese año (resolución ENRE y anexo): los PDF de infoleg dan 403 a clientes automáticos y la búsqueda no devolvió el número de resolución. (Desde 2022 existe el N2.)"
+  },
+  {
+   "servicio": "luz",
+   "lugar": "amba",
+   "empresa": "Edenor",
+   "corte": "vigente",
+   "categoria": "ambas",
+   "motivo": "No se pudo abrir el cuadro de nov-2026 (Res. 886/2026 del ENReGE según la prensa, vigencia 1-11-2026; ni argentina.gob.ar ni el Boletín Oficial devolvieron su anexo). Último cuadro abierto, vigencia 1-6-2026: https://www.argentina.gob.ar/normativa/426258_res26-2_pdf/archivo (Tarifa 1-R sin subsidio, R2 151-400: cargo fijo 3.544,120 $/mes, variable 147,156 $/kWh, 250 kWh = 40.333,12 $) y bonificación SEF https://www.argentina.gob.ar/normativa/426258_res26-8_pdf/archivo (75,033 $/kWh en los primeros 300 kWh: con subsidio 21.574,87 $). No se cargó como vigente porque no es el cuadro de hoy."
+  }
+ ],
+ "nota": "Luz residencial, consumo de referencia 250 kWh/mes. Factura = cargo fijo + cargo variable x 250, sin impuestos (IVA, tasas y otros cambian por municipio). Edenor (AMBA, ENRE): categoría R2 que contiene 250 kWh (151-325 kWh hasta 2023, 151-400 desde 2024). 'sin_subsidio' = tarifa del Nivel 1 (hasta 2021 el único cuadro general residencial); 'con_subsidio' = Nivel 2 (bajos ingresos) desde 2022, con bloque subsidiado de 350 kWh/mes que cubre los 250 kWh. Para 2019-2021 la tarifa social federal no es fila del cuadro y no se cargó. Cargados solo Edenor 2019, 2020, 2023, 2024 y 2025; Córdoba (EPEC) y Santa Fe (EPE) quedan sin cargar, con el motivo en 'faltantes'. Control con subsidio <= sin subsidio por corte: cumplido. Los cuadros de Córdoba (EPEC) y Santa Fe (EPE) y sus faltantes están en tarifas_cuadros_luz_epec.json y tarifas_cuadros_luz_epe.json."
+}

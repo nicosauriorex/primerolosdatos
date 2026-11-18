@@ -6,7 +6,7 @@ import { TEMAS } from "@/lib/temas";
 
 export const dynamic = "force-static";
 
-const SECCIONES = ["historico", "presidentes", "mandato", "herencia", "ranking", "elecciones", "congreso", "contexto", "contexto/paises", "contexto/esperado", "contexto/viento", "bcra", "semaforo", "rigi", "novedades", "predicciones", "gasto", "universidades", "provincias", "plantillas", "curiosidades", "fuentes"];
+const SECCIONES = ["historico", "presidentes", "mandato", "herencia", "ranking", "elecciones", "congreso", "contexto", "contexto/paises", "contexto/esperado", "contexto/viento", "bcra", "semaforo", "rigi", "tarifas", "novedades", "predicciones", "gasto", "universidades", "provincias", "plantillas", "curiosidades", "fuentes"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const rutas = ["/", ...SECCIONES.map((s) => `/${s}/`), ...TEMAS.map((t) => `/tema/${t.slug}/`), ...fijosPublicables().map((d) => `/dato/${d.slug}/`)];

@@ -1,0 +1,235 @@
+{
+ "actualizado": "2026-11-17",
+ "fuente": "Secretaría de Políticas Universitarias (SPU), Departamento de Información Universitaria: Anuarios de Estadísticas Universitarias 2006, 2008 y 2010 y Síntesis de Información Estadísticas Universitarias 2020-2021 y 2022-2023. Datos del sistema SIU-Araucano.",
+ "nota": "Total del país: universidades e institutos universitarios de gestión estatal y privada, carreras de pregrado y grado (sin posgrado). Estudiantes = alumnos del año; nuevos inscriptos y egresados del año. Cada año sale del documento más reciente que lo trae; los años 1996-1997 y 2000-2010 son suma de estatal y privada (o la fila «Total» del cuadro). Cortes y reparos: (1) las fuentes cambian entre 1997/1998, 1999/2000, 2010/2011 y las cifras de un anuario a otro se revisan (ej. 2003: 1.489.243 estudiantes en el anuario 2010 y 1.493.556 en el 1999/2003); el salto de 2010 (1.718.507) a 2011 (1.808.415) es de +5,2 % y puede incluir cambios de cobertura o de método entre el anuario y la síntesis. (2) 2007 baja por correcciones de las universidades del Aconcagua y Nacional de Lanús (nota 2 del cuadro 1.3 del anuario 2008). (3) Egresados: el anuario 1999/2003 rotula las cohortes un año corrido respecto de los anuarios 2006 en adelante; se usa el año del anuario 2006 (que coincide con 2008 y 2010 en los años que se superponen). (4) 1996-1997 salen del anuario 2006 (cuadros estatal y privada, suma propia); 1998 y 1999 del anuario 2008 (corrige Morón). (5) No se cargan 2023 y 2024 (ver faltantes). Regla: sin cita no se carga; los valores se compararon con el texto de cada PDF y las sumas estatal + privada cierran.",
+ "anios": [
+  {
+   "anio": 1996,
+   "estudiantes": 949821,
+   "nuevos_inscriptos": 268494,
+   "egresados": 43986,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2006_-_vol_1.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2006 (SPU), PDF vol. 1: estudiantes = Cuadro 1.1.9 (estatal, total de las instituciones, p. 28: 814.295) + Cuadro 1.2.9 (privada, p. 54: 135.526); nuevos inscriptos = Cuadro 1.1.10 (p. 30: 230.307) + Cuadro 1.2.10 (p. 56: 38.187); egresados = Cuadro 1.1.11 (p. 32: 34.887) + Cuadro 1.2.11 (p. 58: 9.099), con el año tal como lo rotula el anuario 2006. Páginas del PDF, que coinciden con las impresas."
+  },
+  {
+   "anio": 1997,
+   "estudiantes": 1017393,
+   "nuevos_inscriptos": 286386,
+   "egresados": 46045,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2006_-_vol_1.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2006 (SPU), PDF vol. 1: estudiantes = Cuadro 1.1.9 (estatal, total de las instituciones, p. 28: 873.684) + Cuadro 1.2.9 (privada, p. 54: 143.709); nuevos inscriptos = Cuadro 1.1.10 (p. 30: 242.535) + Cuadro 1.2.10 (p. 56: 43.851); egresados = Cuadro 1.1.11 (p. 32: 34.924) + Cuadro 1.2.11 (p. 58: 11.121), con el año tal como lo rotula el anuario 2006. Páginas del PDF, que coinciden con las impresas."
+  },
+  {
+   "anio": 1998,
+   "estudiantes": 1100784,
+   "nuevos_inscriptos": 302428,
+   "egresados": 50005,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2008.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2008 (SPU), Cuadro 1.3 (estudiantes, p. 33 del PDF), Cuadro 1.4 (nuevos inscriptos, p. 34) y Cuadro 1.5 (egresados, p. 35), fila «Total», período 1998-2008, pregrado y grado, estatal + privada. Valores corregidos por la Universidad de Morón en 2008 (nota 1 del cuadro)."
+  },
+  {
+   "anio": 1999,
+   "estudiantes": 1240536,
+   "nuevos_inscriptos": 338859,
+   "egresados": 54957,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2008.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2008 (SPU), Cuadro 1.3 (estudiantes, p. 33 del PDF), Cuadro 1.4 (nuevos inscriptos, p. 34) y Cuadro 1.5 (egresados, p. 35), fila «Total», período 1998-2008, pregrado y grado, estatal + privada. Valores corregidos por la Universidad de Morón en 2008 (nota 1 del cuadro)."
+  },
+  {
+   "anio": 2000,
+   "estudiantes": 1339740,
+   "nuevos_inscriptos": 352605,
+   "egresados": 63259,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2010.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2010 (SPU), fila «Total» (estatal + privado) de Cuadro 1.1.3 estudiantes (p. 40), Cuadro 1.1.4 nuevos inscriptos (p. 41) y Cuadro 1.1.5 egresados (p. 42), período 2000-2010, títulos de pregrado y grado. Controlado: estatal + privado = total en las tres filas."
+  },
+  {
+   "anio": 2001,
+   "estudiantes": 1412999,
+   "nuevos_inscriptos": 347691,
+   "egresados": 65104,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2010.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2010 (SPU), fila «Total» (estatal + privado) de Cuadro 1.1.3 estudiantes (p. 40), Cuadro 1.1.4 nuevos inscriptos (p. 41) y Cuadro 1.1.5 egresados (p. 42), período 2000-2010, títulos de pregrado y grado. Controlado: estatal + privado = total en las tres filas."
+  },
+  {
+   "anio": 2002,
+   "estudiantes": 1462319,
+   "nuevos_inscriptos": 359266,
+   "egresados": 74960,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2010.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2010 (SPU), fila «Total» (estatal + privado) de Cuadro 1.1.3 estudiantes (p. 40), Cuadro 1.1.4 nuevos inscriptos (p. 41) y Cuadro 1.1.5 egresados (p. 42), período 2000-2010, títulos de pregrado y grado. Controlado: estatal + privado = total en las tres filas."
+  },
+  {
+   "anio": 2003,
+   "estudiantes": 1489243,
+   "nuevos_inscriptos": 365892,
+   "egresados": 78429,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2010.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2010 (SPU), fila «Total» (estatal + privado) de Cuadro 1.1.3 estudiantes (p. 40), Cuadro 1.1.4 nuevos inscriptos (p. 41) y Cuadro 1.1.5 egresados (p. 42), período 2000-2010, títulos de pregrado y grado. Controlado: estatal + privado = total en las tres filas."
+  },
+  {
+   "anio": 2004,
+   "estudiantes": 1536653,
+   "nuevos_inscriptos": 372492,
+   "egresados": 83890,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2010.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2010 (SPU), fila «Total» (estatal + privado) de Cuadro 1.1.3 estudiantes (p. 40), Cuadro 1.1.4 nuevos inscriptos (p. 41) y Cuadro 1.1.5 egresados (p. 42), período 2000-2010, títulos de pregrado y grado. Controlado: estatal + privado = total en las tres filas."
+  },
+  {
+   "anio": 2005,
+   "estudiantes": 1553700,
+   "nuevos_inscriptos": 361648,
+   "egresados": 86879,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2010.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2010 (SPU), fila «Total» (estatal + privado) de Cuadro 1.1.3 estudiantes (p. 40), Cuadro 1.1.4 nuevos inscriptos (p. 41) y Cuadro 1.1.5 egresados (p. 42), período 2000-2010, títulos de pregrado y grado. Controlado: estatal + privado = total en las tres filas."
+  },
+  {
+   "anio": 2006,
+   "estudiantes": 1586520,
+   "nuevos_inscriptos": 358763,
+   "egresados": 84785,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2010.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2010 (SPU), fila «Total» (estatal + privado) de Cuadro 1.1.3 estudiantes (p. 40), Cuadro 1.1.4 nuevos inscriptos (p. 41) y Cuadro 1.1.5 egresados (p. 42), período 2000-2010, títulos de pregrado y grado. Controlado: estatal + privado = total en las tres filas."
+  },
+  {
+   "anio": 2007,
+   "estudiantes": 1569065,
+   "nuevos_inscriptos": 362690,
+   "egresados": 86528,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2010.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2010 (SPU), fila «Total» (estatal + privado) de Cuadro 1.1.3 estudiantes (p. 40), Cuadro 1.1.4 nuevos inscriptos (p. 41) y Cuadro 1.1.5 egresados (p. 42), período 2000-2010, títulos de pregrado y grado. Controlado: estatal + privado = total en las tres filas."
+  },
+  {
+   "anio": 2008,
+   "estudiantes": 1600522,
+   "nuevos_inscriptos": 365227,
+   "egresados": 94909,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2010.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2010 (SPU), fila «Total» (estatal + privado) de Cuadro 1.1.3 estudiantes (p. 40), Cuadro 1.1.4 nuevos inscriptos (p. 41) y Cuadro 1.1.5 egresados (p. 42), período 2000-2010, títulos de pregrado y grado. Controlado: estatal + privado = total en las tres filas."
+  },
+  {
+   "anio": 2009,
+   "estudiantes": 1650150,
+   "nuevos_inscriptos": 387603,
+   "egresados": 98129,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2010.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2010 (SPU), fila «Total» (estatal + privado) de Cuadro 1.1.3 estudiantes (p. 40), Cuadro 1.1.4 nuevos inscriptos (p. 41) y Cuadro 1.1.5 egresados (p. 42), período 2000-2010, títulos de pregrado y grado. Controlado: estatal + privado = total en las tres filas."
+  },
+  {
+   "anio": 2010,
+   "estudiantes": 1718507,
+   "nuevos_inscriptos": 415070,
+   "egresados": 99431,
+   "url": "https://www.argentina.gob.ar/sites/default/files/anuario_2010.pdf",
+   "cita": "Anuario de Estadísticas Universitarias 2010 (SPU), fila «Total» (estatal + privado) de Cuadro 1.1.3 estudiantes (p. 40), Cuadro 1.1.4 nuevos inscriptos (p. 41) y Cuadro 1.1.5 egresados (p. 42), período 2000-2010, títulos de pregrado y grado. Controlado: estatal + privado = total en las tres filas."
+  },
+  {
+   "anio": 2011,
+   "estudiantes": 1808415,
+   "nuevos_inscriptos": 412916,
+   "egresados": 109360,
+   "url": "https://www.argentina.gob.ar/sites/default/files/2020/04/sintesis_2020_-_2021_sistema_universitario_argentino.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2020-2021 (SPU, DIU), p. 28 del PDF, gráfico «Evolución de la cantidad de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado. Años 2011-2020»: 2011 = 1.808.415 / 412.916 / 109.360 (repetido en el recuadro de la p. 29 «2011 / 2020»)."
+  },
+  {
+   "anio": 2012,
+   "estudiantes": 1824904,
+   "nuevos_inscriptos": 423920,
+   "egresados": 110360,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior)."
+  },
+  {
+   "anio": 2013,
+   "estudiantes": 1830926,
+   "nuevos_inscriptos": 425415,
+   "egresados": 117719,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior)."
+  },
+  {
+   "anio": 2014,
+   "estudiantes": 1871445,
+   "nuevos_inscriptos": 445763,
+   "egresados": 120631,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior)."
+  },
+  {
+   "anio": 2015,
+   "estudiantes": 1902935,
+   "nuevos_inscriptos": 458565,
+   "egresados": 124960,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior)."
+  },
+  {
+   "anio": 2016,
+   "estudiantes": 1939419,
+   "nuevos_inscriptos": 489701,
+   "egresados": 124674,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior)."
+  },
+  {
+   "anio": 2017,
+   "estudiantes": 2005152,
+   "nuevos_inscriptos": 516305,
+   "egresados": 125328,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior)."
+  },
+  {
+   "anio": 2018,
+   "estudiantes": 2071270,
+   "nuevos_inscriptos": 547661,
+   "egresados": 132744,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior)."
+  },
+  {
+   "anio": 2019,
+   "estudiantes": 2187292,
+   "nuevos_inscriptos": 596446,
+   "egresados": 135908,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior)."
+  },
+  {
+   "anio": 2020,
+   "estudiantes": 2318255,
+   "nuevos_inscriptos": 641929,
+   "egresados": 122679,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior)."
+  },
+  {
+   "anio": 2021,
+   "estudiantes": 2549789,
+   "nuevos_inscriptos": 710699,
+   "egresados": 142826,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior)."
+  },
+  {
+   "anio": 2022,
+   "estudiantes": 2540854,
+   "nuevos_inscriptos": 719669,
+   "egresados": 145728,
+   "url": "https://www.argentina.gob.ar/sites/default/files/sintesis_2022-_2023.pdf",
+   "cita": "Síntesis de Información Estadísticas Universitarias 2022-2023 (SPU, DIU), p. 26 del PDF, gráfico de evolución 2012-2022 de estudiantes, nuevas/os inscriptas/os y egresadas/os de pregrado y grado (con los valores impresos sobre las barras); los mismos valores 2012-2021 figuran en la Síntesis 2021-2022 (p. 26) y 2012-2020 en la 2020-2021 (p. 28), salvo 2013 que la 2020-2021 da 1.830.743 estudiantes y 425.650 nuevos inscriptos (se usa la revisión posterior). 2022 también en el cuadro resumen de la p. 8: pregrado y grado, estudiantes 2.540.854 (estatal 2.030.633 + privado 510.221), nuevos inscriptos 719.669 (543.041 + 176.628), egresados 145.728 (98.728 + 47.000)."
+  }
+ ],
+ "faltantes": [
+  {
+   "anio": 2023,
+   "motivo": "La Síntesis 2023-2024 (https://www.argentina.gob.ar/sites/default/files/sintesis_anuario_2023-2024.pdf, 33 MB) es un PDF de imágenes: no tiene texto extraíble y no se pudo leer (no hay OCR ni render de páginas en este entorno). Hay que mirar a ojo el gráfico o cuadro de pregrado y grado.",
+   "a_buscar": "estudiantes, nuevos inscriptos y egresados 2023"
+  },
+  {
+   "anio": 2024,
+   "motivo": "No se encontró síntesis ni anuario con datos de 2024 (la 2023-2024 no se pudo leer, ver 2023); revisar en https://www.argentina.gob.ar/educacion/universidades/informacion/publicaciones/sintesis.",
+   "a_buscar": "estudiantes, nuevos inscriptos y egresados 2024"
+  }
+ ]
+}
