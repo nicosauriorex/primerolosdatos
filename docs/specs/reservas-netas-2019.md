@@ -1,6 +1,6 @@
 # Reservas netas y deuda neta desde 2019
 
-Estado: spec lista (2026-11-18)
+Estado: implementada (2026-11-18), publicada en 43e806e (corrida completa en verde, run 44354866744)
 
 Pedido del usuario (2026-11-18): «Sí, deuda 2019» (la idea de `docs/IDEAS.md`, «Datos calientes, preguntas y pedidos (2026-11-17)»: bajar a 2019 la parte del Banco Central y la deuda neta citando swaps y seguro de depósitos).
 Fuentes: informes de país del FMI bajados por el usuario el 2026-11-18 (texto leído página por página con pypdf; «PDF pág.» es la página del PDF, no la impresa).
@@ -67,7 +67,7 @@ Quedan afuera a propósito:
 - `npm run tipos`, `npm run lint`, `npm run build`.
 - En `/herencia/` (vista `web-out`): Macri entrega, Alberto recibe y entrega, y Milei recibe y tiene «hoy», en las dos definiciones (FMI y Banco Central); la ventana muestra los supuestos agrupados.
 
-## Cómo se verificó (2026-11-18, sin commit todavía)
+## Cómo se verificó (2026-11-18)
 - `python pipeline/reservas_netas.py`: los 7 controles nuevos dan entre −361 y +940 y los de 2024-2025 no cambian. Traspasos: 11.434 al 9/12/2019 y −10.929 al 7/12/2023.
 - `deuda.pasivos_netos_bcra()`: 94 meses desde 2019-01, y el control de ago-26 pasa.
 - `--solo-json`, `ruff`, `npm run tipos`, `npm run lint` y `npm run build`: sin errores.
@@ -78,7 +78,7 @@ Quedan afuera a propósito:
   - la ventana de un traspaso muestra la cuenta de ese día;
   - 375 px sin desborde y sin errores en la consola.
 - Revisor: sin errores. Marcó cuatro líneas de `deuda-neta.md` que seguían con el inicio viejo (arregladas). Notó que la ventana de un traspaso de 2019 o 2023, con la definición del Banco Central, lista los controles de 2025: se deja así, porque son las únicas fechas en que publicó el Banco Central.
-- Sin verificar: las fichas de `bcra_pasivos_netos` y `deuda_neta` desde 2019 (necesitan la corrida completa).
+- Después del push: corrida completa en verde (run 44354866744); `reservas_netas.json` publicado arranca en 2019-01 con los traspasos 2019-12 y 2023-12, y el catálogo publicado dice «desde ene-19» (`bcra_pasivos_netos`) y «desde mar-19» (`deuda_neta`). El aspecto de `/herencia/` en el sitio no se miró en captura.
 
 ## Dónde ver los cambios
 Página: `docs/cambios/reservas-netas-2019.html`. Local: `http://localhost:3100<ruta>`, con la vista `web-out`. Publicado: `https://primerolosdatos.com.ar<ruta>`, después del push y de la corrida completa.

@@ -97,6 +97,3 @@ Idea del usuario: sumar datos que mencionan seguido el gobierno, los ministros y
 Investigado: fuentes, IDs, ranking y qué no se puede en `docs/investigaciones/datos-nuevos-2026-11-16.md`.
 - ~~AUH, Tarjeta Alimentar, cobertura de la canasta y pensiones por invalidez~~ ✅ 2026-11-16 → spec: docs/specs/auh-pensiones.md
 - El resto (homicidios, empleo público nacional, recaudación por impuesto, universidades por inciso, Malvinas…): sin elegir.
-
-## Datos calientes, preguntas y pedidos (2026-11-17)
-- Reservas netas y deuda neta desde 2019: hoy la parte del Banco Central arranca en abr-24 y la deuda neta en jun-24, porque los supuestos de reservas netas (swaps con China y el BIS, seguro de depósitos) solo tienen cita desde abr-24. Qué hacer: buscar en los informes del FMI de los programas 2018 y 2022 el swap con China (en yuanes, pasarlo a dólares en cada fecha) y el seguro de depósitos de 2019 a 2024; cargarlos en `datos/manual/reservas_netas_supuestos.json` con cita (documento y página) y bajar el inicio a 2019; revisar que la estimación de reservas netas de Herencia (D-021) siga pasando sus controles contra el FMI. Con eso la parte del Banco Central y la deuda neta salen solas desde 2019 (unos 20 trimestres más).
