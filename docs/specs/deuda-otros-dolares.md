@@ -1,6 +1,6 @@
 # Deuda en dólares blue, MEP y CCL
 
-Estado: implementada (2026-11-17), sin publicar
+Estado: implementada (2026-11-17), publicada en 56ce8e5 (corrida completa en verde, run 44216133187)
 
 Pedido del usuario (2026-11-15, en `docs/IDEAS.md`): «o si la quiero ver en otra moneda al dolar CCL» y «no sería en dolares blue?». El 2026-11-17 dijo que se haga («dale seguí con tu recomendación»).
 
