@@ -1,6 +1,6 @@
 # Deuda neta del Tesoro y el Banco Central
 
-Estado: implementada (2026-11-17), sin commit todavía
+Estado: implementada (2026-11-17), publicada en 8f88945 (corrida completa en verde, run 44221691175)
 
 Pedido del usuario (2026-11-17): trajo un texto con otra forma de medir la deuda consolidada («ah ya se, es porque algunos usan otra metodologia»): Tesoro USD 260.638 millones (deuda bruta menos la que tiene el propio sector público) y Banco Central USD 18.869 millones (pasivos monetarios menos reservas netas). Después: «Subí y buscá fuente» y «Sí, armá la spec».
 Fuentes: `docs/investigaciones/deuda-neta-2026-11-17.md`.
