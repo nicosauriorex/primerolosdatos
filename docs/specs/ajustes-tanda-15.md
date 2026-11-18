@@ -1,6 +1,6 @@
 # Ajustes de la tanda 15
 
-Estado: implementada (2026-11-18)
+Estado: implementada (2026-11-18), publicada en c017dec (corrida en verde, run 44301938911)
 
 Pedidos del usuario al recorrer la página (2026-11-17, anotados en `docs/IDEAS.md`):
 
