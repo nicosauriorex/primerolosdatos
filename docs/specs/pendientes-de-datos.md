@@ -1,6 +1,6 @@
 # Pendientes de datos: semáforo, universidades, herencia histórica y leyes del Ejecutivo
 
-Estado: spec lista (2026-11-18)
+Estado: implementada (2026-11-18); publicada en 034e02d, corrida completa en verde (run 44416384904)
 
 Pedido del usuario (2026-11-18): «Pendientes de datos» → los cuatro de `docs/ESTADO.md` («Semáforo, Universidades, Herencia histórica, Congreso»). Decisiones del usuario sobre lo investigado:
 - Leyes: «Todas, con "aprox."».
@@ -123,7 +123,9 @@ Entradas nuevas `fmi_deuda` y `fmi_acuerdo` (mismo formato que las de 2003; unid
 7. Revisor.
 
 ## Verificación
-Sesión principal (2026-11-18): ruff, `--solo-json`, tipos, lint y `npm run build` sin error. En el navegador local (leyendo el contenido, sin capturas: el panel estaba casi oculto): `/semaforo/` con las 7 filas nuevas y sin errores de consola; `/universidades/?u=…UBA` con 1998-2024 y el hueco; `/congreso/?cgi=leyes` y `?cgi=apoyo` con «≈» y el aviso del orden; `/herencia/?p=delarua` (3.263 → 11.050) y `?p=nk` (cepo). Revisor: primera pasada con 3 faltas y 5 errores menores, corregidos; segunda pasada sin problemas. Aprobadas de CFK 1 (122) y Kirchner (195-196) recontadas en los PDF de la HCDN. Sin verificar: X-13 en GitHub Actions (versión b62 o la de apt, distinta de la b61 validada), aspecto en capturas, 375 px.
+Sesión principal (2026-11-18): ruff, `--solo-json`, tipos, lint y `npm run build` sin error. En el navegador local (leyendo el contenido, sin capturas: el panel estaba casi oculto): `/semaforo/` con las 7 filas nuevas y sin errores de consola; `/universidades/?u=…UBA` con 1998-2024 y el hueco; `/congreso/?cgi=leyes` y `?cgi=apoyo` con «≈» y el aviso del orden; `/herencia/?p=delarua` (3.263 → 11.050) y `?p=nk` (cepo). Revisor: primera pasada con 3 faltas y 5 errores menores, corregidos; segunda pasada sin problemas. Aprobadas de CFK 1 (122) y Kirchner (195-196) recontadas en los PDF de la HCDN. Sin verificar: aspecto en capturas, 375 px.
+
+Después del push (2026-11-20): X-13 corre en GitHub Actions con el `x13as` de apt (run 44689053604: «x13as instalado con apt»); el `semaforo.json` publicado tiene 26 filas `x13`, 5 `oficial`, 3 `manual`, 1 `promedios` y 1 sin ajuste. Sigue sin compararse la versión de apt contra la b61 validada.
 
 
 ### Semáforo (parte A, hecho 2026-11-18)
