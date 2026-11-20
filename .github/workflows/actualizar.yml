@@ -144,7 +144,9 @@ jobs:
           else
             FECHA=$(TZ=America/Argentina/Buenos_Aires date +%F)
             git commit -m "Actualizar datos $FECHA"
-            git pull --rebase origin main
+            # Si otra corrida subió caché en el medio (p. ej. la de la rutina de datos a mano), gana la de esta
+            # corrida, que es la descarga más nueva (-X theirs en un rebase = el commit que se reaplica).
+            git pull --rebase -X theirs origin main
             git push origin HEAD:main
           fi
 
