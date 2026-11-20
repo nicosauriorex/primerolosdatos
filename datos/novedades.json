@@ -1140,4 +1140,5 @@
 {"fecha":"2026-11-18","id":"presos_tasa","periodo":"2025-12"},
 {"fecha":"2026-11-18","id":"univ_estudiantes","periodo":"2023-12"},
 {"fecha":"2026-11-18","id":"univ_nuevos_inscriptos","periodo":"2023-12"},
-{"fecha":"2026-11-18","id":"univ_egresados","periodo":"2023-12"}]}
+{"fecha":"2026-11-18","id":"univ_egresados","periodo":"2023-12"},
+{"fecha":"2026-11-19","id":"luz_costo_monomico","periodo":"2026-10"}]}
