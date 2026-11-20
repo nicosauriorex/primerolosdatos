@@ -81,11 +81,11 @@ Una rutina diaria en la nube de Claude revisa, con Haiku, si salió un dato nuev
 - Workflow «Datos a mano» corrida 44817260123 en verde: pasó a main como 9cbba6e, borró la rama, disparó la corrida completa 44817361581.
 - Falla encontrada: no corrió `agenda.py --cargado` (mañana habría recargado el #44). Arreglado a mano y con un control nuevo en el workflow (corta si cambian datos sin la agenda) y el paso marcado como obligatorio en `MANTENIMIENTO-AGENTE.md`.
 - Para mirar a mano: el #44 dice que la canasta subió 0,8 % contra octubre, pero contra el #43 cargado ($266.456) da +9,3 % (¿el IIEP revisó octubre?). No se tocó el #43.
-- La corrida completa que disparó el workflow (44817361581) falló en «Commitear datos»: arrancó mientras corría la del push b9fc924 y las dos subieron la misma caché (conflicto al hacer rebase). Arreglo en `actualizar.yml`: `git pull --rebase -X theirs` (gana la descarga más nueva).
+- La corrida completa que disparó el workflow (44817361581) falló en «Commitear datos»: arrancó mientras corría la del push b9fc924 y las dos subieron la misma caché (conflicto al hacer rebase). Arreglo en `actualizar.yml`: `git pull --rebase -X theirs` (gana la descarga más nueva). Corrida 44819565584 (9361043) en verde: el sitio publicado muestra la cobertura IIEP de 2026-11 (54/58/57 %) y la herencia en 54 % (leído en `tarifas.json` y `herencia_informes.json` publicados).
 - Control en la PC: tarea programada `datos-a-mano-respaldo`, diaria 18:30.
 
 ## Dónde ver los cambios
 1. Tarifas — `/tarifas/`: la canasta y las facturas del AMBA llegan a noviembre de 2026 (IIEP n.° 44). Origen: «agente haiku ponele que investigue diariamente si llegó algún dato nuevo» (primera carga de la rutina).
 2. Herencia — `/herencia/`: la cobertura tarifaria del AMBA «hoy» pasa de 57 % a 54 % (IIEP n.° 44). Mismo origen.
 3. Sin página: `datos/manual/agenda.json`, `pipeline/agenda.py`, `docs/MANTENIMIENTO-REGISTRO.md`, workflow «Datos a mano (rutina diaria)». Pediste: «esto debería tener en cuenta las nuevas cosas manuales que agreguemos».
-Para verlos en el sitio publicado hace falta que termine en verde la corrida completa 44817361581 (ya subido, no hace falta otro push).
+Ya publicados (corrida 44819565584 en verde). Página: `docs/cambios/mantenimiento-automatico.html` (Artifact https://claude.ai/artifact/Nws7Yx5XZxxNihxDWbnFNT).
