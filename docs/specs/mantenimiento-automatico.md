@@ -1,6 +1,6 @@
 # Mantenimiento automático de los datos cargados a mano
 
-Estado: lista para implementar (2026-11-20)
+Estado: implementada (2026-11-20); publicada en b9fc924
 
 Pedido del usuario (2026-11-20): «El mantenimiento del mes no deberíamos tenerlo como tarea programada? o algún agente haiku ponele que investigue diariamente si llegó algún dato nuevo de los que subimos a mano. […] podría hacerlo él y sino delegarle la tarea a otro.» y «esto debería tener en cuenta las nuevas cosas manuales que agreguemos». Decisiones: corre **en la nube** (no depende de la PC prendida; el usuario abre la red del entorno) y **publica solo** (commit y push a `main` si los controles pasan, y avisa).
 
@@ -47,7 +47,7 @@ Una rutina diaria en la nube de Claude revisa, con Haiku, si salió un dato nuev
 10. `docs/ESTADO.md`: «Mantenimiento a mano» pasa a una línea que remite a la agenda y al registro. La rutina no edita `ESTADO.md`.
 
 ### Paso a `main`
-11. Workflow `.github/workflows/datos-a-mano.yml`, al recibir un push a `claude/datos-a-mano-**`: corta (con `--no-renames`) si la rama toca algo fuera de `datos/manual/` y `docs/MANTENIMIENTO-REGISTRO.md`; hace rebase sobre `main`; corre `agenda.py --validar` y `obtener_datos.py --solo-json`; sube a `main` **sin revisión humana** (decisión del usuario, 2026-11-20; hasta tres intentos con rebase si `main` se movió), borra la rama y, si cambiaron datos, dispara `actualizar.yml` (corrida completa; un push que solo toca `datos/` no la dispara sola). Si algo falla, la rama queda, GitHub avisa por mail y la rutina del día siguiente lo informa.
+11. Workflow `.github/workflows/datos-a-mano.yml`, al recibir un push a `claude/datos-a-mano-**`: corta (con `--no-renames`) si la rama toca algo fuera de `datos/manual/` y `docs/MANTENIMIENTO-REGISTRO.md`; hace rebase sobre `main`; corre `agenda.py --validar` y `obtener_datos.py --solo-json`; sube a `main` **sin revisión humana** (decisión del usuario, 2026-11-20; hasta tres intentos con rebase si `main` se movió), borra la rama y, también corta si cambian datos de `datos/manual/` sin que cambie `agenda.json` (falta `--cargado`); si cambiaron datos, dispara `actualizar.yml` (corrida completa; un push que solo toca `datos/` no la dispara sola). Si algo falla, la rama queda, GitHub avisa por mail y la rutina del día siguiente lo informa.
 
 ### Control en la PC (respaldo)
 12. Tarea programada de la app de Claude en la PC del usuario, diaria a las 18:30 (si la PC está apagada, corre al prenderla). Con `RemoteTrigger` (`list_runs` de la rutina) se fija si la rutina en la nube corrió bien en las últimas 48 h. Si corrió, termina sin decir nada. Si no: la dispara (`run`) y sigue su registro; si eso falla o la rutina termina en error, sigue `docs/MANTENIMIENTO-AGENTE.md` en `C:\dev\Datos argentina` (Python local, misma rama `claude/datos-a-mano-…` y mismo workflow; antes `git pull --rebase`), y avisa al celular qué pasó. Pedido del usuario (2026-11-20): «Sumalo», sobre un respaldo local si falla la nube.
@@ -76,5 +76,15 @@ Una rutina diaria en la nube de Claude revisa, con Haiku, si salió un dato nuev
 4. Primera corrida a mano de la rutina (`run`): debe cargar el IIEP n.° 44 con su cita, publicar y avisar; mirar su registro (`get_run_log`), el commit, la corrida de Actions en verde y el dato en el sitio.
 5. Revisor contra esta spec.
 
+## Primera corrida (2026-11-20)
+- Rutina `trig_0197Rv1WHVyhpmqf2f6ws26J` (diaria 21:00 UTC), primera corrida automática 21:03 UTC, 141 s, sesión `session_01UmdtBM2wQa7GLYKUEb7AXa`. Cargó IIEP n.° 44 (`tarifas_iiep.json`) y la cobertura AMBA 54 % (`herencia.json`) con citas verificadas contra el PDF; dejó `semaforo-escrituras-pba` (octubre todavía no salió); avisó al celular.
+- Workflow «Datos a mano» corrida 44817260123 en verde: pasó a main como 9cbba6e, borró la rama, disparó la corrida completa 44817361581.
+- Falla encontrada: no corrió `agenda.py --cargado` (mañana habría recargado el #44). Arreglado a mano y con un control nuevo en el workflow (corta si cambian datos sin la agenda) y el paso marcado como obligatorio en `MANTENIMIENTO-AGENTE.md`.
+- Para mirar a mano: el #44 dice que la canasta subió 0,8 % contra octubre, pero contra el #43 cargado ($266.456) da +9,3 % (¿el IIEP revisó octubre?). No se tocó el #43.
+- Control en la PC: tarea programada `datos-a-mano-respaldo`, diaria 18:30.
+
 ## Dónde ver los cambios
-(Se completa al terminar.)
+1. Tarifas — `/tarifas/`: la canasta y las facturas del AMBA llegan a noviembre de 2026 (IIEP n.° 44). Origen: «agente haiku ponele que investigue diariamente si llegó algún dato nuevo» (primera carga de la rutina).
+2. Herencia — `/herencia/`: la cobertura tarifaria del AMBA «hoy» pasa de 57 % a 54 % (IIEP n.° 44). Mismo origen.
+3. Sin página: `datos/manual/agenda.json`, `pipeline/agenda.py`, `docs/MANTENIMIENTO-REGISTRO.md`, workflow «Datos a mano (rutina diaria)». Pediste: «esto debería tener en cuenta las nuevas cosas manuales que agreguemos».
+Para verlos en el sitio publicado hace falta que termine en verde la corrida completa 44817361581 (ya subido, no hace falta otro push).

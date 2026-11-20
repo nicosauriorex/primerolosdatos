@@ -9,8 +9,8 @@
       "que": "Reporte mensual del Observatorio de Tarifas y Subsidios del IIEP (UBA-CONICET): facturas AMBA de luz, gas, agua, canasta, coberturas (% del costo que paga el usuario).",
       "frecuencia": "mensual",
       "cuando_sale": "Entre el 15 y el 25 de cada mes (el n.° 43 salió el 2026-10-20; el PDF de noviembre tiene Last-Modified 2026-11-19).",
-      "ultimo": "2026-10 (reporte n.° 43)",
-      "mirar_desde": "2026-11-20",
+      "ultimo": "2026-11 (reporte n.° 44)",
+      "mirar_desde": "2026-12-15",
       "proximo_esperado": "PENDIENTE YA: reporte n.° 44 (noviembre 2026); el PDF ya está publicado (verificado con HEAD: 200, application/pdf, 4,4 MB). Después n.° 45 (dic-2026) hacia el 15-22 de diciembre.",
       "donde_mirar": [
         "https://economicas.uba.ar/iiep/informes-y-reportes/tarifas-y-subsidios/ (índice)",
@@ -368,8 +368,8 @@
       "que": "Porcentaje del costo de los servicios que cubren las tarifas en el AMBA, del reporte del IIEP (clave cobertura_amba 'hoy').",
       "frecuencia": "mensual",
       "cuando_sale": "Con el reporte mensual del IIEP (ver tarifas-iiep).",
-      "ultimo": "2026-10-01 (57 %, reporte #43)",
-      "mirar_desde": "2026-11-20",
+      "ultimo": "2026-11-01 (54 %, reporte #44)",
+      "mirar_desde": "2026-12-15",
       "proximo_esperado": "Reporte #44 (nov-2026) ya publicado el 2026-11-19: pendiente de cargar",
       "donde_mirar": [
         "https://economicas.uba.ar/iiep/wp-content/uploads/INFORME-IIEP-NOVIEMBRE-2026.pdf"

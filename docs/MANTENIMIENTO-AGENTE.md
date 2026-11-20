@@ -33,7 +33,7 @@ Si salió algo y la entrada tiene `modo: auto`, lanzá un subagente con `model: 
 - Corre `validar` de la entrada y `python pipeline/obtener_datos.py --solo-json`. Si algo falla, deshace sus cambios (`git checkout -- <archivo>`) e informa el error.
 - Devuelve: cargado sí/no, período, cifra(s), documento, y lo dudoso.
 
-Los comandos `validar` pueden usar la red (la caché es su respaldo). Revisá lo que devolvió con `git diff` (que la cifra esté en el documento y la cita completa) antes de aceptarlo. Después: `python pipeline/agenda.py --cargado <id> --ultimo <período> --mirar-desde <fecha>`. `mirar_desde` es el día en que vale la pena volver a mirar: el siguiente período según `frecuencia` y `cuando_sale`.
+Los comandos `validar` pueden usar la red (la caché es su respaldo). Revisá lo que devolvió con `git diff` (que la cifra esté en el documento y la cita completa) antes de aceptarlo. Después, **obligatorio por cada entrada cargada** (si no, mañana la carga de nuevo; el workflow rechaza la rama si cambian datos y no la agenda): `python pipeline/agenda.py --cargado <id> --ultimo <período> --mirar-desde <fecha>`. `mirar_desde` es el día en que vale la pena volver a mirar: el siguiente período según `frecuencia` y `cuando_sale`.
 
 Si la entrada tiene `modo: avisar`, o el subagente no pudo: no toques los datos; anotalo para avisar.
 
@@ -42,6 +42,7 @@ Por cada novedad (cargado, para mirar, no pude mirar, error), un renglón arriba
 `- AAAA-MM-DD · <id> · <qué pasó> · <período> · <documento con URL> · <detalle corto>`
 
 ## 5. Publicar (solo si cargaste algo o escribiste el registro)
+Antes, si cargaste algo: `git diff --stat datos/manual/agenda.json` tiene que mostrar cambios (una entrada `--cargado` por cada dato cargado).
 ```bash
 python pipeline/agenda.py --validar
 git checkout -b claude/datos-a-mano-$(date -u +%Y-%m-%d-%H%M)

@@ -40,6 +40,11 @@ jobs:
           if [ -n "$FUERA" ]; then
             echo "::error::La rutina solo puede tocar datos/manual/ y docs/MANTENIMIENTO-REGISTRO.md; tocó:"; echo "$FUERA"; exit 1
           fi
+          # Si cargó datos, tiene que haber marcado la agenda (--cargado); si no, al día siguiente los carga de nuevo.
+          if echo "$CAMBIOS" | grep -E '^datos/manual/' | grep -qv '^datos/manual/agenda\.json$' \
+             && ! echo "$CAMBIOS" | grep -qx 'datos/manual/agenda.json'; then
+            echo "::error::Cambiaron datos de datos/manual/ pero no datos/manual/agenda.json (falta agenda.py --cargado)"; exit 1
+          fi
 
       - uses: actions/setup-python@v5
         with:
