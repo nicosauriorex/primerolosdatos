@@ -37,6 +37,11 @@ if (/^pipeline\/.+\.py$/.test(rel)) {
   const py = ["python", "python3"].find((p) => spawnSync(p, ["-m", "ruff", "--version"], { cwd: raiz, encoding: "utf8" }).status === 0);
   if (!py) process.exit(0); // Ruff no instalado
   terminar(spawnSync(py, ["-m", "ruff", "check", absoluta], { cwd: raiz, encoding: "utf8" }));
+} else if (rel.startsWith("datos/manual/")) {
+  // Todo archivo de datos/manual/ tiene que figurar en la agenda (o en "cerrados"); también se revisa la agenda misma.
+  const py = ["python", "python3"].find((p) => spawnSync(p, ["--version"], { cwd: raiz, encoding: "utf8" }).status === 0);
+  if (!py) process.exit(0); // sin Python
+  terminar(spawnSync(py, ["pipeline/agenda.py", "--validar"], { cwd: raiz, encoding: "utf8" }));
 } else if (/^web\/(app|components|lib)\/.+\.tsx?$/.test(rel)) {
   const web = path.join(raiz, "web");
   const win = process.platform === "win32";

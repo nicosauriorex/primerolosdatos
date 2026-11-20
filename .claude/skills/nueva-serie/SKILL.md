@@ -22,6 +22,7 @@ description: Agregar una serie de datos nueva al catálogo (bajarla, cachearla, 
 4. **Correr** `python pipeline/obtener_datos.py` (con red). Confirmar en la salida que el total de series subió y que no hubo error de la fuente nueva. Agregar el id nuevo a `datos/series_esperadas.txt` (lo controla `pipeline/verificar_series.py` en cada corrida).
 4b. **Nombre para el público**: si el nombre oficial tiene siglas o jerga, agregar el nombre claro y los sinónimos de búsqueda en `web/lib/nombres.ts`. Si la serie tiene versiones por región, comprobar que `web/lib/regiones.ts` la agrupa bien (se lista una sola vez).
 5. **Verificar en la página**: correr `python pipeline/obtener_datos.py --solo-json`, `cd web && npm run build` y servir `web/out/` (o usar el preview); buscar la serie en Histórico, comprobar últimos valores contra la fuente original (dos o tres meses).
+5b. **Agenda**: si la serie se carga a mano (archivo en `datos/manual/`), sumar su entrada a `datos/manual/agenda.json` (esquema en la spec `docs/specs/mantenimiento-automatico.md`; o el archivo a `cerrados` si no se actualiza más) y correr `python pipeline/agenda.py --validar`.
 6. Reportar: id, fuente, rango de fechas, último valor y mes.
 
 Notas: para ver qué trajo una fuente, `python pipeline/ver_cache.py <nombre>` (columnas y pocas filas); no leer `datos/cache/` de otra forma. `--solo-json` no toma cambios de `fuente`, `desc` ni de cálculos: se ven con la corrida completa.

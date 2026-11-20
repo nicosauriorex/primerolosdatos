@@ -1,0 +1,79 @@
+name: Datos a mano (rutina diaria)
+
+# La rutina diaria en la nube (docs/MANTENIMIENTO-AGENTE.md) sube los datos que cargó a una rama
+# claude/datos-a-mano-AAAA-MM-DD, porque desde la nube no puede escribir en main ni borrar ramas.
+# Este workflow controla que solo toque lo permitido, valida, lo pasa a main sin revisión humana
+# (lo decidió el usuario el 2026-11-20), borra la rama y dispara la corrida completa para publicar.
+# Spec: docs/specs/mantenimiento-automatico.md (D-032).
+
+on:
+  push:
+    branches: ["claude/datos-a-mano-**"]
+
+concurrency:
+  group: datos-a-mano
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  pasar-a-main:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Controlar qué archivos cambia
+        shell: bash
+        run: |
+          git fetch -q origin main
+          BASE=$(git merge-base origin/main HEAD)
+          # --no-renames: un renombre se ve como borrado + alta, así no se esconde un archivo de afuera.
+          CAMBIOS=$(git diff --no-renames --name-only "$BASE" HEAD)
+          echo "Archivos cambiados:"; echo "$CAMBIOS"
+          if [ -z "$CAMBIOS" ]; then echo "::error::La rama no cambia nada"; exit 1; fi
+          FUERA=$(echo "$CAMBIOS" | grep -vE '^(datos/manual/[^/]+|docs/MANTENIMIENTO-REGISTRO\.md)$' || true)
+          if [ -n "$FUERA" ]; then
+            echo "::error::La rutina solo puede tocar datos/manual/ y docs/MANTENIMIENTO-REGISTRO.md; tocó:"; echo "$FUERA"; exit 1
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      - name: Pasar sobre main y validar
+        id: validar
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rebase origin/main
+          pip install -q -r requirements.txt
+          python pipeline/agenda.py --validar
+          python pipeline/obtener_datos.py --solo-json
+          # Publicar solo si cambiaron datos (no si solo se anotó el registro).
+          if git diff --no-renames --name-only origin/main HEAD | grep -q '^datos/manual/'; then
+            echo "publicar=si" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Subir a main y borrar la rama
+        shell: bash
+        run: |
+          # La corrida diaria puede subir un commit a main en el medio: hasta tres intentos con rebase.
+          for intento in 1 2 3; do
+            if git push origin HEAD:main; then break; fi
+            if [ "$intento" = 3 ]; then echo "::error::No se pudo subir a main"; exit 1; fi
+            sleep 20; git fetch -q origin main; git rebase origin/main
+          done
+          git push origin --delete "${GITHUB_REF_NAME}"
+
+      - name: Publicar (corrida completa)
+        if: steps.validar.outputs.publicar == 'si'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run actualizar.yml --ref main

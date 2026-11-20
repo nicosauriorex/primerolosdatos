@@ -97,6 +97,7 @@ jobs:
         run: |
           pip install -r requirements-dev.txt
           python -m ruff check pipeline
+          python pipeline/agenda.py --validar
           cd web
           npm ci
           npm run lint

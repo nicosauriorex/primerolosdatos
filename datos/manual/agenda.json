@@ -1,0 +1,739 @@
+{
+  "leeme": "Agenda de mantenimiento de los datos cargados a mano en datos/manual/. Cada archivo de esta carpeta tiene que figurar en 'archivos' de alguna entrada o en 'cerrados' (lo controla python pipeline/agenda.py --validar). Spec: docs/specs/mantenimiento-automatico.md. 'proximo_esperado' es una nota libre (no la usa el código).",
+  "entradas": [
+    {
+      "id": "tarifas-iiep",
+      "archivos": [
+        "datos/manual/tarifas_iiep.json"
+      ],
+      "que": "Reporte mensual del Observatorio de Tarifas y Subsidios del IIEP (UBA-CONICET): facturas AMBA de luz, gas, agua, canasta, coberturas (% del costo que paga el usuario).",
+      "frecuencia": "mensual",
+      "cuando_sale": "Entre el 15 y el 25 de cada mes (el n.° 43 salió el 2026-10-20; el PDF de noviembre tiene Last-Modified 2026-11-19).",
+      "ultimo": "2026-10 (reporte n.° 43)",
+      "mirar_desde": "2026-11-20",
+      "proximo_esperado": "PENDIENTE YA: reporte n.° 44 (noviembre 2026); el PDF ya está publicado (verificado con HEAD: 200, application/pdf, 4,4 MB). Después n.° 45 (dic-2026) hacia el 15-22 de diciembre.",
+      "donde_mirar": [
+        "https://economicas.uba.ar/iiep/informes-y-reportes/tarifas-y-subsidios/ (índice)",
+        "https://economicas.uba.ar/iiep/reporte-de-tarifas-y-subsidios-<mes>-<año>/ (página de la entrada)",
+        "PDF: https://economicas.uba.ar/iiep/wp-content/uploads/INFORME-IIEP-<MES>-<AÑO>.pdf (ej. INFORME-IIEP-NOVIEMBRE-2026.pdf)"
+      ],
+      "como_reconocer": "'Reporte de Tarifas y Subsidios #N' del mes siguiente al último cargado; la portada trae GASTO EN SERVICIOS PUBLICOS (AMBA) $/MES, FACTURA ELECTRICA (USUARIO N1), FACTURA DE GAS, FACTURA DE AGUA SIN SUBSIDIOS (MEDIA).",
+      "como_cargar": "Agregar al final de registros un objeto: mes (AAAA-MM), numero, url (PDF), url_pagina, fecha (publicación en el sitio del IIEP), luz_n1, gas_n1, agua, canasta, luz_con_subsidio/gas_con_subsidio (null si no figuran), cobertura_canasta, cobertura_luz, cobertura_gas (solo si hay cifra en el texto), consumo_luz_kwh (265), consumo_gas_m3 (60.5), y cita{campo: 'Portada. p. 1: «texto»'} para cada cifra. Copiar el formato del registro n.° 43. Actualizar 'actualizado' y el rango en 'fuente'. El dato cobertura_amba de herencia.json usa el mismo reporte (ver herencia-cobertura-amba).",
+      "validar": "python pipeline/tarifas.py",
+      "solo_json": false,
+      "modo": "auto",
+      "riesgo": "Confundir facturas con y sin impuestos, mes del reporte vs mes de la factura, o tomar 'promedio país' de reportes viejos; cambios de definición (consumo kWh, rótulo N1/SEF) hay que dejarlos en 'nota'. Duplicar un mes ya cargado."
+    },
+    {
+      "id": "tarifas-cuadros-gas",
+      "archivos": [
+        "datos/manual/tarifas_cuadros_gas_agua.json"
+      ],
+      "que": "Factura sin impuestos de 50 m3/mes (R2 1°) de Metrogas, Ecogas (Córdoba) y Litoral Gas (Santa Fe) del cuadro de ENARGAS. Agua: sin registros (en faltantes).",
+      "frecuencia": "anual",
+      "cuando_sale": "El cuadro vigente cambia casi todos los meses; el corte anual se toma el 1-dic y se carga desde diciembre.",
+      "ultimo": "Cortes 2017-12 a 2025-12 y 'vigente' (cuadro de 1-nov-2026)",
+      "mirar_desde": "2026-12-01",
+      "proximo_esperado": "Corte 2026-12 (cuadro vigente al 1-dic-2026): primera semana de diciembre; refrescar 'vigente' si cambia.",
+      "donde_mirar": [
+        "https://www.enargas.gob.ar/ (cuadros tarifarios vigentes y Excel histórico ResidencialesPequenosComercios092008actual.xlsx)",
+        "argentina.gob.ar/normativa: resoluciones ENARGAS del mes"
+      ],
+      "como_reconocer": "Cuadro tarifario ENARGAS residencial R2 1° de Metrogas CAP, Ecogas Córdoba y Litoral Gas Santa Fe, con vigencia 1 de diciembre de 2026.",
+      "como_cargar": "Un registro por empresa y categoría (sin_subsidio, y con_subsidio solo si el cuadro lo trae): servicio, lugar, empresa, corte, vigencia, categoria, cargo_fijo, cargo_variable, consumo (50), factura (= cargo_fijo + cargo_variable*50), categoria_r, subzona, más norma y cita (sin norma o cita no se carga).",
+      "validar": "python pipeline/tarifas.py",
+      "solo_json": true,
+      "modo": "avisar",
+      "riesgo": "Mezclar tarifa plena con Zona Fría, tomar columnas a/b/c o 'Diferenciales' del Excel, subzona equivocada, cuadro de otra vigencia. Sitio/Excel grande y juicio sobre qué fila usar."
+    },
+    {
+      "id": "tarifas-cuadros-luz-edenor",
+      "archivos": [
+        "datos/manual/tarifas_cuadros_luz.json"
+      ],
+      "que": "Factura sin impuestos de 250 kWh/mes de Edenor (AMBA, ENRE), con y sin subsidio (N1/N2).",
+      "frecuencia": "anual",
+      "cuando_sale": "Resoluciones ENRE a inicio de cada mes; el corte se toma al 1-dic.",
+      "ultimo": "2019-12, 2020-12, 2023-12, 2024-12, 2025-12 (faltan 2022-12 y el vigente nov-2026: no se pudo abrir la Res. 886/2026 del ENReGE)",
+      "mirar_desde": "2026-12-01",
+      "proximo_esperado": "Corte 2026-12 desde el 1-dic-2026; reintentar el cuadro vigente de nov-2026.",
+      "donde_mirar": [
+        "https://www.argentina.gob.ar/enre (cuadros tarifarios Edenor)",
+        "argentina.gob.ar/normativa (Res. ENRE/ENReGE del mes)"
+      ],
+      "como_reconocer": "Cuadro tarifario Edenor residencial R2 (151-400 kWh) vigente al 1 de diciembre de 2026.",
+      "como_cargar": "Registro con servicio=luz, lugar=amba, empresa=Edenor, corte, vigencia, categoria (sin_subsidio/con_subsidio), categoria_residencial, cargo_fijo, cargo_variable, consumo=250, factura = fijo + variable*250, más norma y cita. Quitar el faltante correspondiente de 'faltantes'.",
+      "validar": "python pipeline/tarifas.py",
+      "solo_json": true,
+      "modo": "avisar",
+      "riesgo": "Bloqueos 403 a clientes automáticos (infoleg); confundir categoría R2 y bloques; mezclar Nivel 1 y Nivel 2."
+    },
+    {
+      "id": "tarifas-cuadros-luz-epe",
+      "archivos": [
+        "datos/manual/tarifas_cuadros_luz_epe.json"
+      ],
+      "que": "Factura 250 kWh/mes de la EPE (Santa Fe), tarifa 1001 residencial urbana.",
+      "frecuencia": "anual",
+      "cuando_sale": "Cuadros EPE por resolución del directorio, varias por año. Sin calendario: se re-chequea una vez por mes.",
+      "ultimo": "2020-12 y 2021-12 (nada de 2022 en adelante)",
+      "mirar_desde": "2026-12-20",
+      "proximo_esperado": "Sin fecha: pendiente de que el usuario baje el cuadro (el vigente se baja con el botón de su sitio, según ESTADO.md).",
+      "donde_mirar": [
+        "https://www.epe.santafe.gov.ar/ (cuadros tarifarios)",
+        "Informe de Audiencia dic-2024 (cuadro Nivel 2 enero 2025)"
+      ],
+      "como_reconocer": "Cuadro tarifario EPE vigente con cuota de servicio y escalones 75+75+100 kWh.",
+      "como_cargar": "Igual que los otros cuadros, con 'escalones' [[kWh, precio],...] y cargo_fijo; norma y cita obligatorias.",
+      "validar": "python pipeline/tarifas.py",
+      "solo_json": true,
+      "modo": "avisar",
+      "riesgo": "El sitio exige botón de descarga (no automatizable); cargar el cuadro de otra fecha como de diciembre."
+    },
+    {
+      "id": "tarifas-cuadros-luz-epec",
+      "archivos": [
+        "datos/manual/tarifas_cuadros_luz_epec.json"
+      ],
+      "que": "Factura 250 kWh/mes de EPEC (Córdoba), Tarifa N°1 Residencial (N1 y N2).",
+      "frecuencia": "anual",
+      "cuando_sale": "Resoluciones del ERSeP / cuadros de EPEC varias veces al año. Sin calendario: se re-chequea una vez por mes.",
+      "ultimo": "2019-12, 2020-12 y 2023-12 (faltan 2024, 2025 y vigente: ERSeP da 403, links de energia.gob.ar 404)",
+      "mirar_desde": "2026-12-20",
+      "proximo_esperado": "Sin fecha: depende de conseguir un cuadro abierto; avisar al usuario en diciembre.",
+      "donde_mirar": [
+        "https://www.epec.com.ar/ (cuadros tarifarios PDF)",
+        "argentina.gob.ar 'Cuadros Tarifarios EPEC'",
+        "https://ersep.cba.gov.ar (bloquea)"
+      ],
+      "como_reconocer": "Cuadro tarifario EPEC Tarifa N°1 Residencial tramo >120 y <=500 kWh vigente.",
+      "como_cargar": "Como los otros cuadros con escalones, cargo_fijo mensual, norma y cita.",
+      "validar": "python pipeline/tarifas.py",
+      "solo_json": true,
+      "modo": "avisar",
+      "riesgo": "Fuentes bloqueadas; inventar un cuadro por pass-through. No evadir los bloqueos."
+    },
+    {
+      "id": "subsidios-energia",
+      "archivos": [
+        "datos/manual/subsidios_energia.json"
+      ],
+      "que": "Cantidad de usuarios por tipo de subsidio (Tarifa Social, segmentación RASE N1/N2/N3, SEF desde 2026, Zona Fría) de los informes del Jefe de Gabinete a las Cámaras.",
+      "frecuencia": "eventual",
+      "cuando_sale": "Cuando el Jefe de Gabinete presenta el informe ante Diputados o Senado; el PDF aparece en HCDN. (sin confirmar) Sin fecha cierta: se re-chequea cada semana.",
+      "ultimo": "Informe n.° 145 (28-4-2026; SEF corte 18-3-26; zona fría 2026-04)",
+      "mirar_desde": "2026-11-27",
+      "proximo_esperado": "Informe n.° 146: INFORME146JGM.pdf devuelve 404 hoy (2026-11-20). Sin fecha cierta; revisar semanalmente.",
+      "donde_mirar": [
+        "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/informes/INFORME146JGM.pdf (patrón INFORME<N>JGM.pdf)",
+        "https://www.argentina.gob.ar/jefatura (informes de gestión); versión Senado en senado.gob.ar",
+        "Búsqueda: 'Informe 146 Jefe de Gabinete Cámara' + 'SEF usuarios'"
+      ],
+      "como_reconocer": "Informe N.° 146 (o siguiente) del Jefe de Gabinete; respuestas de la Secretaría de Energía sobre SEF/usuarios con y sin subsidio; zona fría.",
+      "como_cargar": "Agregar a cantidades: tipo, servicio, nivel, fecha (AAAA-MM del corte), usuarios, unidad, alcance, fuente (informe, fecha, pregunta, página PDF), url, cita (frase/cuadro textual), redondeo/nota. Solo entra con documento oficial abierto; lo demás va a faltantes. Los PDF son enormes (1000+ págs): buscar por pregunta.",
+      "validar": "python pipeline/tarifas.py",
+      "solo_json": true,
+      "modo": "avisar",
+      "riesgo": "Confundir usuarios (suministros) con hogares, corte de datos con fecha del informe, o tomar cifra de prensa. PDF gigante con tablas desalineadas."
+    },
+    {
+      "id": "semaforo-came",
+      "archivos": [
+        "datos/manual/semaforo_manual.json"
+      ],
+      "que": "Ventas minoristas pymes (CAME), variación interanual real (CAME), de notas de prensa, solo variaciones, para el semáforo de actividad (/semaforo/).",
+      "frecuencia": "mensual",
+      "cuando_sale": "primer domingo del mes siguiente (por los registros) (sin confirmar)",
+      "ultimo": "2026-10 (-1,6 % ia)",
+      "mirar_desde": "2026-12-06",
+      "proximo_esperado": "2026-11: sale el primer domingo de diciembre (2026-12-06)",
+      "donde_mirar": [
+        "https://www.redcame.org.ar/novedades (informe mensual de ventas minoristas pyme)",
+        "Búsqueda: 'ventas minoristas pyme [mes] interanual CAME'"
+      ],
+      "como_reconocer": "'Las ventas minoristas pyme [subieron/bajaron] X% interanual en noviembre'",
+      "como_cargar": "Agregar a indicadores.came.meses: {mes:'AAAA-MM', var_ia, var_mm (null si no hay), fuente (informe y nota), url (nota leída), cita (frase textual de la nota)}. Signo: 'por debajo/cayó' = negativo. Actualizar 'actualizado'.",
+      "validar": "python pipeline/obtener_datos.py --solo-json",
+      "solo_json": true,
+      "modo": "auto",
+      "riesgo": "Nominal vs real (CAME es real), mm vs ia (Construya trae ambas), mes de publicación vs mes de referencia, un mes anterior revisado. Escrituras PBA: confundir con CABA o cantidad con variación."
+    },
+    {
+      "id": "semaforo-construya",
+      "archivos": [
+        "datos/manual/semaforo_manual.json"
+      ],
+      "que": "Índice Construya, variación interanual y mensual desestacionalizada (Grupo Construya), de notas de prensa, solo variaciones, para el semáforo de actividad (/semaforo/).",
+      "frecuencia": "mensual",
+      "cuando_sale": "primera semana hábil del mes siguiente (por los registros) (sin confirmar)",
+      "ultimo": "2026-10 (ia -9,0; mm -3,53)",
+      "mirar_desde": "2026-12-05",
+      "proximo_esperado": "2026-11: hacia el 5-10 de diciembre",
+      "donde_mirar": [
+        "https://www.grupoconstruya.com.ar/ (informe mensual)",
+        "Notas de prensa: mercado.com.ar, ámbito, infobae (búsqueda: 'Índice Construya noviembre')"
+      ],
+      "como_reconocer": "'El Índice Construya (IC) registró en noviembre ... mensual desestacionalizado / interanual'",
+      "como_cargar": "Agregar a indicadores.construya.meses: {mes:'AAAA-MM', var_ia, var_mm (null si no hay), fuente (informe y nota), url (nota leída), cita (frase textual de la nota)}. Signo: 'por debajo/cayó' = negativo. Actualizar 'actualizado'.",
+      "validar": "python pipeline/obtener_datos.py --solo-json",
+      "solo_json": true,
+      "modo": "auto",
+      "riesgo": "Nominal vs real (CAME es real), mm vs ia (Construya trae ambas), mes de publicación vs mes de referencia, un mes anterior revisado. Escrituras PBA: confundir con CABA o cantidad con variación."
+    },
+    {
+      "id": "semaforo-escrituras-pba",
+      "archivos": [
+        "datos/manual/semaforo_manual.json"
+      ],
+      "que": "Escrituras (compraventas) en la Provincia de Buenos Aires, variación interanual (Colegio de Escribanos de la Provincia de Buenos Aires), de notas de prensa, solo variaciones, para el semáforo de actividad (/semaforo/).",
+      "frecuencia": "mensual",
+      "cuando_sale": "20-30 días después del cierre del mes; hay meses sin dato publicado (sin confirmar)",
+      "ultimo": "2026-09 (-10,0 % ia; único mes cargado; nota de La Nación del 22-10-2026)",
+      "mirar_desde": "2026-11-20",
+      "proximo_esperado": "2026-10: ya puede estar publicado o salir en estos días (20-30 de noviembre)",
+      "donde_mirar": [
+        "https://www.colescba.org.ar/ (estadísticas/novedades)",
+        "Búsqueda: 'Colegio de Escribanos provincia de Buenos Aires compraventas octubre interanual'"
+      ],
+      "como_reconocer": "'Durante octubre se registraron N compraventas de inmuebles en la provincia de Buenos Aires ... interanual'",
+      "como_cargar": "Agregar a indicadores.escrituras_pba.meses: {mes:'AAAA-MM', var_ia, var_mm (null si no hay), fuente (informe y nota), url (nota leída), cita (frase textual de la nota)}. Signo: 'por debajo/cayó' = negativo. Actualizar 'actualizado'.",
+      "validar": "python pipeline/obtener_datos.py --solo-json",
+      "solo_json": true,
+      "modo": "auto",
+      "riesgo": "Nominal vs real (CAME es real), mm vs ia (Construya trae ambas), mes de publicación vs mes de referencia, un mes anterior revisado. Escrituras PBA: confundir con CABA o cantidad con variación."
+    },
+    {
+      "id": "reservas-netas-deg-mensual",
+      "archivos": [
+        "datos/manual/reservas_netas_supuestos.json"
+      ],
+      "que": "Saldo de créditos del FMI en millones de DEG (Extended Arrangements) a fin de cada mes; entra en la estimación propia de reservas netas (/herencia/).",
+      "frecuencia": "mensual",
+      "cuando_sale": "El FMI publica 'Financial Position in the Fund' con datos al último día del mes; se ve a principios del mes siguiente.",
+      "ultimo": "2026-10 (41968,67; 2026-09 igual)",
+      "mirar_desde": "2026-12-01",
+      "proximo_esperado": "2026-11 (al 30-nov-2026): primeros días de diciembre. Sin desembolso ni pago el saldo se repite.",
+      "donde_mirar": [
+        "https://www.imf.org/external/np/fin/tad/exfin2.aspx?memberKey1=30&date1key=2026-11-30 (cambiar date1key al último día del mes)",
+        "https://www.imf.org/external/np/fin/tad/extarr2.aspx?memberKey1=30&date1key=2026-11-30"
+      ],
+      "como_reconocer": "Página 'Financial Position in the Fund for Argentina as of November 30, 2026', sección IV, 'Extended Arrangements' en SDR Million.",
+      "como_cargar": "Agregar '2026-11': <valor> a fmi.deg_fin_de_mes (clave AAAA-MM, millones de DEG). Actualizar 'actualizado'. El mismo dato (fmi_deuda) va en herencia.json traspaso 'hoy': cargar ambos juntos.",
+      "validar": "python pipeline/reservas_netas.py",
+      "solo_json": true,
+      "modo": "auto",
+      "riesgo": "Tomar el total de Outstanding Purchases and Loans en vez de solo Extended Arrangements; DEG vs dólares; fecha de corte de la página equivocada."
+    },
+    {
+      "id": "reservas-netas-supuestos-tramos",
+      "archivos": [
+        "datos/manual/reservas_netas_supuestos.json"
+      ],
+      "que": "Supuestos por tramo de la estimación propia: swaps con PBOC/BIS, seguro de depósitos (SEDESA), USD por DEG, y controles contra reservas netas del FMI y del BCRA.",
+      "frecuencia": "eventual",
+      "cuando_sale": "Con cada revisión del acuerdo (3ª revisión prevista ~dic-2026 según ESTADO.md) y cada Informe de Política Monetaria. (sin confirmar)",
+      "ultimo": "swaps 20.000 desde 2025-12 (CR 26/105); sedesa 2.000 desde 2026-01; usd_por_deg 1,3654; controles FMI hasta 2025-12-30",
+      "mirar_desde": "2026-12-01",
+      "proximo_esperado": "Informe de país de la 3ª revisión, diciembre 2026 (aprox., no confirmado).",
+      "donde_mirar": [
+        "https://www.imf.org/en/Countries/ARG",
+        "https://www.imf.org/en/Publications/CR",
+        "Búsqueda: 'IMF Argentina third review Extended Fund Facility staff report 2026'",
+        "https://www.bcra.gob.ar/ (Informe de Política Monetaria)"
+      ],
+      "como_reconocer": "Staff Report / Country Report N.° 26/xxx con tabla de balance de pagos con 'Swap lines', 'Sedesa/deposit insurance' y NIR.",
+      "como_cargar": "Agregar tramo {desde:'AAAA-MM-01', valor, cita (informe, página PDF, frase), url} a swaps o sedesa; control {fecha, fmi, cita, url} a controles. Actualizar usd_por_deg y su cita si cambia el tipo de programa. Cada tramo vale hasta el siguiente.",
+      "validar": "python pipeline/reservas_netas.py",
+      "solo_json": true,
+      "modo": "avisar",
+      "riesgo": "Miles de millones vs millones (x1000), definición NIR del FMI vs BCRA, página PDF equivocada, 'at current rates' vs 'program rates'. Criterio de juicio."
+    },
+    {
+      "id": "herencia-deuda-finanzas",
+      "archivos": [
+        "datos/manual/herencia.json"
+      ],
+      "que": "Deuda bruta (US$ millones), % del PIB y % en moneda extranjera de la Administración Central, última planilla trimestral de Finanzas (claves deuda_bruta_usd, deuda_bruta_pib, deuda_moneda_ext, traspaso 'hoy').",
+      "frecuencia": "trimestral",
+      "cuando_sale": "~2,5 meses después del cierre del trimestre.",
+      "ultimo": "2026-06-30 (474.198 M US$; 71,38 %; 52,5 %)",
+      "mirar_desde": "2026-12-10",
+      "proximo_esperado": "Planilla al 30/09/2026: hacia mediados de diciembre de 2026",
+      "donde_mirar": [
+        "https://www.argentina.gob.ar/economia/finanzas/datos-trimestrales-de-la-deuda",
+        "Patrón de la planilla: https://www.argentina.gob.ar/sites/default/files/deuda_publica_30-06-2026_0.xlsx (cambia la fecha)"
+      ],
+      "como_reconocer": "Planilla 'Deuda pública, datos al 30/09/2026' (xlsx); hoja A.1.1 C16 (bruta), A.4.7 AE10 (% PIB), A.1.4 H28 (moneda extranjera).",
+      "como_cargar": "Reemplazar los tres datos 'hoy': valor, fecha_dato 2026-09-30, documento, url, pagina ('hoja A.1.1, celda C16'), cita textual de la celda. Los traspasos viejos no se tocan salvo revisión de la planilla.",
+      "validar": "python pipeline/herencia_informes.py",
+      "solo_json": true,
+      "modo": "auto",
+      "riesgo": "Las celdas cambian de columna entre planillas; miles de US$ (dividir por 1000); % PIB como fracción (0,7138 -> 71,38). Pasar el control contra la serie del catálogo (necesita el boletín mensual al día)."
+    },
+    {
+      "id": "herencia-fmi-deuda",
+      "archivos": [
+        "datos/manual/herencia.json"
+      ],
+      "que": "Deuda con el FMI en millones de DEG (Extended Arrangements), clave fmi_deuda traspaso 'hoy'.",
+      "frecuencia": "mensual",
+      "cuando_sale": "Principios del mes siguiente.",
+      "ultimo": "2026-10-31 (41.968,67 M DEG)",
+      "mirar_desde": "2026-12-01",
+      "proximo_esperado": "2026-11-30: primeros días de diciembre (cargar junto con reservas-netas-deg-mensual)",
+      "donde_mirar": [
+        "https://www.imf.org/external/np/fin/tad/exfin2.aspx?memberKey1=30&date1key=2026-11-30"
+      ],
+      "como_reconocer": "'Financial Position in the Fund for Argentina as of November 30, 2026'.",
+      "como_cargar": "Actualizar valor, fecha_dato (2026-11-30), documento, url (nuevo date1key), pagina ('sección IV, Outstanding Purchases and Loans') y cita ('Extended Arrangements X (SDR Million)').",
+      "validar": "python pipeline/herencia_informes.py",
+      "solo_json": true,
+      "modo": "auto",
+      "riesgo": "Igual que reservas-netas-deg-mensual. Actualizar solo el traspaso 'hoy'."
+    },
+    {
+      "id": "herencia-deuda-importadores",
+      "archivos": [
+        "datos/manual/herencia.json"
+      ],
+      "que": "Stock de deuda por importaciones de bienes (US$ millones) del informe trimestral de deuda externa privada del BCRA (clave deuda_importadores 'hoy').",
+      "frecuencia": "trimestral",
+      "cuando_sale": "~3 meses después del cierre del trimestre.",
+      "ultimo": "2026-06-30 (36.383 M US$, informe 2T26)",
+      "mirar_desde": "2026-12-15",
+      "proximo_esperado": "3T26 (30-9-2026): diciembre 2026 a enero 2027",
+      "donde_mirar": [
+        "https://www.bcra.gob.ar/archivos/Pdfs/PublicacionesEstadisticas/Informes/informe-deuda-externa-2026-3t.pdf (patrón ...-2026-2t.pdf)",
+        "https://www.bcra.gob.ar/ Estadísticas > Deuda externa privada"
+      ],
+      "como_reconocer": "Informe 'Deuda externa privada' tercer trimestre 2026, página 2, stock por tipo de operación: deuda por importaciones de bienes.",
+      "como_cargar": "Actualizar valor, fecha_dato 2026-09-30, documento, url, pagina, cita textual.",
+      "validar": "python pipeline/herencia_informes.py",
+      "solo_json": true,
+      "modo": "auto",
+      "riesgo": "Confundir importaciones de bienes con servicios o total deuda comercial; USD vs millones."
+    },
+    {
+      "id": "herencia-reservas-netas-fmi",
+      "archivos": [
+        "datos/manual/herencia.json",
+        "datos/manual/reservas_netas_supuestos.json"
+      ],
+      "que": "Nivel de reservas netas del FMI (NIR) de la última revisión (clave reservas_netas_fmi 'hoy': -11.700 M US$ a fin de 2025).",
+      "frecuencia": "eventual",
+      "cuando_sale": "Informe de país de la 3ª revisión: ~dic-2026 (según ESTADO.md, no verificado). (sin confirmar)",
+      "ultimo": "2025-12-31 (CR 26/105, artículo IV 2026 y 2ª revisión)",
+      "mirar_desde": "2026-12-01",
+      "proximo_esperado": "3ª revisión, diciembre 2026 (aprox.)",
+      "donde_mirar": [
+        "https://www.imf.org/en/Countries/ARG",
+        "https://www.imf.org/en/Publications/CR",
+        "Búsqueda: 'IMF Argentina third review 2026 staff report NIR'"
+      ],
+      "como_reconocer": "Country Report con 'NIR' y su valor a fin del último año o trimestre de referencia.",
+      "como_cargar": "Actualizar valor/fecha_dato/documento/url/pagina/cita del dato 'hoy' y agregar un control en reservas_netas_supuestos.json (controles).",
+      "validar": "python pipeline/herencia_informes.py",
+      "solo_json": true,
+      "modo": "avisar",
+      "riesgo": "La definición NIR del FMI cambia entre revisiones; 'at current rates' vs 'program rates'; página del PDF."
+    },
+    {
+      "id": "herencia-reservas-netas-bcra",
+      "archivos": [
+        "datos/manual/herencia.json",
+        "datos/manual/reservas_netas_supuestos.json"
+      ],
+      "que": "Reservas netas según el BCRA (RIN) del Informe de Política Monetaria (clave reservas_netas_bcra 'hoy': 2.900 M US$ a fin de 2025).",
+      "frecuencia": "eventual",
+      "cuando_sale": "No confirmado: el archivo cita el IPOM de diciembre de 2025 (T4). (sin confirmar)",
+      "ultimo": "2025-12-31 (IPOM dic-2025, cuadro 1)",
+      "mirar_desde": "2026-12-01",
+      "proximo_esperado": "IPOM T4-2026, diciembre 2026 (no confirmado)",
+      "donde_mirar": [
+        "https://www.bcra.gob.ar/archivos/Pdfs/PublicacionesEstadisticas/informes/informe-politica-monetaria-2026-T4.pdf (patrón ...-2025-T4.pdf)",
+        "https://www.bcra.gob.ar/ Publicaciones > Informe de Política Monetaria"
+      ],
+      "como_reconocer": "IPOM con apartado técnico/cuadro 'Reservas Internacionales Netas' (cómputo derivado del balance del BCRA).",
+      "como_cargar": "Actualizar el dato 'hoy' y el control en controles_bcra de reservas_netas_supuestos.json.",
+      "validar": "python pipeline/herencia_informes.py",
+      "solo_json": true,
+      "modo": "avisar",
+      "riesgo": "Tomar RIB en vez de RIN; criterios distintos de pasivos; página del cuadro."
+    },
+    {
+      "id": "herencia-cobertura-amba",
+      "archivos": [
+        "datos/manual/herencia.json"
+      ],
+      "que": "Porcentaje del costo de los servicios que cubren las tarifas en el AMBA, del reporte del IIEP (clave cobertura_amba 'hoy').",
+      "frecuencia": "mensual",
+      "cuando_sale": "Con el reporte mensual del IIEP (ver tarifas-iiep).",
+      "ultimo": "2026-10-01 (57 %, reporte #43)",
+      "mirar_desde": "2026-11-20",
+      "proximo_esperado": "Reporte #44 (nov-2026) ya publicado el 2026-11-19: pendiente de cargar",
+      "donde_mirar": [
+        "https://economicas.uba.ar/iiep/wp-content/uploads/INFORME-IIEP-NOVIEMBRE-2026.pdf"
+      ],
+      "como_reconocer": "Texto 'los hogares del AMBA pagan tarifas que, en promedio, cubren el X% de los costos', p. 3.",
+      "como_cargar": "Actualizar valor, fecha_dato (primer día del mes del reporte), documento ('Reporte de tarifas y subsidios #44, noviembre de 2026'), url, pagina, cita. Debe coincidir con cobertura_canasta de tarifas_iiep.json.",
+      "validar": "python pipeline/herencia_informes.py",
+      "solo_json": true,
+      "modo": "auto",
+      "riesgo": "Tomar el % que cubre el Estado en vez del que pagan los usuarios."
+    },
+    {
+      "id": "herencia-hechos-eventuales",
+      "archivos": [
+        "datos/manual/herencia.json"
+      ],
+      "que": "Hechos de estado: acuerdo vigente con el FMI (PR 25/101, abril 2025), régimen cambiario para personas (Com. A 8226, 14-4-2025), BOPREAL emitido (10.845 M US$, fin Serie 4 jul-2025), puts BCRA en 0 (jun-2025). Claves fmi_acuerdo, cepo, bopreal, puts.",
+      "frecuencia": "eventual",
+      "cuando_sale": "Solo si cambia el acuerdo (nuevo programa/monto), el cepo (nueva comunicación BCRA) o BOPREAL (nueva serie). Sin calendario: se re-chequea una vez por mes.",
+      "ultimo": "fmi_acuerdo 2026-10-31, cepo 2025-04-14, bopreal 2025-07-16, puts 2025-06-10",
+      "mirar_desde": "2026-12-20",
+      "proximo_esperado": "Sin fecha; vigilar la 3ª revisión del FMI y Comunicaciones 'A' del BCRA",
+      "donde_mirar": [
+        "https://www.imf.org/en/News (comunicados Argentina)",
+        "https://www.bcra.gob.ar/ Normativa: Comunicaciones 'A' (Exterior y Cambios)",
+        "Comunicados del BCRA sobre BOPREAL"
+      ],
+      "como_reconocer": "Comunicado del Directorio del FMI o Comunicación 'A' nueva que cambie lo cargado.",
+      "como_cargar": "Reemplazar el dato 'hoy' con documento/url/pagina/cita.",
+      "validar": "python pipeline/herencia_informes.py",
+      "solo_json": true,
+      "modo": "avisar",
+      "riesgo": "Criterio: decidir si un cambio cuenta como fin del cepo o nuevo acuerdo; valores de texto libre."
+    },
+    {
+      "id": "deuda-por-acreedor",
+      "archivos": [
+        "datos/manual/deuda_por_acreedor.json"
+      ],
+      "que": "Deuda bruta de la Administración Central por acreedor (agencias del sector público, organismos multilaterales/bilaterales, sector privado) a fin de trimestre, de las presentaciones gráficas de Finanzas; millones de US$.",
+      "frecuencia": "trimestral",
+      "cuando_sale": "Con la presentación gráfica trimestral de Finanzas, ~2,5 meses después del cierre. (sin confirmar)",
+      "ultimo": "2026-06-30 (2º trimestre 2026)",
+      "mirar_desde": "2026-12-10",
+      "proximo_esperado": "3T26 (30-9-2026): hacia diciembre de 2026 (ESTADO.md). El patrón presentacion_grafica_3er_trim_26.pdf da 404 hoy (el nombre del PDF cambia por trimestre).",
+      "donde_mirar": [
+        "https://www.argentina.gob.ar/economia/finanzas/datos-trimestrales-de-la-deuda (índice)",
+        "Previas: .../presentacion_grafica_it_26_c.pdf, .../presentacion_grafica_2do_trim_26.pdf"
+      ],
+      "como_reconocer": "'Presentación gráfica de la deuda pública, 3er trimestre 2026', página 10: 'Deuda bruta de la Administración Central por acreedor' (columna del trimestre).",
+      "como_cargar": "Agregar a datos: {fecha:'2026-09-30', total, agencias, organismos, privados (millones US$), cita:{documento (trimestre y título del cuadro), url, pagina}}.",
+      "validar": "python pipeline/deuda.py",
+      "solo_json": false,
+      "modo": "auto",
+      "riesgo": "Usar la columna del trimestre anterior; confundir 'agencias' con 'organismos'; el total de la presentación difiere del boletín mensual (revisión)."
+    },
+    {
+      "id": "pobreza-utdt",
+      "archivos": [
+        "datos/manual/pobreza_alta_frecuencia.json"
+      ],
+      "que": "Nowcast mensual de pobreza e indigencia (semestre móvil) de la UTDT (Martín González-Rozada), de notas de prensa. Privado, no oficial.",
+      "frecuencia": "mensual",
+      "cuando_sale": "Mediados de mes; la prensa (iProfesional, Infobae, Ámbito, Bloomberg Línea) reproduce la tabla.",
+      "ultimo": "Siete ventanas vigentes al 2026-11-12; la última 2026-04 a 2026-09 (32,6 %)",
+      "mirar_desde": "2026-12-12",
+      "proximo_esperado": "Edición de diciembre (~12-15 de dic-2026): ventana 2026-05 a 2026-10 y posibles revisiones",
+      "donde_mirar": [
+        "https://www.utdt.edu/ (Nowcast de Pobreza; informe restringido)",
+        "Búsqueda: 'Nowcast de Pobreza UTDT [mes] pobreza semestre móvil'",
+        "https://www.iprofesional.com/ (nota con la tabla)"
+      ],
+      "como_reconocer": "Nota que cita el Nowcast de Pobreza de la UTDT con la tabla de semestres móviles y el último período.",
+      "como_cargar": "Reemplazar nowcast_utdt_vigente con la tabla nueva (por ventana: desde, hasta, pobreza, indigencia, version 'vigente al AAAA-MM-DD', fecha, organismo_nota, url, cita). Las ventanas cuyo valor cambia: mover la anterior a nowcast_utdt_historico (version 'publicada el ...'). Sin url y cita no se carga.",
+      "validar": "python pipeline/manuales_calientes.py",
+      "solo_json": false,
+      "modo": "auto",
+      "riesgo": "Confundir versión revisada con primera estimación; mes 'hasta' vs mes de publicación; huecos que la prensa no publicó; pobreza vs indigencia vs otro estudio."
+    },
+    {
+      "id": "pobreza-uca-odsa",
+      "archivos": [
+        "datos/manual/pobreza_alta_frecuencia.json"
+      ],
+      "que": "Puntos de pobreza e indigencia de la UCA/ODSA (EDSA) por trimestre, de notas de prensa.",
+      "frecuencia": "semestral",
+      "cuando_sale": "El informe del tercer trimestre salió el 2025-12-04; hay estimaciones previas en febrero (2024-02). (sin confirmar)",
+      "ultimo": "2025-T3 (36,3 %)",
+      "mirar_desde": "2026-12-01",
+      "proximo_esperado": "EDSA 3T-2026: primera quincena de diciembre de 2026 (no confirmado)",
+      "donde_mirar": [
+        "https://uca.edu.ar/es/observatorio-de-la-deuda-social-argentina",
+        "Búsqueda: 'UCA pobreza tercer trimestre 2026 EDSA ODSA'"
+      ],
+      "como_reconocer": "Nota o informe ODSA-UCA con pobreza e indigencia del 3T-2026.",
+      "como_cargar": "Agregar a uca_odsa: periodo, pobreza, indigencia, tipo ('medición (EDSA)' o 'estimación'), fecha, url, documento, cita (y nota si hay discrepancias).",
+      "validar": "python pipeline/manuales_calientes.py",
+      "solo_json": false,
+      "modo": "avisar",
+      "riesgo": "Mezclar estimaciones con mediciones EDSA; la nota a veces da dos cifras (titular vs cuerpo)."
+    },
+    {
+      "id": "piquetes",
+      "archivos": [
+        "datos/manual/piquetes.json"
+      ],
+      "que": "Cortes de calle y ruta por año de Diagnóstico Político (consultora privada), citados por Chequeado y medios.",
+      "frecuencia": "anual",
+      "cuando_sale": "Enero (la cifra de 2025 salió el 2026-01-14).",
+      "ultimo": "2025 (3.893)",
+      "mirar_desde": "2027-01-10",
+      "proximo_esperado": "Cifra de 2026: enero de 2027 (~10-20 de enero)",
+      "donde_mirar": [
+        "Búsqueda: 'Diagnóstico Político piquetes 2026 informe anual'",
+        "https://chequeado.com/ (verificaciones)",
+        "hoydia.com.ar, infobae, diariodecuyo"
+      ],
+      "como_reconocer": "Nota con el total anual de piquetes del año calendario cerrado según Diagnóstico Político.",
+      "como_cargar": "Agregar a valores_anuales: anio, piquetes, fecha, url, verificado ('abierto' o 'abierto (dos fuentes)'), cita textual. Preferir dos fuentes.",
+      "validar": "python pipeline/manuales_calientes.py",
+      "solo_json": false,
+      "modo": "auto",
+      "riesgo": "Cifra provisoria o de período móvil (ej. desde la asunción de Milei) en vez del año calendario; fuentes secundarias que redondean."
+    },
+    {
+      "id": "rigi-proyectos",
+      "archivos": [
+        "datos/manual/rigi.json"
+      ],
+      "que": "Proyectos RIGI aprobados (30 hoy, US$ 79.649 M): fila de la planilla oficial + resolución de aprobación (número, fecha de firma y del Boletín Oficial, cita textual) + totales oficiales.",
+      "frecuencia": "eventual",
+      "cuando_sale": "Resolución del Ministerio de Economía publicada en el Boletín Oficial; luego la planilla. Sin calendario: se re-chequea cada semana.",
+      "ultimo": "Parque Eólico La Rinconada (Res. 1983/2026, firmada 2026-11-13); totales al 2026-11-18",
+      "mirar_desde": "2026-11-27",
+      "proximo_esperado": "Sin fecha: revisar la planilla cada pocos días",
+      "donde_mirar": [
+        "https://docs.google.com/spreadsheets/d/1eytHJrzUjIFOXI-P1Hx_wbmZiSqPxVle059Djdos6u8/gviz/tq?tqx=out:csv&sheet=dataset (hoja dataset; también hoja evaluacion)",
+        "https://www.argentina.gob.ar/normativa (buscar 'RIGI' Resolución Ministerio de Economía)",
+        "https://www.boletinoficial.gob.ar"
+      ],
+      "como_reconocer": "Más de 30 filas en la planilla, o resolución 'APRUEBASE LA SOLICITUD DE ADHESION AL (RIGI)'.",
+      "como_cargar": "Agregar proyecto: nombre, empresa, provincias[], sector, monto (M US$, columna inv-comprometida), empleos, descripcion, norma (URL en argentina.gob.ar/normativa), norma_id, fecha (firma), fecha_publicacion (BO), cita_norma (texto textual), nota. Sacarlo de 'pendientes' si estaba. Actualizar totales (fecha, evaluacion), la nota con N proyectos y monto, y fecha_descarga. Proyectos de varias provincias van en una fila.",
+      "validar": "python pipeline/manuales_calientes.py",
+      "solo_json": true,
+      "modo": "auto",
+      "riesgo": "Duplicar un proyecto (ya en pendientes o con otro nombre), tomar monto anunciado en vez del de la planilla, fecha de firma vs publicación, resolución de otro proyecto asignada (pasó con Bajo del Toro)."
+    },
+    {
+      "id": "rigi-pendientes-ingresado",
+      "archivos": [
+        "datos/manual/rigi.json"
+      ],
+      "que": "Proyectos en evaluación/rechazados del Monitor RIGI (DESIP-IIEP, no oficial) y el ingreso de divisas del BCRA (Werning, hasta 2026-03).",
+      "frecuencia": "eventual",
+      "cuando_sale": "El Monitor se actualiza con cada novedad. Sin calendario: se re-chequea cada semana.",
+      "ultimo": "Monitor al 2026-11-17 (16 en evaluación, USD 126.218 M); ingresado neto 762 M hasta 2026-03",
+      "mirar_desde": "2026-11-27",
+      "proximo_esperado": "Sin fecha; revisar el Monitor semanalmente",
+      "donde_mirar": [
+        "https://monitor-rigi-desip-iiep.github.io/RIGI/base-datos.html",
+        "https://www.bcra.gob.ar/ (presentaciones del vicepresidente; búsqueda 'RIGI ingreso de divisas BCRA')"
+      ],
+      "como_reconocer": "Cambios en la portada del Monitor (relevados, aprobados, en evaluación) o nueva presentación del BCRA con flujos RIGI.",
+      "como_cargar": "Reemplazar pendientes (nombre, empresa, provincias, sector, monto, fecha_presentacion, estado evaluacion|rechazado, url, fecha_rechazo), fuente_pendientes, fecha_descarga_pendientes, control_pendientes (n, monto, cita de portada).",
+      "validar": "python pipeline/manuales_calientes.py",
+      "solo_json": true,
+      "modo": "auto",
+      "riesgo": "Fuente no oficial; números que no cierran con la planilla oficial (21 vs 16, ya documentado); el dato de ingreso del BCRA está en un gráfico (no legible)."
+    },
+    {
+      "id": "carne",
+      "archivos": [
+        "datos/manual/carne.json"
+      ],
+      "que": "Consumo per cápita de carne vacuna, porcina, aviar y total (kg/hab/año) del tablero de la Secretaría de Agricultura (MAGyP) + contraste privado CICCRA.",
+      "frecuencia": "anual",
+      "cuando_sale": "El tablero se publica anualmente (el de 2025 trae 2020-2025); CICCRA aparece en prensa durante el año. El tablero no tiene fecha; CICCRA puede salir cualquier mes: se re-chequea una vez por mes.",
+      "ultimo": "Tablero 2025: hasta 2025 (provisorio); CICCRA hasta ene-may 2026",
+      "mirar_desde": "2026-12-20",
+      "proximo_esperado": "Tablero 2026: sin fecha (probablemente 2027). CICCRA: cualquier mes.",
+      "donde_mirar": [
+        "https://www.magyp.gob.ar/sitio/areas/bovinos/informacion_sectorial/ (Tablero de consumo de carnes)",
+        "Búsqueda: 'CICCRA consumo per cápita carne vacuna 2026'"
+      ],
+      "como_reconocer": "Tablero 'consumo per capita de carnes 2026' con el año nuevo.",
+      "como_cargar": "Agregar a serie_tablero_oficial {anio, vacuna, porcina, aviar, total, estado ('confirmado en el PDF oficial (abierto AAAA-MM-DD), tablero N p. X'), url}; revisar si corrigen valores previos. CICCRA: serie_privada_ciccra.valores con url, cita, fecha. Sin cita no se carga.",
+      "validar": "python pipeline/manuales_calientes.py",
+      "solo_json": false,
+      "modo": "avisar",
+      "riesgo": "Corte de metodología 2018/2019 (no empalmar con AGRO_0244); CICCRA usa ventanas ene-jul; el PDF se lee a ojo."
+    },
+    {
+      "id": "huevo",
+      "archivos": [
+        "datos/manual/huevo.json"
+      ],
+      "que": "Consumo de huevos por habitante por año (unidades), Anuario Avícola de la Secretaría de Agricultura/CAPIA.",
+      "frecuencia": "anual",
+      "cuando_sale": "El Anuario Avícola sale a mediados del año siguiente (Anuario 2023: 2025-06-30; 2024: 2025-06-09).",
+      "ultimo": "2025 (2024 = 362)",
+      "mirar_desde": "2027-06-01",
+      "proximo_esperado": "Anuario con el dato 2026: mediados de 2027; posibles correcciones de 2025 antes",
+      "donde_mirar": [
+        "https://www.magyp.gob.ar/sitio/areas/aves/informes/boletines/ (Boletín Avícola / Datos históricos)",
+        "Búsqueda: 'Anuario Avícola 2025 consumo de huevos per cápita'"
+      ],
+      "como_reconocer": "Anuario Avícola con la frase 'el consumo de huevos aumentó X% ... calculándose en N huevos/cápita/año'.",
+      "como_cargar": "Agregar a valores: {anio, huevos, proyectado:false, url, fecha, documento (boletín, página del PDF), cita}. Si una edición corrige años anteriores, anotarlo en discrepancias.",
+      "validar": "python pipeline/manuales_calientes.py",
+      "solo_json": false,
+      "modo": "auto",
+      "riesgo": "Fe de erratas y ediciones superpuestas; fecha del PDF distinta de la edición."
+    },
+    {
+      "id": "femicidios",
+      "archivos": [
+        "datos/manual/femicidios.json"
+      ],
+      "que": "Víctimas directas de femicidio por año, Registro Nacional de Femicidios de la Justicia Argentina (Oficina de la Mujer, CSJN).",
+      "frecuencia": "anual",
+      "cuando_sale": "Informe anual de la Oficina de la Mujer (el de 2025 ya está). Mes de salida: no confirmado. (sin confirmar)",
+      "ultimo": "2025 (200 víctimas directas)",
+      "mirar_desde": "2027-01-15",
+      "proximo_esperado": "Informe 2026: durante 2027 (mes no confirmado)",
+      "donde_mirar": [
+        "https://om.csjn.gov.ar/ (Registro Nacional de Femicidios)",
+        "Búsqueda: 'Registro Nacional de Femicidios informe 2026 Corte Suprema'"
+      ],
+      "como_reconocer": "Informe 'Registro Nacional de Femicidios de la Justicia Argentina' del año nuevo; 'se contabilizaron N víctimas directas'.",
+      "como_cargar": "Agregar a anios {anio, victimas, documento (URL), pagina, cita}. El informe nuevo puede revisar años previos.",
+      "validar": "python pipeline/mas_series.py",
+      "solo_json": false,
+      "modo": "auto",
+      "riesgo": "Víctimas directas vs totales con vinculados; 2018 y 2020 salen de un gráfico."
+    },
+    {
+      "id": "prestacion-alimentar",
+      "archivos": [
+        "datos/manual/prestacion_alimentar.json"
+      ],
+      "que": "Montos mensuales de la Prestación Alimentar por cantidad de hijos y edad máxima, según resoluciones.",
+      "frecuencia": "eventual",
+      "cuando_sale": "Resolución en el Boletín Oficial (última Res. 161/2026, 7-5-2026: +38 %). Sin calendario: se re-chequea una vez por mes.",
+      "ultimo": "Vigencia desde 2026-05 (72.250 / 113.299 / 149.425)",
+      "mirar_desde": "2026-12-20",
+      "proximo_esperado": "Sin fecha; vigilar el Boletín Oficial",
+      "donde_mirar": [
+        "https://www.boletinoficial.gob.ar/ (Ministerio de Capital Humano)",
+        "Búsqueda: 'Resolución Capital Humano Prestación Alimentar monto 2026'"
+      ],
+      "como_reconocer": "Resolución del Ministerio de Capital Humano que fije nuevos montos.",
+      "como_cargar": "Agregar a periodos: {desde 'AAAA-MM', montos [1, 2, 3+ hijos], edad_max, norma, url (Boletín Oficial), nota}.",
+      "validar": "python pipeline/proteccion_social.py",
+      "solo_json": false,
+      "modo": "auto",
+      "riesgo": "Mes de vigencia (art. 2) vs mes de publicación; montos por tramo de hijos; resoluciones que modifican otra."
+    },
+    {
+      "id": "mujeres-por-edad",
+      "archivos": [
+        "datos/manual/mujeres_por_edad.json"
+      ],
+      "que": "Mujeres por grupo quinquenal de edad (15-49) al 1 de julio (INDEC) para la tasa global de fecundidad.",
+      "frecuencia": "anual",
+      "cuando_sale": "Las proyecciones INDEC ya cubren hasta 2040; se carga el año nuevo cuando existan nacimientos del año anterior. (sin confirmar)",
+      "ultimo": "2025",
+      "mirar_desde": "2027-01-15",
+      "proximo_esperado": "2026: al publicarse los nacimientos 2025 (DEIS), no confirmado",
+      "donde_mirar": [
+        "https://www.indec.gob.ar/ftp/cuadros/publicaciones/proyecciones_jurisdicciones_2022_2040.pdf (Cuadro 2.1 Total del país)",
+        "https://www.argentina.gob.ar/salud/deis (estadísticas vitales)"
+      ],
+      "como_reconocer": "Cuadro 2.1 del PDF de proyecciones, columna Mujeres del año nuevo.",
+      "como_cargar": "Agregar a anios: {anio, base:'2022', grupos{'15-19'...'45-49'}, total_15_49 (suma propia), url, cita}.",
+      "validar": "python pipeline/poblacion_salud.py",
+      "solo_json": false,
+      "modo": "auto",
+      "riesgo": "Corte de base 2021/2022 (censo); cuadro o columna equivocados (varones/ambos sexos)."
+    },
+    {
+      "id": "universidades-alumnos",
+      "archivos": [
+        "datos/manual/universidades_alumnos.json"
+      ],
+      "que": "Total país: estudiantes, nuevos inscriptos y egresados de pregrado y grado (estatal + privada) por año, de los Anuarios y Síntesis de la SPU.",
+      "frecuencia": "anual",
+      "cuando_sale": "La SPU publica una Síntesis cada año o dos (la 2023-2024 trae 2023 como último año).",
+      "ultimo": "2023 (2024 en faltantes)",
+      "mirar_desde": "2027-01-15",
+      "proximo_esperado": "Síntesis con datos de 2024: sin fecha (probablemente 2027)",
+      "donde_mirar": [
+        "https://www.argentina.gob.ar/educacion/universidades/informacion/publicaciones/sintesis",
+        "https://www.argentina.gob.ar/sites/default/files/sintesis_anuario_2023-2024.pdf (patrón)"
+      ],
+      "como_reconocer": "Síntesis de Información Estadísticas Universitarias con el año 2024 en el cuadro 'Nuevos inscriptos, reinscriptos, estudiantes y egresados por nivel y sector de gestión'.",
+      "como_cargar": "Agregar a anios {anio, estudiantes, nuevos_inscriptos, egresados, url, cita (documento, página del PDF, cuadro, suma estatal + privada)}; quitar el año de faltantes. La síntesis es un PDF de imágenes: se lee a ojo.",
+      "validar": "python pipeline/manuales_calientes.py",
+      "solo_json": false,
+      "modo": "avisar",
+      "riesgo": "PDF de imágenes sin texto; corte de método entre fuentes; estatal vs total."
+    },
+    {
+      "id": "congreso-bancas-bloques",
+      "archivos": [
+        "datos/manual/congreso_bancas.csv",
+        "datos/manual/congreso_bloques.csv"
+      ],
+      "que": "Composición de Diputados y Senado: bancas propias, aliadas y totales del oficialismo por presidente, al 1 de marzo de cada año y el día de asunción; detalle por bloque con rol (propio/aliado/otro).",
+      "frecuencia": "anual",
+      "cuando_sale": "El informe 'Diputados por bloque y género' se actualiza con cada cambio; el corte se toma al 1 de marzo (Senado: composición cada dos años).",
+      "ultimo": "2026-03-01 (Diputados y Senado)",
+      "mirar_desde": "2027-03-01",
+      "proximo_esperado": "2027-03-01 (cargar en marzo de 2027; hay que decidir aliados de nuevo)",
+      "donde_mirar": [
+        "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/archivos/DiputadosporBloqueGenero-Cantidades-2026.pdf",
+        "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/archivos/Senadores-Bloque-Genero-Cant.pdf",
+        "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/archivos/Comp_Dip_1983-2023.pdf"
+      ],
+      "como_reconocer": "Los PDF de composición con fecha del 1 de marzo del año.",
+      "como_cargar": "congreso_bancas.csv: fecha_corte, camara (dip|sen), presidente (id), propios, aliados, total, fuente (URL), nota. congreso_bloques.csv: una fila por bloque: fecha_corte, camara, bloque, bancas, rol (propio|aliado|otro), fuente. Los bloques 'propio' y 'aliado' deben sumar exactamente propios y aliados de bancas.csv.",
+      "validar": "python pipeline/obtener_datos.py --solo-json",
+      "solo_json": true,
+      "modo": "avisar",
+      "riesgo": "Criterio de qué bloques son aliados (decisión política del usuario); fecha de corte; vacantes."
+    },
+    {
+      "id": "congreso-vetos",
+      "archivos": [
+        "datos/manual/vetos.csv"
+      ],
+      "que": "Vetos totales, parciales e insistidos por presidente y año.",
+      "frecuencia": "anual",
+      "cuando_sale": "El año anterior se completa en enero-marzo (el aviso de capacidad.py dice 'falta cargar vetos de 2026' desde 2027-01-01).",
+      "ultimo": "2025 (Milei: 7 totales, 0 parciales, 3 insistidos)",
+      "mirar_desde": "2027-01-05",
+      "proximo_esperado": "Año 2026: cargar en enero de 2027",
+      "donde_mirar": [
+        "https://datos.jus.gob.ar/dataset/d9a963ea-8b1d-4ca3-9dd9-07a4773e8c23 (base Infoleg normativa nacional, zip)",
+        "https://www3.hcdn.gob.ar/dependencias/secparl/dgral_info_parlamentaria/dip/leyes-insistidas/leyes_insistidas_final.pdf"
+      ],
+      "como_reconocer": "Decretos de veto en Infoleg del año; leyes insistidas en el PDF de HCDN.",
+      "como_cargar": "Fila: presidente (id), anio, totales, parciales, insistidos, fuente (URLs separadas por espacio). Totales y parciales pueden quedar vacíos si no hay fuente oficial.",
+      "validar": "python pipeline/obtener_datos.py --solo-json",
+      "solo_json": true,
+      "modo": "avisar",
+      "riesgo": "Contar una promulgación parcial como veto parcial; año de firma vs de sanción; a veces falta conteo oficial."
+    }
+  ],
+  "cerrados": [
+    {
+      "archivo": "datos/manual/universidades_spu.json",
+      "motivo": "Anuarios SPU 1998-2014 por universidad, extraídos una sola vez con pipeline/extraer_anuarios_spu.py; solo se corrigen nombres si el pipeline avisa que no empareja con el presupuesto."
+    },
+    {
+      "archivo": "datos/manual/leyes_ejecutivo.csv",
+      "motivo": "Menem 1 a CFK 1 y enviadas de Kirchner/CFK 1, cerrado; los mandatos siguientes salen automáticos de datos abiertos de HCDN (pipeline/capacidad.py). pipeline/leyes_ejecutivo_prorrateo.py solo reproduce las cifras."
+    },
+    {
+      "archivo": "datos/manual/dnu.csv",
+      "motivo": "Vacío (solo encabezado): los DNU salen automáticos de Infoleg en pipeline/capacidad.py (lo manual manda si se carga). Sin mantenimiento."
+    },
+    {
+      "archivo": "datos/manual/notas.csv",
+      "motivo": "Avisos fijos por presidente (menem1, duhalde, cfk1, macri); cambian solo si se agrega una advertencia. Sin calendario."
+    }
+  ]
+}
