@@ -765,14 +765,14 @@
   {
    "clave": "cobertura_amba",
    "traspaso": "hoy",
-   "valor": 57,
+   "valor": 54,
    "unidad": "%",
-   "fecha_dato": "2026-10-01",
+   "fecha_dato": "2026-11-01",
    "organismo": "IIEP (UBA-CONICET)",
-   "documento": "Reporte de tarifas y subsidios #43, octubre de 2026",
-   "url": "https://economicas.uba.ar/iiep/wp-content/uploads/INFORME-IIEP-OCTUBRE-2026.pdf",
+   "documento": "Reporte de tarifas y subsidios #44, noviembre de 2026",
+   "url": "https://economicas.uba.ar/iiep/wp-content/uploads/INFORME-IIEP-NOVIEMBRE-2026.pdf",
    "pagina": "pág. 3",
-   "cita": "En los hogares del AMBA se pagan tarifas de servicios públicos que, en promedio, cubren el 57% de los costos y, por lo tanto, el Estado se hace cargo del 43% restante.",
+   "cita": "En los hogares del AMBA se pagan tarifas de servicios públicos que, en promedio, cubren el 54% de los costos y, por lo tanto, el Estado se hace cargo del 46% restante.",
    "nota": "Luz, gas, agua y transporte; promedio de hogares de ingresos altos, medios y bajos."
   },
   {

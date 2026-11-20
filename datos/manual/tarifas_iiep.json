@@ -1,6 +1,6 @@
 {
- "actualizado": "2026-11-17",
- "fuente": "Observatorio de Tarifas y Subsidios, IIEP (UBA-CONICET), Reporte de Tarifas y Subsidios n.° 12 (marzo 2024) a n.° 43 (octubre 2026). Índice: https://economicas.uba.ar/iiep/informes-y-reportes/tarifas-y-subsidios/",
+ "actualizado": "2026-11-20",
+ "fuente": "Observatorio de Tarifas y Subsidios, IIEP (UBA-CONICET), Reporte de Tarifas y Subsidios n.° 12 (marzo 2024) a n.° 44 (noviembre 2026). Índice: https://economicas.uba.ar/iiep/informes-y-reportes/tarifas-y-subsidios/",
  "nota": "Reporte mensual del Observatorio de Tarifas y Subsidios del IIEP (UBA-CONICET): universidad, no es un organismo oficial. Facturas del AMBA con impuestos, de un hogar sin subsidios, en pesos corrientes del mes (portada de cada reporte). La canasta suma luz, gas, agua y transporte (el transporte no se carga acá). Cambios de definición: (1) rótulo de luz y gas: «sin subsidios (N1)» hasta agosto de 2024 y «(usuario N1)» desde septiembre de 2024; en 2026 el hogar sin subsidios del nuevo esquema; el agua es siempre «sin subsidios (media)»; (2) consumo de luz: 300 kWh por mes hasta septiembre de 2024 y 265 kWh desde octubre de 2024 (nota al pie de los gráficos); gas: 65 m³ por mes en marzo-mayo de 2024 y 60,5 m³ desde junio de 2024; el gas es muy estacional; (3) desde enero de 2026 la segmentación N1/N2/N3 se reemplaza por los Subsidios Energéticos Focalizados (SEF, Decreto 943/2025) y la cobertura sube por las bonificaciones extra; (4) la cobertura de la canasta es un promedio ponderado por gasto (luz, gas, agua y transporte); la de luz y la de gas son el promedio residencial del sistema, con los subsidios vigentes del mes; (5) cobertura = porcentaje del costo que pagan los usuarios; el resto lo paga el Estado, y solo se carga cuando figura con cifra en el texto del reporte. Fecha de publicación: la de la entrada del sitio del IIEP, solo desde julio de 2025.",
  "registros": [
   {
@@ -883,6 +883,35 @@
     "cobertura_canasta": "p. 1: «…TARIFARIA Los hogares del AMBA pagan tarifas que, en promedio, cubren el 57% de los costos. El Estado se hace cargo del 43% restante.…»",
     "cobertura_luz": "p. 9: «…eléctrico para la categoría residencial indica que, en promedio, el 58% lo aporta el usuario vía tarifas mientras que el 42% del costo lo aporta el Estado nacional al tomar la cobertura respecto de los…»",
     "cobertura_gas": "p. 10: «…costos de abastecimiento del gas natural indica que un usuario residencial promedio abona el 73% del costo de abastecimiento mientras que el 27% lo aporta el Estado.",
+    "consumo_luz_kwh": "p. 19: «…Consumos de 265 KWh/mes (energía eléctrica) y de 60,5 m3/mes…» (nota al pie de los gráficos; la portada no lo repite)",
+    "consumo_gas_m3": "p. 19: «…Consumos de 265 KWh/mes (energía eléctrica) y de 60,5 m3/mes…» (nota al pie de los gráficos; la portada no lo repite)"
+   }
+  },
+  {
+   "mes": "2026-11",
+   "numero": 44,
+   "url": "https://economicas.uba.ar/iiep/wp-content/uploads/INFORME-IIEP-NOVIEMBRE-2026.pdf",
+   "url_pagina": "https://economicas.uba.ar/iiep/reporte-de-tarifas-y-subsidios-noviembre-2026/",
+   "fecha": "2026-11-19",
+   "luz_n1": 54919,
+   "gas_n1": 34557,
+   "agua": 44522,
+   "canasta": 291247,
+   "luz_con_subsidio": null,
+   "gas_con_subsidio": null,
+   "cobertura_canasta": 54,
+   "cobertura_luz": 58,
+   "cobertura_gas": 57,
+   "consumo_luz_kwh": 265,
+   "consumo_gas_m3": 60.5,
+   "cita": {
+    "canasta": "Portada. p. 1: «GASTO EN SERVICIOS PUBLICOS (AMBA) $291.247/MES»",
+    "luz_n1": "Portada. p. 1: «FACTURA ELECTRICA (USUARIO N1) $ 54.919/MES»",
+    "gas_n1": "Portada. p. 1: «FACTURA DE GAS (USUARIO N1) $ 34.557/MES»",
+    "agua": "Portada. p. 1: «FACTURA DE AGUA SIN SUBSIDIOS (MEDIA) $ 44.522/MES»",
+    "cobertura_canasta": "p. 1: «…TARIFARIA Los hogares del AMBA pagan tarifas que, en promedio, cubren el 54% de los costos. El Estado se hace cargo del 46% restante.…»",
+    "cobertura_luz": "p. 9: «…eléctrico para la categoría residencial indica que, en promedio, el 58% lo aporta el usuario vía tarifas mientras que el 42% del costo lo aporta el Estado nacional al tomar la cobertura respecto de los…»",
+    "cobertura_gas": "p. 10: «…de abastecimiento del gas natural indica que un usuario residencial promedio abona el 57% del costo de abastecimiento mientras que el 43% lo aporta el Estado.»",
     "consumo_luz_kwh": "p. 19: «…Consumos de 265 KWh/mes (energía eléctrica) y de 60,5 m3/mes…» (nota al pie de los gráficos; la portada no lo repite)",
     "consumo_gas_m3": "p. 19: «…Consumos de 265 KWh/mes (energía eléctrica) y de 60,5 m3/mes…» (nota al pie de los gráficos; la portada no lo repite)"
    }
