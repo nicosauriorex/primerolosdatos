@@ -2006,6 +2006,8 @@ a.zocalo:focus-visible { outline: var(--linea) solid var(--foco); outline-offset
 .gas-capa-3 { fill: color-mix(in srgb, var(--acento-texto) 56%, transparent); }
 .gas-capa-4 { fill: color-mix(in srgb, var(--acento-texto) 38%, transparent); }
 .gas-capa-5 { fill: color-mix(in srgb, var(--acento-texto) 24%, transparent); }
+/* las capas claras casi no se separan del fondo (1,4:1 a 2,4:1 en los dos temas): llevan borde del acento, como su muestra en la leyenda */
+.gas-capa-4, .gas-capa-5 { stroke: color-mix(in srgb, var(--acento-texto) 80%, transparent); }
 .gas-leyenda { list-style: none; margin: 0 0 var(--e-2); padding: 0; display: flex; flex-wrap: wrap; gap: 0 var(--e-4); }
 .gas-leyenda button { display: inline-flex; align-items: center; gap: var(--e-2); min-height: var(--alto-toque); padding: 0; border: 0; background: none; color: var(--text-primary); font: inherit; font-size: var(--t-sm); cursor: pointer; text-align: left; }
 .gas-leyenda button:hover span { text-decoration: underline; }
@@ -2016,6 +2018,7 @@ a.zocalo:focus-visible { outline: var(--linea) solid var(--foco); outline-offset
 .gas-capa-sw.gas-capa-3 { background: color-mix(in srgb, var(--acento-texto) 56%, transparent); }
 .gas-capa-sw.gas-capa-4 { background: color-mix(in srgb, var(--acento-texto) 38%, transparent); }
 .gas-capa-sw.gas-capa-5 { background: color-mix(in srgb, var(--acento-texto) 24%, transparent); }
+.gas-capa-sw.gas-capa-4, .gas-capa-sw.gas-capa-5 { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acento-texto) 80%, transparent); }
 
 /* comparar años de un nivel (con ruta): minigráficos sin caja */
 .gas-evo-mini { min-width: 0; color: var(--acento); }

@@ -45,6 +45,7 @@ import red
 
 CACHE = red.CACHE
 URL = "https://opc.gob.ar/Archivos/monitores/monitor_empresas_publicas.html"
+URL_SSPM_378 = "https://apis.datos.gob.ar/series/api/series/?ids=378.3_GTOS_CORR_017_0_A_45_79&start_date=2019&format=csv"
 FUENTE_SERIE = "OPC, Monitor de transferencias a empresas públicas (e-SIDIF)"
 FUENTE_TOTAL = FUENTE_SERIE + "; aportes de capital: Presupuesto Abierto (DGSIAF, Ministerio de Economía)"
 FUENTE_APORTES = "Presupuesto Abierto (DGSIAF, Ministerio de Economía): aportes de capital y compra de acciones, devengado"
@@ -412,7 +413,7 @@ def _armar(t, o, ap=None, anios_ap=()):
             "fuente_ocup": fuente_ocup, "vacios": vacios, "nombres": nombres}
 
 
-def _blandos(a):
+def _blandos(a, con_red=False):
     """Controles blandos: solo se imprimen. Nunca levantan."""
     try:
         meses = a["meses"]
@@ -429,6 +430,24 @@ def _blandos(a):
                   f"+ «Aportes de capital y compra de acciones» {aportes:,.0f} = {otras + aportes:,.0f} (las empresas son una parte; diferencia {otras + aportes - tot:+,.0f})")
     except Exception as e:  # noqa: BLE001
         print(f"  blando Presupuesto Abierto: no se pudo comparar ({e})")
+    if not con_red:
+        print("  blando SSPM 378: sin red, no se compara")
+        return
+    try:
+        # SSPM 378 (cuenta ahorro-inversión-financiamiento, base caja): «déficit operativo de empresas públicas», solo gasto corriente.
+        # Se compara con las transferencias corrientes de la OPC (devengado): mide lo pagado y no lo devengado, así que no cierra igual.
+        txt = red.bajar(URL_SSPM_378, timeout=30).decode("utf-8")
+        sspm = pd.read_csv(io.StringIO(txt))
+        for _, fila in sspm.iterrows():
+            anio = str(fila.iloc[0])[:4]
+            ms = [m for m in a["meses"] if m.startswith(anio)]
+            if len(ms) < 12 or pd.isna(fila.iloc[1]):
+                continue
+            corr = float(sum(a["corr"][m].sum() for m in ms))
+            v = float(fila.iloc[1])
+            print(f"  blando SSPM 378 {anio}: déficit operativo (caja) {v:,.0f}; corrientes de la OPC (devengado) {corr:,.0f} ({(corr / v - 1) * 100:+.0f} %)")
+    except Exception as e:  # noqa: BLE001
+        print(f"  blando SSPM 378: no se pudo comparar ({e})")
 
 
 def _cargar_armar(con_red):
@@ -440,7 +459,7 @@ def _cargar_armar(con_red):
     if not F_APORTES.exists():
         print("  AVISO empresas públicas: no hay respaldo de aportes de capital (datos/cache/empresas_publicas_aportes.csv); van en cero")
     a = _armar(t, o, ap, anios_ap)
-    _blandos(a)
+    _blandos(a, con_red)
     return a
 
 
