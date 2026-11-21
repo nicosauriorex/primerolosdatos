@@ -84,6 +84,11 @@ Una rutina diaria en la nube de Claude revisa, con Haiku, si salió un dato nuev
 - La corrida completa que disparó el workflow (44817361581) falló en «Commitear datos»: arrancó mientras corría la del push b9fc924 y las dos subieron la misma caché (conflicto al hacer rebase). Arreglo en `actualizar.yml`: `git pull --rebase -X theirs` (gana la descarga más nueva). Corrida 44819565584 (9361043) en verde: el sitio publicado muestra la cobertura IIEP de 2026-11 (54/58/57 %) y la herencia en 54 % (leído en `tarifas.json` y `herencia_informes.json` publicados).
 - Control en la PC: tarea programada `datos-a-mano-respaldo`, diaria 18:30.
 
+## Segunda vuelta (2026-11-20, a la noche)
+- Control en la PC verificado: corrió a las 18:32 (11 s), vio la rutina de la nube en verde y terminó sin avisar.
+- Corrida sin novedades verificada: sesión `cse_01UmdtBLSbg1ud19A5NZjS7Z` (23:42 UTC, 63 s): validó la agenda, miró el único pendiente (escrituras PBA, sin octubre), no tocó el repo y avisó al celular por la corrida fallida de las 21:06 (ya arreglada en 9361043).
+- Canasta #44 resuelta: el IIEP recalculó el transporte hacia atrás (tabla 1: transporte contra dic-23 +1.513 % en el #43 y +1.860 % en el #44, con +3,4 % mensual; canasta +860 % → +950 %, es decir +9,4 %). Luz, gas y agua cierran con el #43. Se dejan las dos portadas, con `aviso` y `cita.aviso` en el #44 y una frase en la descripción de `tarifa_amba_canasta`. Regla nueva en `MANTENIMIENTO-AGENTE.md` (paso 3): si la variación que dice el documento no coincide con la cargada, cargar y dejar `aviso` citado.
+
 ## Dónde ver los cambios
 1. Tarifas — `/tarifas/`: la canasta y las facturas del AMBA llegan a noviembre de 2026 (IIEP n.° 44). Origen: «agente haiku ponele que investigue diariamente si llegó algún dato nuevo» (primera carga de la rutina).
 2. Herencia — `/herencia/`: la cobertura tarifaria del AMBA «hoy» pasa de 57 % a 54 % (IIEP n.° 44). Mismo origen.

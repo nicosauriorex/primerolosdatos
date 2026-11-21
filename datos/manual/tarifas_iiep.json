@@ -913,8 +913,10 @@
     "cobertura_luz": "p. 9: «…eléctrico para la categoría residencial indica que, en promedio, el 58% lo aporta el usuario vía tarifas mientras que el 42% del costo lo aporta el Estado nacional al tomar la cobertura respecto de los…»",
     "cobertura_gas": "p. 10: «…de abastecimiento del gas natural indica que un usuario residencial promedio abona el 57% del costo de abastecimiento mientras que el 43% lo aporta el Estado.»",
     "consumo_luz_kwh": "p. 19: «…Consumos de 265 KWh/mes (energía eléctrica) y de 60,5 m3/mes…» (nota al pie de los gráficos; la portada no lo repite)",
-    "consumo_gas_m3": "p. 19: «…Consumos de 265 KWh/mes (energía eléctrica) y de 60,5 m3/mes…» (nota al pie de los gráficos; la portada no lo repite)"
-   }
+    "consumo_gas_m3": "p. 19: «…Consumos de 265 KWh/mes (energía eléctrica) y de 60,5 m3/mes…» (nota al pie de los gráficos; la portada no lo repite)",
+    "aviso": "p. 2, tabla 1: «TRANSPORTE 1860% 91% 3,4% 86,1%» y «CANASTA 950% 67% 0,8% 57,7%»; #43, p. 2, tabla 1: «TRANSPORTE 1513% 69% 2,2% 55,6%» y «CANASTA 860% 56% -0,7% 45,3%»"
+   },
+   "aviso": "Corte de serie en el transporte: el #44 recalculó el gasto en transporte hacia atrás (contra dic-23 pasa de +1.513 % en el #43 a +1.860 %, con +3,4 % mensual). Por eso la canasta da +9,3 % contra el #43 cargado ($266.456), aunque el IIEP informa +0,8 % contra su octubre recalculado (≈ $288.900, que el reporte no publica). Luz, gas y agua no cambian (−18,4 %, +10,4 % y −0,9 % cierran con el #43). No se toca el #43."
   }
  ],
  "faltantes": [

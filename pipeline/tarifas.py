@@ -79,7 +79,9 @@ def series(idx):
         else:
             desc = (base + f"Factura mensual de un hogar del AMBA por {que}, con impuestos, para el consumo de referencia del IIEP "
                     "(que cambió con el tiempo: por ejemplo 300 kWh de luz y después 265 kWh). "
-                    "El gas depende mucho de la estación: conviene compararlo con el mismo mes de otro año. Está en pesos de cada mes: se puede ver en pesos de hoy.")
+                    "El gas depende mucho de la estación: conviene compararlo con el mismo mes de otro año. Está en pesos de cada mes: se puede ver en pesos de hoy."
+                    + (" En noviembre de 2026 (reporte n.° 44) el IIEP recalculó el gasto en transporte de los meses anteriores sin publicar la serie nueva: "
+                       "por eso la canasta salta 9,3 % contra el octubre cargado, aunque el IIEP informa una suba de 0,8 % contra su octubre recalculado." if id_ == "tarifa_amba_canasta" else ""))
         out.append(S(id_, nombre, CAT, tipo, u, s.reindex(idx), 0,
                      f"Observatorio de Tarifas y Subsidios, IIEP (UBA-CONICET), Reportes de Tarifas y Subsidios (el último, n.° {ult.get('numero', '')}; cada mes sale de su reporte)",
                      desc))

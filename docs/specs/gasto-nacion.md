@@ -144,5 +144,7 @@ Lo que los datos oficiales permiten hoy, y lo que no:
 ## Fase 4: empresas públicas
 La Oficina de Presupuesto del Congreso tiene un monitor de transferencias a empresas públicas, sin descarga. Sin fuente legible por un programa: queda como idea (candidata a "agentes que buscan el dato").
 
+**Actualización 2026-11-20: hay fuente legible.** El HTML del monitor (`https://opc.gob.ar/Archivos/monitores/monitor_empresas_publicas.html`, unos 800 KB) trae embebido el archivo `monitor_empresas_publicas_datos.xlsx` en base64 (`const b64 = '…'`). Hoja «Transferencias»: `Ejercicio_Presupuestario, Mes, Mes_Nombre, Empresa, Clasificacion_Economica` (corrientes / capital), `Credito_Vigente_mill, Devengado_mill`, 3.018 filas, 32 empresas (con «Sin discriminar»), ene-2019 a oct-2026, millones de $ corrientes (fuente e-SIDIF). Hoja «Ocupación»: dotación por empresa y mes (SIRHU o Presupuesto). Comprobado: devengado total 2024 = 4.217.849 y 2025 = 3.382.033 millones. Trenes Argentinos suma varias líneas (Operadora Ferroviaria, ADIF, Ferrocarriles Argentinos, Capital Humano Ferroviario). Riesgo: si la OPC cambia la página, se rompe la extracción (caché de respaldo, como todo). Control de totales posible con el AIF de empresas públicas del SSPM (datos.gob.ar, dataset 378, 2015-2025, agregado). Falta la spec de la fase.
+
 ## Fuera de alcance
 Provincias y municipios (spec aparte); recursos e impuestos nacionales (se puede sumar después con los archivos de `recurso` del mismo repositorio); juicios sobre si un gasto está bien o mal.

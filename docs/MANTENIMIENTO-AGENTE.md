@@ -28,6 +28,7 @@ Si salió algo y la entrada tiene `modo: auto`, lanzá un subagente con `model: 
 - Solo toca los archivos de `archivos` de la entrada y nada más. Nunca `pipeline/`, `web/`, workflows ni otros docs.
 - Cada valor nuevo lleva documento, página o cuadro, fecha y URL, en el mismo formato que los valores que ya están en el archivo (copiá la forma de la última carga). Sin cita, no se carga.
 - No cambia ningún valor ya cargado. Si la fuente revisó cifras viejas, no las toca y lo informa.
+- Si la variación que informa el documento (contra el mes o el período anterior) no coincide con la que da el valor nuevo contra el ya cargado, la fuente recalculó hacia atrás: carga igual el valor nuevo y le agrega al registro un campo `aviso` (qué cambió, las dos variaciones y, si se puede, qué parte se recalculó) con su cita en `cita.aviso`. Ejemplo: IIEP n.° 44 en `tarifas_iiep.json`.
 - Si el valor nuevo se aleja del anterior más del doble del mayor salto de los últimos 12 períodos, no lo carga y lo informa.
 - Datos privados (UTDT, UCA, CAME, Construya, Monitor RIGI) siguen marcados como privados, igual que los anteriores.
 - Corre `validar` de la entrada y `python pipeline/obtener_datos.py --solo-json`. Si algo falla, deshace sus cambios (`git checkout -- <archivo>`) e informa el error.
