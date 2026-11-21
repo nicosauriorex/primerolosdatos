@@ -3,15 +3,18 @@
 // (para qué, quién, en qué, dónde), por año, en pesos de hoy, % del total o % del PIB. Tocar una barra abre su nivel siguiente.
 // Todas las cuentas están en lib/gasto.ts; acá solo se dibuja. Estado en la URL: anio, med, etapa, forma, ruta (nombres separados por "~") y todas.
 // Con el archivo mensual (fase 2) se suma `vista=mes` ("Cómo viene el año"), que dibuja components/GastoMensual.tsx; sin el archivo, esa vista no existe.
+// Con el archivo de empresas públicas (fase 4) se suma `vista=empresas`, que dibuja components/GastoEmpresas.tsx; sin el archivo, tampoco existe.
 // Remodelación 3.5 (docs/specs/remodelacion-herramientas.md, G): respuesta arriba, ajustes en una hoja, sin cajas, una sola forma de compartir.
 import { HojaListo } from "./comunes";
 import { useCallback, useMemo, useState } from "react";
 import { useGastoAnios, useGastoIndice, useGastoMensual } from "../useGasto";
+import { useEmpresasPublicas } from "../useEmpresasPublicas";
 import { useSeccion } from "../useSeccion";
 import { Cargando } from "../ui";
 import { Sparkline } from "../Sparkline";
 import { PanelGasto } from "../PanelGasto";
 import { GastoMensual } from "../GastoMensual";
+import { GastoEmpresas } from "../GastoEmpresas";
 import { EvolucionFinalidades } from "../GastoEvolucion";
 import { CabLista, EnlaceFlecha, GrupoAjuste, Migas, Opciones } from "../GastoPiezas";
 import { IconoBuscar } from "../sistema/iconos";
@@ -32,6 +35,7 @@ import {
   type ArchivoAnio, type Barra, type Deflactor, type Forma, type IndiceGasto, type Vista,
 } from "@/lib/gasto";
 import { crearDeflactorMensual, opcionesVista, type DeflactorMensual } from "@/lib/gasto-mensual";
+import { OPCION_EMPRESAS } from "@/lib/empresas-publicas";
 import { esProgramaU } from "@/lib/universidades";
 import { useParams } from "@/lib/url";
 
@@ -62,7 +66,10 @@ function Cuerpo({ ix, deflactor, deflactorM }: { ix: IndiceGasto; deflactor: Def
   const mensual = useGastoMensual();
   const pideMes = p.get("vista") === "mes";
   const modoMes = pideMes && !!mensual.datos;   // sin el archivo mensual, un link con vista=mes muestra el año completo
-  const { listos, cargando, error } = useGastoAnios(ix, montado && !modoMes ? [anio.archivo] : []);
+  const empresas = useEmpresasPublicas();
+  const pideEmp = p.get("vista") === "empresas";
+  const modoEmp = pideEmp && !!empresas.datos;   // sin el archivo de empresas públicas, un link con vista=empresas muestra el año completo
+  const { listos, cargando, error } = useGastoAnios(ix, montado && !modoMes && !modoEmp ? [anio.archivo] : []);
   const archivo = listos.get(anio.archivo) ?? null;
   const vista = useMemo(() => (archivo ? armarVista({ archivo, anio, forma, ruta, medida, etapa, deflactor, max: todas ? Infinity : undefined }) : null),
     [archivo, anio, forma, p.get("ruta"), medida, etapa, deflactor, todas]);   // eslint-disable-line react-hooks/exhaustive-deps
@@ -78,14 +85,29 @@ function Cuerpo({ ix, deflactor, deflactorM }: { ix: IndiceGasto; deflactor: Def
   const resp = vista ? fraseGasto(vista) : null;
 
   const cambiarVista = (v: string) => set(v === "mes"
-    ? { vista: "mes", todas: null, ...(forma === "donde" ? { forma: null, ruta: null } : {}) }   // Dónde no existe en "Cómo viene"
-    : { vista: null, todas: null });
-  const selectorPeriodo = mensual.datos ? (
+    ? { vista: "mes", todas: null, orden: null, emp: null, ...(forma === "donde" ? { forma: null, ruta: null } : {}) }   // Dónde no existe en "Cómo viene"
+    : v === "empresas" ? { vista: "empresas", todas: null, orden: null, forma: null, ruta: null }
+    : { vista: null, todas: null, orden: null, emp: null });
+  const opcionesPeriodo: [string, string][] = [
+    ["anio", "Año completo"],
+    ...(mensual.datos ? [opcionesVista(mensual.datos)[1]] : []),
+    ...(empresas.datos ? [OPCION_EMPRESAS] : []),
+  ];
+  const selectorPeriodo = opcionesPeriodo.length > 1 ? (
     <div className="gas-periodo">
-      <FilaChips etiqueta="Qué período mirar" valor={modoMes ? "mes" : "anio"} opciones={opcionesVista(mensual.datos)} onElegir={cambiarVista} />
+      <FilaChips etiqueta="Qué período mirar" valor={modoEmp ? "empresas" : modoMes ? "mes" : "anio"} opciones={opcionesPeriodo} onElegir={cambiarVista} />
     </div>
   ) : null;
 
+  if (pideEmp && !empresas.listo) return <section className="gas"><p className="sub">Cuánto gastó el Estado nacional cada año, en qué y quién, con datos oficiales del presupuesto.</p><div className="gas-reserva"><Cargando texto="Cargando las empresas públicas…" /></div></section>;
+  if (modoEmp) {
+    return (
+      <section className="gas">
+        <p className="sub">Cuánto gastó el Estado nacional cada año, en qué y quién, con datos oficiales del presupuesto.</p>
+        <GastoEmpresas ar={empresas.datos!} deflactor={deflactorM} p={p} set={set} periodo={selectorPeriodo} />
+      </section>
+    );
+  }
   if (pideMes && !mensual.listo) return <section className="gas"><p className="sub">Cuánto gastó el Estado nacional cada año, en qué y quién, con datos oficiales del presupuesto.</p><div className="gas-reserva"><Cargando texto="Cargando la ejecución mensual…" /></div></section>;
   if (modoMes) {
     return (
@@ -166,7 +188,7 @@ function Cuerpo({ ix, deflactor, deflactorM }: { ix: IndiceGasto; deflactor: Def
         </>
       )}
 
-      <Pie ix={ix} anio={anio.anio} />
+      <Pie ix={ix} anio={anio.anio} conEmpresas={!!empresas.datos} />
       {imagen && vistaImg && <PanelGasto armar={armarImg} titulo={titulo} href={href} onCerrar={() => setImagen(false)} />}
     </section>
   );
@@ -285,14 +307,14 @@ function MiniSerie({ titulo, puntos, fmt }: { titulo: string; puntos: [number, n
   );
 }
 
-function Pie({ ix, anio }: { ix: IndiceGasto; anio: number }) {
+function Pie({ ix, anio, conEmpresas }: { ix: IndiceGasto; anio: number; conEmpresas: boolean }) {
   const a = ix.anios.find((x) => x.anio === anio);
   const enCurso = ix.anios.filter((x) => x.en_curso);
   return (
     <details className="gas-mide">
       <summary>Cómo se mide</summary>
       <ul className="method">
-        <li><b>Qué incluye</b>: la Administración Nacional (la administración central, los organismos descentralizados y la seguridad social, como la ANSES). <b>No incluye</b> las empresas públicas ni los fondos fiduciarios, y tampoco el gasto de las provincias ni de los municipios con sus propios recursos (sí lo que la Nación les transfiere).</li>
+        <li><b>Qué incluye</b>: la Administración Nacional (la administración central, los organismos descentralizados y la seguridad social, como la ANSES). <b>No incluye</b> las empresas públicas ni los fondos fiduciarios, y tampoco el gasto de las provincias ni de los municipios con sus propios recursos (sí lo que la Nación les transfiere).{conEmpresas && <> <Link prefetch={false} href="/gasto/?vista=empresas">Cuánto le transfiere el Tesoro a cada empresa pública</Link>, con la gente que trabaja en ella.</>}</li>
         <li><b>Presupuestado</b>: lo que aprobó la ley de presupuesto al empezar el año. <b>Vigente</b>: el presupuesto con las modificaciones que se le hicieron durante el año. <b>Gastado (devengado)</b>: el gasto ya hecho, cuando el bien o el servicio se recibió y nace la obligación de pagarlo, aunque todavía no se haya pagado. El % ejecutado es lo gastado sobre lo vigente; si una fila no lo muestra, es porque la fuente no trae el crédito vigente completo en ese nivel (pasa, por ejemplo, con cada universidad).</li>
         <li><b>Pesos de hoy</b>: el monto de cada año ajustado por inflación con el IPC (el IPC del último mes publicado sobre el IPC promedio de ese año). <b>% del PIB</b>: sobre el producto bruto de ese año a precios corrientes.</li>
         <li><b>Universidades</b>: no figuran como organismos del presupuesto: reciben transferencias del programa “Desarrollo de la Educación Superior”, que se abre por universidad en Quién. <Link prefetch={false} href="/universidades/">Cuánto reciben las universidades</Link>, con su evolución, los estudiantes y el control.</li>

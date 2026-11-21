@@ -562,7 +562,8 @@ def construir(m: pd.DataFrame, token: str | None):
                       ("Población, salud y pobres", lambda: __import__("poblacion_salud").series(idx, next((s["v"] for s in series if s["id"] == "poblacion"), None))),
                       ("Datos a mano (pobreza UTDT, piquetes, carnes, huevo, universidades, RIGI)", lambda: __import__("manuales_calientes").series(idx)),
                       ("Energía (CAMMESA: parte del costo que pagan las tarifas)", lambda: __import__("energia").series(idx)),
-                      ("Tarifas del AMBA (IIEP)", lambda: __import__("tarifas").series(idx))]:
+                      ("Tarifas del AMBA (IIEP)", lambda: __import__("tarifas").series(idx)),
+                      ("Empresas públicas (OPC)", lambda: __import__("empresas_publicas").series(idx, con_red=True))]:
         try:
             nuevas = f()
             print(f"  {nombre}: {len(nuevas)} series")

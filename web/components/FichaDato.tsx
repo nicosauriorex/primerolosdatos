@@ -36,9 +36,10 @@ import { fuentePublica } from "@/lib/fuente-publica";
 import type { Expr, Motor, SerieMeta } from "@/lib/motor";
 import { marcasEnGrafico } from "@/lib/marcas";
 import { fuentesCalc } from "@/lib/motor";
+import { EnlaceFlecha } from "./GastoPiezas";
 import { hrefDato, hrefHistorico, idsDe } from "@/lib/temas";
 import {
-  cabeceraFicha, filasMandatosFicha, historicoFicha, hrefMandatoDe, hrefPresidentesDe, mandatoFicha, mesesIguales, paramsInicio, periodosFicha,
+  ENLACES_FICHA, cabeceraFicha, filasMandatosFicha, historicoFicha, hrefMandatoDe, hrefPresidentesDe, mandatoFicha, mesesIguales, paramsInicio, periodosFicha,
   bajadaTablaMandatos, sinMandatoTxt, textoCompartirFicha, velasDe, vistaCompartirFicha, type CabeceraFicha, type PeriodoFicha,
 } from "@/lib/ficha";
 
@@ -129,6 +130,7 @@ function Ficha({ m, version, metas, e, info, p, set, pd, nivel, titulo, tituloRe
         velas={unoDe(p.get("pvista"), ["tabla", "velas"] as const, "tabla") === "velas"} onVista={(v) => set({ pvista: v ? "velas" : null })} />
       <CapMandato m={m} e={e} D={mandato} nivel={nivel} pd={pd} inicio={inicio} b={b} md={md} mh={mh} set={set} />
       <GraficosListos m={m} e={e} metas={metas} nivel={nivel} nombre={S[e.id]?.n ?? c.nombre} />
+      {!e.rel && ENLACES_FICHA[e.id] && <EnlaceFlecha href={ENLACES_FICHA[e.id].href}>{ENLACES_FICHA[e.id].texto}</EnlaceFlecha>}
       <details className="fi-metodo">
         <summary>Cómo se mide</summary>
         <div className="fi-metodo-cuerpo">

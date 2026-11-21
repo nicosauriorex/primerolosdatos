@@ -67,6 +67,7 @@ export const FILAS_HERENCIA: DefFila[] = [
     nota: "Resultado financiero del Tesoro menos el déficit cuasifiscal del Banco Central, los dos en % del PIB. No incluye los intereses de las Lebac (2002 a 2017).",
   },
   { clave: "subsidios", grupo: "Cuentas públicas", id: "dg_452_2_energiagia_0_t_7_79", medidas: [{ med: "real", esc: "pib" }, { med: "real" }, { med: "usdr" }], nota: "Serie desde 2016." },
+  { clave: "empresas_publicas", img: "Fondos del Tesoro a empresas públicas", grupo: "Cuentas públicas", id: "emp_pub_total", medidas: [{ med: "real", esc: "pib" }, { med: "real" }], anioCerrado: true, neutra: true, nota: "Serie desde 2019." },
   // Precios
   { clave: "inflacion12", img: "Inflación de 12 meses", grupo: "Precios", id: "ipc_empalme", medidas: [{ med: "via" }], nombre: "Inflación de los últimos 12 meses" },
   { clave: "inflacion1", grupo: "Precios", id: "ipc_empalme", medidas: [{ med: "vm" }], nombre: "Inflación del último mes" },

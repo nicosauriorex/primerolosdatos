@@ -84,6 +84,7 @@ export const TEMAS: Tema[] = [
       { id: "transf_prov", nombre: "Transferencias no automáticas a provincias (en pesos de hoy)", corto: "las transferencias a provincias", med: "real" },
       { id: "sub_transporte", nombre: "Subsidios al transporte (en pesos de hoy)", corto: "los subsidios al transporte", med: "real" },
       { id: "obra_publica", nombre: "Obra pública nacional (en pesos de hoy)", corto: "la obra pública", med: "real" },
+      { id: "emp_pub_total", nombre: "Fondos del Tesoro a empresas públicas (en pesos de hoy)", corto: "los fondos del Tesoro a empresas públicas", med: "real" },
       { id: "luz_cobertura", nombre: "Parte del costo de la luz que pagan las tarifas", corto: "la parte del costo de la luz que pagan las tarifas", med: "asis" },
     ], grupos: ["Fiscal"], q: "fiscal", desc: "Resultado primario y financiero del sector público nacional, ingresos, gastos, deuda y recaudación por impuesto." },
   { slug: "sociedad", nombre: "Seguridad y salud", cats: ["Sociedad"], corto: INFO_CORTA["Sociedad"].texto, largo: largoDe("Sociedad"),

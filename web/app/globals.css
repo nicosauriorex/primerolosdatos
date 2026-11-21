@@ -2772,3 +2772,9 @@ nav.tabs .con-menu { align-self: stretch; align-items: center; }
 .tarifas-h3 { font-size: var(--t-md, 1rem); margin: var(--e-4) 0 var(--e-2); }
 .tarifas-cantidades small { display: block; color: var(--text-muted); }
 .tarifas-tabla .tarifas-parte { display: block; white-space: nowrap; }
+
+/* Empresas públicas (/gasto/?vista=empresas, components/GastoEmpresas.tsx): el año en curso va más claro y marca los mismos meses del año anterior. */
+.emp-parcial .gas-capa { opacity: .55; stroke-dasharray: 3 2; stroke: var(--acento-texto); }
+.emp-marca { stroke: var(--text-primary); stroke-width: 2; stroke-dasharray: 4 2; }
+.emp-ley { display: inline-flex; align-items: center; gap: var(--e-2); min-height: var(--alto-toque); font-size: var(--t-sm); color: var(--text-primary); }
+.emp-ley-marca { flex: none; display: inline-block; width: 14px; height: 0; border-top: 2px dashed var(--text-primary); }

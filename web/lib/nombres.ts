@@ -171,6 +171,19 @@ export const NOMBRES: Record<string, string> = {
   univ_estudiantes: "Estudiantes universitarios",
   univ_nuevos_inscriptos: "Nuevos inscriptos en universidades",
   univ_egresados: "Egresados universitarios",
+  emp_pub_total: "Fondos del Tesoro a empresas públicas",
+  emp_pub_corrientes: "Transferencias corrientes a empresas públicas",
+  emp_pub_capital: "Transferencias de capital a empresas públicas",
+  emp_pub_aportes: "Aportes de capital a empresas públicas",
+  emp_pub_energia_argentina: "Fondos del Tesoro a Energía Argentina (ex ENARSA)",
+  emp_pub_trenes: "Fondos del Tesoro a Trenes Argentinos",
+  emp_pub_aysa: "Fondos del Tesoro a AySA",
+  emp_pub_rio_turbio: "Fondos del Tesoro a Yacimientos Carboníferos Río Turbio",
+  emp_pub_correo: "Fondos del Tesoro al Correo Argentino",
+  emp_pub_belgrano_cargas: "Fondos del Tesoro a Belgrano Cargas",
+  emp_pub_rta: "Fondos del Tesoro a Radio y Televisión Argentina",
+  emp_pub_aerolineas: "Fondos del Tesoro a Aerolíneas Argentinas",
+  emp_pub_empleados: "Empleados de las empresas públicas",
 };
 
 /** Nombres públicos de las categorías (`cat[1]`, y el grupo de las listas). El catálogo conserva el nombre técnico: sirve para agrupar y para leer los metadatos;
@@ -337,6 +350,19 @@ export const SINONIMOS: Record<string, string> = {
   univ_estudiantes: "universitarios estudiantes universitarios universidades alumnos educacion superior",
   univ_nuevos_inscriptos: "universitarios inscriptos nuevos inscriptos ingresantes universidades educacion superior",
   univ_egresados: "universitarios egresados graduados universidades educacion superior titulos",
+  emp_pub_total: "empresas publicas empresas del estado transferencias del tesoro aportes del tesoro subsidios a empresas deficit de las empresas publicas opc monitor",
+  emp_pub_corrientes: "empresas publicas transferencias corrientes gasto corriente aportes del tesoro funcionamiento deficit operativo",
+  emp_pub_capital: "empresas publicas transferencias de capital inversion obras aportes del tesoro",
+  emp_pub_aportes: "aportes de capital capitalizacion capitalizar empresas publicas compra de acciones inciso 6 aportes del tesoro aerolineas austral",
+  emp_pub_energia_argentina: "enarse enarsa ieasa energia argentina sa gas importado gnl barcos combustibles empresa de energia",
+  emp_pub_trenes: "trenes ferrocarriles trenes argentinos sof sociedad operadora ferroviaria adif ferrocarriles argentinos transporte ferroviario subte trenes metropolitanos",
+  emp_pub_aysa: "aysa agua y saneamientos agua potable cloacas empresa de agua",
+  emp_pub_rio_turbio: "yacimientos carboniferos rio turbio ycrt carbon mina santa cruz",
+  emp_pub_correo: "correo argentino correo oficial encomiendas cartas",
+  emp_pub_belgrano_cargas: "belgrano cargas y logistica tren de cargas ferrocarril belgrano carga",
+  emp_pub_rta: "radio y television argentina rta television publica canal 7 radio nacional lra tv publica medios publicos",
+  emp_pub_aerolineas: "aerolineas argentinas aerolineas aviones vuelos austral lineas aereas",
+  emp_pub_empleados: "empleados de empresas publicas personal dotacion trabajadores de las empresas del estado agentes planta sirhu",
 };
 
 // Los "regulados" del IPC (tarifas de servicios públicos, combustibles, transporte, educación…): se buscan también como "servicios públicos" y "tarifas", en todas las regiones.

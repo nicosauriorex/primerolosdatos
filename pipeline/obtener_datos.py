@@ -31,6 +31,7 @@ import semaforo
 import novedades
 import predicciones
 import universidades
+import empresas_publicas
 import provincias
 import provincias_dnap
 import gasto_mensual
@@ -236,6 +237,7 @@ def escribir_json_web(datos, ctx=None, pm=None, cap=None, con_red=True):
     base.json (series transversales) y un <categoria>.json por cada cat[0]. `ctx` (datos anuales del FMI) va aparte en contexto.json."""
     destino = RAIZ / "web" / "public" / "datos"
     destino.mkdir(parents=True, exist_ok=True)
+    datos = empresas_publicas.inyectar_series(datos)  # las emp_pub_* salen siempre de los respaldos (así entran también con --solo-json)
     for viejo in destino.glob("*.json"):
         viejo.unlink()
     grupos = {}
@@ -316,6 +318,13 @@ def escribir_json_web(datos, ctx=None, pm=None, cap=None, con_red=True):
             (destino / nombre).write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     except Exception as e:
         print(f"Universidades: no se pudo armar, se sigue sin universidades.json ({e}).")
+    # Gasto de la Nación, fase 4: transferencias a las empresas públicas y su gente (Monitor de la OPC; respaldos datos/cache/empresas_publicas_*,
+    # una bajada por día como mucho). Va fuera del hash. Si un control no pasa o algo falla, la corrida sigue sin empresas_publicas.json.
+    try:
+        for nombre, obj in empresas_publicas.construir_json(con_red).items():
+            (destino / nombre).write_text(json.dumps(obj, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    except Exception as e:
+        print(f"Empresas públicas: no se pudo armar, se sigue sin empresas_publicas.json ({e}).")
     # Provincias, fase 1: lo que la Nación gasta en cada provincia (de los respaldos de gasto_nacion_*), población de INDEC y el gasto
     # consolidado de las provincias en % del PIB (respaldos datos/cache/provincias_*; una bajada por día como mucho). Va fuera del hash.
     # Si un control no pasa o algo falla, la corrida sigue sin provincias*.json.

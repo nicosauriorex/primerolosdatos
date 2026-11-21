@@ -122,6 +122,13 @@ export const hrefPresidentesDe = (e: Expr, velas: boolean, inicio: Record<string
 export const hrefMandatoDe = (e: Expr, o: { mp: string | null; anc: string | null; md?: string | null; mh?: string | null }, inicio: Record<string, string>): string =>
   `/mandato/?${qs({ mv: encExpr(e), mp: o.mp, anc: o.anc, md: o.md, mh: o.mh, ...inicio })}`;
 
+/** Páginas propias que muestran una variable más a fondo: un link al pie de la ficha. */
+const HREF_EMPRESAS = "/gasto/?vista=empresas";
+export const ENLACES_FICHA: Record<string, { href: string; texto: string }> = Object.fromEntries(
+  ["emp_pub_total", "emp_pub_corrientes", "emp_pub_capital", "emp_pub_aportes", "emp_pub_empleados", "emp_pub_energia_argentina", "emp_pub_trenes", "emp_pub_aysa", "emp_pub_rio_turbio", "emp_pub_correo", "emp_pub_belgrano_cargas", "emp_pub_rta", "emp_pub_aerolineas"]
+    .map((id) => [id, { href: HREF_EMPRESAS, texto: "Ver cuánto recibe cada empresa pública y cuánta gente trabaja en ella" }]),
+);
+
 // ------------------------------------------------------------ Capítulo "Ahora": la cabecera de la ficha
 export const MESES_LARGOS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 /** Dirección de un texto de variación ya formateado: "+0,3 p.p." sube, "−1,2 %" baja, "0,0" igual. */

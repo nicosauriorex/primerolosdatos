@@ -1,6 +1,6 @@
 # Empresas públicas: cuánto les transfiere el Tesoro y cuánta gente trabaja
 
-Estado: lista para implementar
+Estado: implementada (2026-11-20), sin publicar
 Ideas: "presupuesto de cada entidad pública" (IDEAS-HECHAS.md, 2026-11-13: quedaba sin dato «empresas públicas»). Es la fase 4 de [gasto](gasto-nacion.md).
 
 ## Objetivo
@@ -12,6 +12,16 @@ Que se vea cuánto pone el Tesoro en cada empresa pública cada mes desde 2019 (
 - Hoja «Ocupación» (2.795 filas; el nombre de la hoja trae tilde: buscarla por posición o sin tildes): `Ejercicio_Presupuestario, Mes, Mes_Nombre, Empresa, Ocupacion_agentes, Fuente` (`SIRHU` o `Presupuesto`). Hoy hasta ago-2026. El conjunto de empresas cambia un poco de un mes a otro (348 a 387 filas por año) y hay empresas que figuran en una hoja y no en la otra (VENG y Playas Ferroviarias solo en Ocupación).
 - Cifras comprobadas: devengado total 2019 = 139.942; 2023 = 2.242.139; 2024 = 4.217.849; 2025 = 3.382.033 (millones). 2024 corrientes 3.172.899 y capital 1.044.950. Empleados: 72.560 en dic-25 y 69.347 en ago-26 (suma de las empresas de ese mes).
 - El devengado mensual salta mucho (2026: 140.823 en julio, 507.411 en junio): las series son flujos y se leen mejor en 12 meses o por año.
+
+## Aportes de capital (agregado el 2026-11-20, pedido del usuario al ver Aerolíneas)
+El monitor de la OPC cuenta solo transferencias (inciso 5). Entre 2019 y 2022 el Tesoro financió a Aerolíneas con **aportes de capital** (inciso 6, partida principal «Aportes de capital y compra de acciones»), que no entran. Devengado en Presupuesto Abierto (millones): Aerolíneas 23.126 (2019), 42.623 (2020), 63.551 (2021), 72.908 (2022); Austral 549 (2019) y 1.062 (2020); Fabricaciones Militares S.E. 200 (2019); INTeA 700 (2023). El resto de los aportes de capital va a organismos internacionales (CAF, BID, FONPLATA…) y fondos fiduciarios: no son empresas y no entran.
+
+A. **Fuente**: `credito-mensual-<AÑO>.zip` de Presupuesto Abierto (`pipeline/gasto_mensual.py` ya lo baja y lo lee por partes: reusar su `URL_MENSUAL`, `_get` y la lectura con `chunksize`), 2019 al año en curso. Filtro: `principal_desc` contiene «aportes de capital» (sin importar mayúsculas), agrupado por `subparcial_desc`, año e `impacto_presupuestario_mes`, columna `credito_devengado` (decimales con coma). Respaldo versionado `datos/cache/empresas_publicas_aportes.csv` (`anio, mes, empresa, devengado`, ya con el nombre de la OPC); los años cerrados no se vuelven a bajar; el año en curso, como mucho una vez por día. `--solo-json` usa solo el respaldo.
+B. **Qué entra**: diccionario a mano `subparcial_desc` → empresa de la OPC: «Aerolineas Argentinas S.A.» y «Austral Lineas Aereas - Cielos del Sur S.A.» → Aerolíneas Argentinas (Austral se fusionó con Aerolíneas en 2020; se dice en la nota); «Fabricaciones Militares Sociedad del Estado» → Fabricaciones Militares; «Innovaciones Tecnológicas Agropecuarias S.A. (INTeA S.A.)» → la de la OPC con ese nombre. Un destinatario que no está en el diccionario y no es un organismo internacional ni un fondo fiduciario (nombre con «S.A.», «S.E.», «Sociedad del Estado» o «S.A.U.») se imprime como aviso para sumarlo a mano; no corta la corrida.
+C. **Series**: `emp_pub_total` y las de cada empresa pasan a ser transferencias **más** aportes de capital (todavía no se publicaron: los ids no cambian de significado para nadie). Serie nueva `emp_pub_aportes` (Aportes de capital a empresas públicas), mismas propiedades que `emp_pub_corrientes`. Quedan 13 series. Las `desc` dicen que el total suma transferencias y aportes de capital, y de dónde sale cada parte.
+D. **Archivo**: cada empresa y `total` llevan además `"apo": [por mes]` (millones, 1 decimal, mismo largo que `meses`; ceros donde no hay). Si el respaldo de aportes no existe, `apo` va en ceros y se avisa.
+E. **Controles**: los de la OPC siguen sobre las transferencias (2024 = 4.217.849 y 2025 = 3.382.033); nuevos: aportes a Aerolíneas 2021 = 63.551 y 2022 = 72.908 (±1); corrientes + capital + aportes = total de cada mes.
+F. **Sitio**: en `/gasto/?vista=empresas` los aportes son una tercera capa del gráfico por año («Aportes de capital», con su propio color de serie) y entran en el transferido de cada empresa, en el total, en la variación y en el transferido por empleado. La palabra para el público: «lo que puso el Tesoro» (transferencias y aportes de capital); la nota plegada explica la diferencia (un aporte de capital es comprar acciones de la empresa: en el presupuesto es un activo, no un gasto) y que Austral está dentro de Aerolíneas.
 
 ## Qué ve y hace el usuario
 1. En el Histórico, la lupa y los temas encuentra «Transferencias a empresas públicas» y sus series hijas, como cualquier serie: pesos de hoy, dólares, % del PIB, por presidente, imagen.
@@ -78,5 +88,19 @@ Que se vea cuánto pone el Tesoro en cada empresa pública cada mes desde 2019 (
 4. Navegador (`web-out`): `/gasto/?vista=empresas` a 360 y 1280 px (tarjetas, gráfico, lista con Trenes abierto, una empresa abierta, buscador, orden); `/gasto/` y `/gasto/?vista=mes` siguen igual; un link con `vista=empresas` sin el archivo cae en el año completo; Histórico con `emp_pub_total` en % del PIB y por presidente; Herencia con la fila nueva; la lupa encuentra «ENARSA» y «trenes».
 5. Barridos (`barrido-cuentas.ts`, `barrido-navegador.js`) y `revisor`.
 
+## Resultado de la implementación (2026-11-20)
+- Controles duros: 2024 = 4.217.848,8 y 2025 = 3.382.032,8 (tolerancia 1); corrientes + capital, suma de empresas y Trenes cierran en los 94 meses. Los controles corren antes de pisar los respaldos (un dato malo no reemplaza al último bueno) y hay un intento de bajada por día como mucho, aunque falle.
+- Empleados: una empresa cuenta entre su primer y su último mes con dato (Polo Tecnológico empieza en oct-23 y no vacía el total); 0 meses vacíos. La misma regla para el grupo Trenes en el sitio.
+- Control blando contra Presupuesto Abierto: no hay partida propia de empresas; van dentro de «Transferencias a otras entidades del Sector Público Nacional» y «Aportes de capital». Es un tope: 2024, empresas 4.217.849 contra 7.807.500; 2025, 3.382.033 contra 8.566.601. SSPM 378: no se hizo (queda pendiente, no bloquea).
+- `--solo-json`: las `emp_pub_*` salen siempre de los respaldos (`empresas_publicas.inyectar_series`), así entran sin la corrida completa. Novedades: las toma solas (el registro mira todas las series del catálogo).
+- Aceptado: el link de la ficha aparece aunque falte `empresas_publicas.json` (cae en el año completo de `/gasto/`). La vista previa en redes es la de `/gasto/`.
+- Aportes de capital (sección de arriba): Aerolíneas con Austral 23.675,5 (2019), 43.685,0 (2020), 63.551,0 (2021), 72.908,3 (2022); Fabricaciones Militares 200 (2019); INTeA 700 (2023); Polo Tecnológico 7 (2025, sumado al ver el aviso). Primera bajada de los 8 archivos mensuales: unos 53 s. Las series pasan a llamarse «Fondos del Tesoro a …» (incluyen aportes); corrientes y capital siguen siendo solo transferencias. 13 series.
+- Verificado: tipos, lint, build, `barrido-cuentas.ts` sin hallazgos, `barrido-navegador.js` a 360 y 1280 px en la vista (sin desborde; «Ajustes» cortado ya estaba en `/gasto/`; el eje marcado en SVG se ve entero en la captura), ficha, Herencia y Trenes abierto en el navegador. Revisor: dos pasadas.
+
 ## Dónde ver los cambios
-(Se completa al terminar.)
+Página: `docs/cambios/empresas-publicas.html`. Local `http://localhost:3100<ruta>` (vista `web-out`); publicado recién después del push y la corrida completa (toca `pipeline/`).
+1. Portada: 1.1 la lupa encuentra ENARSA, trenes, Aerolíneas, Correo, AySA, Río Turbio — `/`.
+2. Histórico: 2.1 `/historico/?v=emp_pub_total`; 2.2 corrientes y capital `/historico/?v=emp_pub_corrientes,emp_pub_capital`; 2.3 aportes de capital `/historico/?v=emp_pub_aportes`; 2.4 empleados `/historico/?v=emp_pub_empleados`.
+3. Ficha: 3.1 `/dato/?v=emp_pub_total` (link a la vista); 3.2 Aerolíneas con aportes `/dato/?v=emp_pub_aerolineas`; 3.3 Energía Argentina; 3.4 Trenes; 3.5 AySA y las demás.
+4. Herencia: 4.1 fila nueva en Cuentas públicas — `/herencia/`.
+5. En qué gasta la Nación: 5.1 `/gasto/?vista=empresas`; 5.2 Trenes abierto; 5.3 ADIF abierta; 5.4 Aerolíneas 2021 con aportes; 5.5 nombres «Fondos del Tesoro»; 5.6 todas; 5.7 link al pie de `/gasto/`.
