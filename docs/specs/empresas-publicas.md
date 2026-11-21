@@ -1,6 +1,6 @@
 # Empresas públicas: cuánto les transfiere el Tesoro y cuánta gente trabaja
 
-Estado: implementada (2026-11-20), sin publicar
+Estado: implementada (2026-11-20); publicada en 2d4db33 (corrida completa en verde, run 44850525636: la OPC y los aportes se bajaron en Actions)
 Ideas: "presupuesto de cada entidad pública" (IDEAS-HECHAS.md, 2026-11-13: quedaba sin dato «empresas públicas»). Es la fase 4 de [gasto](gasto-nacion.md).
 
 ## Objetivo
